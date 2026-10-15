@@ -11,7 +11,7 @@ export default function Footer() {
         <div className="kz-footer-content-area">
           {/* 1. Left Brand & Conference Meta Column */}
           <div className="kz-footer-brand-col">
-            <a href="#home" className="kz-footer-brand-logo-link" aria-label="KaizenCon 2027 Home">
+            <a href="/" className="kz-footer-brand-logo-link" aria-label="KaizenCon 2027 Home">
               <img
                 src={logoImg}
                 alt="KaizenCon 2027 International Medical Conference"
@@ -33,27 +33,28 @@ export default function Footer() {
 
           {/* 2. Three Navigation Columns */}
           <div className="kz-footer-nav-columns">
-            {/* Column 1: Conference (Only 4 links) */}
+            {/* Column 1: Conference */}
             <div className="kz-footer-nav-col">
               <h3 className="kz-footer-nav-heading">Conference</h3>
               <div className="kz-footer-nav-bar" aria-hidden="true"></div>
               <ul className="kz-footer-nav-list">
-                <li><a href="#about">About KaizenCon</a></li>
-                <li><a href="#programme">Programme</a></li>
-                <li><a href="#speakers">Speakers</a></li>
-                <li><a href="#venue">Venue &amp; Travel</a></li>
+                <li><a href="/#about">About KaizenCon</a></li>
+                <li><a href="/#programme">Programme</a></li>
+                <li><a href="/#speakers">Speakers</a></li>
+                <li><a href="/#venue">Venue &amp; Travel</a></li>
+                <li><a href="/contact">Contact Us</a></li>
               </ul>
             </div>
 
-            {/* Column 2: AI Experience (Only 4 links) */}
+            {/* Column 2: AI Experience */}
             <div className="kz-footer-nav-col">
               <h3 className="kz-footer-nav-heading">AI Experience</h3>
               <div className="kz-footer-nav-bar" aria-hidden="true"></div>
               <ul className="kz-footer-nav-list">
-                <li><a href="#ai-personalization">AI Personalization</a></li>
-                <li><a href="#ai-assistant">Conference Assistant</a></li>
-                <li><a href="#live-intelligence">Live Intelligence</a></li>
-                <li><a href="#knowledge-base">Knowledge Base</a></li>
+                <li><a href="/#ai-layer">AI Personalization</a></li>
+                <li><a href="/#ai-assistant">Conference Assistant</a></li>
+                <li><a href="/#live-intelligence">Live Intelligence</a></li>
+                <li><a href="/#knowledge">Knowledge Base</a></li>
               </ul>
             </div>
 

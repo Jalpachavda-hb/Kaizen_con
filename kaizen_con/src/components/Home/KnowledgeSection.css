@@ -12,7 +12,7 @@
   padding: 80px 0;
   scroll-margin-top: 85px;
   overflow: hidden;
-  font-family: var(--font-family, 'Outfit', 'Poppins', sans-serif);
+  font-family: var(--font-family, 'Roboto', sans-serif);
 }
 
 .kz-knowledge-anchor-target {
@@ -56,7 +56,7 @@
 
 .kz-knowledge-badge {
   display: inline-block;
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 1.6px;
@@ -70,7 +70,7 @@
 
 /* Section Title */
 .kz-knowledge-title {
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: clamp(2.4rem, 3.6vw, 3.4rem);
   font-weight: 800;
   line-height: 1.08;
@@ -90,7 +90,7 @@
 
 /* Subtitle Description */
 .kz-knowledge-subtitle {
-  font-family: 'Poppins', 'Outfit', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 1.08rem;
   line-height: 1.5;
   color: #6b5774;
@@ -114,7 +114,7 @@
   border: 1px solid rgba(85, 53, 94, 0.1);
   border-radius: 9999px;
   padding: 7px 15px;
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.82rem;
   font-weight: 500;
   color: #55355E;
@@ -193,7 +193,7 @@
   border: none;
   outline: none;
   background: transparent;
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.94rem;
   font-weight: 400;
   color: #2f1738;
@@ -235,7 +235,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.92rem;
   font-weight: 600;
   color: #A01B68;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../Global.css';
 import logoImg from '../../assets/home/logokaizecon.png';
 import navbarLeftImg from '../../assets/home/navbarleft_bg.png';
@@ -11,12 +12,28 @@ const navItems = [
   { id: 'speakers', label: 'Speakers', href: '#speakers' },
   { id: 'ai-experience', label: 'AI Experience', href: '#ai-experience' },
   { id: 'knowledge', label: 'Knowledge', href: '#knowledge' },
-  { id: 'contact', label: 'Contact', href: '#contact' },
+  { id: 'contact', label: 'Contact Us', href: '/contact' },
 ];
 
 export default function Navbar() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [activeItem, setActiveItem] = useState('Home');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Sync active nav item with current route and hash
+  useEffect(() => {
+    if (location.pathname === '/contact' || location.pathname === '/contact-us') {
+      setActiveItem('Contact Us');
+    } else if (location.hash) {
+      const match = navItems.find(item => item.href === location.hash);
+      if (match) {
+        setActiveItem(match.label);
+      }
+    } else {
+      setActiveItem('Home');
+    }
+  }, [location.pathname, location.hash]);
 
   // Close drawer on ESC key
   useEffect(() => {
@@ -44,11 +61,32 @@ export default function Navbar() {
   const handleNavClick = (label, href) => {
     setActiveItem(label);
     setIsDrawerOpen(false);
+
+    if (href === '/contact' || href === '/contact-us') {
+      navigate('/contact');
+      return;
+    }
+
     if (href && href.startsWith('#')) {
-      const el = document.querySelector(href);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
+      if (location.pathname !== '/') {
+        // If on another page, navigate to home with the hash
+        navigate('/' + href);
+      } else {
+        const el = document.querySelector(href);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
       }
+    }
+  };
+
+  const handleLogoClick = (e) => {
+    e.preventDefault();
+    setIsDrawerOpen(false);
+    if (location.pathname !== '/') {
+      navigate('/');
+    } else {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }
   };
 
@@ -141,7 +179,7 @@ export default function Navbar() {
         <div className="kaizen-navbar-inner">
           {/* Logo on Left in Dedicated Container (Uses top empty space with exactly 1px space top and bottom) */}
           <div className="kaizen-logo-container">
-            <a href="#home" className="kaizen-logo-link" aria-label="KaizenCon 2027 Home">
+            <a href="/" className="kaizen-logo-link" onClick={handleLogoClick} aria-label="KaizenCon 2027 Home">
               <img
                 src={logoImg}
                 alt="KaizenCon 2027 Robotics & AI Conference Logo"
@@ -197,11 +235,13 @@ export default function Navbar() {
       >
         {/* Drawer Header */}
         <div className="kaizen-drawer-header">
-          <img
-            src={logoImg}
-            alt="KaizenCon 2027 Logo"
-            className="kaizen-drawer-logo"
-          />
+          <a href="/" onClick={handleLogoClick} className="kaizen-drawer-logo-link" aria-label="KaizenCon 2027 Home">
+            <img
+              src={logoImg}
+              alt="KaizenCon 2027 Logo"
+              className="kaizen-drawer-logo"
+            />
+          </a>
           <button
             type="button"
             className="kaizen-drawer-close-btn"

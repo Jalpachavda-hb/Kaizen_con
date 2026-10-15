@@ -12,7 +12,7 @@
   padding: 100px 24px;
   scroll-margin-top: 90px;
   overflow: hidden;
-  font-family: var(--font-family, 'Outfit', 'Poppins', sans-serif);
+  font-family: var(--font-family, 'Roboto', sans-serif);
 }
 
 /* Background image layer confined strictly to this section with adjustable opacity */

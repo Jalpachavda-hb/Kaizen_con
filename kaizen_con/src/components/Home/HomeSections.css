@@ -27,7 +27,7 @@
 
 .kz-section-badge {
   display: inline-block;
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -61,7 +61,7 @@
 .kz-idea-desc {
   max-width: 760px;
   margin: 20px auto 50px auto;
-  font-family: 'Poppins', 'Outfit', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 1.05rem;
   line-height: 1.65;
   color: #5D4363;
@@ -146,7 +146,7 @@
 }
 
 .kz-step-title {
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 1.05rem;
   font-weight: 700;
   color: #2D1432;
@@ -194,7 +194,7 @@
 
 .kz-idea-pill {
   display: inline-block;
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 1.8px;
@@ -208,7 +208,7 @@
 }
 
 .kz-idea-title {
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: clamp(2.2rem, 4.2vw, 3.4rem);
   font-weight: 800;
   line-height: 1.22;
@@ -230,7 +230,7 @@
 
 .kz-section-badge-light {
   display: inline-block;
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -244,7 +244,7 @@
 }
 
 .kz-section-title {
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: clamp(2rem, 3.5vw, 2.85rem);
   font-weight: 800;
   color: #55355E;
@@ -289,7 +289,7 @@
 }
 
 .kz-metrics-eyebrow-text {
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 2px;
@@ -306,7 +306,7 @@
 }
 
 .kz-metrics-title {
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: clamp(2rem, 3.2vw, 2.9rem);
   font-weight: 800;
   line-height: 1.15;
@@ -394,7 +394,7 @@
 }
 
 .kz-metric-number {
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: clamp(1.9rem, 2.2vw, 2.3rem);
   font-weight: 800;
   color: #2D1432;
@@ -403,7 +403,7 @@
 }
 
 .kz-metric-label {
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.95rem;
   font-weight: 700;
   color: #2D1432;
@@ -446,7 +446,7 @@
 
 .kz-tracks-pill {
   display: inline-block;
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 1.8px;
@@ -460,7 +460,7 @@
 }
 
 .kz-tracks-title {
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: clamp(2.2rem, 3.6vw, 3rem);
   font-weight: 800;
   line-height: 1.2;
@@ -537,7 +537,7 @@
 }
 
 .kz-track-title {
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 1.22rem;
   font-weight: 700;
   color: #2D1432;
@@ -576,7 +576,7 @@
 
 .kz-ai-pill-badge {
   display: inline-block;
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 1.6px;
@@ -590,7 +590,7 @@
 }
 
 .kz-ai-showcase-title {
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: clamp(2.3rem, 3.4vw, 3.15rem);
   font-weight: 800;
   color: #55355E;
@@ -679,7 +679,7 @@
   border-radius: 50%;
   background: #55355E;
   color: #FFFFFF;
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-weight: 700;
   font-size: 0.9rem;
   letter-spacing: 0.5px;
@@ -694,7 +694,7 @@
 }
 
 .kz-ai-user-name {
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 1.02rem;
   font-weight: 700;
   color: #55355E;
@@ -710,7 +710,7 @@
 }
 
 .kz-ai-status-pill {
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.8px;
@@ -731,7 +731,7 @@
 
 .kz-ai-card-label {
   display: block;
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 1.2px;
@@ -792,7 +792,7 @@
   border-radius: 50%;
   background: #55355E;
   color: #FFFFFF;
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.78rem;
   font-weight: 700;
   display: flex;
@@ -882,7 +882,7 @@
 }
 
 .kz-speaker-initials {
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 1.4rem;
   font-weight: 700;
   letter-spacing: 1px;
@@ -900,7 +900,7 @@
 }
 
 .kz-speaker-name {
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 1.15rem;
   font-weight: 700;
   color: #55355E;
@@ -960,7 +960,7 @@
 }
 
 .kz-venue-title {
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: clamp(2rem, 3.4vw, 2.75rem);
   font-weight: 800;
   margin: 16px 0 16px 0;
@@ -999,7 +999,7 @@
 }
 
 .detail-value {
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 1.05rem;
   font-weight: 600;
   color: #FFFFFF;
@@ -1040,7 +1040,7 @@
 /* Next Generation Banner Content */
 .kz-nextgen-tagline {
   display: inline-block;
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 2.8px;
@@ -1053,7 +1053,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: clamp(1.85rem, 3.6vw, 3.05rem);
   font-weight: 900;
   line-height: 1.18;
@@ -1103,7 +1103,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.95rem;
   font-weight: 600;
   padding: 13px 26px;

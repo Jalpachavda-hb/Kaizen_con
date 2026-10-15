@@ -1,64 +1,39 @@
 import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Home/Navbar';
-import Hero from './components/Home/Hero';
-import IdeaSection from './components/Home/IdeaSection';
-import StatsSection from './components/Home/StatsSection';
-import TracksSection from './components/Home/TracksSection';
-import AiExperienceShowcase from './components/Home/AiExperienceShowcase';
-import AiConAssisten from './components/Home/AiConAssisten';
-import Liveinteligenc from './components/Home/Liveinteligenc';
-import KnowledgeSection from './components/Home/KnowledgeSection';
-import SpeakersSection from './components/Home/SpeakersSection';
-import VenueSection from './components/Home/VenueSection';
 import Footer from './components/Home/Footer';
 import FloatingChatbot from './components/Home/FloatingChatbot';
+import ScrollToTop from './components/Common/ScrollToTop';
+import HomePage from './pages/HomePage';
+import ContactPage from './pages/ContactPage';
 import './components/Global.css';
 
 function App() {
   return (
-    <div className="app-container">
-      {/* KaizenCon Navbar */}
-      <Navbar />
+    <BrowserRouter>
+      <div className="app-container">
+        {/* Automatic scroll-to-top on route change */}
+        <ScrollToTop />
 
-      {/* Main Home Page Sections */}
-      <main>
-        {/* Hero Section matching screenshot layout & #55355e button */}
-        <Hero />
-         {/* Conference Key Stats & Highlights */}
-  <StatsSection />
-        {/* The Idea Section matching user screenshot */}
-        <IdeaSection />
+        {/* KaizenCon Navbar with Routing */}
+        <Navbar />
 
-        
+        {/* Dynamic Route View */}
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/contact-us" element={<ContactPage />} />
+          {/* Fallback route back to home */}
+          <Route path="*" element={<HomePage />} />
+        </Routes>
 
-        {/* Scientific Themes & Tracks */}
-        <TracksSection />
+        {/* Conference Footer */}
+        <Footer />
 
-        {/* Live AI Layer Experience */}
-        <AiExperienceShowcase />
-
-        {/* AI Conference Assistant */}
-        <AiConAssisten />
-
-        {/* Live Intelligence: The room, made intelligent */}
-        <Liveinteligenc />
-
-        {/* Conference Knowledge - Search the entire conference */}
-        <KnowledgeSection />
-
-        {/* Leading Global Faculty */}
-        <SpeakersSection />
-
-        {/* Venue & Registration Banner */}
-        <VenueSection />
-      </main>
-
-      {/* Conference Footer */}
-      <Footer />
-
-      {/* Persistent Floating AI Chatbot Icon (Visible on all pages) */}
-      <FloatingChatbot />
-    </div>
+        {/* Persistent Floating AI Chatbot Icon (Visible on all pages) */}
+        <FloatingChatbot />
+      </div>
+    </BrowserRouter>
   );
 }
 
