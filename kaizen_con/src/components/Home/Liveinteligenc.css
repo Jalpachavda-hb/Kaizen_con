@@ -1,0 +1,629 @@
+/* ====================================================
+   LIVE INTELLIGENCE SECTION STYLES
+   - Features bgai.png in background
+   - Official KaizenCon Theme Colors (#55355E & Magenta)
+   - Pixel-perfect Live Audience Poll & AI Q&A Clustering
+   - Fully responsive design
+   ==================================================== */
+
+.kz-live-intel-section {
+  position: relative;
+  background-color: #faf7fc;
+  padding: 100px 24px;
+  scroll-margin-top: 90px;
+  overflow: hidden;
+  font-family: var(--font-family, 'Outfit', 'Poppins', sans-serif);
+}
+
+/* Background image layer confined strictly to this section with adjustable opacity */
+.kz-live-intel-bg-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Subtle overlay enhancement to ensure high contrast & crisp text */
+.kz-live-intel-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.45) 0%, rgba(250, 247, 252, 0.2) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.kz-live-intel-container {
+  position: relative;
+  max-width: 1240px;
+  margin: 0 auto;
+  z-index: 2;
+}
+
+/* ====================================================
+   HEADER BLOCK
+   ==================================================== */
+.kz-live-intel-header {
+  text-align: center;
+  max-width: 780px;
+  margin: 0 auto 52px auto;
+}
+
+.kz-live-intel-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 18px;
+  border-radius: 9999px;
+  background: rgba(170, 45, 123, 0.08);
+  border: 1px solid rgba(170, 45, 123, 0.22);
+  color: #AA2D7B;
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 8px rgba(170, 45, 123, 0.06);
+}
+
+.kz-live-intel-pill-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #AA2D7B;
+}
+
+/* Title: Theme Dark Color + Highlight Magenta Gradient */
+.kz-live-intel-title {
+  font-size: clamp(2.2rem, 3.8vw, 3.25rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  margin: 0 0 18px 0;
+}
+
+.kz-title-dark-theme {
+  color: #55355E;
+}
+
+.kz-title-magenta-theme {
+  background: linear-gradient(90deg, #7C3369 0%, #A23B79 30%, #C74485 70%, #D85695 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  color: transparent !important;
+  display: inline-block;
+}
+
+.kz-live-intel-desc {
+  font-size: clamp(0.98rem, 1.2vw, 1.08rem);
+  line-height: 1.65;
+  color: #55355E;
+  opacity: 0.88;
+  margin: 0 auto;
+  max-width: 680px;
+}
+
+/* ====================================================
+   TWO CARDS GRID LAYOUT
+   ==================================================== */
+.kz-live-intel-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  align-items: stretch;
+}
+
+/* Card Common Container */
+.kz-live-card {
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid rgba(85, 53, 94, 0.1);
+  padding: 34px 36px;
+  box-shadow: 
+    0 16px 36px -8px rgba(85, 53, 94, 0.07),
+    0 2px 8px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+  position: relative;
+}
+
+.kz-live-card:hover {
+  box-shadow: 
+    0 20px 44px -8px rgba(85, 53, 94, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+/* Card Header Structure */
+.kz-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  padding-bottom: 4px;
+}
+
+.kz-card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kz-card-icon-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(170, 45, 123, 0.1);
+  color: #AA2D7B;
+  flex-shrink: 0;
+}
+
+.kz-card-title {
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: #35153F;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+/* Header Right Side Controls */
+.kz-poll-header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Pulsing Live Badge */
+.kz-poll-live-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #059669;
+}
+
+.kz-pulse-circle {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: kz-live-pulse 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes kz-live-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.kz-poll-timer-box {
+  text-align: right;
+  line-height: 1.1;
+}
+
+.kz-poll-time-now {
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: #35153F;
+}
+
+.kz-poll-time-total {
+  font-size: 0.75rem;
+  color: #8A7693;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* Questions Count Pill */
+.kz-qa-count-badge {
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(170, 45, 123, 0.08);
+  border: 1px solid rgba(170, 45, 123, 0.18);
+  color: #AA2D7B;
+}
+
+/* ====================================================
+   LEFT CARD: POLL CONTENT
+   ==================================================== */
+.kz-poll-prompt {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #35153F;
+  margin: 0 0 24px 0;
+  line-height: 1.45;
+}
+
+.kz-poll-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.kz-poll-option-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.22s ease;
+  user-select: none;
+}
+
+.kz-poll-option-row:hover {
+  background: rgba(85, 53, 94, 0.03);
+  border-color: rgba(85, 53, 94, 0.08);
+}
+
+.kz-poll-option-row.kz-poll-selected {
+  background: rgba(170, 45, 123, 0.04);
+  border-color: rgba(170, 45, 123, 0.25);
+}
+
+/* Option Icons */
+.kz-poll-option-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kz-icon-robotic {
+  background: rgba(170, 45, 123, 0.09);
+  color: #AA2D7B;
+}
+
+.kz-icon-laparoscopic {
+  background: rgba(85, 53, 94, 0.09);
+  color: #55355E;
+}
+
+.kz-icon-both {
+  background: rgba(216, 90, 154, 0.12);
+  color: #D85A9A;
+}
+
+.kz-icon-open {
+  background: rgba(138, 118, 147, 0.12);
+  color: #8A7693;
+}
+
+/* Option Content & Progress Bar */
+.kz-poll-bar-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+.kz-poll-option-title {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #35153F;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kz-poll-selected-tag {
+  font-size: 0.68rem;
+  color: #AA2D7B;
+  background: rgba(170, 45, 123, 0.1);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.kz-poll-track {
+  width: 100%;
+  height: 8px;
+  background: #F1EBF4;
+  border-radius: 9999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.kz-poll-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Progress Bar Color Themes */
+.kz-fill-robotic {
+  background: linear-gradient(90deg, #AA2D7B 0%, #E0358D 100%);
+}
+
+.kz-fill-laparoscopic {
+  background: #55355E;
+}
+
+.kz-fill-both {
+  background: #D85A9A;
+}
+
+.kz-fill-open {
+  background: #8A7693;
+}
+
+/* Option Percentage and Votes */
+.kz-poll-meta {
+  text-align: right;
+  min-width: 72px;
+  flex-shrink: 0;
+  line-height: 1.15;
+}
+
+.kz-poll-percentage {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #35153F;
+}
+
+.kz-poll-votes-count {
+  font-size: 0.76rem;
+  color: #8A7693;
+  font-weight: 500;
+  margin-top: 3px;
+}
+
+/* ====================================================
+   RIGHT CARD: AI Q&A CLUSTERING
+   ==================================================== */
+.kz-qa-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.kz-qa-item-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  background: rgba(248, 244, 250, 0.75);
+  border: 1px solid rgba(85, 53, 94, 0.08);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+}
+
+.kz-qa-item-card:hover {
+  background: #ffffff;
+  border-color: rgba(170, 45, 123, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px -4px rgba(85, 53, 94, 0.08);
+}
+
+.kz-qa-number-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.88rem;
+  flex-shrink: 0;
+}
+
+.kz-num-pink {
+  background: #FCE7F3;
+  color: #AA2D7B;
+}
+
+.kz-num-purple {
+  background: #EDE7F2;
+  color: #55355E;
+}
+
+.kz-qa-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.kz-qa-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.kz-qa-topic-title {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: #35153F;
+  margin: 0;
+}
+
+.kz-qa-topic-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: #FDF2F8;
+  color: #AA2D7B;
+  border: 1px solid rgba(170, 45, 123, 0.12);
+}
+
+.kz-qa-question-text {
+  font-size: 0.86rem;
+  color: #55355E;
+  line-height: 1.45;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.kz-qa-arrow-btn {
+  width: 22px;
+  height: 22px;
+  color: #AA2D7B;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.22s ease;
+}
+
+.kz-qa-item-card:hover .kz-qa-arrow-btn {
+  transform: translateX(4px);
+}
+
+/* ====================================================
+   CARD FOOTERS
+   ==================================================== */
+.kz-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+  color: #7F6789;
+  padding-top: 18px;
+  border-top: 1px solid rgba(85, 53, 94, 0.08);
+  margin-top: auto;
+}
+
+.kz-footer-icon {
+  width: 16px;
+  height: 16px;
+  color: #AA2D7B;
+  flex-shrink: 0;
+}
+
+/* ====================================================
+   RESPONSIVE DESIGN SYSTEM
+   ==================================================== */
+@media (max-width: 1080px) {
+  .kz-live-intel-grid {
+    grid-template-columns: 1fr;
+    max-width: 720px;
+    margin: 0 auto;
+    gap: 28px;
+  }
+
+  .kz-live-intel-section {
+    padding: 80px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .kz-live-intel-section {
+    padding: 60px 16px;
+  }
+
+  .kz-live-intel-header {
+    margin-bottom: 38px;
+  }
+
+  .kz-live-card {
+    padding: 26px 20px;
+    border-radius: 20px;
+  }
+
+  .kz-poll-header-right {
+    gap: 12px;
+  }
+
+  .kz-poll-time-now {
+    font-size: 1rem;
+  }
+
+  .kz-card-title {
+    font-size: 1.08rem;
+  }
+
+  .kz-poll-prompt {
+    font-size: 0.96rem;
+    margin-bottom: 20px;
+  }
+
+  .kz-poll-option-row {
+    padding: 6px 4px;
+    gap: 12px;
+  }
+
+  .kz-poll-meta {
+    min-width: 60px;
+  }
+
+  .kz-poll-percentage {
+    font-size: 0.96rem;
+  }
+
+  .kz-qa-item-card {
+    padding: 12px 14px;
+    gap: 12px;
+  }
+
+  .kz-qa-number-circle {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+  }
+
+  .kz-qa-question-text {
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .kz-card-header {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .kz-poll-header-right {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+
+  .kz-poll-option-row {
+    gap: 10px;
+  }
+
+  .kz-poll-option-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .kz-card-footer {
+    font-size: 0.78rem;
+  }
+}

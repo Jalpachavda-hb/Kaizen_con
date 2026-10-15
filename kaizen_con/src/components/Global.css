@@ -1,0 +1,772 @@
+:root {
+  /* Brand Color Palette */
+  --kz-pink-light: #D85A9A;
+  --kz-pink-primary: #AA2D7B;
+  --kz-purple-deep: #55355E;
+  --kz-white: #FFFFFF;
+  
+  /* Additional Accents & Tones */
+  --kz-purple-dark: #3a1f42;
+  --kz-purple-light: #7b5886;
+  --kz-pink-subtle: rgba(216, 90, 154, 0.08);
+  --kz-pink-glow: rgba(170, 45, 123, 0.28);
+  --kz-border-light: rgba(85, 53, 94, 0.12);
+  --kz-text-dark: #55355E;
+  --kz-text-muted: #6f5876;
+  
+  /* Background Opacities for subtle AI artwork */
+  --kz-left-bg-opacity: 0.22;
+  --kz-right-bg-opacity: 0.42;
+  
+  /* Shadows & Elevations */
+  --kz-shadow-nav: 0 4px 20px rgba(85, 53, 94, 0.07);
+  --kz-shadow-drawer: -8px 0 32px rgba(85, 53, 94, 0.22);
+  
+  /* Typography */
+  --font-family: 'Poppins', 'Outfit', system-ui, -apple-system, sans-serif;
+  --transition-smooth: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Container Alignment System (Unified across whole website) */
+  --kz-container-max: 1440px;
+  --kz-container-padding: 40px;
+
+  /* Unified Brand Title Gradient (Used Across Whole Website) */
+  --kz-title-gradient: linear-gradient(90deg, #7C3369 0%, #A23B79 30%, #C74485 70%, #D85695 100%);
+}
+
+/* ====================================================
+   UNIFIED TITLE GRADIENT UTILITY
+   ==================================================== */
+.kz-gradient-text,
+.kz-title-gradient,
+.kz-metrics-title-highlight,
+.text-highlight,
+.title-magenta {
+  background: linear-gradient(90deg, #7C3369 0%, #A23B79 30%, #C74485 70%, #D85695 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  color: transparent !important;
+  display: inline-block !important;
+  text-decoration: none !important;
+}
+
+/* ====================================================
+   NAVBAR WRAPPER (INTEGRATED SINGLE-BAR STRUCTURE)
+   ==================================================== */
+.kaizen-navbar-wrapper {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: var(--kz-white);
+  box-shadow: var(--kz-shadow-nav);
+  font-family: var(--font-family);
+  overflow: visible;
+  border-top: 3px solid transparent;
+  border-image: linear-gradient(90deg, #d85a9a 0%, #d85a9a 35%, #aa2d7b 48%, #73437b 62%, #55355e 78%, #3a1c43 100%) 1;
+}
+
+/* ====================================================
+   1. TOP INFO RIBBON (PINNED TO TOP-RIGHT)
+   ==================================================== */
+.kaizen-topbar-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 38px;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.kaizen-topbar-track {
+  display: flex;
+  align-items: stretch;
+  height: 38px;
+  filter: drop-shadow(0 2px 6px rgba(85, 53, 94, 0.14));
+}
+
+/* Smooth borderless S-curve connector */
+.kaizen-topbar-swoop-svg {
+  display: block;
+  width: 54px;
+  height: 38px;
+  flex-shrink: 0;
+  margin-right: -1px; /* seamless connection with ribbon body */
+}
+
+/* Topbar content ribbon body */
+.kaizen-topbar-body {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(90deg, #73437b 0%, #62386b 20%, #55355e 45%, #46254f 75%, #3a1c43 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  color: var(--kz-white);
+  height: 38px;
+  padding: 0 36px 0 10px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.kaizen-topbar-content {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  white-space: nowrap;
+}
+
+.kaizen-topbar-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #ffffff;
+}
+
+.kaizen-topbar-text {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.kaizen-topbar-venue-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  text-align: left;
+}
+
+.kaizen-topbar-venue-title {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: #ffffff;
+}
+
+.kaizen-topbar-venue-subtitle {
+  font-size: 0.6875rem;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.kaizen-topbar-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.kaizen-topbar-divider {
+  display: block;
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.35);
+  margin: 0 2px;
+}
+
+/* ====================================================
+   2. MAIN NAVBAR (SPACIOUS 8REM LOGO WITH ELEGANT TOP & BOTTOM SPACE)
+   ==================================================== */
+.kaizen-navbar {
+  position: relative;
+  width: 100%;
+  background: var(--kz-white);
+  min-height: calc(8rem + 24px);
+  height: calc(8rem + 24px);
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(85, 53, 94, 0.08);
+  overflow: hidden;
+}
+
+/* Background graphics with subtle opacity */
+.kaizen-navbar-bg-left {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 380px;
+  max-width: 35vw;
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: cover;
+  opacity: var(--kz-left-bg-opacity);
+  pointer-events: none;
+  z-index: 1;
+  mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.5) 45%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.5) 45%, transparent 100%);
+}
+
+.kaizen-navbar-bg-right {
+  position: absolute;
+  top: 38px; /* Starts directly below topbar ribbon so graphics are never cut off at top */
+  right: 0;
+  bottom: 0;
+  width: 500px;
+  max-width: 45vw;
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: contain;
+  opacity: var(--kz-right-bg-opacity);
+  pointer-events: none;
+  z-index: 1;
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.35) 20%, rgba(0, 0, 0, 1) 50%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.35) 20%, rgba(0, 0, 0, 1) 50%);
+}
+
+/* Main Inner Container (Unified 1440px Container across whole website) */
+.kaizen-navbar-inner {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 40px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 3;
+  min-height: calc(8rem + 24px);
+  height: calc(8rem + 24px);
+}
+
+/* Logo in Dedicated Container (With clean, comfortable space on top and bottom) */
+.kaizen-logo-container {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 4;
+  min-height: calc(8rem + 24px);
+  height: calc(8rem + 24px);
+  padding: 12px 0; /* clean spacing on top and bottom so logo breathes */
+  box-sizing: border-box;
+}
+
+.kaizen-logo-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  height: 8rem;
+  transition: transform 0.25s ease;
+}
+
+.kaizen-logo-link:hover {
+  transform: scale(1.02);
+}
+
+.kaizen-logo-img {
+  height: 8rem;
+  width: auto;
+  max-width: 340px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Desktop Navigation Menu (Positioned toward right side below 38px topbar) */
+.kaizen-nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  margin-left: auto;
+  margin-right: 180px;
+  margin-top: 38px; /* Aligns neatly in lower tier beneath topbar ribbon */
+  position: relative;
+  z-index: 4;
+}
+
+.kaizen-nav-item {
+  position: relative;
+}
+
+.kaizen-nav-link {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--kz-purple-deep);
+  text-decoration: none;
+  padding: 6px 0 10px 0;
+  position: relative;
+  transition: color 0.25s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.kaizen-nav-link:hover {
+  color: var(--kz-pink-primary);
+}
+
+/* Active Nav State */
+.kaizen-nav-link.active {
+  color: var(--kz-pink-primary);
+  font-weight: 600;
+}
+
+/* Full-width underline under the font of all menu items (Active & Hover) */
+.kaizen-nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0px;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--kz-pink-light), var(--kz-pink-primary));
+  border-radius: 3px;
+  transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kaizen-nav-link:hover::after,
+.kaizen-nav-link.active::after {
+  width: 100%;
+}
+
+/* ====================================================
+   MOBILE TOGGLE (HAMBURGER BUTTON)
+   ==================================================== */
+.kaizen-hamburger-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(85, 53, 94, 0.08);
+  border: 1.5px solid rgba(85, 53, 94, 0.25);
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+  z-index: 101;
+  transition: var(--transition-smooth);
+}
+
+.kaizen-hamburger-btn:hover {
+  background: rgba(85, 53, 94, 0.16);
+  transform: translateY(-1px);
+}
+
+.kaizen-hamburger-line {
+  width: 22px;
+  height: 2.5px;
+  background-color: var(--kz-purple-deep);
+  border-radius: 2px;
+  transition: var(--transition-smooth);
+  margin: 2.5px 0;
+}
+
+.kaizen-hamburger-btn.is-active .kaizen-hamburger-line:nth-child(1) {
+  transform: translateY(7.5px) rotate(45deg);
+  background-color: var(--kz-pink-primary);
+}
+
+.kaizen-hamburger-btn.is-active .kaizen-hamburger-line:nth-child(2) {
+  opacity: 0;
+  transform: translateX(-8px);
+}
+
+.kaizen-hamburger-btn.is-active .kaizen-hamburger-line:nth-child(3) {
+  transform: translateY(-7.5px) rotate(-45deg);
+  background-color: var(--kz-pink-primary);
+}
+
+/* ====================================================
+   MOBILE SIDE DRAWER (SLIDES IN FROM RIGHT)
+   ==================================================== */
+.kaizen-drawer-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(45, 24, 50, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1050;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+.kaizen-drawer-backdrop.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.kaizen-side-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 380px;
+  max-width: 86vw;
+  height: 100vh;
+  background: #ffffff;
+  box-shadow: var(--kz-shadow-drawer);
+  z-index: 1100;
+  transform: translateX(100%);
+  transition: transform 0.38s cubic-bezier(0.2, 0.9, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.kaizen-side-drawer.is-open {
+  transform: translateX(0);
+}
+
+/* DRAWER HEADER */
+.kaizen-drawer-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(85, 53, 94, 0.1);
+  background: linear-gradient(to right, #ffffff, #fdf8fb);
+  position: relative;
+}
+
+.kaizen-drawer-logo {
+  height: 52px;
+  width: auto;
+  max-width: 190px;
+  object-fit: contain;
+}
+
+.kaizen-drawer-close-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(85, 53, 94, 0.15);
+  background: #ffffff;
+  color: var(--kz-purple-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.kaizen-drawer-close-btn:hover {
+  background: var(--kz-pink-primary);
+  color: #ffffff;
+  border-color: var(--kz-pink-primary);
+  transform: rotate(90deg);
+}
+
+/* DRAWER BODY */
+.kaizen-drawer-body {
+  flex: 1;
+  padding: 22px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.kaizen-drawer-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kaizen-drawer-item {
+  width: 100%;
+}
+
+.kaizen-drawer-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--kz-purple-deep);
+  border-radius: 12px;
+  background: transparent;
+  transition: var(--transition-smooth);
+  text-decoration: none;
+}
+
+.kaizen-drawer-link:hover {
+  background: var(--kz-pink-subtle);
+  color: var(--kz-pink-primary);
+  transform: translateX(4px);
+}
+
+.kaizen-drawer-link.active {
+  background: linear-gradient(135deg, var(--kz-pink-light) 0%, var(--kz-pink-primary) 100%);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 4px 14px var(--kz-pink-glow);
+}
+
+.kaizen-drawer-chevron {
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.6;
+  transition: transform 0.25s ease;
+}
+
+.kaizen-drawer-link:hover .kaizen-drawer-chevron {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+.kaizen-drawer-link.active .kaizen-drawer-chevron {
+  opacity: 1;
+}
+
+/* DRAWER CONFERENCE DETAILS CARD */
+.kaizen-drawer-info-card {
+  background: linear-gradient(145deg, #fbf7fb 0%, #f4e9f3 100%);
+  border: 1px solid rgba(85, 53, 94, 0.15);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kaizen-drawer-info-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--kz-pink-primary);
+}
+
+.kaizen-drawer-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.875rem;
+  color: var(--kz-purple-deep);
+  line-height: 1.4;
+}
+
+.kaizen-drawer-info-item svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--kz-pink-primary);
+}
+
+/* ====================================================
+   RESPONSIVE BREAKPOINTS (ALL SCREENS: EXACT 1PX SPACE TOP & BOTTOM)
+   ==================================================== */
+
+/* 1600px Viewport */
+@media (max-width: 1600px) {
+  .kaizen-nav-menu {
+    margin-right: 140px;
+    gap: 28px;
+  }
+}
+
+/* 1440px Viewport: Navbar calc(7.5rem + 20px), Logo 7.5rem -> clean space top/bottom */
+@media (max-width: 1440px) {
+  .kaizen-navbar,
+  .kaizen-navbar-inner,
+  .kaizen-logo-container {
+    height: calc(7.5rem + 20px);
+    min-height: calc(7.5rem + 20px);
+  }
+  .kaizen-logo-container {
+    padding: 10px 0;
+  }
+  .kaizen-logo-link,
+  .kaizen-logo-img {
+    height: 7.5rem;
+    max-width: 310px;
+  }
+  .kaizen-topbar-wrapper,
+  .kaizen-topbar-track,
+  .kaizen-topbar-swoop-svg,
+  .kaizen-topbar-body {
+    height: 36px;
+  }
+  .kaizen-navbar-bg-right {
+    top: 36px;
+  }
+  .kaizen-nav-menu {
+    margin-top: 36px;
+    margin-right: 90px;
+    gap: 24px;
+  }
+  .kaizen-nav-link {
+    font-size: 0.98rem;
+  }
+}
+
+/* 1366px Viewport: Navbar calc(7rem + 20px), Logo 7rem -> clean space top/bottom */
+@media (max-width: 1366px) {
+  .kaizen-navbar,
+  .kaizen-navbar-inner,
+  .kaizen-logo-container {
+    height: calc(7rem + 20px);
+    min-height: calc(7rem + 20px);
+  }
+  .kaizen-logo-container {
+    padding: 10px 0;
+  }
+  .kaizen-logo-link,
+  .kaizen-logo-img {
+    height: 7rem;
+    max-width: 290px;
+  }
+  .kaizen-topbar-wrapper,
+  .kaizen-topbar-track,
+  .kaizen-topbar-swoop-svg,
+  .kaizen-topbar-body {
+    height: 34px;
+  }
+  .kaizen-navbar-bg-right {
+    top: 34px;
+  }
+  .kaizen-topbar-content {
+    gap: 14px;
+  }
+  .kaizen-nav-menu {
+    margin-top: 34px;
+    margin-right: 50px;
+    gap: 18px;
+  }
+  .kaizen-nav-link {
+    font-size: 0.94rem;
+  }
+}
+
+/* 1200px Viewport: Navbar calc(6.25rem + 18px), Logo 6.25rem -> clean space top/bottom */
+@media (max-width: 1200px) {
+  .kaizen-navbar,
+  .kaizen-navbar-inner,
+  .kaizen-logo-container {
+    height: calc(6.25rem + 18px);
+    min-height: calc(6.25rem + 18px);
+  }
+  .kaizen-logo-container {
+    padding: 9px 0;
+  }
+  .kaizen-logo-link,
+  .kaizen-logo-img {
+    height: 6.25rem;
+    max-width: 260px;
+  }
+  .kaizen-topbar-wrapper,
+  .kaizen-topbar-track,
+  .kaizen-topbar-swoop-svg,
+  .kaizen-topbar-body {
+    height: 32px;
+  }
+  .kaizen-navbar-bg-right {
+    top: 32px;
+  }
+  .kaizen-topbar-venue-subtitle {
+    display: none;
+  }
+  .kaizen-topbar-content {
+    gap: 12px;
+  }
+  .kaizen-nav-menu {
+    margin-top: 32px;
+    margin-right: 24px;
+    gap: 14px;
+  }
+  .kaizen-nav-link {
+    font-size: 0.88rem;
+  }
+}
+
+/* 1024px Viewport (Tablet): Switch to Hamburger, Navbar calc(5.5rem + 16px), Logo 5.5rem */
+@media (max-width: 1024px) {
+  .kaizen-topbar-wrapper {
+    display: none; /* Details available in mobile drawer */
+  }
+  .kaizen-navbar,
+  .kaizen-navbar-inner,
+  .kaizen-logo-container {
+    height: calc(5.5rem + 16px);
+    min-height: calc(5.5rem + 16px);
+  }
+  .kaizen-logo-container {
+    padding: 8px 0;
+  }
+  .kaizen-navbar-inner {
+    padding: 0 24px;
+  }
+  .kaizen-logo-link,
+  .kaizen-logo-img {
+    height: 5.5rem;
+    max-width: 235px;
+  }
+  .kaizen-nav-menu {
+    display: none;
+  }
+  .kaizen-hamburger-btn {
+    display: flex;
+  }
+  .kaizen-navbar-bg-left {
+    width: 240px;
+    opacity: 0.18;
+  }
+  .kaizen-navbar-bg-right {
+    top: 0;
+    width: 280px;
+    opacity: 0.35;
+  }
+}
+
+/* 768px Viewport (Mobile Landscape): Navbar calc(4.75rem + 14px), Logo 4.75rem */
+@media (max-width: 768px) {
+  .kaizen-navbar,
+  .kaizen-navbar-inner,
+  .kaizen-logo-container {
+    height: calc(4.75rem + 14px);
+    min-height: calc(4.75rem + 14px);
+  }
+  .kaizen-logo-container {
+    padding: 7px 0;
+  }
+  .kaizen-navbar-inner {
+    padding: 0 16px;
+  }
+  .kaizen-logo-link,
+  .kaizen-logo-img {
+    height: 4.75rem;
+    max-width: 205px;
+  }
+}
+
+/* 480px / 375px Viewport (Mobile Portrait): Navbar calc(4rem + 12px), Logo 4rem */
+@media (max-width: 480px) {
+  .kaizen-navbar,
+  .kaizen-navbar-inner,
+  .kaizen-logo-container {
+    height: calc(4rem + 12px);
+    min-height: calc(4rem + 12px);
+  }
+  .kaizen-logo-container {
+    padding: 6px 0;
+  }
+  .kaizen-navbar-inner {
+    padding: 0 12px;
+  }
+  .kaizen-logo-link,
+  .kaizen-logo-img {
+    height: 4rem;
+    max-width: 175px;
+  }
+  .kaizen-hamburger-btn {
+    width: 40px;
+    height: 40px;
+  }
+  .kaizen-side-drawer {
+    width: 100vw;
+    max-width: 100vw;
+  }
+}

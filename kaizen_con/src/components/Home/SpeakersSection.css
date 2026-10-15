@@ -1,0 +1,177 @@
+/* ====================================================
+   FEATURED SPEAKERS SECTION STYLES
+   - Pure White Section Background (#FFFFFF)
+   - Layout & Responsive Grid for SpeakerCard components
+   - Official KaizenCon Theme: Deep Purple (#55355E) & Vibrant Magenta (#AA2D7B)
+   ==================================================== */
+
+.kz-featured-speakers-section {
+  position: relative;
+  width: 100%;
+  background: #FFFFFF;
+  padding: 85px 0 95px 0;
+  scroll-margin-top: 90px;
+  overflow: hidden;
+  font-family: 'Outfit', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Section Container */
+.kz-featured-speakers-container {
+  position: relative;
+  z-index: 1;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+/* ----------------------------------------------------
+   HEADER BLOCK: Tag, Title with Underline, and "All speakers →"
+   ---------------------------------------------------- */
+.kz-speakers-top-bar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 46px;
+  position: relative;
+}
+
+.kz-speakers-header-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Tag: | SPEAKERS */
+.kz-speakers-pill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  background: rgba(170, 45, 123, 0.06);
+  border: 1px solid rgba(170, 45, 123, 0.14);
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
+.kz-speakers-bar-accent {
+  width: 3px;
+  height: 14px;
+  background-color: #AA2D7B;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.kz-speakers-tag-label {
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #55355E;
+}
+
+/* Title: Featured speakers */
+.kz-speakers-main-title {
+  font-size: clamp(2.1rem, 3.4vw, 2.75rem);
+  font-weight: 800;
+  color: #55355E;
+  margin: 0;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.kz-speakers-title-magenta {
+  color: #AA2D7B;
+  margin-left: 10px;
+}
+
+/* Magenta Underline accent beneath "Featured" */
+.kz-speakers-title-underline {
+  width: 52px;
+  height: 3.5px;
+  background: linear-gradient(90deg, #AA2D7B 0%, #D83B92 100%);
+  border-radius: 3px;
+  margin-top: 10px;
+}
+
+/* Right Link: All speakers → */
+.kz-speakers-all-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.94rem;
+  font-weight: 750;
+  color: #2D1A38;
+  text-decoration: none;
+  padding: 8px 18px;
+  border-radius: 24px;
+  background: #FDF9FB;
+  border: 1px solid rgba(85, 53, 94, 0.14);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.kz-speakers-all-link svg {
+  transition: transform 0.25s ease;
+}
+
+.kz-speakers-all-link:hover {
+  background: #FAF0F6;
+  border-color: rgba(170, 45, 123, 0.35);
+  color: #AA2D7B;
+}
+
+.kz-speakers-all-link:hover svg {
+  transform: translateX(4px);
+}
+
+/* ----------------------------------------------------
+   SPEAKERS CARDS GRID
+   ---------------------------------------------------- */
+.kz-featured-speakers-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: stretch;
+}
+
+/* ----------------------------------------------------
+   RESPONSIVE DESIGN (Pixel-perfect across viewports)
+   ---------------------------------------------------- */
+@media (max-width: 1180px) {
+  .kz-featured-speakers-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+  }
+}
+
+@media (max-width: 768px) {
+  .kz-featured-speakers-section {
+    padding: 60px 0 75px 0;
+  }
+
+  .kz-speakers-top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .kz-speakers-all-link {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 620px) {
+  .kz-featured-speakers-grid {
+    grid-template-columns: 1fr;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .kz-speakers-main-title {
+    font-size: 1.95rem;
+  }
+}

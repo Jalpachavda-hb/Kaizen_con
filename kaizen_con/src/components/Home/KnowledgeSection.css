@@ -1,0 +1,456 @@
+/* ====================================================
+   KAIZEN CON 2027 - CONFERENCE KNOWLEDGE SECTION
+   - Strictly aligned with website .kz-section-container (1440px)
+   - Matches reference screenshot UI
+   - Pure white seamless background (Zero box/shadow artifacts)
+   - 4 topic pills in single line + matching search bar
+   ==================================================== */
+
+.kz-knowledge-section {
+  position: relative;
+  background-color: #ffffff;
+  padding: 80px 0;
+  scroll-margin-top: 85px;
+  overflow: hidden;
+  font-family: var(--font-family, 'Outfit', 'Poppins', sans-serif);
+}
+
+.kz-knowledge-anchor-target {
+  position: absolute;
+  top: -85px;
+  left: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.kz-knowledge-bg-decor {
+  display: none;
+}
+
+/* Main 2-Column Grid strictly inside standard .kz-section-container */
+.kz-knowledge-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  align-items: center;
+  gap: 36px;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+/* ----------------------------------------------------
+   LEFT COLUMN: HEADLINE, DESCRIPTION, PILLS, SEARCH
+   ---------------------------------------------------- */
+.kz-knowledge-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  width: 100%;
+}
+
+/* Category Badge */
+.kz-knowledge-badge-wrapper {
+  margin-bottom: 20px;
+}
+
+.kz-knowledge-badge {
+  display: inline-block;
+  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #A01B68;
+  background: #faeaf2;
+  border: 1px solid rgba(160, 27, 104, 0.15);
+  padding: 5px 16px;
+  border-radius: 9999px;
+}
+
+/* Section Title */
+.kz-knowledge-title {
+  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-size: clamp(2.4rem, 3.6vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  margin: 0 0 16px 0;
+}
+
+.kz-knowledge-title-dark {
+  color: #55355E;
+  display: block;
+}
+
+.kz-knowledge-title-highlight {
+  color: #A01B68;
+  display: block;
+}
+
+/* Subtitle Description */
+.kz-knowledge-subtitle {
+  font-family: 'Poppins', 'Outfit', sans-serif;
+  font-size: 1.08rem;
+  line-height: 1.5;
+  color: #6b5774;
+  font-weight: 400;
+  margin: 0 0 24px 0;
+  white-space: normal;
+}
+
+/* Suggested Topic Pills */
+.kz-knowledge-topics-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.kz-knowledge-topic-pill {
+  appearance: none;
+  background: #fbf5fb;
+  border: 1px solid rgba(85, 53, 94, 0.1);
+  border-radius: 9999px;
+  padding: 7px 15px;
+  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #55355E;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(85, 53, 94, 0.02);
+}
+
+.kz-knowledge-topic-pill:hover {
+  background: #faedf5;
+  border-color: #A01B68;
+  color: #A01B68;
+  transform: translateY(-1px);
+}
+
+.kz-knowledge-topic-pill.is-active {
+  background: #A01B68;
+  border-color: #A01B68;
+  color: #ffffff;
+  box-shadow: 0 3px 12px rgba(160, 27, 104, 0.25);
+}
+
+/* ----------------------------------------------------
+   SEARCH BAR CONTAINER
+   ---------------------------------------------------- */
+.kz-knowledge-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.kz-knowledge-search-box {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid #e5d9e7;
+  border-radius: 14px;
+  padding: 8px 18px;
+  min-height: 54px;
+  box-shadow: 0 2px 12px rgba(85, 53, 94, 0.04);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 12px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.kz-knowledge-search-box.is-focused,
+.kz-knowledge-search-box:focus-within {
+  border-color: #A01B68;
+  box-shadow: 0 4px 20px rgba(160, 27, 104, 0.12), 0 0 0 3px rgba(160, 27, 104, 0.06);
+}
+
+/* Search Icon */
+.kz-search-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7b6082;
+  flex-shrink: 0;
+}
+
+.kz-search-icon {
+  width: 20px;
+  height: 20px;
+  stroke: #7b6082;
+  transition: stroke 0.2s ease;
+}
+
+.kz-knowledge-search-box:focus-within .kz-search-icon {
+  stroke: #A01B68;
+}
+
+/* Input */
+.kz-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-size: 0.94rem;
+  font-weight: 400;
+  color: #2f1738;
+  padding: 6px 0;
+  min-width: 120px;
+}
+
+.kz-search-input::placeholder {
+  color: #9c84a2;
+  opacity: 1;
+}
+
+/* Clear button */
+.kz-search-clear-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #9c84a2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.kz-search-clear-btn:hover {
+  color: #A01B68;
+  background: #faeaf3;
+}
+
+.kz-search-clear-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Open Knowledge Base Link */
+.kz-knowledge-open-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #A01B68;
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 6px 4px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.kz-knowledge-open-link:hover {
+  color: #7E1250;
+}
+
+.kz-knowledge-open-link:hover .kz-knowledge-arrow {
+  transform: translateX(4px);
+}
+
+.kz-knowledge-arrow {
+  display: inline-block;
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+/* ----------------------------------------------------
+   INTERACTIVE RESULTS DROPDOWN PREVIEW
+   ---------------------------------------------------- */
+.kz-knowledge-results-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1.5px solid #e7d8e9;
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(85, 53, 94, 0.16);
+  z-index: 50;
+  overflow: hidden;
+  animation: kzDropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes kzDropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.kz-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  background: #faf4fb;
+  border-bottom: 1px solid #f0e2f1;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #55355E;
+}
+
+.kz-results-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #A01B68;
+  background: #faeaf3;
+  padding: 3px 10px;
+  border-radius: 9999px;
+}
+
+.kz-result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 1px solid #f5ecf6;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+.kz-result-item:last-child {
+  border-bottom: none;
+}
+
+.kz-result-item:hover {
+  background: #fdf5fa;
+}
+
+.kz-result-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+}
+
+.kz-result-category {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #A01B68;
+}
+
+.kz-result-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #2b1732;
+  line-height: 1.35;
+}
+
+.kz-result-speaker {
+  font-size: 0.8rem;
+  color: #6f5876;
+}
+
+.kz-result-pill {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #55355E;
+  background: #f3ebf5;
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  margin-left: 14px;
+}
+
+.kz-result-empty {
+  padding: 18px;
+  text-align: center;
+  font-size: 0.88rem;
+  color: #6f5876;
+  background: #fff;
+}
+
+/* ----------------------------------------------------
+   RIGHT COLUMN: VISUAL DIAGRAM IMAGE (ask.png)
+   ---------------------------------------------------- */
+.kz-knowledge-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+}
+
+.kz-knowledge-visual-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.kz-knowledge-image {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+  /* Completely clean seamless display without box shadows */
+  filter: none;
+  transition: transform 0.3s ease;
+}
+
+.kz-knowledge-visual-wrapper:hover .kz-knowledge-image {
+  transform: scale(1.02);
+}
+
+/* ----------------------------------------------------
+   RESPONSIVE ADAPTATIONS
+   ---------------------------------------------------- */
+@media (max-width: 992px) {
+  .kz-knowledge-section {
+    padding: 60px 0;
+  }
+
+  .kz-knowledge-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .kz-knowledge-visual-wrapper {
+    max-width: 540px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .kz-knowledge-title {
+    font-size: 2.1rem;
+  }
+
+  .kz-knowledge-subtitle {
+    font-size: 0.98rem;
+    margin-bottom: 20px;
+  }
+
+  .kz-knowledge-search-box {
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    gap: 8px;
+  }
+
+  .kz-knowledge-open-link {
+    width: 100%;
+    justify-content: flex-end;
+    padding-top: 4px;
+    border-top: 1px dashed #e8dbe9;
+  }
+}
