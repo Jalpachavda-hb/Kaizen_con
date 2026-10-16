@@ -1,15 +1,46 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Footer.css';
 import logoImg from '../../assets/home/logokaizecon.png';
 
 export default function Footer() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleFooterNav = (e, path) => {
+    e.preventDefault();
+    if (path.startsWith('/#')) {
+      const hash = path.substring(1);
+      if (location.pathname === '/') {
+        const el = document.querySelector(hash);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        navigate(path);
+      }
+    } else {
+      navigate(path);
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleLogoClick = (e) => {
+    e.preventDefault();
+    if (location.pathname !== '/') {
+      navigate('/');
+    } else {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
-    <footer className="kz-footer-main" id="contact">
+    <footer className="kz-footer-main">
       {/* Main 4-Column Grid */}
       <div className="kz-footer-container">
         {/* Column 1: Brand & Conference Meta */}
         <div className="kz-footer-brand-col">
-          <a href="/" className="kz-footer-brand-logo-link" aria-label="KaizenCon 2027 Home">
+          <a href="/" className="kz-footer-brand-logo-link" onClick={handleLogoClick} aria-label="KaizenCon 2027 Home">
             <img
               src={logoImg}
               alt="KaizenCon 2027 International Medical Conference"
@@ -59,12 +90,12 @@ export default function Footer() {
           <h3 className="kz-footer-nav-heading">Conference</h3>
           <div className="kz-footer-heading-bar" aria-hidden="true"></div>
           <ul className="kz-footer-nav-list">
-            <li><a href="/#about">About KaizenCon</a></li>
-            <li><a href="/#programme">Programme</a></li>
-            <li><a href="/#speakers">Speakers</a></li>
-            <li><a href="/#venue">Venue &amp; Travel</a></li>
-            <li><a href="/#registration">Registration</a></li>
-            <li><a href="/contact">Contact Us</a></li>
+            <li><a href="/about" onClick={(e) => handleFooterNav(e, '/about')}>About KaizenCon</a></li>
+            <li><a href="/#programme" onClick={(e) => handleFooterNav(e, '/#programme')}>Programme</a></li>
+            <li><a href="/speakers" onClick={(e) => handleFooterNav(e, '/speakers')}>Speakers</a></li>
+            <li><a href="/#venue" onClick={(e) => handleFooterNav(e, '/#venue')}>Venue &amp; Travel</a></li>
+            <li><a href="/#registration" onClick={(e) => handleFooterNav(e, '/#registration')}>Registration</a></li>
+            <li><a href="/contact" onClick={(e) => handleFooterNav(e, '/contact')}>Contact Us</a></li>
           </ul>
         </div>
 
@@ -73,12 +104,12 @@ export default function Footer() {
           <h3 className="kz-footer-nav-heading">AI Experience</h3>
           <div className="kz-footer-heading-bar" aria-hidden="true"></div>
           <ul className="kz-footer-nav-list">
-            <li><a href="/#ai-layer">AI Personalization</a></li>
-            <li><a href="/#ai-assistant">Conference Assistant</a></li>
-            <li><a href="/#live-intelligence">Live Intelligence</a></li>
-            <li><a href="/#knowledge">Knowledge Base</a></li>
-            <li><a href="/#showcase">Research Showcase</a></li>
-            <li><a href="/#innovation">Innovation Hub</a></li>
+            <li><a href="/#ai-layer" onClick={(e) => handleFooterNav(e, '/#ai-layer')}>AI Personalization</a></li>
+            <li><a href="/#ai-assistant" onClick={(e) => handleFooterNav(e, '/#ai-assistant')}>Conference Assistant</a></li>
+            <li><a href="/#live-intelligence" onClick={(e) => handleFooterNav(e, '/#live-intelligence')}>Live Intelligence</a></li>
+            <li><a href="/knowledge" onClick={(e) => handleFooterNav(e, '/knowledge')}>Knowledge Base</a></li>
+            <li><a href="/#showcase" onClick={(e) => handleFooterNav(e, '/#showcase')}>Research Showcase</a></li>
+            <li><a href="/#innovation" onClick={(e) => handleFooterNav(e, '/#innovation')}>Innovation Hub</a></li>
           </ul>
         </div>
 

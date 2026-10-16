@@ -19,7 +19,7 @@
 .kz-featured-speakers-container {
   position: relative;
   z-index: 1;
-  max-width: 1240px;
+  max-width: 1380px;
   margin: 0 auto;
   padding: 0 24px;
   box-sizing: border-box;
@@ -126,12 +126,12 @@
 }
 
 /* ----------------------------------------------------
-   SPEAKERS CARDS GRID
+   SPEAKERS CARDS GRID (3 Cards in a row)
    ---------------------------------------------------- */
 .kz-featured-speakers-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
   width: 100%;
   box-sizing: border-box;
   align-items: stretch;
@@ -140,10 +140,10 @@
 /* ----------------------------------------------------
    RESPONSIVE DESIGN (Pixel-perfect across viewports)
    ---------------------------------------------------- */
-@media (max-width: 1180px) {
+@media (max-width: 1080px) {
   .kz-featured-speakers-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 22px;
+    gap: 24px;
   }
 }
 

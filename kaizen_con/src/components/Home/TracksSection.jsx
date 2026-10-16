@@ -50,7 +50,8 @@ const capabilities = [
 
 export default function TracksSection() {
   return (
-    <section className="kz-tracks-section" id="about">
+    <section className="kz-tracks-section" id="programme">
+      <span id="tracks" style={{ display: 'block', position: 'relative', top: '-90px', visibility: 'hidden' }} aria-hidden="true" />
       <div className="kz-section-container">
         {/* Left-aligned header matching screenshot */}
         <div className="kz-tracks-header">

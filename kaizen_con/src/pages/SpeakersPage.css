@@ -1,0 +1,720 @@
+/* ====================================================
+   KAIZENCON 2027 - SPEAKERS PAGE STYLES
+   - Hero Section matching Image 1
+   - Section Heading matching Image 2
+   - 8-Card Grid matching Image 3
+   - Search, Filters, Stats Strip, and Modal
+   ==================================================== */
+
+.kz-speakers-page-root {
+  background-color: #FAFAFC;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #2D1A33;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Common container constraints */
+.kz-spk-hero-container,
+.kz-spk-main-container {
+  width: 100%;
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 0 40px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .kz-spk-hero-container,
+  .kz-spk-main-container {
+    padding: 0 20px;
+  }
+}
+
+/* ----------------------------------------------------
+   1. HERO SECTION (Matches Image 1)
+   ---------------------------------------------------- */
+.kz-spk-hero-section {
+  position: relative;
+  background: linear-gradient(180deg, #FAF4F8 0%, #FAF2F7 45%, #FFFFFF 100%);
+  padding: 60px 0 48px;
+  border-bottom: 1px solid #F0E8F2;
+}
+
+/* Subtle ambient background glow effect */
+.kz-spk-hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 5%;
+  width: 500px;
+  height: 380px;
+  background: radial-gradient(circle, rgba(182, 52, 115, 0.08) 0%, rgba(250, 244, 248, 0) 70%);
+  pointer-events: none;
+}
+
+.kz-spk-pill-badge-wrap {
+  margin-bottom: 18px;
+}
+
+/* Pill tag style matching user's EXPERT FACULTY & FEATURED FACULTY */
+.kz-spk-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  background-color: #FDF2F8;
+  border: 1px solid rgba(182, 52, 115, 0.28);
+  color: #B63473;
+  font-size: 0.74rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 5px 16px;
+  border-radius: 999px;
+  box-shadow: 0 1px 4px rgba(182, 52, 115, 0.06);
+}
+
+/* Large Split-Color Headline matching Home Hero Typography */
+.kz-spk-hero-headline {
+  font-family: 'Roboto', sans-serif;
+  font-size: clamp(2.2rem, 3.8vw, 3.85rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin: 0 0 22px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.kz-spk-hero-purple {
+  color: #55355E;
+  display: block;
+}
+
+.kz-spk-hero-magenta {
+  background: linear-gradient(90deg, #7C3369 0%, #A23B79 30%, #C74485 70%, #D85695 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+  width: fit-content;
+}
+
+/* Hero Subtitle matching Home Hero */
+.kz-spk-hero-subtitle {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1.62;
+  color: #6D5774;
+  max-width: 680px;
+  margin: 0 0 32px 0;
+}
+
+/* Metrics Pill Strip */
+.kz-spk-metrics-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.kz-spk-metric-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #FFFFFF;
+  border: 1px solid #ECE3EE;
+  padding: 8px 18px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(85, 53, 94, 0.03);
+}
+
+.kz-spk-metric-num {
+  font-size: 1.15rem;
+  font-weight: 850;
+  color: #B8387A;
+}
+
+.kz-spk-metric-label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #57445F;
+}
+
+/* ----------------------------------------------------
+   2. SECTION HEADER (Matches Image 2)
+   ---------------------------------------------------- */
+.kz-spk-main-section {
+  padding: 48px 0 80px;
+}
+
+.kz-spk-section-header {
+  margin-bottom: 34px;
+}
+
+.kz-spk-section-title {
+  font-size: clamp(1.85rem, 3.2vw, 2.45rem);
+  font-weight: 850;
+  background: linear-gradient(135deg, #35163D 0%, #7E2861 45%, #C23880 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+  letter-spacing: -0.02em;
+  margin: 10px 0 0 0;
+  line-height: 1.24;
+}
+
+/* ----------------------------------------------------
+   3. 3-COLUMN CARDS GRID (3 cards per row with generous spacing)
+   ---------------------------------------------------- */
+.kz-spk-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-bottom: 64px;
+}
+
+@media (max-width: 1100px) {
+  .kz-spk-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+}
+
+@media (max-width: 720px) {
+  .kz-spk-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+/* ----------------------------------------------------
+   4. CONFERENCE STATS RIBBON (Image 2 - Top Section)
+   ---------------------------------------------------- */
+.kz-spk-stats-ribbon {
+  background: #FFFFFF;
+  border: 1px solid #EFE4EE;
+  border-radius: 20px;
+  padding: 24px 20px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: center;
+  box-shadow: 0 4px 20px rgba(53, 22, 61, 0.03);
+  margin-bottom: 72px;
+}
+
+.kz-spk-stat-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 10px 18px;
+  border-right: 1px solid #EFE4EE;
+  box-sizing: border-box;
+}
+
+.kz-spk-stat-col:last-child {
+  border-right: none;
+}
+
+.kz-spk-stat-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background-color: #FDF2F8;
+  border: 1px solid rgba(182, 52, 115, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.22s ease;
+}
+
+.kz-spk-stat-col:hover .kz-spk-stat-icon-wrap {
+  transform: scale(1.06);
+}
+
+.kz-spk-stat-text-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.kz-spk-stat-value {
+  font-size: 1.85rem;
+  font-weight: 850;
+  color: #23122B;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.kz-spk-stat-label {
+  font-size: 0.88rem;
+  color: #63556B;
+  font-weight: 500;
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+@media (max-width: 1024px) {
+  .kz-spk-stats-ribbon {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 0;
+    padding: 24px 16px;
+  }
+
+  .kz-spk-stat-col:nth-child(2) {
+    border-right: none;
+  }
+
+  .kz-spk-stat-col:nth-child(3) {
+    border-top: 1px solid #EFE4EE;
+    padding-top: 20px;
+  }
+
+  .kz-spk-stat-col:nth-child(4) {
+    border-top: 1px solid #EFE4EE;
+    border-right: none;
+    padding-top: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .kz-spk-stats-ribbon {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .kz-spk-stat-col {
+    border-right: none !important;
+    border-bottom: 1px solid #EFE4EE;
+    justify-content: flex-start;
+    padding: 16px 12px;
+  }
+
+  .kz-spk-stat-col:last-child {
+    border-bottom: none;
+  }
+
+  .kz-spk-stat-col:nth-child(3),
+  .kz-spk-stat-col:nth-child(4) {
+    border-top: none;
+    padding-top: 16px;
+  }
+}
+
+/* ----------------------------------------------------
+   5. REPRESENTED INSTITUTIONS SECTION (Image 2 - Lower Section)
+   ---------------------------------------------------- */
+.kz-spk-institutions-section {
+  margin-top: 10px;
+  margin-bottom: 40px;
+}
+
+.kz-spk-institutions-header {
+  text-align: center;
+  margin-bottom: 38px;
+}
+
+.kz-spk-institutions-title {
+  font-size: clamp(1.85rem, 3.2vw, 2.45rem);
+  font-weight: 850;
+  background: linear-gradient(135deg, #35163D 0%, #7E2861 45%, #C23880 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+  letter-spacing: -0.025em;
+  margin: 12px 0 10px;
+  line-height: 1.22;
+}
+
+.kz-spk-institutions-accent-line {
+  width: 48px;
+  height: 3.5px;
+  background: linear-gradient(90deg, #35163D 0%, #C23880 100%);
+  border-radius: 999px;
+  margin: 0 auto;
+}
+
+.kz-spk-institutions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.kz-spk-institution-card {
+  background: #FFFFFF;
+  border: 1px solid #F0E2EF;
+  border-radius: 20px;
+  padding: 34px 22px 28px;
+  text-align: center;
+  box-shadow: 0 4px 18px rgba(45, 20, 50, 0.03);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.kz-spk-institution-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(182, 52, 115, 0.09);
+  border-color: rgba(182, 52, 115, 0.35);
+}
+
+.kz-spk-inst-icon-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #FDF2F8;
+  border: 1px solid #F6D6E7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.kz-spk-institution-card:hover .kz-spk-inst-icon-wrap {
+  transform: scale(1.08);
+}
+
+.kz-spk-inst-name {
+  font-size: 1.02rem;
+  font-weight: 750;
+  color: #2A1633;
+  line-height: 1.38;
+  margin: 0 0 6px 0;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kz-spk-inst-country {
+  font-size: 0.88rem;
+  color: #7A6C82;
+  font-weight: 500;
+  margin: 0 0 18px 0;
+}
+
+.kz-spk-inst-divider {
+  width: 50px;
+  height: 1px;
+  background-color: #EFE3EE;
+  margin: 0 auto 16px;
+}
+
+.kz-spk-inst-count {
+  font-size: 0.86rem;
+  color: #47324E;
+  font-weight: 600;
+}
+
+@media (max-width: 1060px) {
+  .kz-spk-institutions-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .kz-spk-institutions-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .kz-spk-institution-card {
+    padding: 26px 18px 22px;
+  }
+}
+
+/* ----------------------------------------------------
+   6. SPEAKER DETAILS MODAL
+   ---------------------------------------------------- */
+.kz-spk-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(23, 11, 28, 0.65);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  animation: kzFadeIn 0.2s ease-out;
+}
+
+.kz-spk-modal-card {
+  background-color: #FFFFFF;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 620px;
+  padding: 32px 30px;
+  box-sizing: border-box;
+  position: relative;
+  box-shadow: 0 20px 48px rgba(35, 17, 43, 0.28);
+  animation: kzScaleUp 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@keyframes kzFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes kzScaleUp {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.kz-spk-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: #F6F2F8;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6C5C74;
+  transition: all 0.2s ease;
+}
+
+.kz-spk-modal-close:hover {
+  background-color: #B63473;
+  color: #FFFFFF;
+}
+
+.kz-spk-modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 20px;
+  padding-right: 30px;
+}
+
+.kz-spk-modal-title-wrap {
+  flex: 1;
+}
+
+.kz-spk-modal-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.kz-spk-modal-name {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #2D1A33;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.kz-spk-modal-role {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #4C3955;
+  margin: 0 0 4px 0;
+}
+
+.kz-spk-modal-institute {
+  font-size: 0.86rem;
+  color: #796C81;
+  margin: 0;
+}
+
+.kz-spk-modal-divider {
+  height: 1px;
+  background-color: #F0E8F2;
+  margin: 18px 0;
+}
+
+.kz-spk-modal-section {
+  margin-bottom: 18px;
+}
+
+.kz-spk-modal-topic {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #381942;
+  margin: 4px 0 0 0;
+  line-height: 1.35;
+}
+
+.kz-spk-modal-bio {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: #55445D;
+  margin: 6px 0 0 0;
+}
+
+.kz-spk-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 18px;
+  border-top: 1px solid #F0E8F2;
+  margin-top: 24px;
+}
+
+.kz-spk-modal-cta-btn {
+  background-color: #B63473;
+  color: #FFFFFF;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.kz-spk-modal-cta-btn:hover {
+  background-color: #9D2760;
+}
+
+/* ----------------------------------------------------
+   Breadcrumb Navigation
+   ---------------------------------------------------- */
+.kz-spk-breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: #718096;
+  margin-bottom: 22px;
+}
+
+.kz-spk-crumb-link {
+  color: #718096;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.kz-spk-crumb-link:hover {
+  color: #B63473;
+}
+
+.kz-spk-crumb-sep {
+  opacity: 0.5;
+}
+
+.kz-spk-crumb-current {
+  color: #B63473;
+  font-weight: 600;
+}
+
+/* ----------------------------------------------------
+   Bottom Cross-page Navigation Banner
+   ---------------------------------------------------- */
+.kz-spk-bottom-cta-banner {
+  margin-top: 56px;
+  background: linear-gradient(135deg, #FAF4F8 0%, #FFFFFF 100%);
+  border: 1px solid rgba(182, 52, 115, 0.22);
+  border-radius: 20px;
+  padding: 44px 36px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(85, 53, 94, 0.05);
+}
+
+.kz-spk-cta-content {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.kz-spk-cta-badge {
+  display: inline-block;
+  background-color: #FDF2F8;
+  border: 1px solid rgba(182, 52, 115, 0.28);
+  color: #B63473;
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 5px 16px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
+.kz-spk-cta-title {
+  font-size: clamp(1.4rem, 2.2vw, 1.85rem);
+  font-weight: 800;
+  color: #381942;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.02em;
+}
+
+.kz-spk-cta-desc {
+  font-size: 0.96rem;
+  line-height: 1.6;
+  color: #5E5266;
+  margin: 0 0 28px 0;
+}
+
+.kz-spk-cta-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.kz-spk-cta-primary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #B63473;
+  color: #FFFFFF;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(182, 52, 115, 0.3);
+  transition: all 0.25s ease;
+}
+
+.kz-spk-cta-primary-btn:hover {
+  background-color: #9D2760;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(182, 52, 115, 0.4);
+}
+
+.kz-spk-cta-secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #FFFFFF;
+  color: #55355E;
+  border: 1px solid rgba(85, 53, 94, 0.2);
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+.kz-spk-cta-secondary-btn:hover {
+  background-color: #FAF4F8;
+  border-color: #B63473;
+  color: #B63473;
+  transform: translateY(-2px);
+}
+

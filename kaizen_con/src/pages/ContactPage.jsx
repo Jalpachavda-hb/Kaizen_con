@@ -83,17 +83,66 @@ export default function ContactPage() {
 
   return (
     <div className="kz-contact-page">
-      {/* 1. SIMPLE CENTERED HERO SECTION */}
+      {/* 1. HERO SECTION WITH MATCHING TYPOGRAPHY */}
       <section className="kz-contact-hero-simple">
         <div className="kz-contact-container">
+          {/* Breadcrumb Navigation */}
+          <nav className="kz-contact-breadcrumb" aria-label="Breadcrumb">
+            <Link to="/" className="kz-contact-crumb-link">Home</Link>
+            <span className="kz-contact-crumb-sep">/</span>
+            <span className="kz-contact-crumb-current">Contact Us</span>
+          </nav>
+
           <div className="kz-hero-simple-content">
-            <span className="kz-hero-simple-badge">GET IN TOUCH</span>
-            <h1 className="kz-hero-simple-title">
-              Contact
+            <div className="kz-contact-eyebrow-wrap">
+              <span className="kz-hero-simple-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: '6px' }}>
+                  <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="currentColor" />
+                </svg>
+                GET IN TOUCH · KAIZENCON 2027
+              </span>
+            </div>
+
+            <h1 className="kz-contact-hero-headline">
+              <span className="kz-contact-hero-dark">Connect With Us,</span>
+              <span className="kz-contact-hero-magenta">now with intelligence.</span>
             </h1>
+
+            {/* Event Details Pills Row matching About Page exactly */}
+            <div className="kz-contact-pills-row" aria-label="Event Details">
+              <div className="kz-contact-pill">
+                <span className="kz-contact-pill-dot" />
+                <span>1–3 January 2027</span>
+              </div>
+              <div className="kz-contact-pill">
+                <span className="kz-contact-pill-dot" />
+                <span>Ahmedabad, India</span>
+              </div>
+              <div className="kz-contact-pill">
+                <span className="kz-contact-pill-dot" />
+                <span>International Conference Centre</span>
+              </div>
+            </div>
+
             <p className="kz-hero-simple-desc">
-              For enquiries about KaizenCon 2027 — registration, sponsorship, speaker proposals, media, or general information.
+              An international AI-native conference on the future of surgery &amp; intelligent healthcare. For registrations, sponsorships, faculty queries, or media relations.
             </p>
+
+            {/* Quick cross-page router navigation pills */}
+            <div className="kz-contact-quick-links" aria-label="Quick navigation to other pages">
+              <Link to="/about" className="kz-contact-quick-link">
+                <span>About KaizenCon</span>
+                <span aria-hidden="true">→</span>
+              </Link>
+              <Link to="/speakers" className="kz-contact-quick-link">
+                <span>Conference Faculty</span>
+                <span aria-hidden="true">→</span>
+              </Link>
+              <Link to="/knowledge" className="kz-contact-quick-link">
+                <span>Search Knowledge Base</span>
+                <span aria-hidden="true">→</span>
+              </Link>
+            </div>
           </div>
         </div>
       </section>

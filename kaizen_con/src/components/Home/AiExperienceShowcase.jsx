@@ -41,6 +41,7 @@ const RECOMMENDED_SESSIONS = [
 export default function AiExperienceShowcase() {
   return (
     <section className="kz-ai-showcase-section" id="ai-experience">
+      <span id="ai-layer" style={{ display: 'block', position: 'relative', top: '-90px', visibility: 'hidden' }} aria-hidden="true" />
       <div className="kz-section-container">
         <div className="kz-ai-showcase-layout">
           {/* Left Column: AI Personalization Info */}

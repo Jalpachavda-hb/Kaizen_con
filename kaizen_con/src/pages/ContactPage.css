@@ -34,47 +34,176 @@
 .kz-contact-hero-simple {
   position: relative;
   background: linear-gradient(180deg, #FBF4F8 0%, #FAF4F8 50%, #FFFFFF 100%);
-  padding: 56px 0 36px;
-  text-align: center;
+  padding: 40px 0 46px;
+  text-align: left;
+}
+
+/* Breadcrumb Navigation */
+.kz-contact-breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: #718096;
+  margin-bottom: 24px;
+}
+
+.kz-contact-crumb-link {
+  color: #718096;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.kz-contact-crumb-link:hover {
+  color: #B63473;
+}
+
+.kz-contact-crumb-sep {
+  opacity: 0.5;
+}
+
+.kz-contact-crumb-current {
+  color: #B63473;
+  font-weight: 600;
 }
 
 .kz-hero-simple-content {
-  max-width: 780px;
-  margin: 0 auto;
+  max-width: 920px;
+  margin: 0;
+  text-align: left;
 }
 
-.kz-hero-simple-badge {
-  display: inline-block;
-  background: #FDF2F8;
-  border: 1px solid rgba(170, 45, 123, 0.22);
-  color: #AA2D7B;
-  font-size: 0.76rem;
-  font-weight: 750;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  padding: 6px 18px;
-  border-radius: 999px;
+.kz-contact-eyebrow-wrap {
   margin-bottom: 18px;
 }
 
-.kz-hero-simple-title {
-  font-size: clamp(2.5rem, 4.4vw, 3.8rem);
-  font-weight: 850;
-  line-height: 1.12;
-  letter-spacing: -0.025em;
+.kz-hero-simple-badge {
+  display: inline-flex;
+  align-items: center;
+  background-color: #FDF2F8;
+  border: 1px solid rgba(182, 52, 115, 0.28);
+  color: #B63473;
+  font-size: 0.74rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 5px 16px;
+  border-radius: 999px;
+  box-shadow: 0 1px 4px rgba(182, 52, 115, 0.06);
+}
+
+/* 2-Line Split Color Headline Matching Home Hero Exactly */
+.kz-contact-hero-headline {
+  font-family: 'Roboto', sans-serif;
+  font-size: clamp(2.2rem, 3.8vw, 3.85rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin: 0 0 22px 0;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.kz-contact-hero-dark {
   color: #55355E;
   display: block;
+}
+
+.kz-contact-hero-magenta {
+  background: linear-gradient(90deg, #7C3369 0%, #A23B79 30%, #C74485 70%, #D85695 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
   width: fit-content;
-  margin: 0 auto 16px auto;
-  text-align: center;
+}
+
+/* Event Details Pills Row matching user reference */
+.kz-contact-pills-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.kz-contact-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFFFFF;
+  border: 1.5px solid #D5CBD6;
+  border-radius: 9999px;
+  padding: 8px 22px;
+  font-size: 0.92rem;
+  font-weight: 550;
+  color: #55355E;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(85, 53, 94, 0.04);
+  transition: all 0.22s ease;
+}
+
+.kz-contact-pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #A23B79;
+}
+
+.kz-contact-pill:hover {
+  border-color: #55355E;
+  color: #55355E;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(85, 53, 94, 0.12);
 }
 
 .kz-hero-simple-desc {
+  font-family: 'Roboto', sans-serif;
   font-size: 1.05rem;
+  font-weight: 400;
   line-height: 1.62;
-  color: #6F5876;
-  max-width: 620px;
-  margin: 0 auto;
+  color: #6D5774;
+  max-width: 680px;
+  margin: 0 0 28px 0;
+  text-align: left;
+}
+
+/* Quick cross-page links */
+.kz-contact-quick-links {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.kz-contact-quick-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #FFFFFF;
+  border: 1px solid rgba(182, 52, 115, 0.25);
+  color: #55355E;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(85, 53, 94, 0.05);
+  transition: all 0.25s ease;
+}
+
+.kz-contact-quick-link:hover {
+  background: #B63473;
+  color: #FFFFFF;
+  border-color: #B63473;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(182, 52, 115, 0.2);
 }
 
 /* ====================================================

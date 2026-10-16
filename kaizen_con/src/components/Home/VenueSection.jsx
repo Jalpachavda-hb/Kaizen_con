@@ -1,9 +1,11 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './HomeSections.css';
 
 export default function VenueSection() {
   return (
     <section className="kz-venue-section" id="venue">
+      <span id="registration" style={{ display: 'block', position: 'relative', top: '-90px', visibility: 'hidden' }} aria-hidden="true" />
       <div className="kz-section-container">
         <div className="kz-venue-banner">
           <div className="kz-venue-content">
@@ -22,7 +24,7 @@ export default function VenueSection() {
             </p>
 
             <div className="kz-venue-cta-row kz-nextgen-actions">
-              <a href="#tracks" className="kz-nextgen-btn kz-nextgen-btn-primary">
+              <a href="#programme" className="kz-nextgen-btn kz-nextgen-btn-primary">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -41,8 +43,8 @@ export default function VenueSection() {
                 <span>Explore the Programme</span>
               </a>
 
-              <a href="#ai-experience" className="kz-nextgen-btn kz-nextgen-btn-secondary">
-                <span>Discover the AI Experience</span>
+              <Link to="/contact" className="kz-nextgen-btn kz-nextgen-btn-secondary">
+                <span>Contact &amp; Registration</span>
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -56,7 +58,7 @@ export default function VenueSection() {
                   <line x1="5" y1="12" x2="19" y2="12" />
                   <polyline points="12 5 19 12 12 19" />
                 </svg>
-              </a>
+              </Link>
             </div>
 
             <p className="kz-nextgen-disclaimer">

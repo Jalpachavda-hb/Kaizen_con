@@ -9,87 +9,139 @@
 }
 
 /* ----------------------------------------------------
-   1. CIRCULAR LAUNCHER BUTTON (Pinned Bottom-Right)
+   1. CIRCULAR LAUNCHER BUTTON (80 by 80 Pinned Bottom-Right)
    ---------------------------------------------------- */
 .kz-floating-chatbot-btn {
   position: fixed;
-  bottom: 28px;
-  right: 28px;
-  width: 58px;
-  height: 58px;
+  bottom: 24px;
+  right: 24px;
+  width: 80px;
+  height: 80px;
+  min-width: 80px;
+  min-height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #d8246e 0%, #aa2d7b 45%, #55355e 100%);
-  border: 2.5px solid rgba(255, 255, 255, 0.7);
-  color: #ffffff;
+  background: transparent;
+  border: none;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(170, 45, 123, 0.4),
-              0 2px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
-              box-shadow 0.28s ease,
-              background 0.3s ease;
   z-index: 10000;
   outline: none;
-  padding: 0;
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+              filter 0.28s ease;
+  filter: drop-shadow(0 10px 24px rgba(170, 45, 123, 0.48))
+          drop-shadow(0 4px 10px rgba(0, 0, 0, 0.22));
 }
 
 .kz-floating-chatbot-btn:hover {
-  transform: scale(1.08) translateY(-2px);
-  box-shadow: 0 12px 30px rgba(170, 45, 123, 0.52),
-              0 4px 10px rgba(0, 0, 0, 0.15);
+  transform: scale(1.08) translateY(-3px);
+  filter: drop-shadow(0 14px 32px rgba(170, 45, 123, 0.62))
+          drop-shadow(0 6px 14px rgba(0, 0, 0, 0.28));
 }
 
 .kz-floating-chatbot-btn:active {
-  transform: scale(0.96);
+  transform: scale(0.95);
 }
 
-/* Active State (When chat window is open) */
-.kz-floating-chatbot-btn.is-active {
-  background: linear-gradient(135deg, #55355e 0%, #3e1f46 100%);
-  border-color: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 8px 24px rgba(85, 53, 94, 0.45);
+/* Image content wrapper (ensures exact 80x80 circular shape & crisp border) */
+.kz-floating-btn-content {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #B82C79 0%, #7E2463 100%);
+}
+
+.kz-floating-bot-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+  user-select: none;
+  pointer-events: none;
+  transform: scale(1.06);
+  transition: transform 0.3s ease;
+}
+
+.kz-floating-chatbot-btn:hover .kz-floating-bot-img {
+  transform: scale(1.12);
+}
+
+/* Close overlay when chat window is open */
+.kz-floating-close-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(43, 16, 52, 0.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  animation: kzFadeIn 0.22s ease forwards;
+}
+
+.kz-floating-close-overlay svg {
+  width: 32px;
+  height: 32px;
+  stroke: #ffffff;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  transition: transform 0.25s ease;
+}
+
+.kz-floating-chatbot-btn:hover .kz-floating-close-overlay svg {
+  transform: rotate(90deg);
+}
+
+@keyframes kzFadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 /* Glowing Pulsing Ring Behind Button */
 .kz-floating-btn-glow {
   position: absolute;
-  top: -4px;
-  left: -4px;
-  right: -4px;
-  bottom: -4px;
+  inset: -6px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(216, 36, 110, 0.35) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(216, 36, 110, 0.45) 0%, rgba(170, 45, 123, 0.2) 60%, transparent 75%);
   z-index: -1;
   animation: kzGlowPulse 2.4s infinite ease-in-out;
   pointer-events: none;
 }
 
 @keyframes kzGlowPulse {
-  0% { transform: scale(1); opacity: 0.6; }
-  50% { transform: scale(1.18); opacity: 0.2; }
-  100% { transform: scale(1); opacity: 0.6; }
+  0% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.15); opacity: 0.25; }
+  100% { transform: scale(1); opacity: 0.7; }
 }
 
-/* Online Status Green Badge (Top-Right of Circle) */
+/* Online Status Green Badge (Top-Right of 80x80 Circle) */
 .kz-floating-online-badge {
   position: absolute;
-  top: 1px;
-  right: 1px;
-  width: 14px;
-  height: 14px;
+  top: 3px;
+  right: 3px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  z-index: 3;
 }
 
 .kz-floating-online-dot {
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: #22c55e;
   animation: kzOnlinePulse 2s infinite;
@@ -97,50 +149,26 @@
 
 @keyframes kzOnlinePulse {
   0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-  70% { box-shadow: 0 0 0 5px rgba(34, 197, 94, 0); }
+  70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
   100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
 }
 
-/* Launcher Icon Wrapper */
-.kz-floating-btn-icon-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-}
-
-.kz-floating-icon {
-  width: 28px;
-  height: 28px;
-  color: #ffffff;
-  transition: transform 0.25s ease;
-}
-
-.kz-floating-chatbot-btn:hover .kz-floating-icon {
-  transform: scale(1.05);
-}
-
-.kz-icon-close {
-  width: 22px;
-  height: 22px;
-}
-
 /* ----------------------------------------------------
-   2. FLOATING CHAT MODAL WINDOW
+   2. FLOATING CHAT MODAL WINDOW (Spacious & Responsive)
    ---------------------------------------------------- */
 .kz-floating-chat-modal {
   position: fixed;
-  bottom: 98px;
-  right: 28px;
-  width: 380px;
+  bottom: 116px;
+  right: 24px;
+  width: 440px;
   max-width: calc(100vw - 32px);
-  height: 490px;
-  max-height: calc(100vh - 130px);
+  height: 580px;
+  max-height: calc(100vh - 140px);
   background: #ffffff;
-  border-radius: 20px;
-  box-shadow: 0 16px 48px rgba(33, 19, 53, 0.22),
-              0 0 0 1px rgba(85, 53, 94, 0.08);
+  border-radius: 22px;
+  box-shadow: 0 22px 60px rgba(33, 19, 53, 0.26),
+              0 6px 16px rgba(0, 0, 0, 0.08),
+              0 0 0 1px rgba(85, 53, 94, 0.1);
   z-index: 9999;
   display: flex;
   flex-direction: column;
@@ -151,7 +179,7 @@
 @keyframes kzChatPop {
   from {
     opacity: 0;
-    transform: translateY(16px) scale(0.95);
+    transform: translateY(18px) scale(0.96);
   }
   to {
     opacity: 1;
@@ -161,7 +189,7 @@
 
 /* Modal Header (Dark Theme Gradient) */
 .kz-floating-modal-header {
-  padding: 14px 18px;
+  padding: 16px 20px;
   background: linear-gradient(135deg, #5A2761 0%, #4C1E53 30%, #3B1643 65%, #280C2F 100%);
   color: #ffffff;
   display: flex;
@@ -175,25 +203,29 @@
 .kz-floating-header-info {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .kz-floating-header-avatar {
-  width: 36px;
-  height: 36px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  background: linear-gradient(135deg, #B82C79 0%, #7E2463 100%);
 }
 
-.kz-floating-header-avatar svg {
-  width: 20px;
-  height: 20px;
-  color: #ffffff;
+.kz-floating-header-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.45) translateY(6%);
 }
 
 .kz-floating-header-text {
@@ -202,25 +234,26 @@
 }
 
 .kz-floating-header-title {
-  font-size: 0.94rem;
+  font-size: 1rem;
   font-weight: 700;
   margin: 0;
   color: #ffffff;
   line-height: 1.25;
+  letter-spacing: -0.01em;
 }
 
 .kz-floating-header-sub {
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.88);
   display: flex;
   align-items: center;
   gap: 5px;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .kz-online-mini-dot {
-  width: 6px;
-  height: 6px;
+  width: 6.5px;
+  height: 6.5px;
   border-radius: 50%;
   background: #22c55e;
   box-shadow: 0 0 6px #22c55e;
@@ -230,14 +263,14 @@
   background: rgba(255, 255, 255, 0.14);
   border: none;
   color: #ffffff;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   transition: all 0.2s ease;
 }
 
@@ -249,18 +282,27 @@
 /* Modal Body / Conversation Feed */
 .kz-floating-modal-body {
   flex: 1;
-  padding: 16px;
+  padding: 18px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   background: #FAF8FB;
+}
+
+.kz-floating-modal-body::-webkit-scrollbar {
+  width: 5px;
+}
+
+.kz-floating-modal-body::-webkit-scrollbar-thumb {
+  background: rgba(85, 53, 94, 0.18);
+  border-radius: 9999px;
 }
 
 .kz-floating-msg-row {
   display: flex;
   align-items: flex-end;
-  gap: 8px;
+  gap: 10px;
 }
 
 .kz-msg-user {
@@ -272,41 +314,49 @@
 }
 
 .kz-bot-mini-avatar {
-  width: 24px;
-  height: 24px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #d8246e 0%, #aa2d7b 100%);
-  color: #ffffff;
-  font-size: 0.7rem;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(170, 45, 123, 0.3);
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(170, 45, 123, 0.25);
+  background: linear-gradient(135deg, #B82C79 0%, #7E2463 100%);
+}
+
+.kz-bot-mini-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.45) translateY(6%);
 }
 
 .kz-floating-bubble {
   max-width: 82%;
-  padding: 10px 14px;
-  border-radius: 14px;
-  font-size: 0.84rem;
-  line-height: 1.45;
+  padding: 11px 16px;
+  border-radius: 16px;
+  font-size: 0.88rem;
+  line-height: 1.5;
   word-break: break-word;
 }
 
 .kz-msg-bot .kz-floating-bubble {
   background: #ffffff;
   color: #2D1432;
-  border-bottom-left-radius: 3px;
-  box-shadow: 0 2px 8px rgba(85, 53, 94, 0.05);
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 2px 10px rgba(85, 53, 94, 0.06);
   border: 1px solid rgba(85, 53, 94, 0.08);
 }
 
 .kz-msg-user .kz-floating-bubble {
   background: linear-gradient(135deg, #d8246e 0%, #b8165b 100%);
   color: #ffffff;
-  border-bottom-right-radius: 3px;
-  box-shadow: 0 3px 10px rgba(197, 25, 99, 0.22);
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 4px 12px rgba(197, 25, 99, 0.25);
 }
 
 .kz-bubble-text {
@@ -316,7 +366,7 @@
 .kz-bubble-time {
   display: block;
   font-size: 0.68rem;
-  opacity: 0.65;
+  opacity: 0.68;
   margin-top: 4px;
   text-align: right;
 }
@@ -325,13 +375,13 @@
 .kz-typing-bubble {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 10px 14px;
+  gap: 5px;
+  padding: 12px 16px;
 }
 
 .kz-typing-dot {
-  width: 6px;
-  height: 6px;
+  width: 6.5px;
+  height: 6.5px;
   border-radius: 50%;
   background: #aa2d7b;
   animation: kzTypingWave 1.2s infinite ease-in-out;
@@ -341,15 +391,15 @@
 .kz-typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
 @keyframes kzTypingWave {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
   30% { transform: translateY(-5px); opacity: 1; }
 }
 
 /* Quick Prompt Chips */
 .kz-floating-quick-chips {
-  padding: 8px 12px;
+  padding: 10px 14px;
   display: flex;
-  gap: 6px;
+  gap: 8px;
   overflow-x: auto;
   background: #ffffff;
   border-top: 1px solid #f0e6ee;
@@ -357,45 +407,54 @@
 }
 
 .kz-floating-quick-chips::-webkit-scrollbar {
-  height: 3px;
+  height: 4px;
+}
+
+.kz-floating-quick-chips::-webkit-scrollbar-thumb {
+  background: #ecd5e4;
+  border-radius: 4px;
 }
 
 .kz-floating-quick-chips button {
   background: #FAF4F8;
-  border: 1px solid rgba(184, 56, 122, 0.2);
+  border: 1px solid rgba(184, 56, 122, 0.22);
   color: #B8387A;
-  padding: 5px 11px;
+  padding: 6px 12px;
   border-radius: 9999px;
-  font-size: 0.72rem;
+  font-size: 0.76rem;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s ease;
   font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .kz-floating-quick-chips button:hover {
   background: #B8387A;
   color: #ffffff;
+  border-color: #B8387A;
 }
 
 /* Modal Footer / Text Input Bar */
 .kz-floating-modal-footer {
-  padding: 10px 14px;
+  padding: 12px 16px;
   background: #ffffff;
   border-top: 1px solid #f0e6ee;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-shrink: 0;
 }
 
 .kz-floating-input {
   flex: 1;
-  padding: 9px 14px;
+  padding: 10px 16px;
   border: 1.2px solid #e2e8f0;
   border-radius: 9999px;
-  font-size: 0.83rem;
+  font-size: 0.86rem;
   outline: none;
   font-family: inherit;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -408,8 +467,8 @@
 }
 
 .kz-floating-send-btn {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: linear-gradient(135deg, #d8246e 0%, #b8165b 100%);
   color: #ffffff;
@@ -424,8 +483,8 @@
 }
 
 .kz-floating-send-btn svg {
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
   margin-left: 2px;
 }
 
@@ -439,25 +498,124 @@
 }
 
 /* ----------------------------------------------------
-   RESPONSIVE DESIGN (Mobile screens)
+   3. RESPONSIVE DESIGN
    ---------------------------------------------------- */
-@media (max-width: 480px) {
-  .kz-floating-chatbot-btn {
-    bottom: 20px;
-    right: 20px;
-    width: 52px;
-    height: 52px;
-  }
-  .kz-floating-icon {
-    width: 24px;
-    height: 24px;
-  }
+@media (max-width: 768px) {
   .kz-floating-chat-modal {
-    right: 14px;
-    left: 14px;
-    width: auto;
-    bottom: 84px;
-    height: 440px;
-    max-height: calc(100vh - 100px);
+    width: 410px;
+    right: 20px;
+    bottom: 112px;
+    height: 550px;
+    max-height: calc(100vh - 130px);
   }
 }
+
+@media (max-width: 520px) {
+  .kz-floating-chatbot-btn {
+    bottom: 16px;
+    right: 16px;
+    width: 72px;
+    height: 72px;
+    min-width: 72px;
+    min-height: 72px;
+  }
+
+  .kz-floating-btn-content {
+    width: 72px;
+    height: 72px;
+  }
+
+  .kz-floating-bot-img {
+    width: 72px;
+    height: 72px;
+  }
+
+  .kz-floating-online-badge {
+    top: 2px;
+    right: 2px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .kz-floating-online-dot {
+    width: 9px;
+    height: 9px;
+  }
+
+  .kz-floating-chat-modal {
+    right: 12px;
+    left: 12px;
+    width: auto;
+    max-width: 100%;
+    bottom: 96px;
+    height: calc(100dvh - 114px);
+    max-height: 570px;
+    border-radius: 18px;
+  }
+
+  .kz-floating-modal-header {
+    padding: 13px 15px;
+  }
+
+  .kz-floating-header-avatar {
+    width: 38px;
+    height: 38px;
+  }
+
+  .kz-floating-header-title {
+    font-size: 0.94rem;
+  }
+
+  .kz-floating-modal-body {
+    padding: 14px;
+    gap: 11px;
+  }
+
+  .kz-floating-bubble {
+    font-size: 0.83rem;
+    padding: 9px 13px;
+  }
+
+  .kz-floating-modal-footer {
+    padding: 10px 12px;
+  }
+
+  .kz-floating-input {
+    padding: 8px 14px;
+    font-size: 0.82rem;
+  }
+
+  .kz-floating-send-btn {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 380px) {
+  .kz-floating-chatbot-btn {
+    bottom: 12px;
+    right: 12px;
+    width: 66px;
+    height: 66px;
+    min-width: 66px;
+    min-height: 66px;
+  }
+
+  .kz-floating-btn-content {
+    width: 66px;
+    height: 66px;
+  }
+
+  .kz-floating-bot-img {
+    width: 66px;
+    height: 66px;
+  }
+
+  .kz-floating-chat-modal {
+    right: 8px;
+    left: 8px;
+    bottom: 84px;
+    height: calc(100dvh - 98px);
+  }
+}
+

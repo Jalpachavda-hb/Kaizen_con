@@ -1,201 +1,292 @@
 /* ====================================================
-   REUSABLE SPEAKER CARD COMPONENT STYLES
-   - Pixel-perfect match to user's reference screenshot
-   - Pure White Card Background with Subtle Border
-   - Avatar Monogram (Lilac for AM/DO, Magenta for SL/MC)
-   - "View details →" link + Circular Arrow Action Button
+   KAIZENCON 2027 - ELEGANT PROFESSIONAL SPEAKER CARD
+   - Single visible light shadow
+   - Clean, balanced, lightweight typography (not heavy or dark)
+   - Generous internal padding and spacing
+   - Clean avatar monogram and country badge
+   - Subtle specialty tags and clear topic hierarchy
    ==================================================== */
 
-.kz-speaker-card {
+.kz-speaker-card-v2 {
   position: relative;
   background: #FFFFFF;
   border: 1px solid #ECE7EF;
   border-radius: 20px;
-  padding: 28px 24px 22px 24px;
+  /* Generous internal spacing */
+  padding: 28px 26px 24px 26px;
   box-sizing: border-box;
-  box-shadow: 0 4px 18px rgba(85, 53, 94, 0.04), 0 1px 3px rgba(85, 53, 94, 0.02);
+  /* Single visible light shadow */
+  box-shadow: 0 4px 20px rgba(45, 26, 51, 0.05);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   height: 100%;
-  overflow: hidden;
   font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.32s ease,
-              border-color 0.32s ease;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s ease,
+              border-color 0.25s ease;
+  cursor: pointer;
+  text-align: left;
 }
 
-.kz-speaker-card:hover {
-  transform: translateY(-6px);
-  border-color: rgba(182, 52, 115, 0.3);
-  box-shadow: 0 16px 36px rgba(85, 53, 94, 0.10), 0 2px 8px rgba(182, 52, 115, 0.06);
+.kz-speaker-card-v2:hover {
+  transform: translateY(-4px);
+  border-color: #D6A8C4;
+  box-shadow: 0 10px 30px rgba(45, 26, 51, 0.09);
+}
+
+.kz-speaker-card-v2.is-highlighted {
+  border: 1.5px solid #C47AA5;
+  box-shadow: 0 6px 24px rgba(182, 52, 115, 0.07);
 }
 
 /* ----------------------------------------------------
-   1. AVATAR MONOGRAM DISC / IMAGE
+   1. TOP ROW: AVATAR & COUNTRY BADGE
    ---------------------------------------------------- */
-.kz-speaker-avatar-wrap {
+.kz-card-top-row {
   display: flex;
   align-items: center;
-  margin-bottom: 22px;
+  justify-content: space-between;
+  margin-bottom: 18px;
 }
 
-.kz-speaker-avatar-disc {
-  width: 62px;
-  height: 62px;
+.kz-card-avatar-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.kz-card-avatar-disc {
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
+  background: #42264C;
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
-  font-weight: 750;
+  font-size: 1.15rem;
+  font-weight: 650;
   letter-spacing: 0.02em;
-  transition: transform 0.28s ease;
   user-select: none;
+  transition: transform 0.2s ease;
 }
 
-.kz-speaker-card:hover .kz-speaker-avatar-disc {
-  transform: scale(1.04);
+.kz-speaker-card-v2:hover .kz-card-avatar-disc {
+  transform: scale(1.03);
 }
 
-/* Theme Variant 1: Soft Lilac Disc with Dark Plum Text (e.g., AM, DO) */
-.kz-card-theme-light .kz-speaker-avatar-disc {
-  background-color: #EAE0EC;
-  color: #381942;
-}
-
-/* Theme Variant 2: Vibrant Magenta Disc with Crisp White Text (e.g., SL, MC) */
-.kz-card-theme-magenta .kz-speaker-avatar-disc {
-  background-color: #B63473;
-  color: #FFFFFF;
-  box-shadow: 0 4px 14px rgba(182, 52, 115, 0.22);
-}
-
-/* Real Image Support */
-.kz-speaker-avatar-img {
-  width: 62px;
-  height: 62px;
+.kz-card-avatar-img {
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   object-fit: cover;
 }
 
-/* ----------------------------------------------------
-   2. CARD CONTENT: Name, Role, Accent Bar, Institute
-   ---------------------------------------------------- */
-.kz-speaker-card-content {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-
-.kz-speaker-name {
-  font-size: 1.22rem;
-  font-weight: 800;
-  color: #1E1226;
-  margin: 0 0 6px 0;
-  line-height: 1.25;
-  letter-spacing: -0.015em;
-  transition: color 0.22s ease;
-}
-
-.kz-speaker-card:hover .kz-speaker-name {
-  color: #B63473;
-}
-
-.kz-speaker-role {
-  font-size: 0.90rem;
-  font-weight: 500;
-  color: #726079;
-  margin: 0 0 14px 0;
-  line-height: 1.42;
-  min-height: 44px;
-}
-
-/* Brand Accent Bar beneath Role */
-.kz-speaker-accent-bar {
-  width: 32px;
-  height: 2.5px;
-  background-color: #B63473;
-  border-radius: 2px;
-  margin-bottom: 14px;
-}
-
-.kz-speaker-institute {
-  font-size: 0.86rem;
-  color: #726079;
-  margin: 0;
-  line-height: 1.45;
-  min-height: 44px;
-}
-
-/* ----------------------------------------------------
-   3. CARD FOOTER: "View details →" & Circular Arrow Button
-   ---------------------------------------------------- */
-.kz-speaker-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: auto;
-  padding-top: 22px;
-}
-
-/* Left: "View details →" link */
-.kz-speaker-details-link {
+/* Country Badge */
+.kz-card-country-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.92rem;
+  padding: 5px 12px;
+  background-color: #FAF7FA;
+  border: 1px solid #ECE3EC;
+  border-radius: 999px;
+}
+
+.kz-card-flag {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.kz-card-country-name {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #5A4762;
+}
+
+/* ----------------------------------------------------
+   2. SPEAKER IDENTITY: NAME, ROLE, INSTITUTION
+   ---------------------------------------------------- */
+.kz-card-identity {
+  margin-bottom: 16px;
+}
+
+.kz-card-name {
+  font-size: 1.25rem;
   font-weight: 700;
-  color: #8F2259;
-  text-decoration: none;
-  cursor: pointer;
-  transition: color 0.22s ease, transform 0.22s ease;
+  color: #2A1731;
+  margin: 0 0 5px 0;
+  line-height: 1.26;
+  letter-spacing: -0.01em;
+  transition: color 0.2s ease;
 }
 
-.kz-speaker-details-link .kz-link-arrow {
-  transition: transform 0.22s ease;
-}
-
-.kz-speaker-details-link:hover {
+.kz-speaker-card-v2:hover .kz-card-name {
   color: #B63473;
 }
 
-.kz-speaker-details-link:hover .kz-link-arrow {
-  transform: translateX(4px);
+.kz-card-role {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #63486B;
+  margin: 0 0 4px 0;
+  line-height: 1.38;
 }
 
-/* Right: Circular Action Button */
-.kz-speaker-circle-btn {
-  width: 42px;
-  height: 42px;
+.kz-card-institute {
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: #7F7185;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ----------------------------------------------------
+   3. SPECIALTY TAG PILLS
+   ---------------------------------------------------- */
+.kz-card-tags-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.kz-card-specialty-pill {
+  display: inline-block;
+  background-color: #FAF6FB;
+  border: 1px solid #EAE0EB;
+  color: #583A61;
+  font-size: 0.74rem;
+  font-weight: 500;
+  padding: 4px 11px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.kz-card-soft-divider {
+  width: 100%;
+  height: 1px;
+  background-color: #F0E8F2;
+  margin-bottom: 16px;
+}
+
+/* ----------------------------------------------------
+   4. "SPEAKING ON" TOPIC BLOCK
+   ---------------------------------------------------- */
+.kz-card-topic-block {
+  margin-bottom: 16px;
+}
+
+.kz-card-topic-label {
+  display: block;
+  font-size: 0.69rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #B63473;
+  margin-bottom: 6px;
+}
+
+.kz-card-topic-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kz-card-mic-icon-disc {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  border: none;
-  background-color: #F8EAF2;
-  color: #8F2259;
+  background-color: #FDF2F8;
+  border: 1px solid rgba(182, 52, 115, 0.16);
+  color: #B63473;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  padding: 0;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 2px 6px rgba(182, 52, 115, 0.06);
+  flex-shrink: 0;
 }
 
-.kz-speaker-card:hover .kz-speaker-circle-btn {
-  background-color: #F4E0EC;
+.kz-card-topic-title {
+  font-size: 0.92rem;
+  font-weight: 650;
+  color: #2F1836;
+  line-height: 1.36;
+  margin: 0;
+  flex: 1;
 }
 
-.kz-speaker-circle-btn:hover {
-  background-color: #B63473 !important;
-  color: #FFFFFF !important;
-  transform: scale(1.08);
-  box-shadow: 0 4px 14px rgba(182, 52, 115, 0.32);
-}
-
-.kz-speaker-circle-btn svg {
+.kz-card-topic-arrow {
+  color: #B63473;
+  display: flex;
+  align-items: center;
   transition: transform 0.2s ease;
+  flex-shrink: 0;
 }
 
-.kz-speaker-circle-btn:hover svg {
-  transform: translateX(2px);
+.kz-speaker-card-v2:hover .kz-card-topic-arrow {
+  transform: translateX(3px);
 }
+
+/* ----------------------------------------------------
+   5. SESSIONS & FEATURED ROW
+   ---------------------------------------------------- */
+.kz-card-meta-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  margin-bottom: 16px;
+}
+
+.kz-card-sessions-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.80rem;
+  font-weight: 500;
+  color: #63506B;
+}
+
+.kz-card-cal-icon {
+  color: #7E6E85;
+}
+
+.kz-card-meta-separator {
+  color: #E5DAE8;
+  font-size: 0.85rem;
+}
+
+.kz-card-featured-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #FDF2F8;
+  border: 1px solid rgba(182, 52, 115, 0.20);
+  color: #B63473;
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 999px;
+  margin-left: auto;
+}
+
+.kz-card-star-icon {
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.kz-card-bio-paragraph {
+  font-size: 0.83rem;
+  font-weight: 400;
+  line-height: 1.56;
+  color: #6C5A72;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+

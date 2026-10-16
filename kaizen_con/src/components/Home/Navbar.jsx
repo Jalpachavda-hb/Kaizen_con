@@ -6,12 +6,12 @@ import navbarLeftImg from '../../assets/home/navbarleft_bg.png';
 import navbarRightImg from '../../assets/home/navbarright.png';
 
 const navItems = [
-  { id: 'home', label: 'Home', href: '#home' },
-  { id: 'about', label: 'About', href: '#about' },
-  { id: 'programme', label: 'Programme', href: '#programme' },
-  { id: 'speakers', label: 'Speakers', href: '#speakers' },
-  { id: 'ai-experience', label: 'AI Experience', href: '#ai-experience' },
-  { id: 'knowledge', label: 'Knowledge', href: '#knowledge' },
+  { id: 'home', label: 'Home', href: '/' },
+  { id: 'about', label: 'About', href: '/about' },
+  { id: 'programme', label: 'Programme', href: '/#programme' },
+  { id: 'speakers', label: 'Speakers', href: '/speakers' },
+  { id: 'ai-experience', label: 'AI Experience', href: '/#ai-experience' },
+  { id: 'knowledge', label: 'Knowledge', href: '/knowledge' },
   { id: 'contact', label: 'Contact Us', href: '/contact' },
 ];
 
@@ -25,12 +25,24 @@ export default function Navbar() {
   useEffect(() => {
     if (location.pathname === '/contact' || location.pathname === '/contact-us') {
       setActiveItem('Contact Us');
+    } else if (location.pathname === '/about' || location.pathname === '/about-us') {
+      setActiveItem('About');
+    } else if (location.pathname === '/speakers' || location.pathname === '/speaker') {
+      setActiveItem('Speakers');
+    } else if (location.pathname === '/knowledge' || location.pathname === '/knowledge-base') {
+      setActiveItem('Knowledge');
     } else if (location.hash) {
-      const match = navItems.find(item => item.href === location.hash);
-      if (match) {
-        setActiveItem(match.label);
+      if (location.hash === '#programme' || location.hash === '#tracks') {
+        setActiveItem('Programme');
+      } else if (location.hash === '#ai-experience' || location.hash === '#ai-layer') {
+        setActiveItem('AI Experience');
+      } else {
+        const match = navItems.find(item => item.href.endsWith(location.hash));
+        if (match) {
+          setActiveItem(match.label);
+        }
       }
-    } else {
+    } else if (location.pathname === '/') {
       setActiveItem('Home');
     }
   }, [location.pathname, location.hash]);
@@ -62,8 +74,45 @@ export default function Navbar() {
     setActiveItem(label);
     setIsDrawerOpen(false);
 
+    if (href === '/') {
+      if (location.pathname !== '/') {
+        navigate('/');
+      } else {
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      }
+      return;
+    }
+
+    if (href === '/about' || href === '/about-us') {
+      navigate('/about');
+      return;
+    }
+
     if (href === '/contact' || href === '/contact-us') {
       navigate('/contact');
+      return;
+    }
+
+    if (href === '/speakers' || href === '/speaker') {
+      navigate('/speakers');
+      return;
+    }
+
+    if (href === '/knowledge' || href === '/knowledge-base') {
+      navigate('/knowledge');
+      return;
+    }
+
+    if (href && href.startsWith('/#')) {
+      const hash = href.substring(1); // e.g. '#programme'
+      if (location.pathname !== '/') {
+        navigate(href);
+      } else {
+        const el = document.querySelector(hash);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
       return;
     }
 

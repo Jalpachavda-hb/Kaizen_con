@@ -1,0 +1,1560 @@
+/* ====================================================
+   KAIZEN CON 2027 - FULL KNOWLEDGE BASE PAGE STYLING
+   - Exact design alignment with user reference screenshots:
+     * Screenshot 1: Rounded Search box + "TRY:" topic pill bar
+     * Screenshot 2: "CONFERENCE KNOWLEDGE" badge + "Knowledge Base" split headline
+     * Screenshot 3: Multi-card layout with badges, excerpt, and metadata
+     * Screenshot 4: "What's in the knowledge base?" 4 overview cards
+   - KaizenCon 2027 Design System (#55355E & #A01B68)
+   ==================================================== */
+
+.kz-knowledge-page-root {
+  min-height: 100vh;
+  background-color: #fcf9fc;
+  font-family: var(--font-family, 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif);
+  color: #3b2241;
+  padding-bottom: 80px;
+}
+
+/* ----------------------------------------------------
+   GLOBAL PAGE CONTAINER (Unified with website 1440px)
+   ---------------------------------------------------- */
+.kz-kp-main-container {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 40px;
+  box-sizing: border-box;
+}
+
+/* ----------------------------------------------------
+   1. HERO SECTION (Matches Screenshot 2)
+   ---------------------------------------------------- */
+.kz-kp-hero-section {
+  position: relative;
+  background: linear-gradient(180deg, #fdf4f9 0%, #faedf5 60%, #fcf9fc 100%);
+  padding: 50px 0 35px 0;
+  border-bottom: 1px solid rgba(160, 27, 104, 0.08);
+}
+
+.kz-kp-hero-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 40px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+/* Breadcrumb */
+.kz-kp-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #8a708e;
+  margin-bottom: 20px;
+}
+
+.kz-kp-crumb-link {
+  color: #8a708e;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.kz-kp-crumb-link:hover {
+  color: #A01B68;
+}
+
+.kz-kp-crumb-sep {
+  opacity: 0.5;
+}
+
+.kz-kp-crumb-current {
+  color: #B63473;
+  font-weight: 600;
+}
+
+/* Badge (Matches Screenshot 2) */
+.kz-kp-badge-wrap {
+  margin-bottom: 18px;
+}
+
+.kz-kp-badge {
+  display: inline-flex;
+  align-items: center;
+  background-color: #FDF2F8;
+  border: 1px solid rgba(182, 52, 115, 0.28);
+  color: #B63473;
+  font-size: 0.74rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 5px 16px;
+  border-radius: 999px;
+  box-shadow: 0 1px 4px rgba(182, 52, 115, 0.06);
+}
+
+.kz-kp-badge.light {
+  background: #ffffff;
+}
+
+/* Headline: Conference Knowledge, now with intelligence. matching About Page */
+.kz-kp-hero-headline {
+  font-family: 'Roboto', sans-serif;
+  font-size: clamp(2.2rem, 3.8vw, 3.85rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin: 0 0 22px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.kz-kp-hero-dark {
+  color: #55355E;
+  display: block;
+}
+
+.kz-kp-hero-magenta {
+  background: linear-gradient(90deg, #7C3369 0%, #A23B79 30%, #C74485 70%, #D85695 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+  width: fit-content;
+}
+
+/* Subtitle matching Home Hero */
+.kz-kp-hero-subtitle {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1.62;
+  color: #6D5774;
+  max-width: 680px;
+  margin: 0 0 32px 0;
+}
+
+/* Metrics Ribbon (Matches SpeakersPage) */
+.kz-kp-metrics-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.kz-kp-metric-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #FFFFFF;
+  border: 1px solid #ECE3EE;
+  padding: 8px 18px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(85, 53, 94, 0.03);
+}
+
+.kz-kp-metric-num {
+  font-size: 1.15rem;
+  font-weight: 850;
+  color: #B8387A;
+}
+
+.kz-kp-metric-label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #57445F;
+}
+
+/* ----------------------------------------------------
+   2. SEARCH & QUICK SUGGESTIONS SECTION (Matches Screenshot 1)
+   ---------------------------------------------------- */
+.kz-kp-search-section {
+  position: relative;
+  margin-top: -24px;
+  z-index: 10;
+  margin-bottom: 40px;
+}
+
+.kz-kp-search-card {
+  background: #ffffff;
+  border: 1.5px solid #ebdfee;
+  border-radius: 20px;
+  padding: 24px 28px;
+  box-shadow: 0 8px 30px rgba(85, 53, 94, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Search Box */
+.kz-kp-search-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #faf6fb;
+  border: 1.5px solid #e5d9e7;
+  border-radius: 14px;
+  padding: 8px 20px;
+  min-height: 56px;
+  transition: all 0.25s ease;
+}
+
+.kz-kp-search-box:focus-within {
+  background: #ffffff;
+  border-color: #A01B68;
+  box-shadow: 0 4px 20px rgba(160, 27, 104, 0.12);
+}
+
+.kz-kp-search-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7d6484;
+}
+
+.kz-kp-search-box:focus-within .kz-kp-search-icon-wrap {
+  color: #A01B68;
+}
+
+.kz-kp-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.05rem;
+  color: #3b2241;
+  padding: 6px 0;
+}
+
+.kz-kp-search-input::placeholder {
+  color: #9f8aa3;
+}
+
+.kz-kp-clear-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #9f8aa3;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.kz-kp-clear-btn:hover {
+  color: #A01B68;
+  background: #faeaf2;
+}
+
+.kz-kp-search-live-badge {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  background: #faeaf2;
+  color: #A01B68;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+/* Quick Try Row (Matches Screenshot 1) */
+.kz-kp-try-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+}
+
+.kz-kp-try-label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: #8c7391;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.kz-kp-try-pills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+}
+
+.kz-kp-try-pill {
+  appearance: none;
+  background: #ffffff;
+  border: 1.5px solid #ebdfee;
+  border-radius: 9999px;
+  padding: 7px 16px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #49244c;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(85, 53, 94, 0.03);
+  white-space: nowrap;
+}
+
+.kz-kp-try-pill:hover {
+  border-color: #A01B68;
+  color: #A01B68;
+  background: #fdf5fa;
+  transform: translateY(-1px);
+}
+
+/* Active pill (Matches Screenshot 1: dark purple background, white text) */
+.kz-kp-try-pill.is-active {
+  background: #4d2754;
+  border-color: #4d2754;
+  color: #ffffff;
+  box-shadow: 0 3px 12px rgba(77, 39, 84, 0.28);
+}
+
+/* ----------------------------------------------------
+   3. WHAT'S IN THE KNOWLEDGE BASE? (Matches Screenshot 4)
+   ---------------------------------------------------- */
+.kz-kp-categories-section {
+  margin-bottom: 40px;
+}
+
+.kz-kp-categories-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.kz-kp-categories-title {
+  font-family: 'Roboto', sans-serif;
+  font-size: clamp(1.4rem, 2.2vw, 1.85rem);
+  font-weight: 700;
+  color: #442248;
+  margin: 0;
+  letter-spacing: -0.015em;
+}
+
+.kz-kp-reset-filter-btn {
+  background: transparent;
+  border: none;
+  color: #A01B68;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.kz-kp-reset-filter-btn:hover {
+  text-decoration: underline;
+}
+
+/* 4 Overview Category Cards Grid (Matches Screenshot 4) */
+.kz-kp-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.kz-kp-category-card {
+  background: #ffffff;
+  border: 1.5px solid #ebdfee;
+  border-radius: 18px;
+  padding: 24px 22px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 3px 14px rgba(85, 53, 94, 0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  overflow: hidden;
+}
+
+.kz-kp-category-card:hover {
+  transform: translateY(-3px);
+  border-color: #d85a9a;
+  box-shadow: 0 10px 28px rgba(160, 27, 104, 0.12);
+}
+
+/* Active Category Card State */
+.kz-kp-category-card.is-active {
+  background: #fff8fc;
+  border-color: #A01B68;
+  box-shadow: 0 8px 24px rgba(160, 27, 104, 0.18);
+}
+
+.kz-kp-category-card.is-active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #7C3369, #A01B68);
+}
+
+/* Card Icon Box (Matches Screenshot 4) */
+.kz-kp-cat-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #fbf5fb;
+  border: 1px solid rgba(85, 53, 94, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #A01B68;
+  margin-bottom: 16px;
+  transition: all 0.25s ease;
+}
+
+.kz-kp-category-card:hover .kz-kp-cat-icon-box,
+.kz-kp-category-card.is-active .kz-kp-cat-icon-box {
+  background: #faeaf2;
+  color: #A01B68;
+  transform: scale(1.06);
+}
+
+.kz-kp-cat-name {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #3b2241;
+  margin: 0 0 4px 0;
+}
+
+.kz-kp-cat-desc {
+  font-size: 0.88rem;
+  color: #7a637e;
+  margin: 0 0 16px 0;
+}
+
+.kz-kp-cat-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: 12px;
+  border-top: 1px solid #f6edf7;
+}
+
+.kz-kp-cat-count-pill {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #55355E;
+  background: #f4ecf5;
+  padding: 3px 9px;
+  border-radius: 9999px;
+}
+
+.kz-kp-category-card.is-active .kz-kp-cat-count-pill {
+  background: #faeaf2;
+  color: #A01B68;
+  font-weight: 700;
+}
+
+.kz-kp-cat-arrow {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #A01B68;
+}
+
+/* ----------------------------------------------------
+   4. TOOLBAR & CONTROLS SECTION
+   ---------------------------------------------------- */
+.kz-kp-toolbar-section {
+  margin-bottom: 28px;
+}
+
+.kz-kp-toolbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: #ffffff;
+  border: 1px solid #ebdfee;
+  border-radius: 16px;
+  padding: 12px 20px;
+  box-shadow: 0 2px 10px rgba(85, 53, 94, 0.03);
+}
+
+/* Filter Tabs */
+.kz-kp-tabs-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.kz-kp-tab-btn {
+  appearance: none;
+  background: #faf4fb;
+  border: 1px solid rgba(85, 53, 94, 0.08);
+  border-radius: 9999px;
+  padding: 6px 14px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #55355E;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.kz-kp-tab-btn:hover {
+  background: #faedf5;
+  color: #A01B68;
+}
+
+.kz-kp-tab-btn.is-active {
+  background: #A01B68;
+  border-color: #A01B68;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(160, 27, 104, 0.22);
+}
+
+/* Controls Group */
+.kz-kp-controls-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.kz-kp-day-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kz-kp-control-label {
+  font-size: 0.82rem;
+  color: #7d6582;
+  font-weight: 500;
+}
+
+.kz-kp-day-select {
+  appearance: auto;
+  border: 1px solid #ebdfee;
+  border-radius: 8px;
+  background: #faf6fb;
+  padding: 5px 12px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.84rem;
+  color: #49244c;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+}
+
+.kz-kp-day-select:focus {
+  border-color: #A01B68;
+}
+
+/* View Toggle */
+.kz-kp-view-toggle {
+  display: flex;
+  background: #f4ecf5;
+  padding: 3px;
+  border-radius: 8px;
+  gap: 2px;
+}
+
+.kz-kp-view-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #664d6c;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+.kz-kp-view-btn.is-active {
+  background: #ffffff;
+  color: #A01B68;
+  box-shadow: 0 1px 4px rgba(85, 53, 94, 0.12);
+}
+
+/* Active Filters Banner */
+.kz-kp-active-filters-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #faeaf2;
+  border: 1px solid rgba(160, 27, 104, 0.2);
+  border-radius: 12px;
+  padding: 10px 18px;
+  margin-bottom: 24px;
+}
+
+.kz-kp-filter-summary {
+  font-size: 0.88rem;
+  color: #55355E;
+}
+
+.kz-kp-filter-summary strong {
+  color: #A01B68;
+}
+
+.kz-kp-filter-reset-link {
+  background: transparent;
+  border: none;
+  color: #A01B68;
+  font-weight: 700;
+  font-size: 0.84rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ----------------------------------------------------
+   5. KNOWLEDGE CARDS LIST (Matches Screenshot 3)
+   ---------------------------------------------------- */
+.kz-kp-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Card Root Item (Matches Screenshot 3) */
+.kz-kp-item-card {
+  background: #ffffff;
+  border: 1.5px solid #ebdfee;
+  border-radius: 18px;
+  padding: 22px 26px;
+  box-shadow: 0 3px 12px rgba(85, 53, 94, 0.04);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+}
+
+.kz-kp-item-card:hover {
+  border-color: #d85a9a;
+  box-shadow: 0 8px 26px rgba(160, 27, 104, 0.1);
+  transform: translateY(-2px);
+}
+
+.kz-kp-item-card.is-expanded {
+  border-color: #A01B68;
+  box-shadow: 0 8px 28px rgba(160, 27, 104, 0.12);
+}
+
+/* Main Row */
+.kz-kp-card-main-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+/* Left Icon (Rounded container with play or type icon - Matches Screenshot 3) */
+.kz-kp-card-media-wrap {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.kz-kp-card-icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #ebdfee;
+  background: #ffffff;
+  color: #55355E;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 4px rgba(85, 53, 94, 0.04);
+}
+
+.kz-kp-card-icon-btn.play {
+  color: #55355E;
+}
+
+.kz-kp-card-icon-btn.document {
+  color: #A01B68;
+  background: #fdf5fa;
+  border-color: #f2d4e5;
+}
+
+.kz-kp-card-icon-btn.chat {
+  color: #4b3670;
+  background: #f6f3fc;
+}
+
+.kz-kp-card-icon-btn.tag {
+  color: #7b4383;
+}
+
+.kz-kp-item-card:hover .kz-kp-card-icon-btn {
+  background: #faeaf2;
+  border-color: #A01B68;
+  color: #A01B68;
+  transform: scale(1.05);
+}
+
+/* Right Content */
+.kz-kp-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+/* Badges Pill Row (Matches Screenshot 3) */
+.kz-kp-card-badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Primary Type Pill (SESSION, AI SUMMARY, etc. - Matches Screenshot 3) */
+.kz-kp-type-pill {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #55355E;
+  background: #f3ebf5;
+  border: 1px solid rgba(85, 53, 94, 0.25);
+  padding: 4px 12px;
+  border-radius: 9999px;
+  display: inline-block;
+}
+
+.kz-kp-type-pill.type-aisummary {
+  color: #A01B68;
+  background: #faeaf2;
+  border-color: rgba(160, 27, 104, 0.3);
+}
+
+.kz-kp-type-pill.type-qaarchive {
+  color: #4b3670;
+  background: #f3eff9;
+  border-color: rgba(75, 54, 112, 0.25);
+}
+
+.kz-kp-type-pill.type-clinicaltopic {
+  color: #733c7b;
+  background: #f8eef9;
+}
+
+/* Specialty Tags (Robotic Surgery, Colorectal Surgery - Matches Screenshot 3) */
+.kz-kp-tag-pill {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: #55355E;
+  background: #faf4fb;
+  border: 1px solid #ebdfee;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  display: inline-block;
+}
+
+.kz-kp-evidence-pill {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #8c7391;
+  background: transparent;
+  padding: 2px 6px;
+  margin-left: auto;
+}
+
+/* Card Main Title / Excerpt (Matches Screenshot 3) */
+.kz-kp-card-title {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.08rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #3b2241;
+  margin: 0;
+}
+
+/* Metadata Row (User, Day, Location - Matches Screenshot 3) */
+.kz-kp-card-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 24px;
+  margin-top: 4px;
+}
+
+.kz-kp-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #7d6582;
+}
+
+.kz-kp-meta-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9f8aa3;
+}
+
+.kz-kp-meta-text {
+  color: #604665;
+}
+
+.kz-kp-meta-text.bold {
+  font-weight: 600;
+  color: #49244c;
+}
+
+/* Chevron */
+.kz-kp-chevron-wrap {
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.kz-kp-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #9f8aa3;
+  transition: all 0.25s ease;
+}
+
+.kz-kp-chevron.is-open {
+  transform: rotate(180deg);
+  color: #A01B68;
+  background: #faeaf2;
+}
+
+/* ----------------------------------------------------
+   EXPANDED ACCORDION DRAWER BODY
+   ---------------------------------------------------- */
+.kz-kp-card-expanded-body {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1.5px dashed #ebdfee;
+  cursor: default;
+  animation: kzBodyFadeDown 0.25s ease-out;
+}
+
+@keyframes kzBodyFadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.kz-kp-expanded-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.kz-kp-section-subtitle {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #A01B68;
+  margin: 0 0 6px 0;
+}
+
+.kz-kp-abstract-text {
+  font-size: 0.94rem;
+  line-height: 1.6;
+  color: #553f5b;
+  margin: 0;
+}
+
+/* Key Takeaways list */
+.kz-kp-takeaways-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kz-kp-takeaway-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #3b2241;
+}
+
+.kz-kp-takeaway-bullet {
+  color: #A01B68;
+  font-weight: 800;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* AI Insight Callout Box */
+.kz-kp-ai-insight-box {
+  background: linear-gradient(135deg, #fbf2f8 0%, #f7eaf4 100%);
+  border: 1px solid rgba(160, 27, 104, 0.18);
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kz-kp-ai-box-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #A01B68;
+}
+
+.kz-kp-ai-box-text {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #533959;
+  margin: 0;
+}
+
+/* Expanded Actions */
+.kz-kp-expanded-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #f6edf7;
+}
+
+.kz-kp-action-btn {
+  appearance: none;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 18px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kz-kp-action-btn.primary {
+  background: #A01B68;
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(160, 27, 104, 0.25);
+}
+
+.kz-kp-action-btn.primary:hover {
+  background: #7d1351;
+  transform: translateY(-1px);
+}
+
+.kz-kp-action-btn.ai-ask {
+  background: #55355E;
+  color: #ffffff;
+}
+
+.kz-kp-action-btn.ai-ask:hover {
+  background: #402347;
+  transform: translateY(-1px);
+}
+
+.kz-kp-action-btn.outline {
+  background: #ffffff;
+  border: 1.5px solid #ebdfee;
+  color: #55355E;
+}
+
+.kz-kp-action-btn.outline:hover {
+  border-color: #A01B68;
+  color: #A01B68;
+  background: #fdf5fa;
+}
+
+/* Empty State */
+.kz-kp-empty-state {
+  background: #ffffff;
+  border: 1.5px dashed #dcb8d0;
+  border-radius: 20px;
+  padding: 60px 40px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.kz-kp-empty-icon {
+  margin-bottom: 6px;
+}
+
+.kz-kp-empty-title {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #49244c;
+  margin: 0;
+}
+
+.kz-kp-empty-desc {
+  font-size: 0.95rem;
+  color: #725b76;
+  max-width: 540px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.kz-kp-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.kz-kp-empty-btn {
+  appearance: none;
+  background: #A01B68;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.kz-kp-empty-btn:hover {
+  background: #7d1351;
+}
+
+.kz-kp-empty-btn.outline {
+  background: #ffffff;
+  border: 1.5px solid #ebdfee;
+  color: #55355E;
+}
+
+.kz-kp-empty-btn.outline:hover {
+  border-color: #A01B68;
+  color: #A01B68;
+}
+
+/* ----------------------------------------------------
+   6. AI KNOWLEDGE ASSISTANT BANNER
+   ---------------------------------------------------- */
+.kz-kp-ai-cta-section {
+  margin-top: 60px;
+}
+
+.kz-kp-ai-cta-card {
+  background: linear-gradient(135deg, #49244c 0%, #68305c 40%, #A01B68 100%);
+  border-radius: 24px;
+  padding: 44px 50px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 36px;
+  box-shadow: 0 16px 40px rgba(73, 36, 76, 0.28);
+}
+
+.kz-kp-ai-cta-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.kz-kp-ai-cta-title {
+  font-family: 'Roboto', sans-serif;
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 14px 0 10px 0;
+  color: #ffffff;
+}
+
+.kz-kp-ai-cta-subtitle {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.86);
+  max-width: 680px;
+  margin: 0 0 20px 0;
+}
+
+.kz-kp-ai-cta-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.kz-kp-ai-sample-pill {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  color: #ffffff;
+  border-radius: 9999px;
+  padding: 8px 18px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.84rem;
+  font-style: italic;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.kz-kp-ai-sample-pill:hover {
+  background: rgba(255, 255, 255, 0.24);
+  transform: translateY(-1px);
+}
+
+.kz-kp-ai-cta-action {
+  flex-shrink: 0;
+}
+
+.kz-kp-ai-launch-btn {
+  appearance: none;
+  background: #ffffff;
+  color: #A01B68;
+  border: none;
+  border-radius: 14px;
+  padding: 14px 28px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.kz-kp-ai-launch-btn:hover {
+  background: #fff0f7;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+}
+
+.kz-kp-btn-arrow {
+  font-size: 1.2rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.kz-kp-ai-launch-btn:hover .kz-kp-btn-arrow {
+  transform: translateX(4px);
+}
+
+/* ----------------------------------------------------
+   7. IN-DEPTH DETAIL MODAL
+   ---------------------------------------------------- */
+.kz-kp-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(30, 14, 33, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  animation: kzModalFade 0.25s ease-out;
+}
+
+@keyframes kzModalFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.kz-kp-modal-card {
+  background: #ffffff;
+  border-radius: 24px;
+  max-width: 760px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 24px 60px rgba(85, 53, 94, 0.35);
+  display: flex;
+  flex-direction: column;
+}
+
+.kz-kp-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #f4ecf5;
+  border: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #55355E;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.kz-kp-modal-close:hover {
+  background: #A01B68;
+  color: #ffffff;
+}
+
+.kz-kp-modal-header {
+  padding: 32px 36px 20px 36px;
+  border-bottom: 1px solid #ebdfee;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.kz-kp-modal-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.kz-kp-modal-title {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #3b2241;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.kz-kp-modal-speaker-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #faf6fb;
+  border: 1px solid #ebdfee;
+  border-radius: 14px;
+  padding: 12px 18px;
+}
+
+.kz-kp-speaker-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7C3369, #A01B68);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.kz-kp-modal-spk-name {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: #49244c;
+  margin: 0 0 2px 0;
+}
+
+.kz-kp-modal-spk-role {
+  font-size: 0.82rem;
+  color: #725b76;
+  margin: 0 0 2px 0;
+}
+
+.kz-kp-modal-spk-inst {
+  font-size: 0.78rem;
+  color: #A01B68;
+  font-weight: 600;
+  margin: 0;
+}
+
+.kz-kp-modal-body {
+  padding: 24px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.kz-kp-modal-info-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  background: #fbf5fb;
+  border-radius: 12px;
+  padding: 12px 18px;
+}
+
+.kz-kp-modal-info-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kz-kp-info-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #9f8aa3;
+  text-transform: uppercase;
+}
+
+.kz-kp-info-val {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #49244c;
+}
+
+.kz-kp-modal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kz-kp-modal-heading {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #49244c;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.kz-kp-modal-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #553f5b;
+  margin: 0;
+}
+
+.kz-kp-modal-footer {
+  padding: 18px 36px 28px 36px;
+  border-top: 1px solid #ebdfee;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* ----------------------------------------------------
+   RESPONSIVE ADAPTATIONS
+   ---------------------------------------------------- */
+@media (max-width: 1024px) {
+  .kz-kp-categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .kz-kp-ai-cta-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .kz-kp-main-container,
+  .kz-kp-hero-container {
+    padding: 0 20px;
+  }
+
+  .kz-kp-hero-section {
+    padding: 40px 0 25px 0;
+  }
+
+  .kz-kp-search-card {
+    padding: 18px 16px;
+  }
+
+  .kz-kp-categories-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kz-kp-toolbar-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .kz-kp-controls-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .kz-kp-card-main-row {
+    gap: 14px;
+  }
+
+  .kz-kp-card-icon-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .kz-kp-card-title {
+    font-size: 1rem;
+  }
+
+  .kz-kp-modal-header,
+  .kz-kp-modal-body,
+  .kz-kp-modal-footer {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .kz-kp-modal-info-strip {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+/* ----------------------------------------------------
+   Knowledge Page Cross-page Navigation Strip
+   ---------------------------------------------------- */
+.kz-kp-cross-nav-section {
+  padding: 0 0 70px 0;
+  background-color: #FAFAFC;
+}
+
+.kz-kp-cross-container {
+  width: 100%;
+  max-width: 1520px;
+  margin: 0 auto;
+  padding: 0 45px;
+  box-sizing: border-box;
+}
+
+.kz-kp-cross-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(85, 53, 94, 0.12);
+  border-radius: 18px;
+  padding: 36px 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  box-shadow: 0 4px 20px rgba(85, 53, 94, 0.05);
+}
+
+.kz-kp-cross-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  color: #B63473;
+  margin-bottom: 8px;
+}
+
+.kz-kp-cross-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #381942;
+  margin: 0 0 6px 0;
+}
+
+.kz-kp-cross-desc {
+  font-size: 0.92rem;
+  color: #55445D;
+  margin: 0;
+}
+
+.kz-kp-cross-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.kz-kp-cross-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 650;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+.kz-kp-cross-btn.primary {
+  background: #B63473;
+  color: #FFFFFF;
+  box-shadow: 0 3px 12px rgba(182, 52, 115, 0.28);
+}
+
+.kz-kp-cross-btn.primary:hover {
+  background: #9D2760;
+  transform: translateY(-2px);
+}
+
+.kz-kp-cross-btn.secondary {
+  background: #FAF4F8;
+  color: #55355E;
+  border: 1px solid rgba(182, 52, 115, 0.25);
+}
+
+.kz-kp-cross-btn.secondary:hover {
+  background: #F4E8F2;
+  color: #B63473;
+  transform: translateY(-2px);
+}
+
+.kz-kp-cross-btn.tertiary {
+  background: #FFFFFF;
+  color: #55355E;
+  border: 1px solid rgba(85, 53, 94, 0.18);
+}
+
+.kz-kp-cross-btn.tertiary:hover {
+  border-color: #55355E;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 992px) {
+  .kz-kp-cross-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+

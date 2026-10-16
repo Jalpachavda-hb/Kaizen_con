@@ -1,0 +1,2118 @@
+/* ====================================================
+   KAIZENCON 2027 - ABOUT US PAGE STYLES
+   Theme: Deep Royal Purple (#4A2552 / #55355E) & Vivid Magenta (#A01B68 / #B63473)
+   Exact match to user reference screenshot for pill badges & hero typography
+   ==================================================== */
+
+.kz-about-page-root {
+  min-height: 100vh;
+  background-color: #FAF8FB;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #2D1A33;
+  overflow-x: hidden;
+}
+
+/* Common container constraint matching 1440px across site */
+.kz-about-container {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 40px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .kz-about-container {
+    padding: 0 20px;
+  }
+}
+
+/* ----------------------------------------------------
+   1. HERO SECTION (Light Theme matching Contact & Knowledge Pages)
+   ---------------------------------------------------- */
+.kz-about-hero-section {
+  position: relative;
+  background: linear-gradient(180deg, #fdf4f9 0%, #faedf5 55%, #fcf9fc 100%);
+  padding: 54px 0 44px 0;
+  border-bottom: 1px solid rgba(160, 27, 104, 0.08);
+  overflow: hidden;
+}
+
+/* Atmospheric Ambient Soft Glow matching Knowledge & Speakers pages */
+.kz-about-hero-ambient {
+  position: absolute;
+  top: 0;
+  right: 6%;
+  width: 520px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(182, 52, 115, 0.08) 0%, rgba(250, 244, 248, 0) 70%);
+  pointer-events: none;
+}
+
+.kz-about-hero-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+/* Breadcrumb matching Contact & Speakers pages */
+.kz-about-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #B63473;
+  margin-bottom: 20px;
+}
+
+.kz-about-crumb-link {
+  color: #B63473;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.kz-about-crumb-link:hover {
+  color: #8c1e52;
+}
+
+.kz-about-crumb-sep {
+  opacity: 0.5;
+  color: #B63473;
+}
+
+.kz-about-crumb-current {
+  color: #B63473;
+  font-weight: 600;
+}
+
+/* Eyebrow Pill Badge matching Contact Page .kz-hero-simple-badge */
+.kz-about-eyebrow-wrap {
+  margin-bottom: 18px;
+}
+
+.kz-about-eyebrow-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background-color: #FDF2F8;
+  border: 1px solid rgba(182, 52, 115, 0.28);
+  color: #B63473;
+  font-size: 0.74rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 5px 16px;
+  border-radius: 999px;
+  box-shadow: 0 1px 4px rgba(182, 52, 115, 0.06);
+}
+
+.kz-about-badge-sparkle {
+  width: 14px;
+  height: 14px;
+  color: #B63473;
+}
+
+/* Headline Matching Home Hero #55355E & Gradient Palette */
+.kz-about-hero-headline {
+  font-family: 'Roboto', sans-serif;
+  font-size: clamp(2.2rem, 3.8vw, 3.85rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin: 0 0 22px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.kz-about-hero-dark {
+  color: #55355E;
+  display: block;
+}
+
+.kz-about-hero-magenta {
+  background: linear-gradient(90deg, #7C3369 0%, #A23B79 30%, #C74485 70%, #D85695 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+  width: fit-content;
+}
+
+/* Capsule Pills Row matching user reference */
+.kz-about-pills-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.kz-about-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFFFFF;
+  border: 1.5px solid #D5CBD6;
+  border-radius: 9999px;
+  padding: 8px 22px;
+  font-size: 0.92rem;
+  font-weight: 550;
+  color: #55355E;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(85, 53, 94, 0.04);
+  transition: all 0.22s ease;
+}
+
+.kz-about-pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #B63473;
+}
+
+.kz-about-pill:hover {
+  border-color: #B63473;
+  color: #55355E;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(182, 52, 115, 0.12);
+}
+
+/* Hero Description matching Home Hero */
+.kz-about-hero-description {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1.62;
+  color: #6D5774;
+  max-width: 680px;
+  margin: 0;
+}
+
+/* Hero Action Buttons */
+.kz-about-hero-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.kz-about-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #8A2B68 0%, #B63473 100%);
+  color: #FFFFFF;
+  border: 1px solid #B63473;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 12px 28px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(182, 52, 115, 0.28);
+}
+
+.kz-about-btn-primary:hover {
+  background: linear-gradient(135deg, #752056 0%, #9E2660 100%);
+  border-color: #752056;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(182, 52, 115, 0.38);
+}
+
+.kz-about-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  background: #FFFFFF;
+  color: #B63473;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 12px 26px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(182, 52, 115, 0.35);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(182, 52, 115, 0.05);
+}
+
+.kz-about-btn-secondary:hover {
+  background: #FDF2F8;
+  border-color: #B63473;
+  color: #8c1e52;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(182, 52, 115, 0.12);
+}
+
+.kz-about-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  color: #B63473;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 12px 20px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.kz-about-btn-ghost:hover {
+  color: #8c1e52;
+  background: #FDF2F8;
+}
+
+/* ----------------------------------------------------
+   2. STATS STRIP
+   ---------------------------------------------------- */
+.kz-about-stats-section {
+  position: relative;
+  z-index: 3;
+  padding: 36px 0 50px;
+  background: #FAF8FB;
+}
+
+.kz-about-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  background: #FFFFFF;
+  border: 1px solid #EFE4F1;
+  border-radius: 20px;
+  padding: 30px 34px;
+  box-shadow: 0 12px 36px rgba(85, 53, 94, 0.08);
+}
+
+@media (max-width: 1024px) {
+  .kz-about-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .kz-about-stats-grid {
+    grid-template-columns: 1fr;
+    padding: 24px;
+  }
+}
+
+.kz-about-stat-card {
+  padding: 10px 14px;
+  border-left: 3px solid #E6D2E8;
+  transition: all 0.25s ease;
+}
+
+.kz-about-stat-card:hover {
+  border-left-color: #B63473;
+  transform: translateX(4px);
+}
+
+.kz-about-stat-val {
+  font-size: 2.3rem;
+  font-weight: 850;
+  color: #4A2552;
+  line-height: 1.1;
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+
+.kz-about-stat-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2D1A33;
+  margin-bottom: 4px;
+}
+
+.kz-about-stat-detail {
+  font-size: 0.82rem;
+  color: #7B6882;
+  line-height: 1.4;
+}
+
+/* ----------------------------------------------------
+   3. OUR STORY SECTION (Light, Elegant, Matches Reference)
+   ---------------------------------------------------- */
+.kz-story-section {
+  position: relative;
+  padding: 68px 0 80px 0;
+  background-color: #FAF8FA;
+  overflow: hidden;
+  border-top: 1px solid rgba(182, 52, 115, 0.08);
+  border-bottom: 1px solid rgba(182, 52, 115, 0.08);
+}
+
+
+.kz-story-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 56px;
+  align-items: start;
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 980px) {
+  .kz-story-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+/* Left Column: Story & Kaizen */
+.kz-story-left-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.kz-story-eyebrow-wrap {
+  margin-bottom: 16px;
+}
+
+.kz-story-badge {
+  display: inline-block;
+  background: #FFFFFF;
+  border: 1.5px solid rgba(182, 52, 115, 0.45);
+  color: #B63473;
+  font-size: 0.74rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 5px 16px;
+  border-radius: 999px;
+  box-shadow: 0 1px 4px rgba(182, 52, 115, 0.05);
+}
+
+.kz-story-heading {
+  font-family: 'Roboto', sans-serif;
+  font-size: clamp(2.4rem, 4vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  color: #2F1138;
+  margin: 0 0 16px 0;
+}
+
+.kz-story-heading-accent {
+  background: linear-gradient(90deg, #7C3369 0%, #A23B79 30%, #C74485 70%, #D85695 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+.kz-story-accent-bar {
+  width: 52px;
+  height: 4px;
+  background: linear-gradient(90deg, #7C3369 0%, #C74485 100%);
+  border-radius: 2px;
+  margin: 0 0 24px 0;
+}
+
+.kz-story-lead {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.68;
+  color: #55445B;
+  margin: 0 0 18px 0;
+}
+
+.kz-story-body {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.02rem;
+  line-height: 1.68;
+  color: #55445B;
+  margin: 0 0 26px 0;
+}
+
+/* Kaizen Concept Card */
+.kz-story-kaizen-card {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  background: #FFFFFF;
+  border: 1.5px solid rgba(182, 52, 115, 0.16);
+  border-radius: 20px;
+  padding: 22px 26px;
+  box-shadow: 0 4px 18px rgba(85, 53, 94, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  width: 100%;
+}
+
+.kz-story-kaizen-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(85, 53, 94, 0.08);
+}
+
+.kz-kaizen-badge-visual {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kz-kaizen-icon-circle {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FDF2F8 0%, #F5E8F3 100%);
+  border: 2px solid rgba(182, 52, 115, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8A2B68;
+  box-shadow: 0 4px 14px rgba(182, 52, 115, 0.12);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.kz-story-kaizen-card:hover .kz-kaizen-icon-circle {
+  transform: scale(1.06);
+  border-color: #B63473;
+  box-shadow: 0 6px 18px rgba(182, 52, 115, 0.2);
+}
+
+.kz-kaizen-gastro-icon {
+  font-size: 36px;
+  color: #8A2B68;
+  display: block;
+}
+
+.kz-kaizen-divider {
+  width: 1px;
+  height: 56px;
+  background: rgba(182, 52, 115, 0.2);
+  flex-shrink: 0;
+}
+
+.kz-kaizen-info {
+  flex: 1;
+}
+
+.kz-kaizen-title {
+  font-size: 1.32rem;
+  font-weight: 800;
+  color: #2A0E33;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.01em;
+}
+
+.kz-kaizen-text {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: #5D4B63;
+  margin: 0;
+}
+
+/* Right Column: Vision & Mission Cards */
+.kz-story-right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.kz-story-card {
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 34px 32px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 22px rgba(85, 53, 94, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.kz-story-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(85, 53, 94, 0.08);
+}
+
+.kz-vision-card {
+  border: 1px solid rgba(199, 56, 122, 0.22);
+}
+
+.kz-mission-card {
+  border: 1px solid rgba(14, 110, 142, 0.22);
+}
+
+/* Left Vertical Color Stripes */
+.kz-card-left-stripe {
+  position: absolute;
+  left: 0;
+  top: 18px;
+  bottom: 18px;
+  width: 6px;
+  border-radius: 0 4px 4px 0;
+}
+
+.kz-stripe-pink {
+  background: #C7387A;
+}
+
+.kz-stripe-teal {
+  background: #0E6E8E;
+}
+
+/* Card Inner Content */
+.kz-card-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 22px;
+  position: relative;
+  z-index: 2;
+}
+
+.kz-card-icon-badge {
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kz-badge-pink {
+  background: #FDF2F8;
+  border: 1px solid rgba(199, 56, 122, 0.2);
+  color: #C7387A;
+}
+
+.kz-badge-teal {
+  background: #F0F9FB;
+  border: 1px solid rgba(14, 110, 142, 0.2);
+  color: #0E6E8E;
+}
+
+.kz-badge-ring {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.kz-badge-pink .kz-badge-ring {
+  border: 1.5px solid rgba(199, 56, 122, 0.35);
+}
+
+.kz-badge-teal .kz-badge-ring {
+  border: 1.5px solid rgba(14, 110, 142, 0.35);
+}
+
+
+.kz-card-react-icon {
+  font-size: 22px;
+  display: block;
+}
+
+.kz-card-text-block {
+  flex: 1;
+  text-align: left;
+}
+
+.kz-card-tag {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.kz-tag-pink {
+  color: #C7387A;
+}
+
+.kz-tag-teal {
+  color: #0E6E8E;
+}
+
+.kz-card-heading {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #260D2E;
+  line-height: 1.25;
+  margin: 0 0 10px 0;
+  letter-spacing: -0.01em;
+}
+
+.kz-card-desc {
+  font-size: 0.94rem;
+  line-height: 1.55;
+  color: #5B4861;
+  margin: 0;
+}
+
+/* ----------------------------------------------------
+   4. WHAT MAKES IT DIFFERENT: 4 PILLARS & IMPACT STATS
+   ---------------------------------------------------- */
+.kz-diff-pillars-section {
+  padding: 86px 0 92px 0;
+  background: linear-gradient(180deg, #FAF4F8 0%, #F5ECF3 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.kz-pillars-header {
+  text-align: left;
+  max-width: 850px;
+  margin: 0 0 46px 0;
+}
+
+.kz-pillars-badge-wrap {
+  margin-bottom: 14px;
+}
+
+.kz-pillars-badge {
+  display: inline-block;
+  background-color: #FDF2F8;
+  border: 1.5px solid rgba(182, 52, 115, 0.45);
+  color: #B63473;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.74rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 5px 16px;
+  border-radius: 999px;
+  box-shadow: 0 1px 4px rgba(182, 52, 115, 0.05);
+}
+
+.kz-pillars-main-title {
+  font-family: 'Roboto', sans-serif;
+  font-size: clamp(2.3rem, 3.8vw, 3.35rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: #2F1138;
+  margin: 0 0 16px 0;
+}
+
+.kz-pillars-title-gradient {
+  background: linear-gradient(90deg, #7C3369 0%, #A23B79 30%, #C74485 70%, #D85695 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+.kz-pillars-accent-bar {
+  width: 52px;
+  height: 4px;
+  background: linear-gradient(90deg, #7C3369 0%, #C74485 100%);
+  border-radius: 2px;
+  margin: 0 0 18px 0;
+}
+
+.kz-pillars-header-desc {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: #55445B;
+  max-width: 720px;
+  margin: 0;
+}
+
+/* 4 Pillars Grid */
+.kz-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 56px;
+}
+
+@media (max-width: 1100px) {
+  .kz-pillars-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .kz-pillars-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}
+
+/* ====================================================
+   WHAT MAKES IT DIFFERENT: 4 PILLARS CARDS (CREATIVE ARCHITECTURAL UI)
+   ==================================================== */
+.kz-pillar-card {
+  background: #FFFFFF;
+  border-radius: 24px;
+  padding: 30px 24px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+  border: 1.5px solid #F0E8F2;
+  box-shadow: 0 8px 30px rgba(85, 53, 94, 0.05), 0 2px 6px rgba(85, 53, 94, 0.02);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease;
+  min-height: 380px;
+}
+
+.kz-pillar-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 42px rgba(85, 53, 94, 0.12), 0 4px 12px rgba(85, 53, 94, 0.04);
+  border-color: rgba(170, 45, 123, 0.32);
+}
+
+/* Top Accent Stripe */
+.kz-pillar-top-stripe {
+  height: 4px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+}
+
+.kz-stripe-pink {
+  background: linear-gradient(90deg, #D13B7E 0%, #FF7DB4 100%);
+}
+
+.kz-stripe-purple {
+  background: linear-gradient(90deg, #6B3FA0 0%, #A855F7 100%);
+}
+
+.kz-stripe-rose {
+  background: linear-gradient(90deg, #C0266A 0%, #FB7185 100%);
+}
+
+.kz-stripe-indigo {
+  background: linear-gradient(90deg, #482868 0%, #818CF8 100%);
+}
+
+/* Large Watermark Numeral */
+.kz-pillar-watermark {
+  position: absolute;
+  right: 18px;
+  top: 14px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 5rem;
+  font-weight: 900;
+  line-height: 1;
+  color: rgba(85, 53, 94, 0.04);
+  pointer-events: none;
+  user-select: none;
+  transition: transform 0.3s ease, color 0.3s ease;
+  letter-spacing: -0.04em;
+}
+
+.kz-pillar-card:hover .kz-pillar-watermark {
+  color: rgba(170, 45, 123, 0.08);
+  transform: translateY(-2px) scale(1.04);
+}
+
+/* Header Row */
+.kz-pillar-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Pillar Badge */
+.kz-pillar-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.73rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.kz-badge-pink {
+  background: #FDF2F8;
+  color: #D13B7E;
+  border: 1px solid rgba(209, 59, 126, 0.22);
+}
+
+.kz-badge-purple {
+  background: #F5F0FB;
+  color: #6B3FA0;
+  border: 1px solid rgba(107, 63, 160, 0.22);
+}
+
+.kz-badge-rose {
+  background: #FDF2F8;
+  color: #C0266A;
+  border: 1px solid rgba(192, 38, 106, 0.22);
+}
+
+.kz-badge-indigo {
+  background: #F4F1FA;
+  color: #482868;
+  border: 1px solid rgba(72, 40, 104, 0.22);
+}
+
+.kz-pillar-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.kz-dot-pink {
+  background: #D13B7E;
+  box-shadow: 0 0 6px rgba(209, 59, 126, 0.6);
+}
+
+.kz-dot-purple {
+  background: #6B3FA0;
+  box-shadow: 0 0 6px rgba(107, 63, 160, 0.6);
+}
+
+.kz-dot-rose {
+  background: #C0266A;
+  box-shadow: 0 0 6px rgba(192, 38, 106, 0.6);
+}
+
+.kz-dot-indigo {
+  background: #482868;
+  box-shadow: 0 0 6px rgba(72, 40, 104, 0.6);
+}
+
+/* Icon Box */
+.kz-pillar-icon-box {
+  width: 50px;
+  height: 50px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.26s ease, box-shadow 0.26s ease;
+  flex-shrink: 0;
+}
+
+.kz-icon-box-pink {
+  background: linear-gradient(135deg, #FDF0F6 0%, #FBE5EF 100%);
+  color: #C0266A;
+  border: 1px solid rgba(192, 38, 106, 0.2);
+  box-shadow: 0 4px 12px rgba(192, 38, 106, 0.08);
+}
+
+.kz-icon-box-purple {
+  background: linear-gradient(135deg, #F5EFFB 0%, #EFE5FA 100%);
+  color: #582C6D;
+  border: 1px solid rgba(88, 44, 109, 0.2);
+  box-shadow: 0 4px 12px rgba(88, 44, 109, 0.08);
+}
+
+.kz-icon-box-rose {
+  background: linear-gradient(135deg, #FDF0F6 0%, #FCE3EE 100%);
+  color: #C0266A;
+  border: 1px solid rgba(192, 38, 106, 0.2);
+  box-shadow: 0 4px 12px rgba(192, 38, 106, 0.08);
+}
+
+.kz-icon-box-indigo {
+  background: linear-gradient(135deg, #F2EDFA 0%, #EBE3F8 100%);
+  color: #482868;
+  border: 1px solid rgba(72, 40, 104, 0.2);
+  box-shadow: 0 4px 12px rgba(72, 40, 104, 0.08);
+}
+
+.kz-pillar-card:hover .kz-pillar-icon-box {
+  transform: scale(1.08);
+}
+
+.kz-pillar-svg {
+  width: 27px;
+  height: 27px;
+  display: block;
+}
+
+/* Card Content */
+.kz-pillar-content {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 22px;
+}
+
+.kz-pillar-title {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #240D2D;
+  margin: 0 0 10px 0;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  transition: color 0.2s ease;
+}
+
+.kz-pillar-card:hover .kz-pillar-title {
+  color: #AA2D7B;
+}
+
+.kz-pillar-desc {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.94rem;
+  line-height: 1.62;
+  color: #5B4861;
+  margin: 0 0 14px 0;
+}
+
+/* Feature Chips */
+.kz-pillar-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.kz-pillar-chip {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #6D5676;
+  background: #F8F3FA;
+  border: 1px solid #ECE3EE;
+  padding: 4px 10px;
+  border-radius: 8px;
+  letter-spacing: 0.02em;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.kz-pillar-card:hover .kz-pillar-chip {
+  background: #FAF0F6;
+  border-color: rgba(170, 45, 123, 0.2);
+}
+
+/* Action Row */
+.kz-pillar-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16px;
+  border-top: 1px dashed #EDE5F0;
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+}
+
+.kz-pillar-action-text {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.86rem;
+  font-weight: 750;
+  color: #4A2552;
+  transition: color 0.22s ease;
+}
+
+.kz-pillar-action-arrow {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #F6EFF8;
+  color: #8A2B68;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kz-pillar-card:hover .kz-pillar-action-text {
+  color: #AA2D7B;
+}
+
+.kz-pillar-card:hover .kz-pillar-action-arrow {
+  background: linear-gradient(135deg, #C0266A 0%, #8A2B68 100%);
+  color: #FFFFFF;
+  transform: translateX(3px);
+  box-shadow: 0 4px 12px rgba(192, 38, 106, 0.32);
+}
+
+/* ====================================================
+   CONNECTED IMPACT STATS BANNER
+   ==================================================== */
+.kz-impact-stats-banner {
+  background: linear-gradient(135deg, #3D1244 0%, #5C1E58 45%, #8C1E52 85%, #B63473 100%);
+  border-radius: 28px;
+  padding: 40px 36px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(74, 30, 82, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.kz-impact-stats-mesh {
+  position: absolute;
+  top: -50%;
+  left: -20%;
+  width: 140%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.kz-impact-stats-inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: 20px;
+}
+
+@media (max-width: 1024px) {
+  .kz-impact-stats-inner {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+  }
+  .kz-impact-pod-sep {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .kz-impact-stats-inner {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    text-align: center;
+  }
+}
+
+.kz-impact-stat-pod {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 8px 12px;
+}
+
+@media (max-width: 600px) {
+  .kz-impact-stat-pod {
+    align-items: center;
+  }
+}
+
+.kz-impact-icon-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  margin-bottom: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.kz-impact-stat-num {
+  font-size: clamp(2.4rem, 3.4vw, 3.2rem);
+  font-weight: 900;
+  line-height: 1;
+  color: #FFFFFF;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+.kz-impact-stat-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+
+.kz-impact-stat-detail {
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.kz-impact-pod-sep {
+  width: 1px;
+  height: 84px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* ====================================================
+   5. DUAL SHOWCASE: WHO SHOULD ATTEND & WHAT WE WILL EXPLORE
+   ==================================================== */
+/* ====================================================
+   5. DUAL SHOWCASE: WHO SHOULD ATTEND & WHAT WE WILL EXPLORE
+   ==================================================== */
+.kz-ecosystem-section {
+  padding: 85px 0 95px 0;
+  background: #FFFFFF;
+  position: relative;
+  border-top: 1px solid rgba(182, 52, 115, 0.08);
+}
+
+.kz-ecosystem-split {
+  display: flex;
+  align-items: stretch;
+  gap: 48px;
+  position: relative;
+}
+
+.kz-ecosystem-divider {
+  width: 1px;
+  background: #EAE3ED;
+  flex-shrink: 0;
+}
+
+/* Columns */
+.kz-ecosystem-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.kz-attend-col {
+  flex: 1.25;
+}
+
+.kz-explore-col {
+  flex: 1;
+}
+
+@media (max-width: 1100px) {
+  .kz-ecosystem-split {
+    flex-direction: column;
+    gap: 56px;
+  }
+  .kz-ecosystem-divider {
+    width: 100%;
+    height: 1px;
+  }
+}
+
+/* Eyebrow and accent bar */
+.kz-col-eyebrow-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 22px;
+}
+
+.kz-col-eyebrow {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.kz-eyebrow-pink {
+  color: #D13B7E;
+}
+
+.kz-bar-pink,
+.kz-bar-dark {
+  width: 36px;
+  height: 3px;
+  background: linear-gradient(90deg, #7C3369 0%, #A23B79 40%, #C74485 100%);
+  margin-top: 7px;
+  border-radius: 2px;
+}
+
+.kz-eyebrow-dark {
+  color: #B63473;
+}
+
+/* Titles */
+.kz-col-title {
+  font-family: 'Roboto', sans-serif;
+  font-size: clamp(2.3rem, 3.8vw, 3.35rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: #2F1138;
+  margin: 0 0 28px 0;
+}
+
+.kz-title-gradient-accent,
+.kz-title-pink,
+.kz-title-dark {
+  background: linear-gradient(90deg, #7C3369 0%, #A23B79 30%, #C74485 70%, #D85695 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+/* Grids */
+.kz-attendee-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.kz-explore-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 800px) {
+  .kz-attendee-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .kz-attendee-grid,
+  .kz-explore-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Compact Pill Card */
+.kz-compact-pill-card {
+  background: #FFFFFF;
+  border: 1px solid #ECE7F0;
+  border-radius: 20px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 2px 10px rgba(50, 15, 60, 0.03);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  cursor: pointer;
+  min-height: 72px;
+}
+
+.kz-compact-pill-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(50, 15, 60, 0.09);
+  border-color: rgba(209, 59, 126, 0.35);
+}
+
+.kz-explore-col .kz-compact-pill-card:hover {
+  border-color: rgba(85, 53, 94, 0.35);
+}
+
+.kz-pill-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.kz-pill-icon-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.kz-compact-pill-card:hover .kz-pill-icon-circle {
+  transform: scale(1.05);
+}
+
+.kz-pill-name {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #2D1036;
+  line-height: 1.35;
+}
+
+/* Arrow Button */
+.kz-pill-arrow {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #F4EFF6;
+  color: #8C7896;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.kz-compact-pill-card:hover .kz-pill-arrow {
+  background: #D13B7E;
+  color: #FFFFFF;
+  transform: translateX(2px);
+}
+
+.kz-explore-col .kz-compact-pill-card:hover .kz-pill-arrow {
+  background: #55355E;
+  color: #FFFFFF;
+}
+
+/* ====================================================
+   6. RESPONSIBLE AI: HUMANS MAKE THE FINAL CALL
+   ==================================================== */
+.kz-responsible-ai-section {
+  padding: 95px 0 85px 0;
+  background: linear-gradient(180deg, #1C0922 0%, #2D0F38 50%, #190820 100%);
+  position: relative;
+  overflow: hidden;
+  color: #FFFFFF;
+}
+
+.kz-responsible-ambient-glow {
+  position: absolute;
+  top: 15%;
+  right: 10%;
+  width: 600px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(182, 52, 115, 0.18) 0%, rgba(28, 9, 34, 0) 70%);
+  pointer-events: none;
+}
+
+.kz-responsible-header {
+  text-align: center;
+  max-width: 840px;
+  margin: 0 auto 58px auto;
+  position: relative;
+  z-index: 2;
+}
+
+.kz-responsible-badge-wrap {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.kz-responsible-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
+  color: #FFD4EA;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 6px 18px;
+  border-radius: 999px;
+}
+
+.kz-responsible-title {
+  font-family: 'Roboto', sans-serif;
+  font-size: clamp(2.4rem, 4vw, 3.5rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: #FFFFFF;
+  margin: 0 0 18px 0;
+}
+
+.kz-highlight-gradient {
+  background: linear-gradient(135deg, #FF7DB4 0%, #FFB5D7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.kz-responsible-lead {
+  font-size: 1.08rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0;
+}
+
+/* 4 Trust Architecture Cards */
+.kz-responsible-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+  margin-bottom: 48px;
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 1100px) {
+  .kz-responsible-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .kz-responsible-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kz-responsible-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  border-radius: 22px;
+  padding: 30px 24px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.kz-resp-top-accent {
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 3px;
+  background: linear-gradient(90deg, #FF7DB4, #B63473);
+  opacity: 0.7;
+  border-radius: 0 0 3px 3px;
+  transition: all 0.3s ease;
+}
+
+.kz-responsible-card:hover {
+  transform: translateY(-6px);
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 125, 180, 0.4);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+}
+
+.kz-responsible-card:hover .kz-resp-top-accent {
+  left: 0;
+  right: 0;
+  opacity: 1;
+}
+
+.kz-resp-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.kz-resp-num {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #FF7DB4;
+  font-family: monospace;
+}
+
+.kz-resp-chip {
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #FFD4EA;
+  background: rgba(182, 52, 115, 0.3);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 125, 180, 0.25);
+}
+
+.kz-resp-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FF7DB4;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.kz-resp-card-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.01em;
+}
+
+.kz-resp-card-text {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.78);
+  margin: 0 0 24px 0;
+  flex: 1;
+}
+
+.kz-resp-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.76rem;
+  font-weight: 650;
+  color: #FFD4EA;
+}
+
+.kz-resp-dot-active {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22C55E;
+  box-shadow: 0 0 6px #22C55E;
+}
+
+/* Bottom Trust Ribbon */
+.kz-responsible-ribbon {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+  border-radius: 18px;
+  padding: 18px 28px;
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 800px) {
+  .kz-responsible-ribbon {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 20px;
+  }
+}
+
+.kz-ribbon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #FFB020;
+  background: rgba(255, 176, 32, 0.12);
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 176, 32, 0.28);
+  white-space: nowrap;
+}
+
+.kz-ribbon-text {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+/* ----------------------------------------------------
+   6. COMPARISON TABLE SECTION
+   ---------------------------------------------------- */
+.kz-about-diff-section {
+  padding: 80px 0;
+  background: #FFFFFF;
+  border-top: 1px solid #EFE4F1;
+}
+
+.kz-about-table-wrap {
+  overflow-x: auto;
+  border-radius: 20px;
+  border: 1px solid #E8D9EB;
+  box-shadow: 0 8px 30px rgba(85, 53, 94, 0.05);
+  background: #FFFFFF;
+}
+
+.kz-about-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.kz-about-table th {
+  padding: 20px 24px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: #F9F4FA;
+  border-bottom: 1px solid #E8D9EB;
+}
+
+.kz-col-aspect {
+  color: #55355E;
+  width: 25%;
+}
+
+.kz-col-trad {
+  color: #7B6882;
+  width: 35%;
+}
+
+.kz-col-kaizen {
+  color: #B63473;
+  width: 40%;
+  background: #FDF2F8 !important;
+}
+
+.kz-about-table td {
+  padding: 22px 24px;
+  border-bottom: 1px solid #F2E8F4;
+  vertical-align: middle;
+}
+
+.kz-about-table tr:last-child td {
+  border-bottom: none;
+}
+
+.kz-aspect-badge {
+  font-weight: 750;
+  color: #381A3E;
+  font-size: 0.96rem;
+}
+
+.kz-trad-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: #73617A;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.kz-icon-cross {
+  color: #A094A5;
+  font-weight: 700;
+  margin-top: 1px;
+}
+
+.kz-kaizen-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: #2D1A33;
+  font-weight: 600;
+  font-size: 0.94rem;
+  line-height: 1.45;
+}
+
+.kz-td-kaizen {
+  background: rgba(253, 242, 248, 0.35);
+}
+
+.kz-icon-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #B63473;
+  color: #FFFFFF;
+  font-size: 0.72rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ----------------------------------------------------
+   7. FACULTY LEADERSHIP PREVIEW
+   ---------------------------------------------------- */
+.kz-about-faculty-section {
+  padding: 80px 0;
+  background: #FAF8FB;
+}
+
+.kz-about-split-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 768px) {
+  .kz-about-split-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.kz-about-view-all-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFFFFF;
+  border: 1px solid #D9C3DC;
+  color: #55355E;
+  font-weight: 700;
+  font-size: 0.92rem;
+  padding: 12px 24px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.kz-about-view-all-btn:hover {
+  background: #55355E;
+  color: #FFFFFF;
+  border-color: #55355E;
+  transform: translateY(-2px);
+}
+
+.kz-about-faculty-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .kz-about-faculty-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .kz-about-faculty-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kz-about-fac-card {
+  background: #FFFFFF;
+  border: 1px solid #EEDFEF;
+  border-radius: 20px;
+  padding: 28px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.25s ease;
+}
+
+.kz-about-fac-card:hover {
+  transform: translateY(-4px);
+  border-color: #B63473;
+  box-shadow: 0 12px 30px rgba(85, 53, 94, 0.08);
+}
+
+.kz-fac-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #B63473;
+  background: #FDF2F8;
+  padding: 3px 12px;
+  border-radius: 999px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(182, 52, 115, 0.2);
+}
+
+.kz-fac-avatar {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #55355E 0%, #B63473 100%);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  margin-bottom: 16px;
+  box-shadow: 0 6px 18px rgba(85, 53, 94, 0.25);
+}
+
+.kz-fac-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #2D1A33;
+  margin: 0 0 6px 0;
+}
+
+.kz-fac-role {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #B63473;
+  margin-bottom: 6px;
+}
+
+.kz-fac-inst {
+  font-size: 0.8rem;
+  color: #6E5B74;
+  line-height: 1.35;
+  margin-bottom: 12px;
+}
+
+.kz-fac-country {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #4A3A50;
+  margin-top: auto;
+}
+
+/* ----------------------------------------------------
+   8. VENUE SPOTLIGHT SECTION
+   ---------------------------------------------------- */
+.kz-about-venue-section {
+  padding: 40px 0 80px 0;
+  background: #FAF8FB;
+}
+
+.kz-about-venue-card {
+  background: linear-gradient(135deg, #3C1944 0%, #55355E 100%);
+  border-radius: 26px;
+  padding: 50px 48px;
+  color: #FFFFFF;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(60, 25, 68, 0.25);
+}
+
+@media (max-width: 768px) {
+  .kz-about-venue-card {
+    padding: 34px 24px;
+  }
+}
+
+.kz-about-venue-tag {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #FFB3D9;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.kz-about-venue-title {
+  font-size: clamp(2rem, 3.2vw, 2.6rem);
+  font-weight: 850;
+  margin: 0 0 6px 0;
+  color: #FFFFFF;
+}
+
+.kz-about-venue-subtitle {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: #FFD4EA;
+  margin: 0 0 18px 0;
+}
+
+.kz-about-venue-text {
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 860px;
+  margin-bottom: 30px;
+}
+
+.kz-about-venue-meta-pills {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.kz-venue-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #FFFFFF;
+  backdrop-filter: blur(8px);
+}
+
+.kz-venue-meta-pill svg {
+  color: #FF94CC;
+}
+
+/* ----------------------------------------------------
+   9. FAQS SECTION
+   ---------------------------------------------------- */
+.kz-about-faq-section {
+  padding: 80px 0;
+  background: #FFFFFF;
+  border-top: 1px solid #EFE4F1;
+}
+
+.kz-about-faq-accordion {
+  max-width: 880px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.kz-about-faq-item {
+  border: 1px solid #EADBEC;
+  border-radius: 16px;
+  background: #FAF7FB;
+  padding: 22px 28px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.kz-about-faq-item:hover {
+  border-color: #B63473;
+  background: #FFFFFF;
+}
+
+.kz-about-faq-item.is-active {
+  background: #FFFFFF;
+  border-color: #B63473;
+  box-shadow: 0 8px 24px rgba(182, 52, 115, 0.08);
+}
+
+.kz-about-faq-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 1.06rem;
+  font-weight: 750;
+  color: #2D1A33;
+}
+
+.kz-about-faq-icon {
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: #B63473;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+
+.kz-about-faq-answer {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #F0E2F1;
+}
+
+.kz-about-faq-answer p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #55425B;
+  margin: 0;
+}
+
+/* ----------------------------------------------------
+   10. CTA SECTION
+   ---------------------------------------------------- */
+.kz-about-cta-section {
+  padding: 60px 0 100px 0;
+  background: #FAF8FB;
+}
+
+.kz-about-cta-card {
+  background: linear-gradient(135deg, #4A2552 0%, #2A1131 100%);
+  border-radius: 28px;
+  padding: 70px 48px;
+  text-align: center;
+  color: #FFFFFF;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(74, 37, 82, 0.3);
+}
+
+@media (max-width: 768px) {
+  .kz-about-cta-card {
+    padding: 44px 24px;
+  }
+}
+
+.kz-about-cta-pill {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #FFB3D9;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  padding: 6px 18px;
+  border-radius: 999px;
+  margin-bottom: 20px;
+}
+
+.kz-about-cta-title {
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  font-weight: 850;
+  line-height: 1.15;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.02em;
+}
+
+.kz-about-cta-desc {
+  font-size: 1.15rem;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 650px;
+  margin: 0 auto 34px auto;
+  line-height: 1.55;
+}
+
+.kz-about-cta-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.kz-about-cta-btn-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #B63473 0%, #901B56 100%);
+  color: #FFFFFF;
+  font-size: 1rem;
+  font-weight: 650;
+  padding: 14px 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 8px 25px rgba(182, 52, 115, 0.45);
+}
+
+.kz-about-cta-btn-main:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #C73B80 0%, #A02061 100%);
+  box-shadow: 0 10px 30px rgba(182, 52, 115, 0.6);
+}
+
+.kz-about-cta-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 14px 30px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.kz-about-cta-btn-outline:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-2px);
+}

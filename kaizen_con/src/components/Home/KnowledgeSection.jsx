@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import './KnowledgeSection.css';
 import askImg from '../../assets/home/ask.png';
 
@@ -182,20 +183,13 @@ export default function KnowledgeSection() {
                 )}
 
                 {/* Right Action: Open knowledge base link */}
-                <a
-                  href="#ai-assistant"
+                <Link
+                  to="/knowledge"
                   className="kz-knowledge-open-link"
-                  onClick={(e) => {
-                    const el = document.querySelector('#ai-assistant') || document.querySelector('#ai-experience');
-                    if (el) {
-                      e.preventDefault();
-                      el.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}
                 >
                   <span>Open knowledge base</span>
                   <span className="kz-knowledge-arrow" aria-hidden="true">→</span>
-                </a>
+                </Link>
               </div>
 
               {/* Instant Search Results Dropdown Preview */}

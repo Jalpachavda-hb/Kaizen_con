@@ -1,7 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './FloatingChatbot.css';
+import chatbotImg from '../../assets/home/chatbot.png';
 
 export default function FloatingChatbot() {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
@@ -75,7 +78,7 @@ export default function FloatingChatbot() {
 
   return (
     <div className="kz-floating-chatbot-root">
-      {/* Floating Circular Launcher Button */}
+      {/* Floating Circular Launcher Button (80 by 80) */}
       <button
         type="button"
         className={`kz-floating-chatbot-btn ${isOpen ? 'is-active' : ''}`}
@@ -87,49 +90,36 @@ export default function FloatingChatbot() {
         <span className="kz-floating-btn-glow" aria-hidden="true" />
 
         {/* Online Status Pulse Badge */}
-        <span className="kz-floating-online-badge" aria-label="Online">
-          <span className="kz-floating-online-dot" />
-        </span>
+        {!isOpen && (
+          <span className="kz-floating-online-badge" aria-label="Online">
+            <span className="kz-floating-online-dot" />
+          </span>
+        )}
 
-        {/* Icon (Swaps between AI Chatbot and Close X) */}
-        <div className="kz-floating-btn-icon-wrap">
-          {isOpen ? (
-            <svg
-              className="kz-floating-icon kz-icon-close"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          ) : (
-            <svg
-              className="kz-floating-icon kz-icon-bot"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              {/* Antenna with digital beacon */}
-              <line x1="12" y1="2" x2="12" y2="5" />
-              <circle cx="12" cy="2" r="1.2" fill="currentColor" />
-              {/* Modern robot rounded head */}
-              <rect x="4" y="5" width="16" height="13" rx="5" />
-              {/* Digital eyes */}
-              <circle cx="9" cy="11.5" r="1.5" fill="currentColor" />
-              <circle cx="15" cy="11.5" r="1.5" fill="currentColor" />
-              {/* Friendly smile */}
-              <path d="M9.5 15c1 .8 4 .8 5 0" strokeWidth="1.6" />
-              {/* Side audio receptors */}
-              <path d="M2 10.5v2" strokeWidth="2" />
-              <path d="M22 10.5v2" strokeWidth="2" />
-            </svg>
+        {/* Mascot Image (80 by 80) with Close Overlay on Active */}
+        <div className="kz-floating-btn-content">
+          <img
+            src={chatbotImg}
+            alt="KaizenCon AI Chatbot"
+            className="kz-floating-bot-img"
+            width="80"
+            height="80"
+          />
+          {isOpen && (
+            <div className="kz-floating-close-overlay" aria-label="Close Chat">
+              <svg
+                className="kz-floating-icon kz-icon-close"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </div>
           )}
         </div>
       </button>
@@ -141,14 +131,11 @@ export default function FloatingChatbot() {
           <div className="kz-floating-modal-header">
             <div className="kz-floating-header-info">
               <div className="kz-floating-header-avatar" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="2" x2="12" y2="5" />
-                  <circle cx="12" cy="2" r="1.2" fill="currentColor" />
-                  <rect x="4" y="5" width="16" height="13" rx="4" />
-                  <circle cx="9" cy="11" r="1.5" fill="currentColor" />
-                  <circle cx="15" cy="11" r="1.5" fill="currentColor" />
-                  <path d="M10 15h4" />
-                </svg>
+                <img
+                  src={chatbotImg}
+                  alt="KaizenCon AI"
+                  className="kz-floating-header-avatar-img"
+                />
               </div>
               <div className="kz-floating-header-text">
                 <h4 className="kz-floating-header-title">KaizenCon AI</h4>
@@ -173,9 +160,13 @@ export default function FloatingChatbot() {
             {messages.map((m, i) => (
               <div key={i} className={`kz-floating-msg-row kz-msg-${m.sender}`}>
                 {m.sender === 'bot' && (
-                  <span className="kz-bot-mini-avatar" aria-hidden="true">
-                    ✦
-                  </span>
+                  <div className="kz-bot-mini-avatar" aria-hidden="true">
+                    <img
+                      src={chatbotImg}
+                      alt="AI"
+                      className="kz-bot-mini-avatar-img"
+                    />
+                  </div>
                 )}
                 <div className="kz-floating-bubble">
                   <p className="kz-bubble-text">{m.text}</p>
@@ -186,7 +177,13 @@ export default function FloatingChatbot() {
 
             {isTyping && (
               <div className="kz-floating-msg-row kz-msg-bot">
-                <span className="kz-bot-mini-avatar">✦</span>
+                <div className="kz-bot-mini-avatar" aria-hidden="true">
+                  <img
+                    src={chatbotImg}
+                    alt="AI"
+                    className="kz-bot-mini-avatar-img"
+                  />
+                </div>
                 <div className="kz-floating-bubble kz-typing-bubble">
                   <span className="kz-typing-dot" />
                   <span className="kz-typing-dot" />
@@ -197,16 +194,19 @@ export default function FloatingChatbot() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick Prompts Chips */}
+          {/* Quick Prompts & Router Navigation Chips */}
           <div className="kz-floating-quick-chips">
             <button type="button" onClick={() => handleQuickQuestion('Tell me about the Scientific Programme')}>
               📅 Programme
             </button>
-            <button type="button" onClick={() => handleQuickQuestion('Where is the Venue located?')}>
-              📍 Venue
+            <button type="button" onClick={() => { navigate('/contact'); setIsOpen(false); }}>
+              ✉️ Contact Us
             </button>
-            <button type="button" onClick={() => handleQuickQuestion('How do I Register?')}>
-              🎟️ Registration
+            <button type="button" onClick={() => { navigate('/speakers'); setIsOpen(false); }}>
+              🎙️ Faculty
+            </button>
+            <button type="button" onClick={() => { navigate('/knowledge'); setIsOpen(false); }}>
+              📚 Knowledge Base
             </button>
           </div>
 
