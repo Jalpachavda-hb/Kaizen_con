@@ -1,5 +1,5 @@
 /* ====================================================
-   KAIZENCON 2027 - PREMIUM RESPONSIVE FOOTER STYLES
+   KAIZENCON 2027 - CLEAN 4-COLUMN FOOTER STYLES
    ==================================================== */
 
 .kz-footer-main {
@@ -8,46 +8,35 @@
   background: #ffffff;
   color: #334155;
   font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  border-top: 1px solid #ede8ef;
+  border-top: 1px solid #edf0f4;
   overflow: hidden;
+  padding-top: 56px;
 }
 
-/* Full-bleed wrapper so hospital image touches the right browser edge */
-.kz-footer-wrapper {
-  position: relative;
-  width: 100%;
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
+/* Main 4-Column Grid Container */
+.kz-footer-container {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 40px 52px 40px;
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1.05fr 1.25fr;
+  gap: clamp(24px, 3.5vw, 54px);
+  align-items: flex-start;
 }
 
 /* ----------------------------------------------------
-   1. CONTENT AREA (Brand + 3 Navigation Columns)
-   Aligned with 1440px website container
+   1. BRAND COLUMN (Left side with divider line)
    ---------------------------------------------------- */
-.kz-footer-content-area {
-  flex: 1;
-  min-width: 0;
-  padding: 38px 36px 34px max(40px, calc((100vw - 1440px) / 2 + 40px));
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 36px;
-}
-
-/* Brand Column */
 .kz-footer-brand-col {
-  flex: 0 0 280px;
-  max-width: 310px;
   display: flex;
   flex-direction: column;
-  padding-right: 32px;
-  border-right: 1px solid #e9ecef;
+  padding-right: clamp(20px, 3vw, 44px);
+  border-right: 1px solid #edf0f4;
 }
 
 .kz-footer-brand-logo-link {
   display: inline-block;
-  margin-bottom: 14px;
+  margin-bottom: 18px;
   transition: transform 0.25s ease;
 }
 
@@ -56,7 +45,7 @@
 }
 
 .kz-footer-brand-logo-img {
-  height: 64px;
+  height: 62px;
   width: auto;
   max-width: 100%;
   object-fit: contain;
@@ -64,159 +53,158 @@
 }
 
 .kz-footer-brand-desc {
-  font-size: 0.9rem;
-  color: #4b5563;
-  line-height: 1.5;
-  margin: 0 0 20px 0;
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.55;
+  margin: 0 0 24px 0;
   font-weight: 500;
+  max-width: 310px;
 }
 
-.kz-footer-event-details {
+/* Event Meta Items (Date & Location) */
+.kz-footer-meta-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 22px;
+  gap: 16px;
 }
 
-.kz-footer-event-text {
-  font-size: 0.88rem;
-  color: #4b5563;
-  margin: 0;
-  line-height: 1.5;
-  font-weight: 400;
-}
-
-/* Social icons under Brand info */
-.kz-footer-socials {
+.kz-footer-meta-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding-top: 6px;
+  gap: 14px;
 }
 
-.kz-footer-social-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #f4f0f6;
-  color: #211333;
-  display: inline-flex;
+.kz-footer-meta-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background-color: #fdf2f7;
+  color: #d8246e;
+  display: flex;
   align-items: center;
   justify-content: center;
-  text-decoration: none;
-  transition: all 0.22s ease;
-  font-size: 0.9rem;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-.kz-footer-social-btn svg {
-  width: 17px;
-  height: 17px;
-  fill: currentColor;
+.kz-footer-meta-item:hover .kz-footer-meta-icon {
+  background-color: #fce7f3;
+  transform: scale(1.05);
 }
 
-.kz-footer-social-btn:hover {
-  background: #c51963;
-  color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(197, 25, 99, 0.28);
+.kz-footer-meta-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.kz-footer-meta-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kz-footer-meta-primary {
+  font-size: 0.93rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.35;
+}
+
+.kz-footer-meta-secondary {
+  font-size: 0.84rem;
+  color: #64748b;
+  line-height: 1.35;
 }
 
 /* ----------------------------------------------------
-   2. THREE NAVIGATION COLUMNS (Evenly distributed)
+   2. NAVIGATION & CONTACT HEADINGS
    ---------------------------------------------------- */
-.kz-footer-nav-columns {
+.kz-footer-nav-col,
+.kz-footer-contact-col {
   display: flex;
-  gap: clamp(28px, 4vw, 70px);
-  flex: 1;
-  justify-content: space-around;
-  padding-left: 12px;
-}
-
-.kz-footer-nav-col {
-  min-width: 120px;
+  flex-direction: column;
 }
 
 .kz-footer-nav-heading {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: #1f1435;
   margin: 0;
   letter-spacing: -0.2px;
 }
 
-.kz-footer-nav-bar {
-  width: 28px;
-  height: 2.5px;
+.kz-footer-heading-bar {
+  width: 32px;
+  height: 3px;
   background-color: #d8246e;
   border-radius: 2px;
-  margin: 6px 0 16px 0;
+  margin: 8px 0 20px 0;
 }
 
+/* ----------------------------------------------------
+   3. NAVIGATION LINK LISTS
+   ---------------------------------------------------- */
 .kz-footer-nav-list {
   list-style: none;
   padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 13px;
 }
 
 .kz-footer-nav-list li a {
-  font-size: 0.86rem;
-  color: #4b5563;
+  font-size: 0.91rem;
+  color: #475569;
   text-decoration: none;
-  transition: all 0.22s ease;
+  transition: color 0.2s ease, transform 0.2s ease;
   display: inline-block;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 .kz-footer-nav-list li a:hover {
-  color: #c51963;
-  transform: translateX(2px);
+  color: #d8246e;
+  transform: translateX(3px);
 }
 
-/* Contact Details in Get in Touch Column */
+/* ----------------------------------------------------
+   4. GET IN TOUCH COLUMN
+   ---------------------------------------------------- */
 .kz-footer-contact-list {
   list-style: none;
   padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .kz-footer-contact-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 0.86rem;
-  color: #4b5563;
-  line-height: 1.35;
+  gap: 13px;
 }
 
-.kz-footer-contact-item a {
-  color: #4b5563;
-  text-decoration: none;
-  transition: all 0.22s ease;
-}
-
-.kz-footer-contact-item a:hover {
-  color: #c51963;
-  transform: translateX(2px);
-}
-
-.kz-footer-contact-item span {
-  color: #4b5563;
+.kz-footer-contact-address {
+  align-items: flex-start;
 }
 
 .kz-footer-contact-icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: #fdf2f7;
   color: #d8246e;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.kz-footer-contact-item:hover .kz-footer-contact-icon {
+  background-color: #fce7f3;
+  transform: scale(1.05);
 }
 
 .kz-footer-contact-icon svg {
@@ -224,175 +212,105 @@
   height: 17px;
 }
 
-/* ----------------------------------------------------
-   3. HOSPITAL SECTION TOUCHING RIGHT EDGE (Clean, Full Image, No Pink Lines)
-   Full building visible from top to bottom with object-fit: contain
-   ---------------------------------------------------- */
-.kz-footer-hospital-section {
-  position: relative;
-  flex: 0 0 clamp(480px, 40vw, 620px);
-  width: clamp(480px, 40vw, 620px);
-  height: 350px;
-  min-height: 350px;
-  align-self: stretch;
+.kz-footer-contact-link {
+  font-size: 0.91rem;
+  color: #334155;
+  text-decoration: none;
+  line-height: 1.45;
+  transition: color 0.2s ease;
+  word-break: break-word;
+}
+
+.kz-footer-contact-link:hover {
+  color: #d8246e;
+}
+
+.kz-footer-contact-multiline {
   display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  margin-left: auto;
-  margin-right: -24px; /* Flushes graphic completely against right viewport edge */
-  overflow: hidden;
-  padding: 0;
-}
-
-.kz-footer-hospital-img {
-  width: 100%;
-  height: calc(100% + 20px);
-  object-fit: contain;
-  object-position: right bottom;
-  display: block;
-  transform: translateY(18px); /* Eliminates bottom white space so cars sit flush on bottom border */
-  filter: drop-shadow(-4px 8px 20px rgba(33, 19, 53, 0.08));
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.91rem;
+  color: #334155;
+  line-height: 1.4;
 }
 
 /* ----------------------------------------------------
-   4. BOTTOM LEGAL BAR (Copyright on Left, AI Chatbot on Right)
-   Aligned with 1440px website container
+   5. BOTTOM LEGAL BAR
    ---------------------------------------------------- */
 .kz-footer-bottom-bar {
   width: 100%;
   border-top: 1px solid #edf0f4;
   background: #ffffff;
-  padding: 18px 0;
+  padding: 20px 0;
 }
 
 .kz-footer-bottom-container {
-  width: 100%;
-  max-width: 1440px;
+  max-width: 1360px;
   margin: 0 auto;
   padding: 0 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 16px;
-}
-
-.kz-footer-copyright-group {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+  gap: 12px;
 }
 
 .kz-footer-copyright-text {
-  font-size: 0.83rem;
-  color: #475569;
+  font-size: 0.84rem;
+  color: #64748b;
   font-weight: 500;
   margin: 0;
 }
 
 .kz-footer-disclaimer-text {
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   color: #94a3b8;
   margin: 0;
 }
-
 
 /* ====================================================
    RESPONSIVE DESIGN
    ==================================================== */
 
-/* 1366px and below */
-@media (max-width: 1366px) {
-  .kz-footer-content-area {
-    padding: 44px 28px 40px 36px;
-    gap: 28px;
+/* 1080px and below (Medium Screens / Tablets) */
+@media (max-width: 1080px) {
+  .kz-footer-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 36px;
+    padding: 0 28px 44px 28px;
   }
-  .kz-footer-brand-col {
-    flex: 0 0 250px;
-    padding-right: 20px;
-  }
-  .kz-footer-nav-columns {
-    gap: clamp(20px, 2.5vw, 40px);
-  }
-  .kz-footer-hospital-section {
-    flex: 0 0 clamp(460px, 40vw, 580px);
-    width: clamp(460px, 40vw, 580px);
-    height: 350px;
-    min-height: 350px;
-    margin-right: -24px;
-  }
-  .kz-footer-bottom-container {
-    padding: 0 36px;
-  }
-}
 
-/* 1100px and below (Tablet) */
-@media (max-width: 1100px) {
-  .kz-footer-wrapper {
-    flex-direction: column;
-  }
-  .kz-footer-content-area {
-    padding: 36px 24px 24px 24px;
-    max-width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 28px;
-  }
   .kz-footer-brand-col {
     border-right: none;
-    max-width: 100%;
     padding-right: 0;
   }
-  .kz-footer-nav-columns {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-  }
-  /* Hospital banner across bottom of footer content on tablet */
-  .kz-footer-hospital-section {
-    width: 100%;
-    height: 340px;
-    min-height: 340px;
-    margin: 0;
-    justify-content: center;
-    border-top: 1px solid #edf0f4;
-  }
-  .kz-footer-hospital-img {
-    object-position: center bottom;
-    max-height: 330px;
-  }
+
   .kz-footer-bottom-container {
-    padding: 0 24px;
+    padding: 0 28px;
   }
 }
 
-/* 680px and below (Mobile) */
-@media (max-width: 680px) {
-  .kz-footer-content-area {
+/* 640px and below (Mobile Screens) */
+@media (max-width: 640px) {
+  .kz-footer-main {
+    padding-top: 40px;
+  }
+
+  .kz-footer-container {
     grid-template-columns: 1fr;
-    gap: 28px;
-    padding: 30px 16px 20px 16px;
+    gap: 32px;
+    padding: 0 20px 36px 20px;
   }
-  .kz-footer-nav-columns {
-    grid-template-columns: 1fr;
-    gap: 22px;
-    border-top: 1px solid #edf0f4;
-    padding-top: 20px;
+
+  .kz-footer-brand-col {
+    border-bottom: 1px solid #edf0f4;
+    padding-bottom: 28px;
   }
-  .kz-footer-hospital-section {
-    width: 100%;
-    height: 240px;
-    min-height: 240px;
-    margin: 0;
-  }
-  .kz-footer-hospital-img {
-    max-height: 230px;
-    object-position: center center;
-  }
+
   .kz-footer-bottom-container {
+    padding: 0 20px;
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
-    padding: 0 16px;
+    gap: 8px;
   }
 }
