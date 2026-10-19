@@ -4,8 +4,13 @@ import SpeakerCard from '../components/Home/SpeakerCard';
 import { getSpeakers, getImageUrl } from '../Apipath';
 import './SpeakersPage.css';
 
-
-
+// Default fallback institutions if dynamic data is empty
+const DEFAULT_INSTITUTIONS = [
+  { name: 'Global Institute of Surgical Innovation', country: 'India', count: '4 speakers' },
+  { name: 'International Centre for Robotic Surgery', country: 'France', count: '3 speakers' },
+  { name: 'Future Health Research Institute', country: 'Nigeria', count: '2 speakers' },
+  { name: 'Centre for Intelligent Surgery', country: 'Singapore', count: '2 speakers' },
+];
 
 export default function SpeakersPage() {
   const [speakers, setSpeakers] = useState([]);
