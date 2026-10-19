@@ -54,9 +54,9 @@ export default function Hero() {
 
           {/* 2. 3-Line Headline matching exact reference image */}
           <h1 className="kz-hero-title">
-            <span className="kz-hero-title-line title-line-1">WHERE HUMAN</span>
-            <span className="kz-hero-title-line title-line-2">EXPERTISE MEETS</span>
-            <span className="kz-hero-title-line title-line-3">ARTIFICIAL INTELLIGENCE</span>
+            <span className="kz-hero-title-line title-line-1">Where Human Expertise</span>
+            <span className="kz-hero-title-line title-line-2">Meets Artificial Intelligence</span>
+            {/* <span className="kz-hero-title-line title-line-3">Artificial Intelligence</span> */}
           </h1>
 
           {/* 3. Subtitle / Description */}

@@ -29,49 +29,47 @@
   cursor: pointer;
   z-index: 10000;
   outline: none;
-  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
-              filter 0.28s ease;
-  filter: drop-shadow(0 10px 24px rgba(170, 45, 123, 0.48))
-          drop-shadow(0 4px 10px rgba(0, 0, 0, 0.22));
+  transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: none;
+  box-shadow: none;
 }
 
 .kz-floating-chatbot-btn:hover {
-  transform: scale(1.08) translateY(-3px);
-  filter: drop-shadow(0 14px 32px rgba(170, 45, 123, 0.62))
-          drop-shadow(0 6px 14px rgba(0, 0, 0, 0.28));
+  transform: scale(1.06) translateY(-2px);
+  filter: none;
+  box-shadow: none;
 }
 
 .kz-floating-chatbot-btn:active {
   transform: scale(0.95);
 }
 
-/* Image content wrapper (ensures exact 80x80 circular shape & crisp border) */
+/* Image content wrapper (transparent, no artificial border or background) */
 .kz-floating-btn-content {
   position: relative;
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #B82C79 0%, #7E2463 100%);
+  background: transparent;
 }
 
 .kz-floating-bot-img {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   display: block;
   user-select: none;
   pointer-events: none;
-  transform: scale(1.06);
-  transition: transform 0.3s ease;
+  transform: none;
+  transition: none;
 }
 
 .kz-floating-chatbot-btn:hover .kz-floating-bot-img {
-  transform: scale(1.12);
+  transform: none;
 }
 
 /* Close overlay when chat window is open */
@@ -79,7 +77,7 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: rgba(43, 16, 52, 0.85);
+  background: rgba(43, 16, 52, 0.88);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   display: flex;
@@ -93,7 +91,7 @@
   width: 32px;
   height: 32px;
   stroke: #ffffff;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  filter: none;
   transition: transform 0.25s ease;
 }
 
@@ -106,21 +104,9 @@
   to { opacity: 1; transform: scale(1); }
 }
 
-/* Glowing Pulsing Ring Behind Button */
+/* Pulsing aura disabled per request */
 .kz-floating-btn-glow {
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(216, 36, 110, 0.45) 0%, rgba(170, 45, 123, 0.2) 60%, transparent 75%);
-  z-index: -1;
-  animation: kzGlowPulse 2.4s infinite ease-in-out;
-  pointer-events: none;
-}
-
-@keyframes kzGlowPulse {
-  0% { transform: scale(1); opacity: 0.7; }
-  50% { transform: scale(1.15); opacity: 0.25; }
-  100% { transform: scale(1); opacity: 0.7; }
+  display: none;
 }
 
 
@@ -193,25 +179,25 @@
 }
 
 .kz-floating-header-avatar {
-  width: 52px;
-  height: 52px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
-  overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  overflow: visible;
+  border: none;
+  box-shadow: none;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: linear-gradient(135deg, #B82C79 0%, #7E2463 100%);
+  background: transparent;
 }
 
 .kz-floating-header-avatar-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
-  transform: scale(1.45) translateY(6%);
+  transform: none;
 }
 
 .kz-floating-header-text {
@@ -300,25 +286,25 @@
 }
 
 .kz-bot-mini-avatar {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(170, 45, 123, 0.3);
-  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  overflow: visible;
+  box-shadow: none;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: linear-gradient(135deg, #B82C79 0%, #7E2463 100%);
+  background: transparent;
 }
 
 .kz-bot-mini-avatar-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
-  transform: scale(1.45) translateY(6%);
+  transform: none;
 }
 
 .kz-floating-bubble {

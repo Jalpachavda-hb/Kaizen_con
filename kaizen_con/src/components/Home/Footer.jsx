@@ -61,7 +61,7 @@ export default function Footer() {
           <p className="kz-footer-brand-desc">
             Where Human Expertise Meets Artificial Intelligence.
           </p>
-
+     
           <div className="kz-footer-meta-list">
             {/* Event Dates */}
             <div className="kz-footer-meta-item">
@@ -115,11 +115,11 @@ export default function Footer() {
           <div className="kz-footer-heading-bar" aria-hidden="true"></div>
           <ul className="kz-footer-nav-list">
             <li><a href="/ai-experience" onClick={(e) => handleFooterNav(e, '/ai-experience')}>The AI Experience</a></li>
-            <li><a href="/ai-experience#personalization" onClick={(e) => handleFooterNav(e, '/ai-experience#personalization')}>01 — AI Personalization</a></li>
-            <li><a href="/ai-experience#assistant" onClick={(e) => handleFooterNav(e, '/ai-experience#assistant')}>02 — Conference Assistant</a></li>
-            <li><a href="/ai-experience#live-qa" onClick={(e) => handleFooterNav(e, '/ai-experience#live-qa')}>03 — Live Q&amp;A Intelligence</a></li>
-            <li><a href="/ai-experience#perspectives" onClick={(e) => handleFooterNav(e, '/ai-experience#perspectives')}>04 — AI Perspectives</a></li>
-            <li><a href="/ai-experience#knowledge" onClick={(e) => handleFooterNav(e, '/ai-experience#knowledge')}>05 — Conference Knowledge</a></li>
+            <li><a href="/ai-experience#personalization" onClick={(e) => handleFooterNav(e, '/ai-experience#personalization')}>AI Personalization</a></li>
+            <li><a href="/ai-experience#assistant" onClick={(e) => handleFooterNav(e, '/ai-experience#assistant')}>Conference Assistant</a></li>
+            <li><a href="/ai-experience#live-qa" onClick={(e) => handleFooterNav(e, '/ai-experience#live-qa')}>Live Q&amp;A Intelligence</a></li>
+            <li><a href="/ai-experience#perspectives" onClick={(e) => handleFooterNav(e, '/ai-experience#perspectives')}>AI Perspectives</a></li>
+            <li><a href="/ai-experience#knowledge" onClick={(e) => handleFooterNav(e, '/ai-experience#knowledge')}> Conference Knowledge</a></li>
           </ul>
         </div>
 

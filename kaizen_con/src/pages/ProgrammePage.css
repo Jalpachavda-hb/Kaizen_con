@@ -1,14 +1,16 @@
 /* ====================================================
-   KAIZEN CON 2027 - PROGRAMME AT A GLANCE
+   KAIZEN CON 2027 - PROGRAMME PAGE STYLES
+   - View 1: "At a Glance" 3-Column Timeline (Default View)
+   - View 2: "Sessions" 4-Column Card Grid (When Clicking Sessions)
+   - View 3: "Topics" Showcase
+   - View 4: "Speakers" Faculty Showcase
    Theme Colors:
-   - Primary Magenta: #AA2D7B
-   - Secondary Pink: #D85A9A
-   - Deep Purple: #55355E
-   - Dark Text: #1F1325
-   - Soft Background: #FCFBFE / #FFFFFF
+   - Brand Magenta: #AA2D7B
+   - Brand Pink: #D85A9A
+   - Brand Purple: #55355E
+   - Text Dark: #1F1325
    Font: var(--font-family, 'Roboto', sans-serif)
-   Fully Responsive (Desktop 4-col, Tablet 2-col, Mobile 1-col)
-   Strictly NO doctor avatars/photos on cards
+   Fully Responsive (Desktop, Tablet, Mobile)
    ==================================================== */
 
 :root {
@@ -24,17 +26,15 @@
   --kz-text-subtle: #8e7794;
   --kz-card-bg: #ffffff;
   --kz-card-border: #ebe5ee;
-  --kz-card-shadow: 0 3px 12px rgba(85, 53, 94, 0.05);
-  --kz-card-hover-shadow: 0 10px 28px rgba(85, 53, 94, 0.1);
+  --kz-shadow-card: 0 4px 18px rgba(85, 53, 94, 0.05);
+  --kz-shadow-hover: 0 10px 28px rgba(85, 53, 94, 0.1);
 }
 
-/* ====================================================
-   PAGE CONTAINER WRAPPER
-   ==================================================== */
+/* Page Wrapper */
 .kz-programme-page-wrapper {
   background-color: #fbf9fb;
   min-height: 100vh;
-  padding: 40px 0 100px 0;
+  padding: 36px 0 90px 0;
   font-family: var(--font-family, 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
   color: var(--kz-text-main);
   box-sizing: border-box;
@@ -42,37 +42,36 @@
 
 .kz-programme-container {
   width: 100%;
-  max-width: 1440px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 36px;
+  padding: 0 20px;
   box-sizing: border-box;
 }
 
 /* ====================================================
-   1. TOP HEADER SECTION
+   1. PAGE HEADER
    ==================================================== */
 .kz-programme-header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 32px;
-  margin-bottom: 44px;
-  padding-bottom: 28px;
+  margin-bottom: 28px;
+  padding-bottom: 24px;
   border-bottom: 1px solid rgba(85, 53, 94, 0.1);
   flex-wrap: wrap;
 }
 
 .kz-programme-header-left {
   flex: 1;
-  min-width: 300px;
+  min-width: 280px;
 }
 
-/* Schedule accent bar & uppercase label */
 .kz-schedule-badge-row {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .kz-schedule-dash {
@@ -93,7 +92,7 @@
 
 .kz-programme-main-title {
   margin: 0 0 10px 0;
-  font-size: 2.6rem;
+  font-size: 2.5rem;
   font-weight: 800;
   color: var(--kz-text-dark);
   letter-spacing: -0.025em;
@@ -109,18 +108,18 @@
   max-width: 720px;
 }
 
-/* Right Meta (Date + Location) */
+/* Header Right Meta */
 .kz-programme-header-right {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 24px;
   flex-shrink: 0;
 }
 
 .kz-header-meta-item {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .kz-header-meta-icon {
@@ -148,28 +147,868 @@
   color: var(--kz-text-dark);
 }
 
-.kz-header-meta-link,
 .kz-header-meta-secondary {
   font-size: 0.825rem;
   font-weight: 500;
   color: var(--kz-brand-magenta);
   text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.kz-header-meta-link:hover {
-  text-decoration: underline;
-  color: var(--kz-brand-magenta-dark);
 }
 
 .kz-header-meta-divider {
   width: 1px;
-  height: 42px;
+  height: 40px;
   background-color: rgba(85, 53, 94, 0.15);
 }
 
 /* ====================================================
-   2. DAY-BY-DAY ROW SECTION & TIMELINE RAIL
+   2. CONTROLS BAR (TABS, SEARCH, FILTER)
+   ==================================================== */
+.kz-programme-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.kz-programme-tabs-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Segmented View Buttons */
+.kz-view-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  font-size: 0.8875rem;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: 9px;
+  background-color: #ffffff;
+  color: #4a2c53;
+  border: 1.5px solid rgba(85, 53, 94, 0.16);
+  cursor: pointer;
+  transition: all 0.22s ease;
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(85, 53, 94, 0.03);
+}
+
+.kz-view-tab-btn:hover {
+  background-color: #faf5f9;
+  border-color: rgba(170, 45, 123, 0.35);
+  color: var(--kz-brand-magenta);
+}
+
+/* Active Segment (e.g. solid brand magenta) */
+.kz-view-tab-btn.is-active {
+  background-color: var(--kz-brand-magenta);
+  color: #ffffff;
+  border-color: var(--kz-brand-magenta);
+  box-shadow: 0 3px 12px rgba(170, 45, 123, 0.25);
+}
+
+.kz-view-tab-btn.is-active svg {
+  stroke: #ffffff;
+}
+
+.kz-external-link-btn {
+  color: #4a2c53;
+}
+
+/* Search & Filter Group */
+.kz-programme-search-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.kz-search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 300px;
+  max-width: 100%;
+}
+
+.kz-search-icon {
+  position: absolute;
+  left: 12px;
+  color: #8e7794;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.kz-search-input {
+  width: 100%;
+  padding: 9px 32px 9px 38px;
+  font-size: 0.875rem;
+  font-weight: 400;
+  font-family: inherit;
+  border-radius: 9px;
+  border: 1.5px solid rgba(85, 53, 94, 0.16);
+  background: #ffffff;
+  color: var(--kz-text-dark);
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.kz-search-input::placeholder {
+  color: #9c84a2;
+}
+
+.kz-search-input:focus {
+  border-color: var(--kz-brand-magenta);
+  box-shadow: 0 0 0 3px rgba(170, 45, 123, 0.12);
+}
+
+.kz-search-clear-btn {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.15rem;
+  color: #8e7794;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Filter Toggle Button */
+.kz-filter-wrapper {
+  position: relative;
+}
+
+.kz-filter-toggle-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  border: 1.5px solid rgba(85, 53, 94, 0.16);
+  background: #ffffff;
+  color: #4a2c53;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.kz-filter-toggle-btn:hover,
+.kz-filter-toggle-btn.is-filtering {
+  background-color: #faf5f9;
+  border-color: var(--kz-brand-magenta);
+  color: var(--kz-brand-magenta);
+}
+
+.kz-filter-active-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--kz-brand-magenta);
+}
+
+/* Filter Dropdown */
+.kz-filter-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 250px;
+  background: #ffffff;
+  border: 1px solid rgba(85, 53, 94, 0.14);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(85, 53, 94, 0.14);
+  z-index: 100;
+  padding: 10px 0;
+}
+
+.kz-filter-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px 10px 16px;
+  font-size: 0.775rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--kz-brand-magenta);
+  border-bottom: 1px solid rgba(85, 53, 94, 0.08);
+}
+
+.kz-filter-reset-link {
+  background: none;
+  border: none;
+  color: #6f5876;
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.kz-filter-dropdown-list {
+  list-style: none;
+  padding: 6px 0;
+  margin: 0;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.kz-filter-option-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  font-size: 0.825rem;
+  font-weight: 500;
+  color: #3a1f42;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.kz-filter-option-btn:hover {
+  background-color: #faf5f9;
+  color: var(--kz-brand-magenta);
+}
+
+.kz-filter-option-btn.is-selected {
+  background-color: #f7ebf3;
+  color: var(--kz-brand-magenta);
+  font-weight: 600;
+}
+
+/* ====================================================
+   3. TOPICS HORIZONTAL FILTER BAR (Matches Screenshot 1)
+   ==================================================== */
+.kz-topics-horizontal-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 26px;
+  padding-bottom: 4px;
+}
+
+.kz-topics-bar-label {
+  font-size: 0.8125rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #2b1430;
+  flex-shrink: 0;
+}
+
+.kz-topics-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 4px 2px;
+}
+
+.kz-topics-pills-row::-webkit-scrollbar {
+  display: none;
+}
+
+.kz-topic-pill-chip {
+  padding: 7px 18px;
+  font-size: 0.825rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: #4a2c53;
+  background-color: #ffffff;
+  border: 1.5px solid rgba(85, 53, 94, 0.18);
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.kz-topic-pill-chip:hover {
+  border-color: rgba(170, 45, 123, 0.4);
+  color: var(--kz-brand-magenta);
+  background-color: #fdf8fb;
+}
+
+.kz-topic-pill-chip.is-active {
+  border-color: var(--kz-brand-magenta);
+  color: var(--kz-brand-magenta);
+  background-color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 0 0 1px var(--kz-brand-magenta);
+}
+
+/* Mobile Day Tabs */
+.kz-mobile-day-tabs {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.kz-mobile-day-btn {
+  flex: 1;
+  padding: 9px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: 8px;
+  border: 1px solid rgba(85, 53, 94, 0.15);
+  background: #ffffff;
+  color: #55355e;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.kz-mobile-day-btn.is-active {
+  background: var(--kz-brand-magenta);
+  color: #ffffff;
+  border-color: var(--kz-brand-magenta);
+}
+
+/* ====================================================
+   4. VIEW 1: "AT A GLANCE" 3-COLUMN TIMELINE
+      Fits 6 events cleanly, sleek scrollbar if > 6
+   ==================================================== */
+.kz-programme-columns-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.kz-day-column-card {
+  background-color: #ffffff;
+  border: 1px solid rgba(85, 53, 94, 0.11);
+  border-radius: 16px;
+  padding: 18px 14px 16px 14px;
+  box-shadow: var(--kz-shadow-card);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  transition: box-shadow 0.25s ease;
+}
+
+.kz-day-column-card:hover {
+  box-shadow: 0 8px 28px rgba(85, 53, 94, 0.08);
+}
+
+/* Column Header (Left Title/Date + Right Stats) */
+.kz-day-column-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(85, 53, 94, 0.08);
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.kz-day-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.kz-day-title {
+  margin: 0;
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: #1f1325;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+
+.kz-day-date-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--kz-text-muted);
+}
+
+/* Stats Counters */
+.kz-day-stats-counters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.kz-stat-counter-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.kz-stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #351c3d;
+  margin-bottom: 2px;
+}
+
+.kz-stat-number {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #24112a;
+  line-height: 1.1;
+}
+
+.kz-stat-label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: #7b5886;
+}
+
+/* Timeline Body - Exactly displays 6 events cleanly; scrolls smoothly if more than 6 */
+.kz-day-timeline-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  flex: 1;
+  max-height: 520px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: #e2b3ce #fbf7f9;
+}
+
+.kz-day-timeline-body::-webkit-scrollbar {
+  width: 5px;
+}
+
+.kz-day-timeline-body::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.kz-day-timeline-body::-webkit-scrollbar-track {
+  background: #fbf7f9;
+  border-radius: 6px;
+}
+
+.kz-day-timeline-body::-webkit-scrollbar-thumb {
+  background: #e2b3ce;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.kz-day-timeline-body::-webkit-scrollbar-thumb:hover {
+  background: #d88bb5;
+}
+
+.kz-no-sessions-found {
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--kz-text-muted);
+  font-size: 0.8875rem;
+}
+
+/* ====================================================
+   GLANCE VIEW TIMELINE ITEMS (Exact match to Reference Screenshot)
+   ==================================================== */
+.kz-glance-item-wrapper {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  cursor: pointer;
+  transition: transform 0.18s ease;
+  width: 100%;
+  min-width: 0 !important;
+  box-sizing: border-box;
+}
+
+.kz-glance-item-wrapper:hover {
+  transform: translateX(2px);
+}
+
+/* Left Timeline Rail */
+.kz-glance-timeline-rail {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 10px !important;
+  flex-shrink: 0 !important;
+  position: relative;
+  padding-top: 14px;
+}
+
+.kz-glance-timeline-dot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background-color: #ef4444 !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 0 0 1.5px #ef4444 !important;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.kz-glance-timeline-line {
+  position: absolute;
+  top: 22px;
+  bottom: -14px;
+  width: 1.5px !important;
+  background-color: #fecdd3 !important;
+  z-index: 1;
+}
+
+/* Time Block (08:00 / 09:00 stacked) */
+.kz-glance-time-block {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  width: 42px !important;
+  flex-shrink: 0 !important;
+  line-height: 1.25 !important;
+}
+
+.kz-glance-time-start {
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+}
+
+.kz-glance-time-end {
+  font-size: 0.7rem !important;
+  font-weight: 500 !important;
+  color: #6b7280 !important;
+}
+
+/* Sleek Horizontal Card matching Screenshot 2 */
+.kz-glance-card {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 8px 10px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.2s ease !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.kz-glance-item-wrapper:hover .kz-glance-card {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+  transform: translateY(-1px);
+}
+
+/* Left Icon Badge with React Icon */
+.kz-glance-icon-badge {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  transition: transform 0.2s ease;
+}
+
+.kz-glance-item-wrapper:hover .kz-glance-icon-badge {
+  transform: scale(1.06);
+}
+
+/* Middle Content Stack */
+.kz-glance-card-content {
+  flex: 1 !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  overflow: hidden !important;
+}
+
+.kz-glance-tag-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  font-size: 0.6rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.4px !important;
+  padding: 1.5px 6px !important;
+  border-radius: 4px !important;
+  border-width: 1px !important;
+  border-style: solid !important;
+  margin-bottom: 2px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  max-width: 100% !important;
+}
+
+.kz-glance-session-title {
+  margin: 0 !important;
+  font-size: 0.84rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  line-height: 1.25 !important;
+  max-width: 100% !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Right Chevron Arrow */
+.kz-glance-chevron {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #94a3b8 !important;
+  flex-shrink: 0 !important;
+  transition: transform 0.2s ease, color 0.2s ease;
+  margin-left: 2px !important;
+}
+
+.kz-glance-item-wrapper:hover .kz-glance-chevron {
+  transform: translateX(2px);
+  color: var(--kz-brand-magenta);
+}
+
+/* Timeline Item Wrapper */
+.kz-timeline-item-wrapper {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.18s ease;
+}
+
+.kz-timeline-item-wrapper:hover {
+  transform: translateX(2px);
+}
+
+/* Left Timeline Rail */
+.kz-timeline-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 10px;
+  flex-shrink: 0;
+  position: relative;
+  padding-top: 14px;
+}
+
+.kz-timeline-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--kz-brand-magenta);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 1px var(--kz-brand-magenta);
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.kz-timeline-line {
+  position: absolute;
+  top: 22px;
+  bottom: -16px;
+  width: 1.5px;
+  background-color: rgba(170, 45, 123, 0.25);
+  z-index: 1;
+}
+
+/* Time Block */
+.kz-session-time-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  width: 50px;
+  flex-shrink: 0;
+  line-height: 1.25;
+}
+
+.kz-time-start {
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: #201124;
+}
+
+.kz-time-end {
+  font-size: 0.725rem;
+  font-weight: 500;
+  color: #8a7190;
+}
+
+/* Session Card */
+.kz-session-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(85, 53, 94, 0.1);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.kz-timeline-item-wrapper:hover .kz-session-card {
+  border-color: rgba(170, 45, 123, 0.35);
+  box-shadow: 0 4px 14px rgba(85, 53, 94, 0.08);
+}
+
+.kz-session-icon-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.kz-timeline-item-wrapper:hover .kz-session-icon-badge {
+  transform: scale(1.08);
+}
+
+.kz-session-main-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kz-session-hall-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #7b6282;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kz-session-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1f1325;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kz-session-tag-pill {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 2px;
+}
+
+/* Tag Pill Color Variations */
+.kz-tag-welcome {
+  background-color: #fdf2f8;
+  color: #aa2d7b;
+}
+
+.kz-tag-ai {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.kz-tag-robotic {
+  background-color: #f0fdf4;
+  color: #15803d;
+}
+
+.kz-tag-future {
+  background-color: #fff7ed;
+  color: #c2410c;
+}
+
+.kz-tag-panel {
+  background-color: #faf5ff;
+  color: #7e22ce;
+}
+
+.kz-tag-digital {
+  background-color: #ecfeff;
+  color: #0e7490;
+}
+
+.kz-tag-imaging {
+  background-color: #fdf4ff;
+  color: #a21caf;
+}
+
+.kz-tag-keynote {
+  background-color: #fef2f2;
+  color: #b91c1c;
+}
+
+.kz-tag-tech {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+/* Chevron */
+.kz-session-chevron-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a389a9;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.kz-timeline-item-wrapper:hover .kz-session-chevron-wrap {
+  transform: translateX(3px);
+  color: var(--kz-brand-magenta);
+}
+
+/* ====================================================
+   5. VIEW 2: "SESSIONS" (NEW 4-COLUMN CARD GRID DESIGN)
+      Triggered when clicking the [Sessions] tab!
    ==================================================== */
 .kz-programme-days-stack {
   display: flex;
@@ -268,7 +1107,6 @@
   align-items: center;
 }
 
-/* Dots along the rail */
 .kz-timeline-track-dot {
   position: absolute;
   width: 9px;
@@ -334,9 +1172,7 @@
   color: var(--kz-brand-magenta);
 }
 
-/* ====================================================
-   3. 4-COLUMN CARDS GRID (RESPONSIVE)
-   ==================================================== */
+/* 4 Cards per Row Grid */
 .kz-sessions-responsive-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -349,7 +1185,7 @@
   border: 1px solid var(--kz-card-border);
   border-radius: 14px;
   padding: 20px 18px;
-  box-shadow: var(--kz-card-shadow);
+  box-shadow: var(--kz-shadow-card);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -363,7 +1199,7 @@
 .kz-session-card-block:hover {
   transform: translateY(-4px);
   border-color: rgba(170, 45, 123, 0.35);
-  box-shadow: var(--kz-card-hover-shadow);
+  box-shadow: var(--kz-shadow-hover);
 }
 
 /* Top Meta Row (Icon + Time + Duration) */
@@ -468,7 +1304,6 @@
   line-height: 1.2;
 }
 
-/* Category Pill Styling with Kaizen Theme Harmonization */
 .kz-pill-oral {
   background-color: #fdf2f8;
   color: #aa2d7b;
@@ -599,7 +1434,153 @@
 }
 
 /* ====================================================
-   4. MODAL DIALOG STYLES
+   6. TOPICS & SPEAKERS OVERVIEWS
+   ==================================================== */
+.kz-topics-overview-section {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.kz-topics-overview-header {
+  border-bottom: 1px solid rgba(85, 53, 94, 0.1);
+  padding-bottom: 16px;
+}
+
+.kz-topics-overview-title {
+  margin: 0 0 8px 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--kz-text-dark);
+}
+
+.kz-topics-overview-subtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--kz-text-muted);
+}
+
+.kz-topics-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.kz-topic-showcase-card {
+  background: #ffffff;
+  border: 1px solid rgba(85, 53, 94, 0.12);
+  border-radius: 14px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kz-topic-showcase-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--kz-brand-magenta);
+  box-shadow: var(--kz-shadow-hover);
+}
+
+.kz-topic-showcase-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background-color: var(--kz-brand-light-tint);
+  color: var(--kz-brand-magenta);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kz-topic-showcase-name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--kz-text-dark);
+}
+
+.kz-topic-showcase-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--kz-text-muted);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.kz-topic-showcase-cta {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--kz-brand-magenta);
+}
+
+.kz-speakers-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+}
+
+.kz-speaker-faculty-card {
+  background: #ffffff;
+  border: 1px solid rgba(85, 53, 94, 0.12);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.2s ease;
+}
+
+.kz-speaker-faculty-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(170, 45, 123, 0.35);
+  box-shadow: var(--kz-shadow-card);
+}
+
+.kz-speaker-initials-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--kz-brand-magenta) 0%, var(--kz-brand-pink) 100%);
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kz-speaker-info-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.kz-speaker-card-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--kz-text-dark);
+}
+
+.kz-speaker-card-role {
+  font-size: 0.8rem;
+  color: var(--kz-brand-magenta);
+  font-weight: 600;
+}
+
+.kz-speaker-card-sessions {
+  font-size: 0.775rem;
+  color: var(--kz-text-muted);
+  line-height: 1.35;
+}
+
+/* ====================================================
+   7. MODAL DIALOG STYLES
    ==================================================== */
 .kz-session-modal-backdrop {
   position: fixed;
@@ -774,10 +1755,10 @@
 }
 
 /* ====================================================
-   5. RESPONSIVENESS BREAKPOINTS
+   8. RESPONSIVENESS BREAKPOINTS
    ==================================================== */
 
-/* Large Tablets / Small Laptops (<= 1280px): 3 Columns */
+/* Large Tablets / Laptops (<= 1280px) */
 @media (max-width: 1280px) {
   .kz-programme-container {
     padding: 0 24px;
@@ -787,7 +1768,7 @@
   }
 }
 
-/* Medium Tablets (<= 992px): 2 Columns */
+/* Medium Tablets (<= 992px) */
 @media (max-width: 992px) {
   .kz-programme-header {
     flex-direction: column;
@@ -798,6 +1779,10 @@
     width: 100%;
     justify-content: flex-start;
     padding-top: 10px;
+  }
+  .kz-programme-columns-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
   }
   .kz-day-section-row {
     grid-template-columns: 66px 1fr;
@@ -812,7 +1797,7 @@
   }
 }
 
-/* Small Tablets & Mobile (<= 768px): 1-Column Grid, Clean Inline Badge */
+/* Small Tablets & Mobile (<= 768px) */
 @media (max-width: 768px) {
   .kz-programme-page-wrapper {
     padding: 24px 0 60px 0;
@@ -836,7 +1821,26 @@
     gap: 14px;
   }
 
-  /* Redefine section row on mobile: no squished left column */
+  /* Show Mobile Day Selector for Glance View */
+  .kz-mobile-day-tabs {
+    display: flex;
+  }
+
+  .kz-hide-on-mobile {
+    display: none !important;
+  }
+
+  /* Search bar full width */
+  .kz-programme-search-filter-group {
+    width: 100%;
+    margin-left: 0;
+  }
+  .kz-search-input-wrapper {
+    flex: 1;
+    width: auto;
+  }
+
+  /* Sessions View on Mobile */
   .kz-day-section-row {
     display: flex;
     flex-direction: column;
@@ -844,7 +1848,7 @@
   }
 
   .kz-timeline-date-column {
-    display: none; /* Hidden on mobile in favor of inline badge */
+    display: none;
   }
 
   .kz-mobile-day-indicator {
@@ -860,7 +1864,6 @@
     letter-spacing: 0.5px;
   }
 
-  /* Make day title row show the D1 badge inline */
   .kz-day-section-header {
     align-items: center;
     gap: 10px;

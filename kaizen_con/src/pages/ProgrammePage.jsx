@@ -1,172 +1,479 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import {
+  LuCoffee,
+  LuUser,
+  LuScissors,
+  LuBrain,
+  LuGlobe,
+  LuUsers,
+  LuBell,
+  LuImage,
+  LuTrendingUp,
+  LuSettings,
+  LuMonitor,
+  LuActivity,
+  LuDatabase,
+  LuChartBar,
+  LuStar,
+  LuPresentation,
+  LuNetwork,
+  LuCalendar,
+  LuMapPin,
+  LuClock,
+  LuChevronRight,
+  LuArrowRight,
+  LuSearch,
+  LuFilter,
+  LuTag,
+  LuMic,
+  LuCompass,
+  LuX,
+  LuLayoutGrid,
+  LuList
+} from 'react-icons/lu';
 import './ProgrammePage.css';
 
-// Clean SVG Icons for categories
-const IconPodium = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
-    <path d="M6 21v-4a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v4" />
-    <rect x="4" y="21" width="16" height="2" rx="1" />
-  </svg>
-);
-
-const IconClamp = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="6" cy="18" r="3" />
-    <circle cx="18" cy="18" r="3" />
-    <path d="M8.5 16.5L16 6" />
-    <path d="M15.5 16.5L8 6" />
-  </svg>
-);
-
-const IconBrain = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-5.04z" />
-    <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-5.04z" />
-  </svg>
-);
-
-const IconGlobe = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10" />
-    <line x1="2" y1="12" x2="22" y2="12" />
-    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z" />
-  </svg>
-);
-
-const IconUsers = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-    <circle cx="9" cy="7" r="4" />
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-  </svg>
-);
-
-const IconChart = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-    <polyline points="16 7 22 7 22 13" />
-  </svg>
-);
-
-const IconMonitor = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-    <line x1="8" y1="21" x2="16" y2="21" />
-    <line x1="12" y1="17" x2="12" y2="21" />
-  </svg>
-);
-
-const IconNetwork = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="18" cy="5" r="3" />
-    <circle cx="6" cy="12" r="3" />
-    <circle cx="18" cy="19" r="3" />
-    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-  </svg>
-);
-
-const IconCoffee = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
-    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
-    <line x1="6" y1="1" x2="6" y2="4" />
-    <line x1="10" y1="1" x2="10" y2="4" />
-    <line x1="14" y1="1" x2="14" y2="4" />
-  </svg>
-);
-
-const IconSiren = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2v3" />
-    <path d="M5.2 6.2l2.1 2.1" />
-    <path d="M18.8 6.2l-2.1 2.1" />
-    <path d="M6 14a6 6 0 0 1 12 0v5H6v-5z" />
-    <rect x="4" y="19" width="16" height="3" rx="1" />
-  </svg>
-);
-
-const IconImage = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-    <circle cx="8.5" cy="8.5" r="1.5" />
-    <polyline points="21 15 16 10 5 21" />
-  </svg>
-);
-
-const IconDoctor = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-    <circle cx="12" cy="7" r="4" />
-  </svg>
-);
-
-const IconGear = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-  </svg>
-);
-
-const IconEndoscope = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 13a4 4 0 0 0 8 0V4" />
-    <circle cx="11" cy="4" r="2" />
-    <path d="M13 10c0 4.5 4 5 7 5" />
-    <circle cx="20" cy="15" r="1.5" />
-  </svg>
-);
-
-const IconDatabase = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <ellipse cx="12" cy="5" rx="9" ry="3" />
-    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
-    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
-  </svg>
-);
-
-const IconBarChart = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="20" x2="18" y2="10" />
-    <line x1="12" y1="20" x2="12" y2="4" />
-    <line x1="6" y1="20" x2="6" y2="14" />
-  </svg>
-);
-
-const IconStar = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-  </svg>
-);
-
-// Map icons helper
-const renderSessionIcon = (iconName) => {
+// Helper function to render React Icons dynamically
+const renderReactIcon = (iconName, size = 20) => {
   switch (iconName) {
-    case 'podium': return <IconPodium />;
-    case 'clamp': return <IconClamp />;
-    case 'brain': return <IconBrain />;
-    case 'globe': return <IconGlobe />;
-    case 'users': return <IconUsers />;
-    case 'chart': return <IconChart />;
-    case 'monitor': return <IconMonitor />;
-    case 'network': return <IconNetwork />;
-    case 'coffee': return <IconCoffee />;
-    case 'siren': return <IconSiren />;
-    case 'image': return <IconImage />;
-    case 'doctor': return <IconDoctor />;
-    case 'gear': return <IconGear />;
-    case 'endoscope': return <IconEndoscope />;
-    case 'database': return <IconDatabase />;
-    case 'barchart': return <IconBarChart />;
-    case 'star': return <IconStar />;
-    default: return <IconPodium />;
+    case 'coffee': return <LuCoffee size={size} />;
+    case 'doctor': return <LuUser size={size} />;
+    case 'clamp': return <LuScissors size={size} />;
+    case 'brain': return <LuBrain size={size} />;
+    case 'globe': return <LuGlobe size={size} />;
+    case 'users': return <LuUsers size={size} />;
+    case 'siren': return <LuBell size={size} />;
+    case 'image': return <LuImage size={size} />;
+    case 'chart': return <LuTrendingUp size={size} />;
+    case 'gear': return <LuSettings size={size} />;
+    case 'monitor': return <LuMonitor size={size} />;
+    case 'endoscope': return <LuActivity size={size} />;
+    case 'database': return <LuDatabase size={size} />;
+    case 'barchart': return <LuChartBar size={size} />;
+    case 'star': return <LuStar size={size} />;
+    case 'podium': return <LuPresentation size={size} />;
+    case 'network': return <LuNetwork size={size} />;
+    default: return <LuPresentation size={size} />;
   }
 };
 
-// Complete Conference Programme Dataset Structured by Day
-const CONFERENCE_DAYS_DATA = [
+// =========================================================================
+// DATASET 1: "AT A GLANCE" 3-COLUMN VIEW (Exact Match to User's Screenshot 2)
+// =========================================================================
+const GLANCE_DAYS_DATA = [
+  {
+    dayNumber: 1,
+    dayTitle: 'Day 1',
+    dayOfWeek: 'Friday, January 1, 2027',
+    stats: {
+      sessionsCount: '8',
+      sessionsLabel: 'Sessions',
+      speakersCount: '12',
+      speakersLabel: 'Speakers',
+      tracksCount: '4',
+      tracksLabel: 'Tracks'
+    },
+    sessions: [
+      {
+        id: 'glance-d1-1',
+        timeStart: '08:00',
+        timeEnd: '09:00',
+        title: 'Registration & Welcome Tea',
+        hall: 'Main Auditorium',
+        category: 'welcome',
+        categoryLabel: 'WELCOME & REGISTRATION',
+        cardColor: '#3b82f6',
+        cardBg: '#ffffff',
+        badgeBg: '#eff6ff',
+        badgeColor: '#3b82f6',
+        tagBg: '#f8fafc',
+        tagColor: '#64748b',
+        tagBorder: '#e2e8f0',
+        icon: 'coffee',
+        speaker: 'Registration & Hospitality Committee',
+        description: 'Collection of registration materials, AI delegate pass sync, digital badge issuance, and morning welcome tea.'
+      },
+      {
+        id: 'glance-d1-2',
+        timeStart: '09:00',
+        timeEnd: '10:00',
+        title: 'Opening Keynote: The AI-Native Operating Room',
+        hall: 'Main Auditorium',
+        category: 'ai',
+        categoryLabel: 'AI IN HEALTHCARE',
+        cardColor: '#f43f5e',
+        cardBg: '#fffbfb',
+        badgeBg: '#fff1f2',
+        badgeColor: '#f43f5e',
+        tagBg: '#fff1f2',
+        tagColor: '#f43f5e',
+        tagBorder: '#ffe4e6',
+        icon: 'doctor',
+        speaker: 'Dr. James Carter',
+        description: 'Pioneering lecture on how intraoperative machine learning, autonomous tissue tracking, and ambient clinical intelligence transform surgical suites.'
+      },
+      {
+        id: 'glance-d1-3',
+        timeStart: '10:30',
+        timeEnd: '11:15',
+        title: 'Robotic Colorectal Surgery: Current Trends and Future Directions',
+        hall: 'Hall A — Surgical Sciences',
+        category: 'robotic',
+        categoryLabel: 'ROBOTIC SURGERY',
+        cardColor: '#3b82f6',
+        cardBg: '#f8faff',
+        badgeBg: '#eff6ff',
+        badgeColor: '#3b82f6',
+        tagBg: '#eff6ff',
+        tagColor: '#3b82f6',
+        tagBorder: '#dbeafe',
+        icon: 'clamp',
+        speaker: 'Dr. Maya Chen',
+        description: 'Clinical comparative analysis of single-port versus multi-arm robotic platforms, oncological lymph node harvests, and ergonomic surgeon longevity.'
+      },
+      {
+        id: 'glance-d1-4',
+        timeStart: '11:30',
+        timeEnd: '12:15',
+        title: 'AI in Surgical Decision Making',
+        hall: 'Hall B — Technology & Innovation',
+        category: 'ai',
+        categoryLabel: 'AI IN HEALTHCARE',
+        cardColor: '#a855f7',
+        cardBg: '#faf7fd',
+        badgeBg: '#faf5ff',
+        badgeColor: '#a855f7',
+        tagBg: '#fff1f2',
+        tagColor: '#f43f5e',
+        tagBorder: '#ffe4e6',
+        icon: 'brain',
+        speaker: 'Dr. Arjun Mehta',
+        description: 'Real-time machine learning risk calculators, microvascular perfusion indicators, and algorithmic safeguards against intraoperative adverse events.'
+      },
+      {
+        id: 'glance-d1-5',
+        timeStart: '14:00',
+        timeEnd: '14:45',
+        title: 'Global Access to Advanced Surgery',
+        hall: 'Main Auditorium',
+        category: 'future',
+        categoryLabel: 'FUTURE OF HEALTHCARE',
+        cardColor: '#10b981',
+        cardBg: '#f7fbf8',
+        badgeBg: '#ecfdf5',
+        badgeColor: '#10b981',
+        tagBg: '#ecfdf5',
+        tagColor: '#10b981',
+        tagBorder: '#a7f3d0',
+        icon: 'globe',
+        speaker: 'Dr. Sofia Laurent',
+        description: 'Overcoming geographic and economic surgical disparities through telerobotics, decentralized simulation hubs, and low-latency satellite clinical links.'
+      },
+      {
+        id: 'glance-d1-6',
+        timeStart: '16:00',
+        timeEnd: '17:00',
+        title: 'Panel Discussion: The Next Era of Surgical Innovation',
+        hall: 'Main Auditorium',
+        category: 'panel',
+        categoryLabel: 'PANEL',
+        cardColor: '#f97316',
+        cardBg: '#fefaf6',
+        badgeBg: '#fff7ed',
+        badgeColor: '#f97316',
+        tagBg: '#fff7ed',
+        tagColor: '#f97316',
+        tagBorder: '#fed7aa',
+        icon: 'users',
+        speaker: 'Dr. Daniel Okafor & Panel',
+        description: 'Multidisciplinary consensus panel discussing regulatory horizons, surgeon autonomy in automated procedures, and patient-centered robotics.'
+      }
+    ]
+  },
+  {
+    dayNumber: 2,
+    dayTitle: 'Day 2',
+    dayOfWeek: 'Saturday, January 2, 2027',
+    stats: {
+      sessionsCount: '7',
+      sessionsLabel: 'Sessions',
+      speakersCount: '10',
+      speakersLabel: 'Speakers',
+      tracksCount: '4',
+      tracksLabel: 'Tracks'
+    },
+    sessions: [
+      {
+        id: 'glance-d2-1',
+        timeStart: '08:00',
+        timeEnd: '09:00',
+        title: 'Morning Networking & Coffee',
+        hall: 'Main Lobby',
+        category: 'welcome',
+        categoryLabel: 'NETWORKING',
+        cardColor: '#3b82f6',
+        cardBg: '#f8faff',
+        badgeBg: '#eff6ff',
+        badgeColor: '#3b82f6',
+        tagBg: '#f8fafc',
+        tagColor: '#64748b',
+        tagBorder: '#e2e8f0',
+        icon: 'coffee',
+        speaker: 'Conference Hosts',
+        description: 'Join fellow delegates for an informal morning networking session and preview of Day 2 surgical breakout tracks over coffee.'
+      },
+      {
+        id: 'glance-d2-2',
+        timeStart: '09:00',
+        timeEnd: '10:00',
+        title: 'AI Triage in Trauma Surgery',
+        hall: 'Main Auditorium',
+        category: 'ai',
+        categoryLabel: 'AI IN HEALTHCARE',
+        cardColor: '#f43f5e',
+        cardBg: '#fffbfb',
+        badgeBg: '#fff1f2',
+        badgeColor: '#f43f5e',
+        tagBg: '#fff1f2',
+        tagColor: '#f43f5e',
+        tagBorder: '#ffe4e6',
+        icon: 'siren',
+        speaker: 'Dr. Maya Chen',
+        description: 'How AI-assisted triage systems improve accuracy, prioritize polytrauma workflow, and optimize patient outcomes in emergency care.'
+      },
+      {
+        id: 'glance-d2-3',
+        timeStart: '10:30',
+        timeEnd: '11:15',
+        title: 'Real-Time AI in Medical Imaging',
+        hall: 'Hall B — Technology & Innovation',
+        category: 'imaging',
+        categoryLabel: 'MEDICAL IMAGING',
+        cardColor: '#0ea5e9',
+        cardBg: '#f8faff',
+        badgeBg: '#f0f9ff',
+        badgeColor: '#0ea5e9',
+        tagBg: '#f0f9ff',
+        tagColor: '#0ea5e9',
+        tagBorder: '#bae6fd',
+        icon: 'image',
+        speaker: 'Dr. James Carter',
+        description: 'Live demonstration and clinical review of AI-augmented intraoperative imaging systems used intraoperatively for cancer margins.'
+      },
+      {
+        id: 'glance-d2-4',
+        timeStart: '11:30',
+        timeEnd: '12:15',
+        title: 'Surgeon Training in the AI Era',
+        hall: 'Hall C — Digital Health',
+        category: 'digital',
+        categoryLabel: 'DIGITAL HEALTH',
+        cardColor: '#22c55e',
+        cardBg: '#f7fbf8',
+        badgeBg: '#f0fdf4',
+        badgeColor: '#22c55e',
+        tagBg: '#f0fdf4',
+        tagColor: '#22c55e',
+        tagBorder: '#bbf7d0',
+        icon: 'doctor',
+        speaker: 'Dr. Aisha Rahman',
+        description: 'Simulation, data and certification for next-generation surgical education, haptic feedback models, and telemetry evaluation.'
+      },
+      {
+        id: 'glance-d2-5',
+        timeStart: '14:00',
+        timeEnd: '14:45',
+        title: 'Machine Learning for Surgical Outcomes',
+        hall: 'Hall A — Surgical Sciences',
+        category: 'ai',
+        categoryLabel: 'AI IN HEALTHCARE',
+        cardColor: '#a855f7',
+        cardBg: '#faf7fd',
+        badgeBg: '#faf5ff',
+        badgeColor: '#a855f7',
+        tagBg: '#fff1f2',
+        tagColor: '#f43f5e',
+        tagBorder: '#ffe4e6',
+        icon: 'chart',
+        speaker: 'Dr. Arjun Mehta',
+        description: 'Validated predictive algorithms predicting post-operative recovery, complication risks, and personalized clinical intervention paths.'
+      },
+      {
+        id: 'glance-d2-6',
+        timeStart: '15:00',
+        timeEnd: '15:45',
+        title: 'Robotic Low Anterior Resection: Live Case Session',
+        hall: 'Hall A — Surgical Sciences',
+        category: 'robotic',
+        categoryLabel: 'ROBOTIC SURGERY',
+        cardColor: '#3b82f6',
+        cardBg: '#f8faff',
+        badgeBg: '#eff6ff',
+        badgeColor: '#3b82f6',
+        tagBg: '#eff6ff',
+        tagColor: '#3b82f6',
+        tagBorder: '#dbeafe',
+        icon: 'clamp',
+        speaker: 'Dr. Maya Chen',
+        description: 'Live broadcast of robotic deep pelvic dissection with real-time nerve mapping, autonomic preservation, and robotic endostapling.'
+      },
+      {
+        id: 'glance-d2-7',
+        timeStart: '16:00',
+        timeEnd: '17:00',
+        title: 'Next-Generation Robotic Systems',
+        hall: 'Hall B — Technology & Innovation',
+        category: 'robotic',
+        categoryLabel: 'ROBOTIC SURGERY',
+        cardColor: '#3b82f6',
+        cardBg: '#f8faff',
+        badgeBg: '#eff6ff',
+        badgeColor: '#3b82f6',
+        tagBg: '#eff6ff',
+        tagColor: '#3b82f6',
+        tagBorder: '#dbeafe',
+        icon: 'gear',
+        speaker: 'Dr. Sofia Laurent',
+        description: 'Hands-on review of modular arm robotics, flexible endoluminal instrumentation, and tele-surgery performance over 5G networks.'
+      }
+    ]
+  },
+  {
+    dayNumber: 3,
+    dayTitle: 'Day 3',
+    dayOfWeek: 'Sunday, January 3, 2027',
+    stats: {
+      sessionsCount: '6',
+      sessionsLabel: 'Sessions',
+      speakersCount: '9',
+      speakersLabel: 'Speakers',
+      tracksCount: '3',
+      tracksLabel: 'Tracks'
+    },
+    sessions: [
+      {
+        id: 'glance-d3-1',
+        timeStart: '08:00',
+        timeEnd: '09:00',
+        title: 'Breakfast & Networking',
+        hall: 'Main Lobby',
+        category: 'welcome',
+        categoryLabel: 'NETWORKING',
+        cardColor: '#3b82f6',
+        cardBg: '#f8faff',
+        badgeBg: '#eff6ff',
+        badgeColor: '#3b82f6',
+        tagBg: '#f8fafc',
+        tagColor: '#64748b',
+        tagBorder: '#e2e8f0',
+        icon: 'coffee',
+        speaker: 'Conference Hosts',
+        description: 'Morning fellowship, research abstract viewing, and inter-institutional collaboration meetings.'
+      },
+      {
+        id: 'glance-d3-2',
+        timeStart: '09:00',
+        timeEnd: '10:00',
+        title: 'The Autonomous Surgical Suite',
+        hall: 'Main Auditorium',
+        category: 'future',
+        categoryLabel: 'FUTURE OF HEALTHCARE',
+        cardColor: '#10b981',
+        cardBg: '#f7fbf8',
+        badgeBg: '#ecfdf5',
+        badgeColor: '#10b981',
+        tagBg: '#ecfdf5',
+        tagColor: '#10b981',
+        tagBorder: '#a7f3d0',
+        icon: 'monitor',
+        speaker: 'Dr. Daniel Okafor',
+        description: 'Exploring supervisory surgical automation: suturing algorithms, tension sensing, and safety architectures.'
+      },
+      {
+        id: 'glance-d3-3',
+        timeStart: '10:30',
+        timeEnd: '11:15',
+        title: 'AI-Assisted Endoscopy and Early Detection',
+        hall: 'Hall A — Surgical Sciences',
+        category: 'ai',
+        categoryLabel: 'AI IN HEALTHCARE',
+        cardColor: '#f43f5e',
+        cardBg: '#fffbfb',
+        badgeBg: '#fff1f2',
+        badgeColor: '#f43f5e',
+        tagBg: '#fff1f2',
+        tagColor: '#f43f5e',
+        tagBorder: '#ffe4e6',
+        icon: 'endoscope',
+        speaker: 'Dr. Arjun Mehta',
+        description: 'Real-time computer vision detection of flat adenomas, Barrett esophagus dysplastic surveillance, and microvascular pattern characterization.'
+      },
+      {
+        id: 'glance-d3-4',
+        timeStart: '11:30',
+        timeEnd: '12:15',
+        title: 'Surgical Data Science and Predictive Analytics',
+        hall: 'Hall B — Technology & Innovation',
+        category: 'tech',
+        categoryLabel: 'TECHNOLOGY & INNOVATION',
+        cardColor: '#3b82f6',
+        cardBg: '#f8faff',
+        badgeBg: '#eff6ff',
+        badgeColor: '#3b82f6',
+        tagBg: '#eff6ff',
+        tagColor: '#3b82f6',
+        tagBorder: '#dbeafe',
+        icon: 'database',
+        speaker: 'Dr. Sofia Laurent',
+        description: 'Large registry models, federated learning, and intraoperative risk estimation from structured metadata.'
+      },
+      {
+        id: 'glance-d3-5',
+        timeStart: '14:00',
+        timeEnd: '14:45',
+        title: 'Healthcare Economics in the AI Era',
+        hall: 'Hall C — Digital Health',
+        category: 'economics',
+        categoryLabel: 'HEALTHCARE ECONOMICS',
+        cardColor: '#eab308',
+        cardBg: '#fefaf6',
+        badgeBg: '#fefce8',
+        badgeColor: '#eab308',
+        tagBg: '#fefce8',
+        tagColor: '#eab308',
+        tagBorder: '#fef08a',
+        icon: 'barchart',
+        speaker: 'Dr. James Carter',
+        description: 'Cost-utility analysis, hospital procurement benchmarks, and reimbursement pathways for AI diagnostic pipelines.'
+      },
+      {
+        id: 'glance-d3-6',
+        timeStart: '16:00',
+        timeEnd: '17:00',
+        title: 'Closing Keynote: Humanity in the Age of AI',
+        hall: 'Main Auditorium',
+        category: 'future',
+        categoryLabel: 'FUTURE OF HEALTHCARE',
+        cardColor: '#a855f7',
+        cardBg: '#faf7fd',
+        badgeBg: '#faf5ff',
+        badgeColor: '#a855f7',
+        tagBg: '#ecfdf5',
+        tagColor: '#10b981',
+        tagBorder: '#a7f3d0',
+        icon: 'star',
+        speaker: 'Dr. Thomas Weber',
+        description: 'Conference summary, best scientific awards, and roadmap for robotic AI surgery through 2030.'
+      }
+    ]
+  }
+];
+
+// =========================================================================
+// DATASET 2: "SESSIONS" (4-COLUMN CARD GRID DESIGN)
+// =========================================================================
+const SESSIONS_GRID_DAYS = [
   {
     dayId: 'D1',
     dayNumber: 1,
@@ -177,7 +484,7 @@ const CONFERENCE_DAYS_DATA = [
     sessionsCount: '8 Sessions',
     sessions: [
       {
-        id: 'd1-1',
+        id: 'grid-d1-1',
         time: '09:00 - 10:00',
         duration: '60 min',
         icon: 'podium',
@@ -191,7 +498,7 @@ const CONFERENCE_DAYS_DATA = [
         venue: 'Main Auditorium'
       },
       {
-        id: 'd1-2',
+        id: 'grid-d1-2',
         time: '10:30 - 11:15',
         duration: '45 min',
         icon: 'clamp',
@@ -205,7 +512,7 @@ const CONFERENCE_DAYS_DATA = [
         venue: 'Hall A — Surgical Sciences'
       },
       {
-        id: 'd1-3',
+        id: 'grid-d1-3',
         time: '11:30 - 12:15',
         duration: '45 min',
         icon: 'brain',
@@ -219,7 +526,7 @@ const CONFERENCE_DAYS_DATA = [
         venue: 'Hall B — Technology & Innovation'
       },
       {
-        id: 'd1-4',
+        id: 'grid-d1-4',
         time: '14:00 - 14:45',
         duration: '45 min',
         icon: 'globe',
@@ -233,7 +540,7 @@ const CONFERENCE_DAYS_DATA = [
         venue: 'Main Auditorium'
       },
       {
-        id: 'd1-5',
+        id: 'grid-d1-5',
         time: '15:00 - 15:45',
         duration: '45 min',
         icon: 'users',
@@ -246,7 +553,7 @@ const CONFERENCE_DAYS_DATA = [
         venue: 'Hall A — Surgical Sciences'
       },
       {
-        id: 'd1-6',
+        id: 'grid-d1-6',
         time: '16:00 - 17:00',
         duration: '60 min',
         icon: 'chart',
@@ -260,7 +567,7 @@ const CONFERENCE_DAYS_DATA = [
         venue: 'Hall C — Digital Health'
       },
       {
-        id: 'd1-7',
+        id: 'grid-d1-7',
         time: '17:00 - 17:45',
         duration: '45 min',
         icon: 'monitor',
@@ -274,7 +581,7 @@ const CONFERENCE_DAYS_DATA = [
         venue: 'Main Auditorium'
       },
       {
-        id: 'd1-8',
+        id: 'grid-d1-8',
         time: '18:00 - 18:30',
         duration: '30 min',
         icon: 'network',
@@ -298,20 +605,20 @@ const CONFERENCE_DAYS_DATA = [
     sessionsCount: '7 Sessions',
     sessions: [
       {
-        id: 'd2-1',
+        id: 'grid-d2-1',
         time: '08:00 - 09:00',
         duration: '60 min',
         icon: 'coffee',
         title: 'Morning Networking & Coffee',
-        desc: 'Join fellow delegates for an informal networking session over fresh morning coffee and breakfast.',
+        desc: 'Join fellow delegates for an informal networking session over coffee before surgical breakout sessions.',
         tags: [
           { label: 'NETWORKING', type: 'networking' }
         ],
-        speaker: 'Delegates & Faculty',
+        speaker: 'Conference Hosts',
         venue: 'Main Lobby'
       },
       {
-        id: 'd2-2',
+        id: 'grid-d2-2',
         time: '09:00 - 10:00',
         duration: '60 min',
         icon: 'siren',
@@ -325,7 +632,7 @@ const CONFERENCE_DAYS_DATA = [
         venue: 'Main Auditorium'
       },
       {
-        id: 'd2-3',
+        id: 'grid-d2-3',
         time: '10:30 - 11:15',
         duration: '45 min',
         icon: 'image',
@@ -339,12 +646,12 @@ const CONFERENCE_DAYS_DATA = [
         venue: 'Hall B — Technology & Innovation'
       },
       {
-        id: 'd2-4',
+        id: 'grid-d2-4',
         time: '11:30 - 12:15',
         duration: '45 min',
         icon: 'doctor',
         title: 'Surgeon Training in the AI Era',
-        desc: 'Simulation, data and certification models for next-generation surgical education programs.',
+        desc: 'Simulation, data and certification for next-generation surgical education and VR tactile models.',
         tags: [
           { label: 'ORAL', type: 'oral' },
           { label: 'DIGITAL HEALTH', type: 'digital' }
@@ -353,45 +660,45 @@ const CONFERENCE_DAYS_DATA = [
         venue: 'Hall C — Digital Health'
       },
       {
-        id: 'd2-5',
+        id: 'grid-d2-5',
         time: '14:00 - 14:45',
         duration: '45 min',
         icon: 'chart',
         title: 'Machine Learning for Surgical Outcomes',
-        desc: 'Validated deep learning models for complication forecasting and risk-adjusted postoperative milestones.',
+        desc: 'Predictive algorithms predicting post-operative recovery, complication risks, and personalized interventions.',
         tags: [
           { label: 'ORAL', type: 'oral' },
           { label: 'AI IN HEALTHCARE', type: 'ai' }
-        ],
-        speaker: 'Dr. Sofia Laurent',
-        venue: 'Hall A — Surgical Sciences'
-      },
-      {
-        id: 'd2-6',
-        time: '15:00 - 15:45',
-        duration: '45 min',
-        icon: 'clamp',
-        title: 'Robotic Low Anterior Resection: Live Case Session',
-        desc: 'High-definition live case transmission featuring autonomic nerve preservation and intracorporeal anastomosis.',
-        tags: [
-          { label: 'ORAL', type: 'oral' },
-          { label: 'ROBOTIC SURGERY', type: 'robotic' }
         ],
         speaker: 'Dr. Arjun Mehta',
         venue: 'Hall A — Surgical Sciences'
       },
       {
-        id: 'd2-7',
+        id: 'grid-d2-6',
+        time: '15:00 - 15:45',
+        duration: '45 min',
+        icon: 'clamp',
+        title: 'Robotic Low Anterior Resection: Live Case',
+        desc: 'High-definition 3D live surgical transmission featuring pelvic dissection and robotic endoluminal stapling.',
+        tags: [
+          { label: 'LIVE SURGERY', type: 'robotic' },
+          { label: 'ROBOTIC SURGERY', type: 'robotic' }
+        ],
+        speaker: 'Dr. Maya Chen',
+        venue: 'Hall A — Surgical Sciences'
+      },
+      {
+        id: 'grid-d2-7',
         time: '16:00 - 17:00',
         duration: '60 min',
         icon: 'gear',
         title: 'Next-Generation Robotic Systems',
-        desc: 'Comparative evaluation of emerging flexible platforms, open-architecture consoles, and telesurgery performance.',
+        desc: 'Hands-on review of modular arm robotics, flexible instrumentation, and tele-surgery performance over 5G.',
         tags: [
           { label: 'ORAL', type: 'oral' },
           { label: 'ROBOTIC SURGERY', type: 'robotic' }
         ],
-        speaker: 'Dr. Thomas Weber',
+        speaker: 'Dr. Sofia Laurent',
         venue: 'Hall B — Technology & Innovation'
       }
     ]
@@ -406,86 +713,85 @@ const CONFERENCE_DAYS_DATA = [
     sessionsCount: '6 Sessions',
     sessions: [
       {
-        id: 'd3-1',
+        id: 'grid-d3-1',
         time: '08:00 - 09:00',
         duration: '60 min',
         icon: 'coffee',
         title: 'Breakfast & Networking',
-        desc: 'Final morning fellowship, research discussion roundtables, and international partnership meetings.',
+        desc: 'Morning fellowship, research abstract viewing, and inter-institutional collaboration meetings.',
         tags: [
           { label: 'NETWORKING', type: 'networking' }
         ],
-        speaker: 'Delegates & Faculty',
+        speaker: 'Conference Hosts',
         venue: 'Main Lobby'
       },
       {
-        id: 'd3-2',
+        id: 'grid-d3-2',
         time: '09:00 - 10:00',
         duration: '60 min',
         icon: 'monitor',
         title: 'The Autonomous Surgical Suite',
-        desc: 'Exploring supervisory autonomy, human-in-the-loop safeguards, and algorithmic precision control paradigms.',
+        desc: 'Exploring supervisory surgical automation: suturing algorithms, tension sensing, and safety architectures.',
         tags: [
-          { label: 'KEYNOTE', type: 'keynote' },
+          { label: 'ORAL', type: 'oral' },
           { label: 'FUTURE OF HEALTHCARE', type: 'future' }
         ],
-        speaker: 'Dr. Arjun Mehta',
+        speaker: 'Dr. Daniel Okafor',
         venue: 'Main Auditorium'
       },
       {
-        id: 'd3-3',
+        id: 'grid-d3-3',
         time: '10:30 - 11:15',
         duration: '45 min',
         icon: 'endoscope',
         title: 'AI-Assisted Endoscopy and Early Detection',
-        desc: 'Computer vision diagnostics for mucosal neoplasia, microvascular characterization, and polyp detection.',
+        desc: 'Real-time computer vision detection of flat adenomas, dysplastic surveillance, and microvascular pattern recognition.',
         tags: [
           { label: 'ORAL', type: 'oral' },
           { label: 'AI IN HEALTHCARE', type: 'ai' }
         ],
-        speaker: 'Dr. Maya Chen',
+        speaker: 'Dr. Arjun Mehta',
         venue: 'Hall A — Surgical Sciences'
       },
       {
-        id: 'd3-4',
+        id: 'grid-d3-4',
         time: '11:30 - 12:15',
         duration: '45 min',
         icon: 'database',
         title: 'Surgical Data Science and Predictive Analytics',
-        desc: 'Federated clinical learning, video telemetry analytics, and multi-center registry insights.',
+        desc: 'Large registry models, federated learning, and intraoperative risk estimation from clinical metadata.',
         tags: [
           { label: 'ORAL', type: 'oral' },
-          { label: 'TECHNOLOGY & INNOVATION', type: 'tech' }
+          { label: 'TECHNOLOGY & INNOVATION', type: 'future' }
         ],
-        speaker: 'Dr. Marcus Vance',
+        speaker: 'Dr. Sofia Laurent',
         venue: 'Hall B — Technology & Innovation'
       },
       {
-        id: 'd3-5',
+        id: 'grid-d3-5',
         time: '14:00 - 14:45',
         duration: '45 min',
         icon: 'barchart',
         title: 'Healthcare Economics in the AI Era',
-        desc: 'Value-based procurement, hospital ROI modeling, reimbursement shifts, and robotic investment feasibility.',
+        desc: 'Cost-utility analysis, hospital procurement benchmarks, and reimbursement pathways for AI diagnostic pipelines.',
         tags: [
-          { label: 'ORAL', type: 'oral' },
-          { label: 'HEALTHCARE ECONOMICS', type: 'economics' }
+          { label: 'HEALTHCARE ECONOMICS', type: 'future' }
         ],
-        speaker: 'Dr. Daniel Okafor',
+        speaker: 'Dr. James Carter',
         venue: 'Hall C — Digital Health'
       },
       {
-        id: 'd3-6',
+        id: 'grid-d3-6',
         time: '16:00 - 17:00',
         duration: '60 min',
         icon: 'star',
-        title: 'Closing Keynote & Valedictory Session',
-        desc: 'Closing remarks, ethical mandates for medical AI, and KaizenCon 2027 clinical summary.',
+        title: 'Closing Keynote: Humanity in the Age of AI',
+        desc: 'Conference summary, best scientific awards, and roadmap for robotic AI surgery through 2030.',
         tags: [
           { label: 'KEYNOTE', type: 'keynote' },
           { label: 'FUTURE OF HEALTHCARE', type: 'future' }
         ],
-        speaker: 'Dr. Sofia Laurent & Panel',
+        speaker: 'Dr. Thomas Weber',
         venue: 'Main Auditorium'
       }
     ]
@@ -493,54 +799,140 @@ const CONFERENCE_DAYS_DATA = [
 ];
 
 export default function ProgrammePage() {
+  const [activeTab, setActiveTab] = useState('glance');
+  const [selectedTopic, setSelectedTopic] = useState('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTrack, setSelectedTrack] = useState('ALL');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
+  const [activeMobileDay, setActiveMobileDay] = useState(1);
 
-  // Close modal on Escape
+  // Close modal and dropdown on Escape
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         setSelectedSession(null);
+        setIsFilterOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Topic bar pills exactly matching Screenshot 2
+  const topicsBarItems = [
+    { id: 'ALL', label: 'All' },
+    { id: 'robotic', label: 'Robotic Surgery' },
+    { id: 'ai', label: 'AI in Healthcare' },
+    { id: 'colorectal', label: 'Colorectal Surgery' },
+    { id: 'innovation', label: 'Surgical Innovation' },
+    { id: 'future', label: 'Future of Healthcare' },
+    { id: 'digital', label: 'Digital Health' },
+    { id: 'imaging', label: 'Medical Imaging' },
+    { id: 'economics', label: 'Healthcare Economics' }
+  ];
+
+  // Track filter dropdown items
+  const allTracks = [
+    { id: 'ALL', label: 'All Tracks' },
+    { id: 'ai', label: 'AI in Healthcare' },
+    { id: 'robotic', label: 'Robotic Surgery' },
+    { id: 'future', label: 'Future of Healthcare' },
+    { id: 'imaging', label: 'Medical Imaging' },
+    { id: 'digital', label: 'Digital Health' },
+    { id: 'panel', label: 'Panels & Debates' },
+    { id: 'welcome', label: 'Networking & Welcome' }
+  ];
+
+  // Filtered dataset for Glance view
+  const filteredGlanceProgramme = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    return GLANCE_DAYS_DATA.map((day) => {
+      const filteredSessions = day.sessions.filter((session) => {
+        if (selectedTopic !== 'ALL') {
+          const matchCat = session.category.toLowerCase().includes(selectedTopic.toLowerCase());
+          const matchLabel = session.categoryLabel.toLowerCase().includes(selectedTopic.toLowerCase());
+          const matchTitle = session.title.toLowerCase().includes(selectedTopic.toLowerCase());
+          if (!matchCat && !matchLabel && !matchTitle) return false;
+        }
+
+        if (selectedTrack !== 'ALL') {
+          if (!session.category.toLowerCase().includes(selectedTrack.toLowerCase())) return false;
+        }
+
+        if (!query) return true;
+        const inTitle = session.title.toLowerCase().includes(query);
+        const inHall = session.hall.toLowerCase().includes(query);
+        const inTag = session.categoryLabel.toLowerCase().includes(query);
+        const inSpeaker = session.speaker.toLowerCase().includes(query);
+        const inDesc = session.description.toLowerCase().includes(query);
+
+        return inTitle || inHall || inTag || inSpeaker || inDesc;
+      });
+
+      return {
+        ...day,
+        sessions: filteredSessions
+      };
+    });
+  }, [searchQuery, selectedTrack, selectedTopic]);
+
+  // Filtered dataset for Sessions view
+  const filteredSessionsGrid = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    return SESSIONS_GRID_DAYS.map((day) => {
+      const filtered = day.sessions.filter((s) => {
+        if (selectedTopic !== 'ALL') {
+          const inTags = s.tags.some(t => t.label.toLowerCase().includes(selectedTopic.toLowerCase()) || t.type.toLowerCase().includes(selectedTopic.toLowerCase()));
+          const inTitle = s.title.toLowerCase().includes(selectedTopic.toLowerCase());
+          if (!inTags && !inTitle) return false;
+        }
+
+        if (!query) return true;
+        const inTitle = s.title.toLowerCase().includes(query);
+        const inVenue = s.venue.toLowerCase().includes(query);
+        const inSpeaker = s.speaker.toLowerCase().includes(query);
+        const inDesc = s.desc.toLowerCase().includes(query);
+        const inTags = s.tags.some(t => t.label.toLowerCase().includes(query));
+
+        return inTitle || inVenue || inSpeaker || inDesc || inTags;
+      });
+
+      return {
+        ...day,
+        sessions: filtered
+      };
+    });
+  }, [searchQuery, selectedTopic]);
+
   return (
     <div className="kz-programme-page-wrapper">
       <div className="kz-programme-container">
 
         {/* ====================================================
-            1. PAGE HEADER (Matches screenshot top section)
+            1. PAGE HEADER
            ==================================================== */}
         <header className="kz-programme-header">
           <div className="kz-programme-header-left">
-            {/* Red / Magenta Schedule Tag with Red Accent Dash */}
             <div className="kz-schedule-badge-row">
               <span className="kz-schedule-dash" aria-hidden="true" />
               <span className="kz-schedule-pill">SCHEDULE</span>
             </div>
 
-            {/* Main Title */}
             <h1 className="kz-programme-main-title">Programme at a Glance</h1>
 
-            {/* Subtitle */}
             <p className="kz-programme-subtitle">
               Three days of groundbreaking talks, live surgeries, AI innovations and expert discussions.
             </p>
           </div>
 
-          {/* Right Info Meta (Calendar & Location with direct links) */}
+          {/* Right Info Meta (Calendar & Location with React Icons) */}
           <div className="kz-programme-header-right">
-            {/* Calendar Meta */}
             <div className="kz-header-meta-item">
               <span className="kz-header-meta-icon" aria-hidden="true">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
+                <LuCalendar size={20} />
               </span>
               <div className="kz-header-meta-text">
                 <span className="kz-header-meta-primary">1 – 3 January 2027</span>
@@ -549,13 +941,9 @@ export default function ProgrammePage() {
 
             <span className="kz-header-meta-divider" aria-hidden="true" />
 
-            {/* Location Meta */}
             <div className="kz-header-meta-item">
               <span className="kz-header-meta-icon" aria-hidden="true">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
+                <LuMapPin size={20} />
               </span>
               <div className="kz-header-meta-text">
                 <span className="kz-header-meta-primary">International Conference Centre</span>
@@ -566,135 +954,513 @@ export default function ProgrammePage() {
         </header>
 
         {/* ====================================================
-            2. DAY-BY-DAY ROW SECTIONS WITH TIMELINE RAIL
+            2. TOP CONTROLS BAR (AT A GLANCE / SESSIONS TABS, SEARCH, FILTER)
            ==================================================== */}
-        <main className="kz-programme-days-stack" id="schedule">
-          {CONFERENCE_DAYS_DATA.map((dayData, dayIdx) => (
-            <section key={dayData.dayId} className="kz-day-section-row">
-              
-              {/* Left Timeline Rail Column with D1 / D2 / D3 Badge and Dots */}
-              <div className="kz-timeline-date-column" aria-hidden="true">
-                {/* Square Date Box */}
-                <div className="kz-date-badge-box">
-                  <div className="kz-date-badge-top">{dayData.dayId}</div>
-                  <div className="kz-date-badge-bottom">
-                    <span className="kz-badge-month">{dayData.badgeMonth}</span>
-                    <span className="kz-badge-date">{dayData.badgeDate}</span>
-                    <span className="kz-badge-year">{dayData.badgeYear}</span>
+        <section className="kz-programme-controls-bar" aria-label="Programme Navigation and Filters">
+
+          <div className="kz-programme-tabs-group" role="tablist">
+            {/* 1. At a Glance Button */}
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'glance'}
+              className={`kz-view-tab-btn ${activeTab === 'glance' ? 'is-active' : ''}`}
+              onClick={() => setActiveTab('glance')}
+            >
+              <LuLayoutGrid size={16} />
+              <span>At a Glance</span>
+            </button>
+
+            {/* 2. Sessions Button */}
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'sessions'}
+              className={`kz-view-tab-btn ${activeTab === 'sessions' ? 'is-active' : ''}`}
+              onClick={() => setActiveTab('sessions')}
+            >
+              <LuList size={16} />
+              <span>Sessions</span>
+            </button>
+
+            {/* 3. Topics Button */}
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'topics'}
+              className={`kz-view-tab-btn ${activeTab === 'topics' ? 'is-active' : ''}`}
+              onClick={() => setActiveTab('topics')}
+            >
+              <LuTag size={16} />
+              <span>Topics</span>
+            </button>
+
+            {/* 4. Speakers Button */}
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'speakers'}
+              className={`kz-view-tab-btn ${activeTab === 'speakers' ? 'is-active' : ''}`}
+              onClick={() => setActiveTab('speakers')}
+            >
+              <LuUsers size={16} />
+              <span>Speakers</span>
+            </button>
+
+            {/* 5. Conference Website Link */}
+            <Link to="/" className="kz-view-tab-btn kz-external-link-btn" title="Back to Conference Home">
+              <LuGlobe size={16} />
+              <span>Conference Website</span>
+            </Link>
+          </div>
+
+          {/* Search Input & Filter Button */}
+          <div className="kz-programme-search-filter-group">
+            <div className="kz-search-input-wrapper">
+              <span className="kz-search-icon" aria-hidden="true">
+                <LuSearch size={16} />
+              </span>
+              <input
+                type="text"
+                className="kz-search-input"
+                placeholder="Search sessions, topics, speakers..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Search programme"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  className="kz-search-clear-btn"
+                  onClick={() => setSearchQuery('')}
+                  aria-label="Clear search"
+                >
+                  <LuX size={16} />
+                </button>
+              )}
+            </div>
+
+            <div className="kz-filter-wrapper">
+              <button
+                type="button"
+                className={`kz-filter-toggle-btn ${selectedTrack !== 'ALL' || isFilterOpen ? 'is-filtering' : ''}`}
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                aria-label="Filter programme options"
+                aria-expanded={isFilterOpen}
+              >
+                <LuFilter size={17} />
+                {selectedTrack !== 'ALL' && <span className="kz-filter-active-dot" />}
+              </button>
+
+              {isFilterOpen && (
+                <div className="kz-filter-dropdown-menu">
+                  <div className="kz-filter-dropdown-header">
+                    <span>Filter by Track</span>
+                    {selectedTrack !== 'ALL' && (
+                      <button
+                        type="button"
+                        className="kz-filter-reset-link"
+                        onClick={() => {
+                          setSelectedTrack('ALL');
+                          setIsFilterOpen(false);
+                        }}
+                      >
+                        Reset
+                      </button>
+                    )}
+                  </div>
+                  <ul className="kz-filter-dropdown-list">
+                    {allTracks.map((tr) => (
+                      <li key={tr.id}>
+                        <button
+                          type="button"
+                          className={`kz-filter-option-btn ${selectedTrack === tr.id ? 'is-selected' : ''}`}
+                          onClick={() => {
+                            setSelectedTrack(tr.id);
+                            setIsFilterOpen(false);
+                          }}
+                        >
+                          <span>{tr.label}</span>
+                          {selectedTrack === tr.id && (
+                            <LuChevronRight size={14} />
+                          )}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* ====================================================
+            3. TOPICS HORIZONTAL FILTER BAR (Matches User's Screenshot 2)
+           ==================================================== */}
+        <section className="kz-topics-horizontal-bar" aria-label="Topic Filter Pills">
+          <span className="kz-topics-bar-label">TOPICS</span>
+          <div className="kz-topics-pills-row">
+            {topicsBarItems.map((topicItem) => {
+              const isActive = selectedTopic === topicItem.id;
+              return (
+                <button
+                  key={topicItem.id}
+                  type="button"
+                  className={`kz-topic-pill-chip ${isActive ? 'is-active' : ''}`}
+                  onClick={() => setSelectedTopic(topicItem.id)}
+                >
+                  {topicItem.label}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Mobile Day Selector Pill Tabs */}
+        <div className="kz-mobile-day-tabs" aria-label="Select conference day">
+          <button
+            type="button"
+            className={`kz-mobile-day-btn ${activeMobileDay === 1 ? 'is-active' : ''}`}
+            onClick={() => setActiveMobileDay(1)}
+          >
+            Day 1 (Jan 1)
+          </button>
+          <button
+            type="button"
+            className={`kz-mobile-day-btn ${activeMobileDay === 2 ? 'is-active' : ''}`}
+            onClick={() => setActiveMobileDay(2)}
+          >
+            Day 2 (Jan 2)
+          </button>
+          <button
+            type="button"
+            className={`kz-mobile-day-btn ${activeMobileDay === 3 ? 'is-active' : ''}`}
+            onClick={() => setActiveMobileDay(3)}
+          >
+            Day 3 (Jan 3)
+          </button>
+        </div>
+
+        {/* ====================================================
+            4. VIEW 1: "AT A GLANCE" 3-COLUMN TIMELINE (DEFAULT VIEW)
+               Pixel-perfect match to User's Screenshot 2!
+           ==================================================== */}
+        {activeTab === 'glance' && (
+          <main className="kz-programme-columns-grid">
+            {filteredGlanceProgramme.map((dayCol) => {
+              const isHiddenOnMobile = activeMobileDay !== dayCol.dayNumber;
+
+              return (
+                <div
+                  key={dayCol.dayNumber}
+                  className={`kz-day-column-card ${isHiddenOnMobile ? 'kz-hide-on-mobile' : ''}`}
+                >
+                  {/* Column Header */}
+                  <div className="kz-day-column-header">
+                    <div className="kz-day-header-left">
+                      <h2 className="kz-day-title">{dayCol.dayTitle}</h2>
+                      <span className="kz-day-date-label">{dayCol.dayOfWeek}</span>
+                    </div>
+
+                    {/* Stats Counters on Top Right */}
+                    <div className="kz-day-stats-counters">
+                      <div className="kz-stat-counter-box">
+                        <span className="kz-stat-icon" aria-hidden="true">
+                          <LuMic size={15} />
+                        </span>
+                        <span className="kz-stat-number">{dayCol.stats.sessionsCount}</span>
+                        <span className="kz-stat-label">{dayCol.stats.sessionsLabel}</span>
+                      </div>
+
+                      <div className="kz-stat-counter-box">
+                        <span className="kz-stat-icon" aria-hidden="true">
+                          <LuUsers size={15} />
+                        </span>
+                        <span className="kz-stat-number">{dayCol.stats.speakersCount}</span>
+                        <span className="kz-stat-label">{dayCol.stats.speakersLabel}</span>
+                      </div>
+
+                      <div className="kz-stat-counter-box">
+                        <span className="kz-stat-icon" aria-hidden="true">
+                          <LuCompass size={15} />
+                        </span>
+                        <span className="kz-stat-number">{dayCol.stats.tracksCount}</span>
+                        <span className="kz-stat-label">{dayCol.stats.tracksLabel}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Sessions Timeline Track - Fits 6 events, scrolls if more than 6 */}
+                  <div className="kz-day-timeline-body">
+                    {dayCol.sessions.length === 0 ? (
+                      <div className="kz-no-sessions-found">
+                        <span>No sessions match the current search or topic filter.</span>
+                      </div>
+                    ) : (
+                      dayCol.sessions.map((session, idx) => (
+                        <div
+                          key={session.id}
+                          className="kz-glance-item-wrapper"
+                          onClick={() => setSelectedSession({
+                            title: session.title,
+                            time: `${session.timeStart} – ${session.timeEnd}`,
+                            duration: '45-60 min',
+                            venue: session.hall,
+                            speaker: session.speaker,
+                            desc: session.description,
+                            tags: session.categoryLabel ? [{ label: session.categoryLabel, type: session.category }] : []
+                          })}
+                        >
+                          {/* Left Timeline Rail */}
+                          <div className="kz-glance-timeline-rail" aria-hidden="true">
+                            <span className="kz-glance-timeline-dot" />
+                            {idx < dayCol.sessions.length - 1 && (
+                              <span className="kz-glance-timeline-line" />
+                            )}
+                          </div>
+
+                          {/* Time Block (08:00 / 09:00) */}
+                          <div className="kz-glance-time-block">
+                            <span className="kz-glance-time-start">{session.timeStart}</span>
+                            <span className="kz-glance-time-end">{session.timeEnd}</span>
+                          </div>
+
+                          {/* Sleek Horizontal Card matching Screenshot 2 */}
+                          <article
+                            className="kz-glance-card"
+                            style={{
+                              borderLeft: `4px solid ${session.cardColor || '#aa2d7b'}`,
+                              backgroundColor: session.cardBg || '#ffffff'
+                            }}
+                          >
+                            {/* Left Icon Badge with React Icon */}
+                            <div
+                              className="kz-glance-icon-badge"
+                              style={{
+                                backgroundColor: session.badgeBg || '#f1f5f9',
+                                color: session.badgeColor || '#1e293b'
+                              }}
+                              aria-hidden="true"
+                            >
+                              {renderReactIcon(session.icon, 20)}
+                            </div>
+
+                            {/* Middle Content Stack */}
+                            <div className="kz-glance-card-content">
+                              {session.categoryLabel && (
+                                <span
+                                  className="kz-glance-tag-pill"
+                                  style={{
+                                    backgroundColor: session.tagBg || '#f8fafc',
+                                    color: session.tagColor || '#64748b',
+                                    borderColor: session.tagBorder || '#e2e8f0'
+                                  }}
+                                >
+                                  {session.categoryLabel}
+                                </span>
+                              )}
+                              <h3 className="kz-glance-session-title">{session.title}</h3>
+                            </div>
+
+                            {/* Right Chevron Arrow */}
+                            <div className="kz-glance-chevron" aria-hidden="true">
+                              <LuChevronRight size={18} />
+                            </div>
+                          </article>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </main>
+        )}
+
+        {/* ====================================================
+            5. VIEW 2: "SESSIONS" (4-COLUMN CARD GRID DESIGN)
+               Triggered when clicking the [Sessions] tab!
+           ==================================================== */}
+        {activeTab === 'sessions' && (
+          <main className="kz-programme-days-stack">
+            {filteredSessionsGrid.map((dayData) => (
+              <section key={dayData.dayId} className="kz-day-section-row">
+
+                {/* Left Timeline Rail Column with D1 / D2 / D3 Badge and Dots */}
+                <div className="kz-timeline-date-column" aria-hidden="true">
+                  <div className="kz-date-badge-box">
+                    <div className="kz-date-badge-top">{dayData.dayId}</div>
+                    <div className="kz-date-badge-bottom">
+                      <span className="kz-badge-month">{dayData.badgeMonth}</span>
+                      <span className="kz-badge-date">{dayData.badgeDate}</span>
+                      <span className="kz-badge-year">{dayData.badgeYear}</span>
+                    </div>
+                  </div>
+
+                  <div className="kz-timeline-vertical-line">
+                    <span className="kz-timeline-track-dot dot-1" />
+                    <span className="kz-timeline-track-dot dot-2" />
                   </div>
                 </div>
 
-                {/* Vertical Timeline Track Line */}
-                <div className="kz-timeline-vertical-line">
-                  <span className="kz-timeline-track-dot dot-1" />
-                  <span className="kz-timeline-track-dot dot-2" />
-                </div>
-              </div>
+                {/* Right Content Column */}
+                <div className="kz-day-content-column">
+                  <div className="kz-day-section-header">
+                    <span className="kz-mobile-day-indicator">{dayData.dayId}</span>
+                    <h2 className="kz-day-section-title">{dayData.title}</h2>
+                    <span className="kz-day-sessions-badge">
+                      <LuCalendar size={14} />
+                      <span>{dayData.sessionsCount}</span>
+                    </span>
+                  </div>
 
-              {/* Right Content Column (Day Header & Cards Grid) */}
-              <div className="kz-day-content-column">
-                
-                {/* Day Header Row */}
-                <div className="kz-day-section-header">
-                  <span className="kz-mobile-day-indicator">{dayData.dayId}</span>
-                  <h2 className="kz-day-section-title">{dayData.title}</h2>
-                  <span className="kz-day-sessions-badge">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <rect x="3" y="4" width="18" height="18" rx="2" />
-                      <line x1="16" y1="2" x2="16" y2="6" />
-                      <line x1="8" y1="2" x2="8" y2="6" />
-                      <line x1="3" y1="10" x2="21" y2="10" />
-                    </svg>
-                    <span>{dayData.sessionsCount}</span>
-                  </span>
-                </div>
+                  <div className="kz-sessions-responsive-grid">
+                    {dayData.sessions.map((session) => (
+                      <article
+                        key={session.id}
+                        className="kz-session-card-block"
+                        onClick={() => setSelectedSession(session)}
+                      >
+                        <div className="kz-card-top-row">
+                          <div className="kz-card-icon-badge" aria-hidden="true">
+                            {renderReactIcon(session.icon, 18)}
+                          </div>
 
-                {/* Cards Grid: 4 Cards per Row (Responsive) */}
-                <div className="kz-sessions-responsive-grid">
-                  {dayData.sessions.map((session) => (
-                    <article
-                      key={session.id}
-                      className="kz-session-card-block"
-                      onClick={() => setSelectedSession(session)}
-                    >
-                      {/* Top Meta Row (Icon + Time + Duration) */}
-                      <div className="kz-card-top-row">
-                        <div className="kz-card-icon-badge" aria-hidden="true">
-                          {renderSessionIcon(session.icon)}
-                        </div>
-
-                        <div className="kz-card-time-wrap">
-                          <span className="kz-card-time-text">{session.time}</span>
-                          <span className="kz-card-duration-chip">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                              <circle cx="12" cy="12" r="10" />
-                              <polyline points="12 6 12 12 16 14" />
-                            </svg>
-                            <span>{session.duration}</span>
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Session Title */}
-                      <h3 className="kz-card-title">{session.title}</h3>
-
-                      {/* Excerpt Description */}
-                      <p className="kz-card-description">{session.desc}</p>
-
-                      {/* Category Tag Pills */}
-                      <div className="kz-card-tags-row">
-                        {session.tags.map((tagItem, tIdx) => (
-                          <span
-                            key={tIdx}
-                            className={`kz-card-pill kz-pill-${tagItem.type}`}
-                          >
-                            {tagItem.label}
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Bottom Row: Speaker Name & Venue (NO DOCTOR IMAGES) + Arrow Button */}
-                      <div className="kz-card-bottom-row">
-                        <div className="kz-card-speaker-venue-meta">
-                          {session.speaker && (
-                            <span className="kz-card-speaker-name">{session.speaker}</span>
-                          )}
-                          <div className="kz-card-venue-row">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                              <circle cx="12" cy="10" r="3" />
-                            </svg>
-                            <span>{session.venue}</span>
+                          <div className="kz-card-time-wrap">
+                            <span className="kz-card-time-text">{session.time}</span>
+                            <span className="kz-card-duration-chip">
+                              <LuClock size={12} />
+                              <span>{session.duration}</span>
+                            </span>
                           </div>
                         </div>
 
-                        {/* Arrow Action Button */}
-                        <button
-                          type="button"
-                          className="kz-card-arrow-btn"
-                          aria-label={`View details for ${session.title}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedSession(session);
-                          }}
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="5" y1="12" x2="19" y2="12" />
-                            <polyline points="12 5 19 12 12 19" />
-                          </svg>
-                        </button>
-                      </div>
-                    </article>
-                  ))}
+                        <h3 className="kz-card-title">{session.title}</h3>
+                        <p className="kz-card-description">{session.desc}</p>
+
+                        <div className="kz-card-tags-row">
+                          {session.tags.map((tagItem, tIdx) => (
+                            <span
+                              key={tIdx}
+                              className={`kz-card-pill kz-pill-${tagItem.type}`}
+                            >
+                              {tagItem.label}
+                            </span>
+                          ))}
+                        </div>
+
+                        <div className="kz-card-bottom-row">
+                          <div className="kz-card-speaker-venue-meta">
+                            {session.speaker && (
+                              <span className="kz-card-speaker-name">{session.speaker}</span>
+                            )}
+                            <div className="kz-card-venue-row">
+                              <LuMapPin size={13} />
+                              <span>{session.venue}</span>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            className="kz-card-arrow-btn"
+                            aria-label={`View details for ${session.title}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedSession(session);
+                            }}
+                          >
+                            <LuArrowRight size={16} />
+                          </button>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </section>
-          ))}
-        </main>
+              </section>
+            ))}
+          </main>
+        )}
+
+        {/* ====================================================
+            6. VIEW 3: "TOPICS" TRACKS VIEW
+           ==================================================== */}
+        {activeTab === 'topics' && (
+          <div className="kz-topics-overview-section">
+            <div className="kz-topics-overview-header">
+              <h2 className="kz-topics-overview-title">Conference Thematic Tracks</h2>
+              <p className="kz-topics-overview-subtitle">
+                Explore specialized surgical innovation tracks and jump straight into curated scientific discussions.
+              </p>
+            </div>
+
+            <div className="kz-topics-cards-grid">
+              {topicsBarItems.filter(t => t.id !== 'ALL').map((topicItem) => (
+                <div
+                  key={topicItem.id}
+                  className="kz-topic-showcase-card"
+                  onClick={() => {
+                    setSelectedTopic(topicItem.id);
+                    setActiveTab('glance');
+                  }}
+                >
+                  <div className="kz-topic-showcase-badge">
+                    <LuTag size={24} />
+                  </div>
+                  <h3 className="kz-topic-showcase-name">{topicItem.label}</h3>
+                  <p className="kz-topic-showcase-desc">
+                    Comprehensive presentations, expert panels, and live multi-arm demonstrations dedicated to {topicItem.label}.
+                  </p>
+                  <span className="kz-topic-showcase-cta">
+                    View Track Sessions &rarr;
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ====================================================
+            7. VIEW 4: "SPEAKERS" OVERVIEW
+           ==================================================== */}
+        {activeTab === 'speakers' && (
+          <div className="kz-topics-overview-section">
+            <div className="kz-topics-overview-header">
+              <h2 className="kz-topics-overview-title">Keynote Faculty & Speakers</h2>
+              <p className="kz-topics-overview-subtitle">
+                World-renowned clinical surgeons, robotic pioneers, and AI researchers leading the scientific programme.
+              </p>
+            </div>
+
+            <div className="kz-speakers-list-grid">
+              {[
+                { name: 'Dr. James Carter', role: 'Surgical Oncologist & Operating Lead', sessions: 'Opening Keynote, HPB Reconstruction' },
+                { name: 'Dr. Maya Chen', role: 'Robotic GI & Colorectal Surgeon', sessions: 'Robotic Colorectal Surgery, Live Case' },
+                { name: 'Dr. Arjun Mehta', role: 'Director of Advanced Surgical Tech', sessions: 'AI in Surgical Decision Making, Endoscopy' },
+                { name: 'Dr. Sofia Laurent', role: 'Global Surgical Innovation Chair', sessions: 'Global Access, Next-Gen Robotics' },
+                { name: 'Dr. Daniel Okafor', role: 'Laparoscopic & Robotic Specialist', sessions: 'Next Era Panel, Autonomous Suite' },
+                { name: 'Dr. Aisha Rahman', role: 'Surgical VR & AI Simulation Chair', sessions: 'Surgeon Training, Education in AI' },
+                { name: 'Dr. Thomas Weber', role: 'KaizenCon Scientific Committee President', sessions: 'Humanity in AI, Valedictory Keynote' }
+              ].map((spk, idx) => (
+                <div key={idx} className="kz-speaker-faculty-card">
+                  <div className="kz-speaker-initials-badge">
+                    {spk.name.split(' ').map(n => n[0]).join('').replace('D', '')}
+                  </div>
+                  <div className="kz-speaker-info-col">
+                    <h3 className="kz-speaker-card-name">{spk.name}</h3>
+                    <span className="kz-speaker-card-role">{spk.role}</span>
+                    <span className="kz-speaker-card-sessions">
+                      <strong>Sessions:</strong> {spk.sessions}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ====================================================
-          SESSION DETAIL MODAL
+          8. SESSION DETAIL MODAL DIALOG
          ==================================================== */}
       {selectedSession && (
         <div className="kz-session-modal-backdrop" onClick={() => setSelectedSession(null)}>
@@ -705,17 +1471,18 @@ export default function ProgrammePage() {
             aria-modal="true"
             aria-labelledby="kz-modal-session-title"
           >
-            {/* Modal Header */}
             <div className="kz-modal-header">
               <div className="kz-modal-tag-row">
                 {selectedSession.tags && selectedSession.tags.map((tagItem, idx) => (
-                  <span key={idx} className={`kz-card-pill kz-pill-${tagItem.type}`}>
+                  <span key={idx} className={`kz-card-pill kz-pill-${tagItem.type || 'oral'}`}>
                     {tagItem.label}
                   </span>
                 ))}
-                <span className="kz-modal-time-badge">
-                  {selectedSession.time} ({selectedSession.duration})
-                </span>
+                {selectedSession.time && (
+                  <span className="kz-modal-time-badge">
+                    {selectedSession.time} {selectedSession.duration ? `(${selectedSession.duration})` : ''}
+                  </span>
+                )}
               </div>
 
               <button
@@ -724,11 +1491,10 @@ export default function ProgrammePage() {
                 onClick={() => setSelectedSession(null)}
                 aria-label="Close dialog"
               >
-                &times;
+                <LuX size={20} />
               </button>
             </div>
 
-            {/* Modal Body */}
             <div className="kz-modal-body">
               <h2 id="kz-modal-session-title" className="kz-modal-title">
                 {selectedSession.title}
@@ -736,32 +1502,37 @@ export default function ProgrammePage() {
 
               <div className="kz-modal-meta-grid">
                 <div className="kz-modal-meta-cell">
-                  <span className="kz-modal-meta-label">Venue</span>
-                  <span className="kz-modal-meta-val">{selectedSession.venue}</span>
+                  <span className="kz-modal-meta-label">
+                    <LuMapPin size={13} style={{ marginRight: 5, verticalAlign: 'text-bottom' }} />
+                    Venue / Hall
+                  </span>
+                  <span className="kz-modal-meta-val">{selectedSession.venue || selectedSession.hall}</span>
                 </div>
 
                 <div className="kz-modal-meta-cell">
-                  <span className="kz-modal-meta-label">Faculty / Speaker</span>
+                  <span className="kz-modal-meta-label">
+                    <LuUser size={13} style={{ marginRight: 5, verticalAlign: 'text-bottom' }} />
+                    Faculty / Speaker
+                  </span>
                   <span className="kz-modal-meta-val">{selectedSession.speaker}</span>
                 </div>
               </div>
 
               <div className="kz-modal-section">
                 <h4 className="kz-modal-section-heading">Overview</h4>
-                <p className="kz-modal-desc-text">{selectedSession.desc}</p>
+                <p className="kz-modal-desc-text">{selectedSession.desc || selectedSession.description}</p>
               </div>
 
               <div className="kz-modal-section">
-                <h4 className="kz-modal-section-heading">Learning Objectives</h4>
+                <h4 className="kz-modal-section-heading">Key Learning Objectives</h4>
                 <ul className="kz-modal-bullets">
                   <li>Review clinical evidence, indications, and workflow integration paradigms.</li>
                   <li>Identify patient safety guidelines and risk stratification strategies.</li>
-                  <li>Interactive discussion with operating faculty and researchers.</li>
+                  <li>Interactive Q&A discussion with operating faculty and clinical researchers.</li>
                 </ul>
               </div>
             </div>
 
-            {/* Modal Footer */}
             <div className="kz-modal-footer">
               <button
                 type="button"

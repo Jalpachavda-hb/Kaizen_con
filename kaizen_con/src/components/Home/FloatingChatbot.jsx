@@ -86,11 +86,6 @@ export default function FloatingChatbot() {
         aria-label={isOpen ? 'Close AI Chatbot' : 'Open KaizenCon AI Chatbot'}
         title="KaizenCon AI Assistant"
       >
-        {/* Glowing aura */}
-        <span className="kz-floating-btn-glow" aria-hidden="true" />
-
-     
-
         {/* Mascot Image (80 by 80) with Close Overlay on Active */}
         <div className="kz-floating-btn-content">
           <img
