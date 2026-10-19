@@ -89,12 +89,7 @@ export default function FloatingChatbot() {
         {/* Glowing aura */}
         <span className="kz-floating-btn-glow" aria-hidden="true" />
 
-        {/* Online Status Pulse Badge */}
-        {!isOpen && (
-          <span className="kz-floating-online-badge" aria-label="Online">
-            <span className="kz-floating-online-dot" />
-          </span>
-        )}
+     
 
         {/* Mascot Image (80 by 80) with Close Overlay on Active */}
         <div className="kz-floating-btn-content">

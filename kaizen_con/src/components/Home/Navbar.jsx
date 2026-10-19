@@ -8,9 +8,9 @@ import navbarRightImg from '../../assets/home/navbarright.png';
 const navItems = [
   { id: 'home', label: 'Home', href: '/' },
   { id: 'about', label: 'About', href: '/about' },
-  { id: 'programme', label: 'Programme', href: '/#programme' },
+  { id: 'programme', label: 'Programme', href: '/programme' },
   { id: 'speakers', label: 'Speakers', href: '/speakers' },
-  { id: 'ai-experience', label: 'AI Experience', href: '/#ai-experience' },
+  { id: 'ai-experience', label: 'AI Experience', href: '/ai-experience' },
   { id: 'knowledge', label: 'Knowledge', href: '/knowledge' },
   { id: 'contact', label: 'Contact Us', href: '/contact' },
 ];
@@ -23,12 +23,16 @@ export default function Navbar() {
 
   // Sync active nav item with current route and hash
   useEffect(() => {
-    if (location.pathname === '/contact' || location.pathname === '/contact-us') {
+    if (location.pathname === '/programme' || location.pathname === '/program') {
+      setActiveItem('Programme');
+    } else if (location.pathname === '/contact' || location.pathname === '/contact-us') {
       setActiveItem('Contact Us');
     } else if (location.pathname === '/about' || location.pathname === '/about-us') {
       setActiveItem('About');
     } else if (location.pathname === '/speakers' || location.pathname === '/speaker') {
       setActiveItem('Speakers');
+    } else if (location.pathname === '/ai-experience' || location.pathname === '/ai') {
+      setActiveItem('AI Experience');
     } else if (location.pathname === '/knowledge' || location.pathname === '/knowledge-base') {
       setActiveItem('Knowledge');
     } else if (location.hash) {
@@ -88,6 +92,11 @@ export default function Navbar() {
       return;
     }
 
+    if (href === '/programme' || href === '/program') {
+      navigate('/programme');
+      return;
+    }
+
     if (href === '/contact' || href === '/contact-us') {
       navigate('/contact');
       return;
@@ -95,6 +104,11 @@ export default function Navbar() {
 
     if (href === '/speakers' || href === '/speaker') {
       navigate('/speakers');
+      return;
+    }
+
+    if (href === '/ai-experience' || href === '/ai') {
+      navigate('/ai-experience');
       return;
     }
 

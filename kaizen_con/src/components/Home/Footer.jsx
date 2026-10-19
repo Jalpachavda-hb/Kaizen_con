@@ -19,6 +19,16 @@ export default function Footer() {
       } else {
         navigate(path);
       }
+    } else if (path.includes('#')) {
+      const [route, hash] = path.split('#');
+      if (location.pathname === route) {
+        const el = document.getElementById(hash);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        navigate(path);
+      }
     } else {
       navigate(path);
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
@@ -91,7 +101,7 @@ export default function Footer() {
           <div className="kz-footer-heading-bar" aria-hidden="true"></div>
           <ul className="kz-footer-nav-list">
             <li><a href="/about" onClick={(e) => handleFooterNav(e, '/about')}>About KaizenCon</a></li>
-            <li><a href="/#programme" onClick={(e) => handleFooterNav(e, '/#programme')}>Programme</a></li>
+            <li><a href="/programme" onClick={(e) => handleFooterNav(e, '/programme')}>Programme</a></li>
             <li><a href="/speakers" onClick={(e) => handleFooterNav(e, '/speakers')}>Speakers</a></li>
             <li><a href="/#venue" onClick={(e) => handleFooterNav(e, '/#venue')}>Venue &amp; Travel</a></li>
             <li><a href="/#registration" onClick={(e) => handleFooterNav(e, '/#registration')}>Registration</a></li>
@@ -104,12 +114,12 @@ export default function Footer() {
           <h3 className="kz-footer-nav-heading">AI Experience</h3>
           <div className="kz-footer-heading-bar" aria-hidden="true"></div>
           <ul className="kz-footer-nav-list">
-            <li><a href="/#ai-layer" onClick={(e) => handleFooterNav(e, '/#ai-layer')}>AI Personalization</a></li>
-            <li><a href="/#ai-assistant" onClick={(e) => handleFooterNav(e, '/#ai-assistant')}>Conference Assistant</a></li>
-            <li><a href="/#live-intelligence" onClick={(e) => handleFooterNav(e, '/#live-intelligence')}>Live Intelligence</a></li>
-            <li><a href="/knowledge" onClick={(e) => handleFooterNav(e, '/knowledge')}>Knowledge Base</a></li>
-            <li><a href="/#showcase" onClick={(e) => handleFooterNav(e, '/#showcase')}>Research Showcase</a></li>
-            <li><a href="/#innovation" onClick={(e) => handleFooterNav(e, '/#innovation')}>Innovation Hub</a></li>
+            <li><a href="/ai-experience" onClick={(e) => handleFooterNav(e, '/ai-experience')}>The AI Experience</a></li>
+            <li><a href="/ai-experience#personalization" onClick={(e) => handleFooterNav(e, '/ai-experience#personalization')}>01 — AI Personalization</a></li>
+            <li><a href="/ai-experience#assistant" onClick={(e) => handleFooterNav(e, '/ai-experience#assistant')}>02 — Conference Assistant</a></li>
+            <li><a href="/ai-experience#live-qa" onClick={(e) => handleFooterNav(e, '/ai-experience#live-qa')}>03 — Live Q&amp;A Intelligence</a></li>
+            <li><a href="/ai-experience#perspectives" onClick={(e) => handleFooterNav(e, '/ai-experience#perspectives')}>04 — AI Perspectives</a></li>
+            <li><a href="/ai-experience#knowledge" onClick={(e) => handleFooterNav(e, '/ai-experience#knowledge')}>05 — Conference Knowledge</a></li>
           </ul>
         </div>
 

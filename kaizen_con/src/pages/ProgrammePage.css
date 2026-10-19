@@ -1,0 +1,881 @@
+/* ====================================================
+   KAIZEN CON 2027 - PROGRAMME AT A GLANCE
+   Theme Colors:
+   - Primary Magenta: #AA2D7B
+   - Secondary Pink: #D85A9A
+   - Deep Purple: #55355E
+   - Dark Text: #1F1325
+   - Soft Background: #FCFBFE / #FFFFFF
+   Font: var(--font-family, 'Roboto', sans-serif)
+   Fully Responsive (Desktop 4-col, Tablet 2-col, Mobile 1-col)
+   Strictly NO doctor avatars/photos on cards
+   ==================================================== */
+
+:root {
+  --kz-brand-magenta: #aa2d7b;
+  --kz-brand-magenta-dark: #8c1e62;
+  --kz-brand-pink: #d85a9a;
+  --kz-brand-purple: #55355e;
+  --kz-brand-light-tint: #fdf2f8;
+  --kz-brand-border-tint: rgba(170, 45, 123, 0.22);
+  --kz-text-dark: #1f1325;
+  --kz-text-main: #351c3d;
+  --kz-text-muted: #6f5876;
+  --kz-text-subtle: #8e7794;
+  --kz-card-bg: #ffffff;
+  --kz-card-border: #ebe5ee;
+  --kz-card-shadow: 0 3px 12px rgba(85, 53, 94, 0.05);
+  --kz-card-hover-shadow: 0 10px 28px rgba(85, 53, 94, 0.1);
+}
+
+/* ====================================================
+   PAGE CONTAINER WRAPPER
+   ==================================================== */
+.kz-programme-page-wrapper {
+  background-color: #fbf9fb;
+  min-height: 100vh;
+  padding: 40px 0 100px 0;
+  font-family: var(--font-family, 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+  color: var(--kz-text-main);
+  box-sizing: border-box;
+}
+
+.kz-programme-container {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 36px;
+  box-sizing: border-box;
+}
+
+/* ====================================================
+   1. TOP HEADER SECTION
+   ==================================================== */
+.kz-programme-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 44px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid rgba(85, 53, 94, 0.1);
+  flex-wrap: wrap;
+}
+
+.kz-programme-header-left {
+  flex: 1;
+  min-width: 300px;
+}
+
+/* Schedule accent bar & uppercase label */
+.kz-schedule-badge-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.kz-schedule-dash {
+  display: inline-block;
+  width: 28px;
+  height: 4px;
+  background-color: var(--kz-brand-magenta);
+  border-radius: 2px;
+}
+
+.kz-schedule-pill {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--kz-brand-magenta);
+}
+
+.kz-programme-main-title {
+  margin: 0 0 10px 0;
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: var(--kz-text-dark);
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+.kz-programme-subtitle {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--kz-text-muted);
+  font-weight: 400;
+  line-height: 1.5;
+  max-width: 720px;
+}
+
+/* Right Meta (Date + Location) */
+.kz-programme-header-right {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-shrink: 0;
+}
+
+.kz-header-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.kz-header-meta-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--kz-brand-magenta);
+  background-color: var(--kz-brand-light-tint);
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid var(--kz-brand-border-tint);
+  flex-shrink: 0;
+}
+
+.kz-header-meta-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.kz-header-meta-primary {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--kz-text-dark);
+}
+
+.kz-header-meta-link,
+.kz-header-meta-secondary {
+  font-size: 0.825rem;
+  font-weight: 500;
+  color: var(--kz-brand-magenta);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.kz-header-meta-link:hover {
+  text-decoration: underline;
+  color: var(--kz-brand-magenta-dark);
+}
+
+.kz-header-meta-divider {
+  width: 1px;
+  height: 42px;
+  background-color: rgba(85, 53, 94, 0.15);
+}
+
+/* ====================================================
+   2. DAY-BY-DAY ROW SECTION & TIMELINE RAIL
+   ==================================================== */
+.kz-programme-days-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 52px;
+}
+
+.kz-day-section-row {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 28px;
+  align-items: stretch;
+  position: relative;
+}
+
+/* Left Timeline Rail Column */
+.kz-timeline-date-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 76px;
+}
+
+/* D1 / D2 / D3 Date Box */
+.kz-date-badge-box {
+  width: 58px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid var(--kz-brand-magenta);
+  box-shadow: 0 4px 12px rgba(170, 45, 123, 0.18);
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.kz-date-badge-top {
+  background-color: var(--kz-brand-magenta);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-align: center;
+  padding: 5px 0;
+  letter-spacing: 0.5px;
+}
+
+.kz-date-badge-bottom {
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 4px 7px 4px;
+}
+
+.kz-badge-month {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--kz-brand-magenta);
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.kz-badge-date {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--kz-text-dark);
+  line-height: 1.1;
+  margin: 1px 0;
+}
+
+.kz-badge-year {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--kz-text-subtle);
+  line-height: 1;
+}
+
+/* Vertical Timeline Track Line */
+.kz-timeline-vertical-line {
+  position: absolute;
+  top: 72px;
+  bottom: -40px;
+  left: 50%;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    rgba(170, 45, 123, 0.45) 0%,
+    rgba(170, 45, 123, 0.25) 50%,
+    rgba(170, 45, 123, 0.1) 100%
+  );
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Dots along the rail */
+.kz-timeline-track-dot {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: var(--kz-brand-magenta);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 1px var(--kz-brand-magenta);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.kz-timeline-track-dot.dot-1 {
+  top: 155px;
+}
+
+.kz-timeline-track-dot.dot-2 {
+  top: 360px;
+}
+
+/* Right Content Column */
+.kz-day-content-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* Day Section Header */
+.kz-day-section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.kz-mobile-day-indicator {
+  display: none;
+}
+
+.kz-day-section-title {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--kz-text-dark);
+  letter-spacing: -0.015em;
+}
+
+.kz-day-sessions-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background-color: #ffffff;
+  border: 1px solid rgba(85, 53, 94, 0.16);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--kz-text-muted);
+}
+
+.kz-day-sessions-badge svg {
+  color: var(--kz-brand-magenta);
+}
+
+/* ====================================================
+   3. 4-COLUMN CARDS GRID (RESPONSIVE)
+   ==================================================== */
+.kz-sessions-responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+/* Session Card Block */
+.kz-session-card-block {
+  background-color: var(--kz-card-bg);
+  border: 1px solid var(--kz-card-border);
+  border-radius: 14px;
+  padding: 20px 18px;
+  box-shadow: var(--kz-card-shadow);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  position: relative;
+  min-height: 250px;
+}
+
+.kz-session-card-block:hover {
+  transform: translateY(-4px);
+  border-color: rgba(170, 45, 123, 0.35);
+  box-shadow: var(--kz-card-hover-shadow);
+}
+
+/* Top Meta Row (Icon + Time + Duration) */
+.kz-card-top-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.kz-card-icon-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  background-color: var(--kz-brand-light-tint);
+  border: 1px solid var(--kz-brand-border-tint);
+  color: var(--kz-brand-magenta);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.kz-session-card-block:hover .kz-card-icon-badge {
+  background-color: #fce7f3;
+  transform: scale(1.05);
+}
+
+.kz-card-time-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.kz-card-time-text {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--kz-brand-magenta);
+  letter-spacing: -0.01em;
+}
+
+.kz-card-duration-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.775rem;
+  font-weight: 500;
+  color: var(--kz-text-subtle);
+}
+
+.kz-card-duration-chip svg {
+  color: var(--kz-text-subtle);
+}
+
+/* Title & Description */
+.kz-card-title {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--kz-text-dark);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.7em;
+}
+
+.kz-card-description {
+  margin: 0 0 14px 0;
+  font-size: 0.8125rem;
+  color: var(--kz-text-muted);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 3.5em;
+  font-weight: 400;
+}
+
+/* Tags Row */
+.kz-card-tags-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.kz-card-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 5px;
+  line-height: 1.2;
+}
+
+/* Category Pill Styling with Kaizen Theme Harmonization */
+.kz-pill-oral {
+  background-color: #fdf2f8;
+  color: #aa2d7b;
+  border: 1px solid rgba(170, 45, 123, 0.25);
+}
+
+.kz-pill-ai {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid rgba(29, 78, 216, 0.2);
+}
+
+.kz-pill-robotic {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border: 1px solid rgba(21, 128, 61, 0.2);
+}
+
+.kz-pill-keynote {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid rgba(185, 28, 28, 0.22);
+}
+
+.kz-pill-panel {
+  background-color: #faf5ff;
+  color: #7e22ce;
+  border: 1px solid rgba(126, 34, 206, 0.22);
+}
+
+.kz-pill-future {
+  background-color: #fff7ed;
+  color: #c2410c;
+  border: 1px solid rgba(194, 65, 12, 0.22);
+}
+
+.kz-pill-digital {
+  background-color: #ecfeff;
+  color: #0e7490;
+  border: 1px solid rgba(14, 116, 144, 0.22);
+}
+
+.kz-pill-imaging {
+  background-color: #fdf4ff;
+  color: #a21caf;
+  border: 1px solid rgba(162, 28, 175, 0.22);
+}
+
+.kz-pill-networking {
+  background-color: #fdf2f8;
+  color: var(--kz-brand-magenta);
+  border: 1px solid var(--kz-brand-border-tint);
+}
+
+/* Bottom Meta Row (NO DOCTOR IMAGES) + Arrow */
+.kz-card-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(85, 53, 94, 0.08);
+  margin-top: auto;
+}
+
+.kz-card-speaker-venue-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.kz-card-speaker-name {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--kz-text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kz-card-venue-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: var(--kz-text-muted);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kz-card-venue-row svg {
+  color: var(--kz-brand-magenta);
+  flex-shrink: 0;
+}
+
+.kz-card-venue-row span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Circular Arrow Action Button */
+.kz-card-arrow-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(85, 53, 94, 0.18);
+  background-color: #ffffff;
+  color: var(--kz-brand-purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.kz-session-card-block:hover .kz-card-arrow-btn,
+.kz-card-arrow-btn:hover {
+  background-color: var(--kz-brand-magenta);
+  border-color: var(--kz-brand-magenta);
+  color: #ffffff;
+  transform: translateX(2px);
+}
+
+/* ====================================================
+   4. MODAL DIALOG STYLES
+   ==================================================== */
+.kz-session-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(31, 19, 37, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: kzModalFadeIn 0.2s ease-out;
+}
+
+@keyframes kzModalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.kz-session-modal-container {
+  background-color: #ffffff;
+  border-radius: 18px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(31, 19, 37, 0.3);
+  display: flex;
+  flex-direction: column;
+  animation: kzModalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes kzModalSlideUp {
+  from {
+    transform: translateY(24px) scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.kz-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 26px 18px 26px;
+  border-bottom: 1px solid rgba(85, 53, 94, 0.1);
+}
+
+.kz-modal-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.kz-modal-time-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--kz-brand-magenta);
+  background-color: var(--kz-brand-light-tint);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--kz-brand-border-tint);
+}
+
+.kz-modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: var(--kz-text-muted);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+  transition: color 0.18s ease;
+}
+
+.kz-modal-close-btn:hover {
+  color: var(--kz-brand-magenta);
+}
+
+.kz-modal-body {
+  padding: 24px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.kz-modal-title {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--kz-text-dark);
+  line-height: 1.3;
+}
+
+.kz-modal-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  background-color: #faf7f9;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(85, 53, 94, 0.08);
+}
+
+.kz-modal-meta-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kz-modal-meta-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--kz-brand-magenta);
+}
+
+.kz-modal-meta-val {
+  font-size: 0.925rem;
+  font-weight: 600;
+  color: var(--kz-text-dark);
+}
+
+.kz-modal-section-heading {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--kz-text-dark);
+}
+
+.kz-modal-desc-text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--kz-text-muted);
+  line-height: 1.6;
+}
+
+.kz-modal-bullets {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 0.8875rem;
+  color: var(--kz-text-muted);
+  line-height: 1.6;
+}
+
+.kz-modal-footer {
+  padding: 16px 26px;
+  border-top: 1px solid rgba(85, 53, 94, 0.1);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.kz-modal-dismiss-btn {
+  background-color: var(--kz-brand-magenta);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 22px;
+  font-size: 0.8875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.kz-modal-dismiss-btn:hover {
+  background-color: var(--kz-brand-magenta-dark);
+}
+
+/* ====================================================
+   5. RESPONSIVENESS BREAKPOINTS
+   ==================================================== */
+
+/* Large Tablets / Small Laptops (<= 1280px): 3 Columns */
+@media (max-width: 1280px) {
+  .kz-programme-container {
+    padding: 0 24px;
+  }
+  .kz-sessions-responsive-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Medium Tablets (<= 992px): 2 Columns */
+@media (max-width: 992px) {
+  .kz-programme-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .kz-programme-header-right {
+    width: 100%;
+    justify-content: flex-start;
+    padding-top: 10px;
+  }
+  .kz-day-section-row {
+    grid-template-columns: 66px 1fr;
+    gap: 20px;
+  }
+  .kz-sessions-responsive-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .kz-programme-main-title {
+    font-size: 2.2rem;
+  }
+}
+
+/* Small Tablets & Mobile (<= 768px): 1-Column Grid, Clean Inline Badge */
+@media (max-width: 768px) {
+  .kz-programme-page-wrapper {
+    padding: 24px 0 60px 0;
+  }
+  .kz-programme-container {
+    padding: 0 16px;
+  }
+  .kz-programme-main-title {
+    font-size: 1.85rem;
+  }
+  .kz-programme-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .kz-header-meta-divider {
+    display: none;
+  }
+  .kz-programme-header-right {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  /* Redefine section row on mobile: no squished left column */
+  .kz-day-section-row {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .kz-timeline-date-column {
+    display: none; /* Hidden on mobile in favor of inline badge */
+  }
+
+  .kz-mobile-day-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--kz-brand-magenta);
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 800;
+    border-radius: 6px;
+    padding: 3px 8px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Make day title row show the D1 badge inline */
+  .kz-day-section-header {
+    align-items: center;
+    gap: 10px;
+  }
+
+  .kz-day-section-title {
+    font-size: 1.25rem;
+  }
+
+  .kz-sessions-responsive-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .kz-modal-meta-grid {
+    grid-template-columns: 1fr;
+  }
+}
