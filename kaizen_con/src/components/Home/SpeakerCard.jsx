@@ -1,11 +1,11 @@
-import React from 'react';
+import { useState } from 'react';
 import './SpeakerCard.css';
 
 /**
  * Reusable SpeakerCard Component
  * Ultra-clean, professional design for medical conference:
  * - Pure white card with single visible light shadow
- * - Clean avatar monogram
+ * - Clean avatar monogram / profile image
  * - Flag + country pill badge
  * - Name, role, institute
  * - Row of specialty tag pills
@@ -31,6 +31,8 @@ export default function SpeakerCard({
   onViewDetails,
   className = '',
 }) {
+  const [imgError, setImgError] = useState(false);
+
   // Fallback initials from name
   const displayInitials =
     initials ||
@@ -52,16 +54,22 @@ export default function SpeakerCard({
 
   return (
     <article
+      data-speaker-id={id}
       className={`kz-speaker-card-v2 ${isHighlighted ? 'is-highlighted' : ''} ${className}`}
       onClick={handleCardClick}
     >
       {/* 1. TOP ROW: AVATAR & COUNTRY BADGE */}
       <div className="kz-card-top-row">
-        {/* Avatar Monogram */}
+        {/* Avatar Monogram or Profile Image */}
         <div className="kz-card-avatar-wrap">
           <div className="kz-card-avatar-disc" aria-hidden="true">
-            {image ? (
-              <img src={image} alt={name} className="kz-card-avatar-img" />
+            {image && !imgError ? (
+              <img
+                src={image}
+                alt={name}
+                className="kz-card-avatar-img"
+                onError={() => setImgError(true)}
+              />
             ) : (
               <span>{displayInitials}</span>
             )}

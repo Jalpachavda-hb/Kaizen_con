@@ -1,5 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { getSchedules, getSpeakers } from '../Apipath';
 import {
   LuCoffee,
   LuUser,
@@ -58,745 +59,348 @@ const renderReactIcon = (iconName, size = 20) => {
   }
 };
 
-// =========================================================================
-// DATASET 1: "AT A GLANCE" 3-COLUMN VIEW (Exact Match to User's Screenshot 2)
-// =========================================================================
-const GLANCE_DAYS_DATA = [
-  {
-    dayNumber: 1,
-    dayTitle: 'Day 1',
-    dayOfWeek: 'Friday, January 1, 2027',
-    stats: {
-      sessionsCount: '8',
-      sessionsLabel: 'Sessions',
-      speakersCount: '12',
-      speakersLabel: 'Speakers',
-      tracksCount: '4',
-      tracksLabel: 'Tracks'
-    },
-    sessions: [
-      {
-        id: 'glance-d1-1',
-        timeStart: '08:00',
-        timeEnd: '09:00',
-        title: 'Registration & Welcome Tea',
-        hall: 'Main Auditorium',
-        category: 'welcome',
-        categoryLabel: 'WELCOME & REGISTRATION',
-        cardColor: '#3b82f6',
-        cardBg: '#ffffff',
-        badgeBg: '#eff6ff',
-        badgeColor: '#3b82f6',
-        tagBg: '#f8fafc',
-        tagColor: '#64748b',
-        tagBorder: '#e2e8f0',
-        icon: 'coffee',
-        speaker: 'Registration & Hospitality Committee',
-        description: 'Collection of registration materials, AI delegate pass sync, digital badge issuance, and morning welcome tea.'
-      },
-      {
-        id: 'glance-d1-2',
-        timeStart: '09:00',
-        timeEnd: '10:00',
-        title: 'Opening Keynote: The AI-Native Operating Room',
-        hall: 'Main Auditorium',
-        category: 'ai',
-        categoryLabel: 'AI IN HEALTHCARE',
-        cardColor: '#f43f5e',
-        cardBg: '#fffbfb',
-        badgeBg: '#fff1f2',
-        badgeColor: '#f43f5e',
-        tagBg: '#fff1f2',
-        tagColor: '#f43f5e',
-        tagBorder: '#ffe4e6',
-        icon: 'doctor',
-        speaker: 'Dr. James Carter',
-        description: 'Pioneering lecture on how intraoperative machine learning, autonomous tissue tracking, and ambient clinical intelligence transform surgical suites.'
-      },
-      {
-        id: 'glance-d1-3',
-        timeStart: '10:30',
-        timeEnd: '11:15',
-        title: 'Robotic Colorectal Surgery: Current Trends and Future Directions',
-        hall: 'Hall A — Surgical Sciences',
-        category: 'robotic',
-        categoryLabel: 'ROBOTIC SURGERY',
-        cardColor: '#3b82f6',
-        cardBg: '#f8faff',
-        badgeBg: '#eff6ff',
-        badgeColor: '#3b82f6',
-        tagBg: '#eff6ff',
-        tagColor: '#3b82f6',
-        tagBorder: '#dbeafe',
-        icon: 'clamp',
-        speaker: 'Dr. Maya Chen',
-        description: 'Clinical comparative analysis of single-port versus multi-arm robotic platforms, oncological lymph node harvests, and ergonomic surgeon longevity.'
-      },
-      {
-        id: 'glance-d1-4',
-        timeStart: '11:30',
-        timeEnd: '12:15',
-        title: 'AI in Surgical Decision Making',
-        hall: 'Hall B — Technology & Innovation',
-        category: 'ai',
-        categoryLabel: 'AI IN HEALTHCARE',
-        cardColor: '#a855f7',
-        cardBg: '#faf7fd',
-        badgeBg: '#faf5ff',
-        badgeColor: '#a855f7',
-        tagBg: '#fff1f2',
-        tagColor: '#f43f5e',
-        tagBorder: '#ffe4e6',
-        icon: 'brain',
-        speaker: 'Dr. Arjun Mehta',
-        description: 'Real-time machine learning risk calculators, microvascular perfusion indicators, and algorithmic safeguards against intraoperative adverse events.'
-      },
-      {
-        id: 'glance-d1-5',
-        timeStart: '14:00',
-        timeEnd: '14:45',
-        title: 'Global Access to Advanced Surgery',
-        hall: 'Main Auditorium',
-        category: 'future',
-        categoryLabel: 'FUTURE OF HEALTHCARE',
-        cardColor: '#10b981',
-        cardBg: '#f7fbf8',
-        badgeBg: '#ecfdf5',
-        badgeColor: '#10b981',
-        tagBg: '#ecfdf5',
-        tagColor: '#10b981',
-        tagBorder: '#a7f3d0',
-        icon: 'globe',
-        speaker: 'Dr. Sofia Laurent',
-        description: 'Overcoming geographic and economic surgical disparities through telerobotics, decentralized simulation hubs, and low-latency satellite clinical links.'
-      },
-      {
-        id: 'glance-d1-6',
-        timeStart: '16:00',
-        timeEnd: '17:00',
-        title: 'Panel Discussion: The Next Era of Surgical Innovation',
-        hall: 'Main Auditorium',
-        category: 'panel',
-        categoryLabel: 'PANEL',
-        cardColor: '#f97316',
-        cardBg: '#fefaf6',
-        badgeBg: '#fff7ed',
-        badgeColor: '#f97316',
-        tagBg: '#fff7ed',
-        tagColor: '#f97316',
-        tagBorder: '#fed7aa',
-        icon: 'users',
-        speaker: 'Dr. Daniel Okafor & Panel',
-        description: 'Multidisciplinary consensus panel discussing regulatory horizons, surgeon autonomy in automated procedures, and patient-centered robotics.'
-      }
-    ]
-  },
-  {
-    dayNumber: 2,
-    dayTitle: 'Day 2',
-    dayOfWeek: 'Saturday, January 2, 2027',
-    stats: {
-      sessionsCount: '7',
-      sessionsLabel: 'Sessions',
-      speakersCount: '10',
-      speakersLabel: 'Speakers',
-      tracksCount: '4',
-      tracksLabel: 'Tracks'
-    },
-    sessions: [
-      {
-        id: 'glance-d2-1',
-        timeStart: '08:00',
-        timeEnd: '09:00',
-        title: 'Morning Networking & Coffee',
-        hall: 'Main Lobby',
-        category: 'welcome',
-        categoryLabel: 'NETWORKING',
-        cardColor: '#3b82f6',
-        cardBg: '#f8faff',
-        badgeBg: '#eff6ff',
-        badgeColor: '#3b82f6',
-        tagBg: '#f8fafc',
-        tagColor: '#64748b',
-        tagBorder: '#e2e8f0',
-        icon: 'coffee',
-        speaker: 'Conference Hosts',
-        description: 'Join fellow delegates for an informal morning networking session and preview of Day 2 surgical breakout tracks over coffee.'
-      },
-      {
-        id: 'glance-d2-2',
-        timeStart: '09:00',
-        timeEnd: '10:00',
-        title: 'AI Triage in Trauma Surgery',
-        hall: 'Main Auditorium',
-        category: 'ai',
-        categoryLabel: 'AI IN HEALTHCARE',
-        cardColor: '#f43f5e',
-        cardBg: '#fffbfb',
-        badgeBg: '#fff1f2',
-        badgeColor: '#f43f5e',
-        tagBg: '#fff1f2',
-        tagColor: '#f43f5e',
-        tagBorder: '#ffe4e6',
-        icon: 'siren',
-        speaker: 'Dr. Maya Chen',
-        description: 'How AI-assisted triage systems improve accuracy, prioritize polytrauma workflow, and optimize patient outcomes in emergency care.'
-      },
-      {
-        id: 'glance-d2-3',
-        timeStart: '10:30',
-        timeEnd: '11:15',
-        title: 'Real-Time AI in Medical Imaging',
-        hall: 'Hall B — Technology & Innovation',
-        category: 'imaging',
-        categoryLabel: 'MEDICAL IMAGING',
-        cardColor: '#0ea5e9',
-        cardBg: '#f8faff',
-        badgeBg: '#f0f9ff',
-        badgeColor: '#0ea5e9',
-        tagBg: '#f0f9ff',
-        tagColor: '#0ea5e9',
-        tagBorder: '#bae6fd',
-        icon: 'image',
-        speaker: 'Dr. James Carter',
-        description: 'Live demonstration and clinical review of AI-augmented intraoperative imaging systems used intraoperatively for cancer margins.'
-      },
-      {
-        id: 'glance-d2-4',
-        timeStart: '11:30',
-        timeEnd: '12:15',
-        title: 'Surgeon Training in the AI Era',
-        hall: 'Hall C — Digital Health',
-        category: 'digital',
-        categoryLabel: 'DIGITAL HEALTH',
-        cardColor: '#22c55e',
-        cardBg: '#f7fbf8',
-        badgeBg: '#f0fdf4',
-        badgeColor: '#22c55e',
-        tagBg: '#f0fdf4',
-        tagColor: '#22c55e',
-        tagBorder: '#bbf7d0',
-        icon: 'doctor',
-        speaker: 'Dr. Aisha Rahman',
-        description: 'Simulation, data and certification for next-generation surgical education, haptic feedback models, and telemetry evaluation.'
-      },
-      {
-        id: 'glance-d2-5',
-        timeStart: '14:00',
-        timeEnd: '14:45',
-        title: 'Machine Learning for Surgical Outcomes',
-        hall: 'Hall A — Surgical Sciences',
-        category: 'ai',
-        categoryLabel: 'AI IN HEALTHCARE',
-        cardColor: '#a855f7',
-        cardBg: '#faf7fd',
-        badgeBg: '#faf5ff',
-        badgeColor: '#a855f7',
-        tagBg: '#fff1f2',
-        tagColor: '#f43f5e',
-        tagBorder: '#ffe4e6',
-        icon: 'chart',
-        speaker: 'Dr. Arjun Mehta',
-        description: 'Validated predictive algorithms predicting post-operative recovery, complication risks, and personalized clinical intervention paths.'
-      },
-      {
-        id: 'glance-d2-6',
-        timeStart: '15:00',
-        timeEnd: '15:45',
-        title: 'Robotic Low Anterior Resection: Live Case Session',
-        hall: 'Hall A — Surgical Sciences',
-        category: 'robotic',
-        categoryLabel: 'ROBOTIC SURGERY',
-        cardColor: '#3b82f6',
-        cardBg: '#f8faff',
-        badgeBg: '#eff6ff',
-        badgeColor: '#3b82f6',
-        tagBg: '#eff6ff',
-        tagColor: '#3b82f6',
-        tagBorder: '#dbeafe',
-        icon: 'clamp',
-        speaker: 'Dr. Maya Chen',
-        description: 'Live broadcast of robotic deep pelvic dissection with real-time nerve mapping, autonomic preservation, and robotic endostapling.'
-      },
-      {
-        id: 'glance-d2-7',
-        timeStart: '16:00',
-        timeEnd: '17:00',
-        title: 'Next-Generation Robotic Systems',
-        hall: 'Hall B — Technology & Innovation',
-        category: 'robotic',
-        categoryLabel: 'ROBOTIC SURGERY',
-        cardColor: '#3b82f6',
-        cardBg: '#f8faff',
-        badgeBg: '#eff6ff',
-        badgeColor: '#3b82f6',
-        tagBg: '#eff6ff',
-        tagColor: '#3b82f6',
-        tagBorder: '#dbeafe',
-        icon: 'gear',
-        speaker: 'Dr. Sofia Laurent',
-        description: 'Hands-on review of modular arm robotics, flexible endoluminal instrumentation, and tele-surgery performance over 5G networks.'
-      }
-    ]
-  },
-  {
-    dayNumber: 3,
-    dayTitle: 'Day 3',
-    dayOfWeek: 'Sunday, January 3, 2027',
-    stats: {
-      sessionsCount: '6',
-      sessionsLabel: 'Sessions',
-      speakersCount: '9',
-      speakersLabel: 'Speakers',
-      tracksCount: '3',
-      tracksLabel: 'Tracks'
-    },
-    sessions: [
-      {
-        id: 'glance-d3-1',
-        timeStart: '08:00',
-        timeEnd: '09:00',
-        title: 'Breakfast & Networking',
-        hall: 'Main Lobby',
-        category: 'welcome',
-        categoryLabel: 'NETWORKING',
-        cardColor: '#3b82f6',
-        cardBg: '#f8faff',
-        badgeBg: '#eff6ff',
-        badgeColor: '#3b82f6',
-        tagBg: '#f8fafc',
-        tagColor: '#64748b',
-        tagBorder: '#e2e8f0',
-        icon: 'coffee',
-        speaker: 'Conference Hosts',
-        description: 'Morning fellowship, research abstract viewing, and inter-institutional collaboration meetings.'
-      },
-      {
-        id: 'glance-d3-2',
-        timeStart: '09:00',
-        timeEnd: '10:00',
-        title: 'The Autonomous Surgical Suite',
-        hall: 'Main Auditorium',
-        category: 'future',
-        categoryLabel: 'FUTURE OF HEALTHCARE',
-        cardColor: '#10b981',
-        cardBg: '#f7fbf8',
-        badgeBg: '#ecfdf5',
-        badgeColor: '#10b981',
-        tagBg: '#ecfdf5',
-        tagColor: '#10b981',
-        tagBorder: '#a7f3d0',
-        icon: 'monitor',
-        speaker: 'Dr. Daniel Okafor',
-        description: 'Exploring supervisory surgical automation: suturing algorithms, tension sensing, and safety architectures.'
-      },
-      {
-        id: 'glance-d3-3',
-        timeStart: '10:30',
-        timeEnd: '11:15',
-        title: 'AI-Assisted Endoscopy and Early Detection',
-        hall: 'Hall A — Surgical Sciences',
-        category: 'ai',
-        categoryLabel: 'AI IN HEALTHCARE',
-        cardColor: '#f43f5e',
-        cardBg: '#fffbfb',
-        badgeBg: '#fff1f2',
-        badgeColor: '#f43f5e',
-        tagBg: '#fff1f2',
-        tagColor: '#f43f5e',
-        tagBorder: '#ffe4e6',
-        icon: 'endoscope',
-        speaker: 'Dr. Arjun Mehta',
-        description: 'Real-time computer vision detection of flat adenomas, Barrett esophagus dysplastic surveillance, and microvascular pattern characterization.'
-      },
-      {
-        id: 'glance-d3-4',
-        timeStart: '11:30',
-        timeEnd: '12:15',
-        title: 'Surgical Data Science and Predictive Analytics',
-        hall: 'Hall B — Technology & Innovation',
-        category: 'tech',
-        categoryLabel: 'TECHNOLOGY & INNOVATION',
-        cardColor: '#3b82f6',
-        cardBg: '#f8faff',
-        badgeBg: '#eff6ff',
-        badgeColor: '#3b82f6',
-        tagBg: '#eff6ff',
-        tagColor: '#3b82f6',
-        tagBorder: '#dbeafe',
-        icon: 'database',
-        speaker: 'Dr. Sofia Laurent',
-        description: 'Large registry models, federated learning, and intraoperative risk estimation from structured metadata.'
-      },
-      {
-        id: 'glance-d3-5',
-        timeStart: '14:00',
-        timeEnd: '14:45',
-        title: 'Healthcare Economics in the AI Era',
-        hall: 'Hall C — Digital Health',
-        category: 'economics',
-        categoryLabel: 'HEALTHCARE ECONOMICS',
-        cardColor: '#eab308',
-        cardBg: '#fefaf6',
-        badgeBg: '#fefce8',
-        badgeColor: '#eab308',
-        tagBg: '#fefce8',
-        tagColor: '#eab308',
-        tagBorder: '#fef08a',
-        icon: 'barchart',
-        speaker: 'Dr. James Carter',
-        description: 'Cost-utility analysis, hospital procurement benchmarks, and reimbursement pathways for AI diagnostic pipelines.'
-      },
-      {
-        id: 'glance-d3-6',
-        timeStart: '16:00',
-        timeEnd: '17:00',
-        title: 'Closing Keynote: Humanity in the Age of AI',
-        hall: 'Main Auditorium',
-        category: 'future',
-        categoryLabel: 'FUTURE OF HEALTHCARE',
-        cardColor: '#a855f7',
-        cardBg: '#faf7fd',
-        badgeBg: '#faf5ff',
-        badgeColor: '#a855f7',
-        tagBg: '#ecfdf5',
-        tagColor: '#10b981',
-        tagBorder: '#a7f3d0',
-        icon: 'star',
-        speaker: 'Dr. Thomas Weber',
-        description: 'Conference summary, best scientific awards, and roadmap for robotic AI surgery through 2030.'
-      }
-    ]
+
+
+// Helper function to calculate duration from HH:MM(:SS) strings
+const calculateDuration = (start, end) => {
+  if (!start || !end) return '45 min';
+  const [sh, sm] = start.split(':').map(Number);
+  const [eh, em] = end.split(':').map(Number);
+  if (isNaN(sh) || isNaN(sm) || isNaN(eh) || isNaN(em)) return '45 min';
+  const diff = (eh * 60 + em) - (sh * 60 + sm);
+  return diff > 0 ? `${diff} min` : '45 min';
+};
+
+// Category visual styling helper
+const getCategoryStyle = (category = '') => {
+  const cat = (category || '').toLowerCase();
+
+  if (cat.includes('break') || cat.includes('tea') || cat.includes('coffee') || cat.includes('lunch') || cat.includes('foyer')) {
+    return {
+      cardColor: '#f59e0b',
+      cardBg: '#fffdfa',
+      badgeBg: '#fef3c7',
+      badgeColor: '#d97706',
+      tagBg: '#fef3c7',
+      tagColor: '#b45309',
+      tagBorder: '#fde68a',
+      icon: 'coffee',
+      tagType: 'networking'
+    };
   }
+
+  if (cat.includes('cardio') || cat.includes('heart')) {
+    return {
+      cardColor: '#ef4444',
+      cardBg: '#fffbfb',
+      badgeBg: '#fee2e2',
+      badgeColor: '#ef4444',
+      tagBg: '#fee2e2',
+      tagColor: '#dc2626',
+      tagBorder: '#fecaca',
+      icon: 'monitor',
+      tagType: 'ai'
+    };
+  }
+
+  if (cat.includes('maternal') || cat.includes('gynec') || cat.includes('obstetric')) {
+    return {
+      cardColor: '#ec4899',
+      cardBg: '#fffbfd',
+      badgeBg: '#fdf2f8',
+      badgeColor: '#ec4899',
+      tagBg: '#fdf2f8',
+      tagColor: '#db2777',
+      tagBorder: '#fbcfe8',
+      icon: 'doctor',
+      tagType: 'robotic'
+    };
+  }
+
+  if (cat.includes('neuro') || cat.includes('stroke') || cat.includes('brain')) {
+    return {
+      cardColor: '#a855f7',
+      cardBg: '#faf7fd',
+      badgeBg: '#faf5ff',
+      badgeColor: '#a855f7',
+      tagBg: '#faf5ff',
+      tagColor: '#9333ea',
+      tagBorder: '#e9d5ff',
+      icon: 'brain',
+      tagType: 'ai'
+    };
+  }
+
+  if (cat.includes('pediatric') || cat.includes('child')) {
+    return {
+      cardColor: '#06b6d4',
+      cardBg: '#f6fdfe',
+      badgeBg: '#ecfeff',
+      badgeColor: '#06b6d4',
+      tagBg: '#ecfeff',
+      tagColor: '#0891b2',
+      tagBorder: '#cffafe',
+      icon: 'users',
+      tagType: 'future'
+    };
+  }
+
+  if (cat.includes('ortho') || cat.includes('joint') || cat.includes('surg')) {
+    return {
+      cardColor: '#3b82f6',
+      cardBg: '#f8faff',
+      badgeBg: '#eff6ff',
+      badgeColor: '#3b82f6',
+      tagBg: '#eff6ff',
+      tagColor: '#2563eb',
+      tagBorder: '#dbeafe',
+      icon: 'clamp',
+      tagType: 'robotic'
+    };
+  }
+
+  if (cat.includes('derma') || cat.includes('skin')) {
+    return {
+      cardColor: '#10b981',
+      cardBg: '#f7fbf8',
+      badgeBg: '#ecfdf5',
+      badgeColor: '#10b981',
+      tagBg: '#ecfdf5',
+      tagColor: '#059669',
+      tagBorder: '#a7f3d0',
+      icon: 'star',
+      tagType: 'imaging'
+    };
+  }
+
+  if (cat.includes('robot')) {
+    return {
+      cardColor: '#3b82f6',
+      cardBg: '#f8faff',
+      badgeBg: '#eff6ff',
+      badgeColor: '#3b82f6',
+      tagBg: '#eff6ff',
+      tagColor: '#2563eb',
+      tagBorder: '#dbeafe',
+      icon: 'gear',
+      tagType: 'robotic'
+    };
+  }
+
+  if (cat.includes('ai') || cat.includes('tech') || cat.includes('data')) {
+    return {
+      cardColor: '#a855f7',
+      cardBg: '#faf7fd',
+      badgeBg: '#faf5ff',
+      badgeColor: '#a855f7',
+      tagBg: '#faf5ff',
+      tagColor: '#9333ea',
+      tagBorder: '#e9d5ff',
+      icon: 'database',
+      tagType: 'ai'
+    };
+  }
+
+  return {
+    cardColor: '#6366f1',
+    cardBg: '#fbfbfe',
+    badgeBg: '#eef2ff',
+    badgeColor: '#6366f1',
+    tagBg: '#eef2ff',
+    tagColor: '#4f46e5',
+    tagBorder: '#c7d2fe',
+    icon: 'podium',
+    tagType: 'oral'
+  };
+};
+
+// Fallback topics
+const DEFAULT_TOPICS = [
+  { id: 'ALL', label: 'All' },
+  { id: 'cardiology', label: 'Cardiology' },
+  { id: 'obstetrics and gynecology', label: 'Maternal & Gynecology' },
+  { id: 'neurology', label: 'Neurology' },
+  { id: 'pediatrics', label: 'Pediatrics' },
+  { id: 'orthopedic surgery', label: 'Orthopedic Surgery' },
+  { id: 'dermatology', label: 'Dermatology' },
+  { id: 'break', label: 'Refreshment Breaks' }
 ];
 
-// =========================================================================
-// DATASET 2: "SESSIONS" (4-COLUMN CARD GRID DESIGN)
-// =========================================================================
-const SESSIONS_GRID_DAYS = [
-  {
-    dayId: 'D1',
-    dayNumber: 1,
-    title: 'Day 1 — January 1, 2027',
-    badgeMonth: 'JAN',
-    badgeDate: '01',
-    badgeYear: '2027',
-    sessionsCount: '8 Sessions',
-    sessions: [
-      {
-        id: 'grid-d1-1',
-        time: '09:00 - 10:00',
-        duration: '60 min',
-        icon: 'podium',
-        title: 'Opening Keynote: The AI-Native Operating Room',
-        desc: 'Exploring how AI is transforming surgical precision, decision-making, and patient outcomes in modern healthcare.',
-        tags: [
-          { label: 'ORAL', type: 'oral' },
-          { label: 'AI IN HEALTHCARE', type: 'ai' }
-        ],
-        speaker: 'Dr. James Carter',
-        venue: 'Main Auditorium'
-      },
-      {
-        id: 'grid-d1-2',
-        time: '10:30 - 11:15',
-        duration: '45 min',
-        icon: 'clamp',
-        title: 'Robotic Colorectal Surgery: Current Trends and Future Directions',
-        desc: 'Latest advancements in robotic colorectal surgery with insights from global experts and live case examples.',
-        tags: [
-          { label: 'ORAL', type: 'oral' },
-          { label: 'ROBOTIC SURGERY', type: 'robotic' }
-        ],
-        speaker: 'Dr. Maya Chen',
-        venue: 'Hall A — Surgical Sciences'
-      },
-      {
-        id: 'grid-d1-3',
-        time: '11:30 - 12:15',
-        duration: '45 min',
-        icon: 'brain',
-        title: 'AI in Surgical Decision Making',
-        desc: 'Understanding how AI models assist surgeons in real-time decision making with clinical use cases and validation studies.',
-        tags: [
-          { label: 'ORAL', type: 'oral' },
-          { label: 'AI IN HEALTHCARE', type: 'ai' }
-        ],
-        speaker: 'Dr. Arjun Mehta',
-        venue: 'Hall B — Technology & Innovation'
-      },
-      {
-        id: 'grid-d1-4',
-        time: '14:00 - 14:45',
-        duration: '45 min',
-        icon: 'globe',
-        title: 'Global Access to Advanced Surgery',
-        desc: 'Discussion on democratizing access to advanced surgical care through AI, robotics and tele-mentoring.',
-        tags: [
-          { label: 'ORAL', type: 'oral' },
-          { label: 'FUTURE OF HEALTHCARE', type: 'future' }
-        ],
-        speaker: 'Dr. Sofia Laurent',
-        venue: 'Main Auditorium'
-      },
-      {
-        id: 'grid-d1-5',
-        time: '15:00 - 15:45',
-        duration: '45 min',
-        icon: 'users',
-        title: 'Panel Discussion: The Next Era of Surgical Innovation',
-        desc: 'Industry leaders and clinicians discuss how AI and robotics will shape the next decade of surgery.',
-        tags: [
-          { label: 'PANEL', type: 'panel' }
-        ],
-        speaker: 'Dr. Daniel Okafor',
-        venue: 'Hall A — Surgical Sciences'
-      },
-      {
-        id: 'grid-d1-6',
-        time: '16:00 - 17:00',
-        duration: '60 min',
-        icon: 'chart',
-        title: 'Future of Surgical Education in the AI Era',
-        desc: 'How AI is reshaping training, simulation and competency assessment for the next generation of surgeons.',
-        tags: [
-          { label: 'ORAL', type: 'oral' },
-          { label: 'DIGITAL HEALTH', type: 'digital' }
-        ],
-        speaker: 'Dr. Aisha Rahman',
-        venue: 'Hall C — Digital Health'
-      },
-      {
-        id: 'grid-d1-7',
-        time: '17:00 - 17:45',
-        duration: '45 min',
-        icon: 'monitor',
-        title: 'Closing Session: Humanity in the Age of AI',
-        desc: 'A thought-provoking discussion on ethics, human touch and the future of patient care in an AI-driven world.',
-        tags: [
-          { label: 'KEYNOTE', type: 'keynote' },
-          { label: 'FUTURE OF HEALTHCARE', type: 'future' }
-        ],
-        speaker: 'Dr. Thomas Weber',
-        venue: 'Main Auditorium'
-      },
-      {
-        id: 'grid-d1-8',
-        time: '18:00 - 18:30',
-        duration: '30 min',
-        icon: 'network',
-        title: 'Networking Reception',
-        desc: 'An opportunity to connect with global experts, speakers and delegates over light refreshments.',
-        tags: [
-          { label: 'NETWORKING', type: 'networking' }
-        ],
-        speaker: 'Conference Hosts',
-        venue: 'Exhibition Area'
-      }
-    ]
-  },
-  {
-    dayId: 'D2',
-    dayNumber: 2,
-    title: 'Day 2 — January 2, 2027',
-    badgeMonth: 'JAN',
-    badgeDate: '02',
-    badgeYear: '2027',
-    sessionsCount: '7 Sessions',
-    sessions: [
-      {
-        id: 'grid-d2-1',
-        time: '08:00 - 09:00',
-        duration: '60 min',
-        icon: 'coffee',
-        title: 'Morning Networking & Coffee',
-        desc: 'Join fellow delegates for an informal networking session over coffee before surgical breakout sessions.',
-        tags: [
-          { label: 'NETWORKING', type: 'networking' }
-        ],
-        speaker: 'Conference Hosts',
-        venue: 'Main Lobby'
-      },
-      {
-        id: 'grid-d2-2',
-        time: '09:00 - 10:00',
-        duration: '60 min',
-        icon: 'siren',
-        title: 'AI Triage in Trauma Surgery',
-        desc: 'How AI-assisted triage systems improve accuracy, workflow and patient outcomes in trauma care.',
-        tags: [
-          { label: 'ORAL', type: 'oral' },
-          { label: 'AI IN HEALTHCARE', type: 'ai' }
-        ],
-        speaker: 'Dr. Maya Chen',
-        venue: 'Main Auditorium'
-      },
-      {
-        id: 'grid-d2-3',
-        time: '10:30 - 11:15',
-        duration: '45 min',
-        icon: 'image',
-        title: 'Real-Time AI Imaging',
-        desc: 'Live demonstration and clinical review of AI-augmented imaging systems used intraoperatively.',
-        tags: [
-          { label: 'ORAL', type: 'oral' },
-          { label: 'MEDICAL IMAGING', type: 'imaging' }
-        ],
-        speaker: 'Dr. James Carter',
-        venue: 'Hall B — Technology & Innovation'
-      },
-      {
-        id: 'grid-d2-4',
-        time: '11:30 - 12:15',
-        duration: '45 min',
-        icon: 'doctor',
-        title: 'Surgeon Training in the AI Era',
-        desc: 'Simulation, data and certification for next-generation surgical education and VR tactile models.',
-        tags: [
-          { label: 'ORAL', type: 'oral' },
-          { label: 'DIGITAL HEALTH', type: 'digital' }
-        ],
-        speaker: 'Dr. Aisha Rahman',
-        venue: 'Hall C — Digital Health'
-      },
-      {
-        id: 'grid-d2-5',
-        time: '14:00 - 14:45',
-        duration: '45 min',
-        icon: 'chart',
-        title: 'Machine Learning for Surgical Outcomes',
-        desc: 'Predictive algorithms predicting post-operative recovery, complication risks, and personalized interventions.',
-        tags: [
-          { label: 'ORAL', type: 'oral' },
-          { label: 'AI IN HEALTHCARE', type: 'ai' }
-        ],
-        speaker: 'Dr. Arjun Mehta',
-        venue: 'Hall A — Surgical Sciences'
-      },
-      {
-        id: 'grid-d2-6',
-        time: '15:00 - 15:45',
-        duration: '45 min',
-        icon: 'clamp',
-        title: 'Robotic Low Anterior Resection: Live Case',
-        desc: 'High-definition 3D live surgical transmission featuring pelvic dissection and robotic endoluminal stapling.',
-        tags: [
-          { label: 'LIVE SURGERY', type: 'robotic' },
-          { label: 'ROBOTIC SURGERY', type: 'robotic' }
-        ],
-        speaker: 'Dr. Maya Chen',
-        venue: 'Hall A — Surgical Sciences'
-      },
-      {
-        id: 'grid-d2-7',
-        time: '16:00 - 17:00',
-        duration: '60 min',
-        icon: 'gear',
-        title: 'Next-Generation Robotic Systems',
-        desc: 'Hands-on review of modular arm robotics, flexible instrumentation, and tele-surgery performance over 5G.',
-        tags: [
-          { label: 'ORAL', type: 'oral' },
-          { label: 'ROBOTIC SURGERY', type: 'robotic' }
-        ],
-        speaker: 'Dr. Sofia Laurent',
-        venue: 'Hall B — Technology & Innovation'
-      }
-    ]
-  },
-  {
-    dayId: 'D3',
-    dayNumber: 3,
-    title: 'Day 3 — January 3, 2027',
-    badgeMonth: 'JAN',
-    badgeDate: '03',
-    badgeYear: '2027',
-    sessionsCount: '6 Sessions',
-    sessions: [
-      {
-        id: 'grid-d3-1',
-        time: '08:00 - 09:00',
-        duration: '60 min',
-        icon: 'coffee',
-        title: 'Breakfast & Networking',
-        desc: 'Morning fellowship, research abstract viewing, and inter-institutional collaboration meetings.',
-        tags: [
-          { label: 'NETWORKING', type: 'networking' }
-        ],
-        speaker: 'Conference Hosts',
-        venue: 'Main Lobby'
-      },
-      {
-        id: 'grid-d3-2',
-        time: '09:00 - 10:00',
-        duration: '60 min',
-        icon: 'monitor',
-        title: 'The Autonomous Surgical Suite',
-        desc: 'Exploring supervisory surgical automation: suturing algorithms, tension sensing, and safety architectures.',
-        tags: [
-          { label: 'ORAL', type: 'oral' },
-          { label: 'FUTURE OF HEALTHCARE', type: 'future' }
-        ],
-        speaker: 'Dr. Daniel Okafor',
-        venue: 'Main Auditorium'
-      },
-      {
-        id: 'grid-d3-3',
-        time: '10:30 - 11:15',
-        duration: '45 min',
-        icon: 'endoscope',
-        title: 'AI-Assisted Endoscopy and Early Detection',
-        desc: 'Real-time computer vision detection of flat adenomas, dysplastic surveillance, and microvascular pattern recognition.',
-        tags: [
-          { label: 'ORAL', type: 'oral' },
-          { label: 'AI IN HEALTHCARE', type: 'ai' }
-        ],
-        speaker: 'Dr. Arjun Mehta',
-        venue: 'Hall A — Surgical Sciences'
-      },
-      {
-        id: 'grid-d3-4',
-        time: '11:30 - 12:15',
-        duration: '45 min',
-        icon: 'database',
-        title: 'Surgical Data Science and Predictive Analytics',
-        desc: 'Large registry models, federated learning, and intraoperative risk estimation from clinical metadata.',
-        tags: [
-          { label: 'ORAL', type: 'oral' },
-          { label: 'TECHNOLOGY & INNOVATION', type: 'future' }
-        ],
-        speaker: 'Dr. Sofia Laurent',
-        venue: 'Hall B — Technology & Innovation'
-      },
-      {
-        id: 'grid-d3-5',
-        time: '14:00 - 14:45',
-        duration: '45 min',
-        icon: 'barchart',
-        title: 'Healthcare Economics in the AI Era',
-        desc: 'Cost-utility analysis, hospital procurement benchmarks, and reimbursement pathways for AI diagnostic pipelines.',
-        tags: [
-          { label: 'HEALTHCARE ECONOMICS', type: 'future' }
-        ],
-        speaker: 'Dr. James Carter',
-        venue: 'Hall C — Digital Health'
-      },
-      {
-        id: 'grid-d3-6',
-        time: '16:00 - 17:00',
-        duration: '60 min',
-        icon: 'star',
-        title: 'Closing Keynote: Humanity in the Age of AI',
-        desc: 'Conference summary, best scientific awards, and roadmap for robotic AI surgery through 2030.',
-        tags: [
-          { label: 'KEYNOTE', type: 'keynote' },
-          { label: 'FUTURE OF HEALTHCARE', type: 'future' }
-        ],
-        speaker: 'Dr. Thomas Weber',
-        venue: 'Main Auditorium'
-      }
-    ]
-  }
+// Fallback tracks
+const DEFAULT_TRACKS = [
+  { id: 'ALL', label: 'All Tracks' },
+  { id: 'cardiology', label: 'Cardiology' },
+  { id: 'obstetrics and gynecology', label: 'Obstetrics & Gynecology' },
+  { id: 'neurology', label: 'Neurology' },
+  { id: 'pediatrics', label: 'Pediatrics' },
+  { id: 'orthopedic surgery', label: 'Orthopedic Surgery' },
+  { id: 'dermatology', label: 'Dermatology' },
+  { id: 'break', label: 'Breaks & Networking' }
 ];
+
+// Transform raw API schedule list into day groups for Glance and Grid views
+const transformApiSchedules = (rawList, speakerMap = {}) => {
+  if (!Array.isArray(rawList) || rawList.length === 0) {
+    return { activeGlanceDays: [], activeGridDays: [] };
+  }
+
+  const grouped = {};
+  rawList.forEach((item) => {
+    const dateKey = item.event_date || '2027-01-01';
+    if (!grouped[dateKey]) grouped[dateKey] = [];
+    grouped[dateKey].push(item);
+  });
+
+  const sortedDates = Object.keys(grouped).sort();
+
+  const activeGlanceDays = sortedDates.map((dateStr, idx) => {
+    const dayNumber = idx + 1;
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const dateObj = new Date(year, (month || 1) - 1, day || 1);
+
+    const dayOfWeek = dateObj.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
+
+    const badgeMonth = dateObj.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+    const badgeDate = String(day).padStart(2, '0');
+    const badgeYear = String(year);
+
+    const items = grouped[dateStr] || [];
+
+    const sessions = items.map((s, sIdx) => {
+      const timeStart = s.start_time ? s.start_time.slice(0, 5) : '09:00';
+      const timeEnd = s.end_time ? s.end_time.slice(0, 5) : '10:00';
+      const duration = calculateDuration(timeStart, timeEnd);
+      const style = getCategoryStyle(s.category);
+
+      let speakerName;
+      if (s.speaker_id) {
+        speakerName = speakerMap[s.speaker_id] || `Speaker #${s.speaker_id}`;
+      } else if (s.category && s.category.toLowerCase().includes('break')) {
+        speakerName = 'Hospitality & Refreshments';
+      } else {
+        speakerName = 'Organizing Committee';
+      }
+
+      const venueName = s.room && s.venue ? `${s.room} — ${s.venue}` : (s.room || s.venue || 'Main Hall');
+
+      return {
+        id: `api-glance-${s.id || sIdx}`,
+        rawId: s.id,
+        timeStart,
+        timeEnd,
+        duration,
+        title: s.title || 'Scientific Session',
+        hall: venueName,
+        category: (s.category || 'general').toLowerCase(),
+        rawCategory: s.category || 'General',
+        categoryLabel: (s.category || 'GENERAL').toUpperCase(),
+        cardColor: style.cardColor,
+        cardBg: style.cardBg,
+        badgeBg: style.badgeBg,
+        badgeColor: style.badgeColor,
+        tagBg: style.tagBg,
+        tagColor: style.tagColor,
+        tagBorder: style.tagBorder,
+        icon: style.icon,
+        speaker: speakerName,
+        description: s.description || ''
+      };
+    });
+
+    const uniqueSpeakers = new Set(
+      sessions
+        .map((s) => s.speaker)
+        .filter((spk) => spk && !spk.includes('Hospitality') && !spk.includes('Committee'))
+    ).size;
+
+    const uniqueCategories = new Set(sessions.map((s) => s.rawCategory)).size;
+
+    return {
+      dayNumber,
+      dayTitle: `Day ${dayNumber}`,
+      dayOfWeek,
+      badgeMonth,
+      badgeDate,
+      badgeYear,
+      stats: {
+        sessionsCount: String(sessions.length),
+        sessionsLabel: 'Sessions',
+        speakersCount: String(uniqueSpeakers || sessions.length),
+        speakersLabel: 'Speakers',
+        tracksCount: String(uniqueCategories || 1),
+        tracksLabel: 'Tracks'
+      },
+      sessions
+    };
+  });
+
+  const activeGridDays = sortedDates.map((dateStr, idx) => {
+    const dayNumber = idx + 1;
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const dateObj = new Date(year, (month || 1) - 1, day || 1);
+
+    const badgeMonth = dateObj.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+    const badgeDate = String(day).padStart(2, '0');
+    const badgeYear = String(year);
+    const dayId = `D${dayNumber}`;
+
+    const items = grouped[dateStr] || [];
+
+    const sessions = items.map((s, sIdx) => {
+      const timeStart = s.start_time ? s.start_time.slice(0, 5) : '09:00';
+      const timeEnd = s.end_time ? s.end_time.slice(0, 5) : '10:00';
+      const duration = calculateDuration(timeStart, timeEnd);
+      const style = getCategoryStyle(s.category);
+
+      let speakerName;
+      if (s.speaker_id) {
+        speakerName = speakerMap[s.speaker_id] || `Speaker #${s.speaker_id}`;
+      } else if (s.category && s.category.toLowerCase().includes('break')) {
+        speakerName = 'Hospitality & Refreshments';
+      } else {
+        speakerName = 'Organizing Committee';
+      }
+
+      const venueName = s.room && s.venue ? `${s.room} — ${s.venue}` : (s.room || s.venue || 'Main Hall');
+
+      return {
+        id: `api-grid-${s.id || sIdx}`,
+        rawId: s.id,
+        time: `${timeStart} - ${timeEnd}`,
+        duration,
+        icon: style.icon,
+        title: s.title || 'Scientific Session',
+        desc: s.description || '',
+        rawCategory: s.category || 'General',
+        tags: [
+          { label: s.category && s.category.toLowerCase().includes('break') ? 'BREAK' : 'ORAL', type: style.tagType },
+          ...(s.category ? [{ label: s.category.toUpperCase(), type: style.tagType }] : [])
+        ],
+        speaker: speakerName,
+        venue: venueName,
+        hall: venueName
+      };
+    });
+
+    return {
+      dayId,
+      dayNumber,
+      title: `Day ${dayNumber} — ${dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`,
+      badgeMonth,
+      badgeDate,
+      badgeYear,
+      sessionsCount: `${sessions.length} Session${sessions.length > 1 ? 's' : ''}`,
+      sessions
+    };
+  });
+
+  return { activeGlanceDays, activeGridDays };
+};
 
 export default function ProgrammePage() {
   const [activeTab, setActiveTab] = useState('glance');
@@ -806,6 +410,85 @@ export default function ProgrammePage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
   const [activeMobileDay, setActiveMobileDay] = useState(1);
+
+  // Dynamic API state
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [apiSchedules, setApiSchedules] = useState([]);
+  const [speakersList, setSpeakersList] = useState([]);
+
+  // Fetch schedules and speakers from API (for manual retry)
+  const fetchProgrammeData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const [schedRes, spkRes] = await Promise.allSettled([
+        getSchedules(),
+        getSpeakers()
+      ]);
+
+      if (spkRes.status === 'fulfilled') {
+        const rawSpeakers = Array.isArray(spkRes.value) ? spkRes.value : (spkRes.value?.results || []);
+        setSpeakersList(rawSpeakers);
+      }
+
+      if (schedRes.status === 'fulfilled') {
+        const rawSchedules = Array.isArray(schedRes.value) ? schedRes.value : (schedRes.value?.results || []);
+        setApiSchedules(rawSchedules);
+      } else {
+        throw new Error(schedRes.reason?.message || 'Failed to fetch schedules');
+      }
+    } catch (err) {
+      console.error('Error fetching programme API:', err);
+      setError(err.message || 'Unable to load schedule data');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Initial load
+  useEffect(() => {
+    let isCurrent = true;
+
+    async function loadInitialData() {
+      try {
+        const [schedRes, spkRes] = await Promise.allSettled([
+          getSchedules(),
+          getSpeakers()
+        ]);
+
+        if (!isCurrent) return;
+
+        if (spkRes.status === 'fulfilled') {
+          const rawSpeakers = Array.isArray(spkRes.value) ? spkRes.value : (spkRes.value?.results || []);
+          setSpeakersList(rawSpeakers);
+        }
+
+        if (schedRes.status === 'fulfilled') {
+          const rawSchedules = Array.isArray(schedRes.value) ? schedRes.value : (schedRes.value?.results || []);
+          setApiSchedules(rawSchedules);
+        } else {
+          throw new Error(schedRes.reason?.message || 'Failed to fetch schedules');
+        }
+      } catch (err) {
+        if (isCurrent) {
+          console.error('Error fetching programme API:', err);
+          setError(err.message || 'Unable to load schedule data');
+        }
+      } finally {
+        if (isCurrent) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadInitialData();
+
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
 
   // Close modal and dropdown on Escape
   useEffect(() => {
@@ -819,54 +502,107 @@ export default function ProgrammePage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Topic bar pills exactly matching Screenshot 2
-  const topicsBarItems = [
-    { id: 'ALL', label: 'All' },
-    { id: 'robotic', label: 'Robotic Surgery' },
-    { id: 'ai', label: 'AI in Healthcare' },
-    { id: 'colorectal', label: 'Colorectal Surgery' },
-    { id: 'innovation', label: 'Surgical Innovation' },
-    { id: 'future', label: 'Future of Healthcare' },
-    { id: 'digital', label: 'Digital Health' },
-    { id: 'imaging', label: 'Medical Imaging' },
-    { id: 'economics', label: 'Healthcare Economics' }
-  ];
+  // Map of speaker_id -> Doctor's full name
+  const speakerMap = useMemo(() => {
+    const map = {};
+    speakersList.forEach((spk) => {
+      const id = spk.id ?? spk.speaker_id;
+      if (id !== undefined && id !== null) {
+        const firstName = spk.first_name || '';
+        const lastName = spk.last_name || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+        map[id] = fullName ? `Dr. ${fullName}` : 'Specialist Faculty';
+      }
+    });
+    return map;
+  }, [speakersList]);
 
-  // Track filter dropdown items
-  const allTracks = [
-    { id: 'ALL', label: 'All Tracks' },
-    { id: 'ai', label: 'AI in Healthcare' },
-    { id: 'robotic', label: 'Robotic Surgery' },
-    { id: 'future', label: 'Future of Healthcare' },
-    { id: 'imaging', label: 'Medical Imaging' },
-    { id: 'digital', label: 'Digital Health' },
-    { id: 'panel', label: 'Panels & Debates' },
-    { id: 'welcome', label: 'Networking & Welcome' }
-  ];
+  // Formatted datasets for both views
+  const { activeGlanceDays, activeGridDays } = useMemo(() => {
+    return transformApiSchedules(apiSchedules, speakerMap);
+  }, [apiSchedules, speakerMap]);
+
+  // Dynamic topics extracted from API categories
+  const topicsBarItems = useMemo(() => {
+    if (!apiSchedules || apiSchedules.length === 0) {
+      return DEFAULT_TOPICS;
+    }
+    const categorySet = new Set();
+    apiSchedules.forEach((item) => {
+      if (item.category) categorySet.add(item.category);
+    });
+    return [
+      { id: 'ALL', label: 'All' },
+      ...Array.from(categorySet).map((cat) => ({
+        id: cat.toLowerCase(),
+        label: cat
+      }))
+    ];
+  }, [apiSchedules]);
+
+  // Dynamic tracks filter dropdown
+  const allTracks = useMemo(() => {
+    if (!apiSchedules || apiSchedules.length === 0) {
+      return DEFAULT_TRACKS;
+    }
+    const categorySet = new Set();
+    apiSchedules.forEach((item) => {
+      if (item.category) categorySet.add(item.category);
+    });
+    return [
+      { id: 'ALL', label: 'All Tracks' },
+      ...Array.from(categorySet).map((cat) => ({
+        id: cat.toLowerCase(),
+        label: cat
+      }))
+    ];
+  }, [apiSchedules]);
+
+  // Header meta derived from active data
+  const activeVenueName = useMemo(() => {
+    if (apiSchedules && apiSchedules.length > 0) {
+      const found = apiSchedules.find((s) => s.venue);
+      if (found) return found.venue;
+    }
+    return 'RK Hospital Conference Hall';
+  }, [apiSchedules]);
+
+  const activeDateRange = useMemo(() => {
+    if (activeGlanceDays && activeGlanceDays.length > 0) {
+      const first = activeGlanceDays[0];
+      const last = activeGlanceDays[activeGlanceDays.length - 1];
+      if (first?.badgeDate && last?.badgeDate) {
+        return `${parseInt(first.badgeDate, 10)} – ${parseInt(last.badgeDate, 10)} January 2027`;
+      }
+    }
+    return '1 – 3 January 2027';
+  }, [activeGlanceDays]);
 
   // Filtered dataset for Glance view
   const filteredGlanceProgramme = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    return GLANCE_DAYS_DATA.map((day) => {
+    return activeGlanceDays.map((day) => {
       const filteredSessions = day.sessions.filter((session) => {
         if (selectedTopic !== 'ALL') {
-          const matchCat = session.category.toLowerCase().includes(selectedTopic.toLowerCase());
-          const matchLabel = session.categoryLabel.toLowerCase().includes(selectedTopic.toLowerCase());
-          const matchTitle = session.title.toLowerCase().includes(selectedTopic.toLowerCase());
+          const matchCat = (session.category || '').toLowerCase().includes(selectedTopic.toLowerCase());
+          const matchLabel = (session.categoryLabel || '').toLowerCase().includes(selectedTopic.toLowerCase());
+          const matchTitle = (session.title || '').toLowerCase().includes(selectedTopic.toLowerCase());
           if (!matchCat && !matchLabel && !matchTitle) return false;
         }
 
         if (selectedTrack !== 'ALL') {
-          if (!session.category.toLowerCase().includes(selectedTrack.toLowerCase())) return false;
+          const matchCat = (session.category || '').toLowerCase().includes(selectedTrack.toLowerCase());
+          const matchLabel = (session.categoryLabel || '').toLowerCase().includes(selectedTrack.toLowerCase());
+          if (!matchCat && !matchLabel) return false;
         }
 
         if (!query) return true;
-        const inTitle = session.title.toLowerCase().includes(query);
-        const inHall = session.hall.toLowerCase().includes(query);
-        const inTag = session.categoryLabel.toLowerCase().includes(query);
-        const inSpeaker = session.speaker.toLowerCase().includes(query);
-        const inDesc = session.description.toLowerCase().includes(query);
+        const inTitle = (session.title || '').toLowerCase().includes(query);
+        const inHall = (session.hall || '').toLowerCase().includes(query);
+        const inTag = (session.categoryLabel || '').toLowerCase().includes(query);
+        const inSpeaker = (session.speaker || '').toLowerCase().includes(query);
+        const inDesc = (session.description || '').toLowerCase().includes(query);
 
         return inTitle || inHall || inTag || inSpeaker || inDesc;
       });
@@ -876,26 +612,27 @@ export default function ProgrammePage() {
         sessions: filteredSessions
       };
     });
-  }, [searchQuery, selectedTrack, selectedTopic]);
+  }, [activeGlanceDays, searchQuery, selectedTrack, selectedTopic]);
 
   // Filtered dataset for Sessions view
   const filteredSessionsGrid = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    return SESSIONS_GRID_DAYS.map((day) => {
+    return activeGridDays.map((day) => {
       const filtered = day.sessions.filter((s) => {
         if (selectedTopic !== 'ALL') {
-          const inTags = s.tags.some(t => t.label.toLowerCase().includes(selectedTopic.toLowerCase()) || t.type.toLowerCase().includes(selectedTopic.toLowerCase()));
-          const inTitle = s.title.toLowerCase().includes(selectedTopic.toLowerCase());
-          if (!inTags && !inTitle) return false;
+          const inTags = s.tags && s.tags.some(t => t.label.toLowerCase().includes(selectedTopic.toLowerCase()) || (t.type && t.type.toLowerCase().includes(selectedTopic.toLowerCase())));
+          const inTitle = (s.title || '').toLowerCase().includes(selectedTopic.toLowerCase());
+          const inCat = (s.rawCategory || '').toLowerCase().includes(selectedTopic.toLowerCase());
+          if (!inTags && !inTitle && !inCat) return false;
         }
 
         if (!query) return true;
-        const inTitle = s.title.toLowerCase().includes(query);
-        const inVenue = s.venue.toLowerCase().includes(query);
-        const inSpeaker = s.speaker.toLowerCase().includes(query);
-        const inDesc = s.desc.toLowerCase().includes(query);
-        const inTags = s.tags.some(t => t.label.toLowerCase().includes(query));
+        const inTitle = (s.title || '').toLowerCase().includes(query);
+        const inVenue = (s.venue || '').toLowerCase().includes(query);
+        const inSpeaker = (s.speaker || '').toLowerCase().includes(query);
+        const inDesc = (s.desc || '').toLowerCase().includes(query);
+        const inTags = s.tags && s.tags.some(t => t.label.toLowerCase().includes(query));
 
         return inTitle || inVenue || inSpeaker || inDesc || inTags;
       });
@@ -905,7 +642,7 @@ export default function ProgrammePage() {
         sessions: filtered
       };
     });
-  }, [searchQuery, selectedTopic]);
+  }, [activeGridDays, searchQuery, selectedTopic]);
 
   return (
     <div className="kz-programme-page-wrapper">
@@ -935,7 +672,7 @@ export default function ProgrammePage() {
                 <LuCalendar size={20} />
               </span>
               <div className="kz-header-meta-text">
-                <span className="kz-header-meta-primary">1 – 3 January 2027</span>
+                <span className="kz-header-meta-primary">{activeDateRange}</span>
               </div>
             </div>
 
@@ -946,12 +683,71 @@ export default function ProgrammePage() {
                 <LuMapPin size={20} />
               </span>
               <div className="kz-header-meta-text">
-                <span className="kz-header-meta-primary">International Conference Centre</span>
+                <span className="kz-header-meta-primary">{activeVenueName}</span>
                 <span className="kz-header-meta-secondary">Ahmedabad, India &rarr;</span>
               </div>
             </div>
           </div>
         </header>
+
+        {/* Loading and Error Feedback */}
+        {loading && (
+          <div
+            style={{
+              padding: '14px 20px',
+              margin: '0 0 20px 0',
+              borderRadius: '12px',
+              background: '#fdf2f8',
+              border: '1px solid rgba(170, 45, 123, 0.2)',
+              color: '#aa2d7b',
+              fontSize: '0.92rem',
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px'
+            }}
+          >
+            <LuClock size={16} />
+            <span>Loading conference schedule from server...</span>
+          </div>
+        )}
+
+        {error && (
+          <div
+            style={{
+              padding: '14px 20px',
+              margin: '0 0 20px 0',
+              borderRadius: '12px',
+              background: '#fff1f2',
+              border: '1px solid #fecdd3',
+              color: '#be123c',
+              fontSize: '0.9rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px'
+            }}
+          >
+            <span>Unable to load schedules from server ({error}).</span>
+            <button
+              type="button"
+              onClick={fetchProgrammeData}
+              style={{
+                background: '#be123c',
+                color: '#ffffff',
+                border: 'none',
+                padding: '6px 14px',
+                borderRadius: '6px',
+                fontSize: '0.82rem',
+                fontWeight: 650,
+                cursor: 'pointer'
+              }}
+            >
+              Retry
+            </button>
+          </div>
+        )}
 
         {/* ====================================================
             2. TOP CONTROLS BAR (AT A GLANCE / SESSIONS TABS, SEARCH, FILTER)
@@ -995,17 +791,7 @@ export default function ProgrammePage() {
               <span>Topics</span>
             </button>
 
-            {/* 4. Speakers Button */}
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'speakers'}
-              className={`kz-view-tab-btn ${activeTab === 'speakers' ? 'is-active' : ''}`}
-              onClick={() => setActiveTab('speakers')}
-            >
-              <LuUsers size={16} />
-              <span>Speakers</span>
-            </button>
+         
 
             {/* 5. Conference Website Link */}
             <Link to="/" className="kz-view-tab-btn kz-external-link-btn" title="Back to Conference Home">
@@ -1118,27 +904,16 @@ export default function ProgrammePage() {
 
         {/* Mobile Day Selector Pill Tabs */}
         <div className="kz-mobile-day-tabs" aria-label="Select conference day">
-          <button
-            type="button"
-            className={`kz-mobile-day-btn ${activeMobileDay === 1 ? 'is-active' : ''}`}
-            onClick={() => setActiveMobileDay(1)}
-          >
-            Day 1 (Jan 1)
-          </button>
-          <button
-            type="button"
-            className={`kz-mobile-day-btn ${activeMobileDay === 2 ? 'is-active' : ''}`}
-            onClick={() => setActiveMobileDay(2)}
-          >
-            Day 2 (Jan 2)
-          </button>
-          <button
-            type="button"
-            className={`kz-mobile-day-btn ${activeMobileDay === 3 ? 'is-active' : ''}`}
-            onClick={() => setActiveMobileDay(3)}
-          >
-            Day 3 (Jan 3)
-          </button>
+          {activeGlanceDays.map((d) => (
+            <button
+              key={d.dayNumber}
+              type="button"
+              className={`kz-mobile-day-btn ${activeMobileDay === d.dayNumber ? 'is-active' : ''}`}
+              onClick={() => setActiveMobileDay(d.dayNumber)}
+            >
+              Day {d.dayNumber} ({d.badgeMonth || 'Jan'} {d.badgeDate || d.dayNumber})
+            </button>
+          ))}
         </div>
 
         {/* ====================================================

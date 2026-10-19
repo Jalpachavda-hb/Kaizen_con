@@ -1,166 +1,130 @@
-import React, { useState } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import SpeakerCard from '../components/Home/SpeakerCard';
+import { getSpeakers, getImageUrl } from '../Apipath';
 import './SpeakersPage.css';
 
-// Complete dataset for KaizenCon 2027 Keynote & Featured Speakers with flags and specialty tags
-const SPEAKERS_DATA = [
-  {
-    id: 'spk-01',
-    initials: 'AM',
-    name: 'Dr. Arjun Mehta',
-    role: 'Gastrointestinal & Robotic Surgeon',
-    institute: 'Global Institute of Surgical Innovation',
-    country: 'India',
-    flag: '🇮🇳',
-    tags: ['Robotic Surgery', 'GI Oncology', 'Minimally Invasive Surgery'],
-    topic: 'AI-Guided Robotic Colorectal Surgery',
-    sessions: '3 sessions',
-    tag: 'FEATURED',
-    bio: 'Dr. Arjun Mehta is a leading gastrointestinal and robotic surgeon with over 18 years of experience in minimally invasive surgery, robotic techniques, and colorectal oncology...',
-    fullBio: 'Dr. Arjun Mehta is a leading gastrointestinal and robotic surgeon with over 18 years of clinical experience in minimally invasive and robotic colorectal resection. He heads the Surgical Technology Innovation Group at the Global Institute of Surgical Innovation.',
-    theme: 'dark',
-    category: 'Robotics',
-    isHighlighted: false,
-  },
-  {
-    id: 'spk-02',
-    initials: 'SL',
-    name: 'Dr. Sofia Laurent',
-    role: 'Surgical Oncologist & AI Researcher',
-    institute: 'International Centre for Robotic Surgery',
-    country: 'France',
-    flag: '🇫🇷',
-    tags: ['Surgical Oncology', 'Predictive AI', 'Clinical Trials'],
-    topic: 'Machine Learning in Surgical Decision-Making',
-    sessions: '3 sessions',
-    tag: 'FEATURED',
-    bio: 'Dr. Sofia Laurent combines her clinical practice in surgical oncology with cutting-edge AI research. Based at the International Centre for Robotic Surgery...',
-    fullBio: 'Dr. Sofia Laurent combines her clinical practice in surgical oncology with cutting-edge AI research. Based at the International Centre for Robotic Surgery, she pioneered algorithmic predictive margins for complex pelvic malignancies.',
-    theme: 'magenta',
-    category: 'AI & Data',
-    isHighlighted: true,
-  },
-  {
-    id: 'spk-03',
-    initials: 'DO',
-    name: 'Dr. Daniel Okafor',
-    role: 'Laparoscopic & Colorectal Surgeon',
-    institute: 'Future Health Research Institute',
-    country: 'Nigeria',
-    flag: '🇳🇬',
-    tags: ['Colorectal Surgery', 'Laparoscopy', 'Comparative Trials'],
-    topic: 'Robotics vs Laparoscopy: A Clinical Comparison',
-    sessions: '3 sessions',
-    tag: 'FEATURED',
-    bio: "Dr. Daniel Okafor is one of Africa's most respected colorectal surgeons, renowned for his evidence-based approach to surgical training, laparoscopic innovation...",
-    fullBio: "Dr. Daniel Okafor is one of Africa's most respected colorectal surgeons, renowned for his evidence-based approach to comparative clinical trials between conventional laparoscopy and robotic-assisted surgical platforms.",
-    theme: 'dark',
-    category: 'Robotics',
-    isHighlighted: false,
-  },
-  {
-    id: 'spk-04',
-    initials: 'MC',
-    name: 'Dr. Maya Chen',
-    role: 'Computational Surgeon & Imaging Specialist',
-    institute: 'Centre for Intelligent Surgery',
-    country: 'Singapore',
-    flag: '🇸🇬',
-    tags: ['Computational Surgery', 'Medical Imaging', 'Computer Vision'],
-    topic: 'AI-Enhanced Intraoperative Imaging',
-    sessions: '3 sessions',
-    tag: 'FEATURED',
-    bio: 'Dr. Maya Chen is a pioneer at the intersection of computational surgery and medical imaging. Her laboratory at the Centre for Intelligent Surgery...',
-    fullBio: 'Dr. Maya Chen is a pioneer at the intersection of computational surgery and medical imaging. Her laboratory at the Centre for Intelligent Surgery invents real-time hyper-spectral overlay systems for intraoperative vascular guidance.',
-    theme: 'magenta',
-    category: 'AI & Data',
-    isHighlighted: false,
-  },
-  {
-    id: 'spk-05',
-    initials: 'ER',
-    name: 'Dr. Elena Rossi',
-    role: 'Digital Health Strategist & Surgeon',
-    institute: 'Global Institute of Surgical Innovation',
-    country: 'Italy',
-    flag: '🇮🇹',
-    tags: ['Digital Health', 'Clinical Workflows', 'Smart OR Integration'],
-    topic: 'Digital Transformation of Surgical Workflows',
-    sessions: '2 sessions',
-    tag: 'FEATURED',
-    bio: 'Dr. Elena Rossi bridges the worlds of clinical surgery and digital health strategy. As Director of Digital Innovation at the Global Institute...',
-    fullBio: 'Dr. Elena Rossi bridges the worlds of clinical surgery and digital health strategy. As Director of Digital Innovation at the Global Institute, she oversees the enterprise implementation of connected operating theaters.',
-    theme: 'dark',
-    category: 'Strategy & Policy',
-    isHighlighted: false,
-  },
-  {
-    id: 'spk-06',
-    initials: 'TW',
-    name: 'Dr. Thomas Weber',
-    role: 'Surgical Robotics Engineer & Surgeon',
-    institute: 'International Centre for Robotic Surgery',
-    country: 'Germany',
-    flag: '🇩🇪',
-    tags: ['Robotics Engineering', 'Haptic Systems', 'Tissue Telemetry'],
-    topic: 'Next-Generation Robotic Surgical Platforms',
-    sessions: '2 sessions',
-    tag: 'FEATURED',
-    bio: 'Dr. Thomas Weber occupies a rare dual role as both a practising surgeon and a robotics engineer. His research group at the International Centre...',
-    fullBio: 'Dr. Thomas Weber occupies a rare dual role as both a practising surgeon and a robotics engineer. His research group at the International Centre focuses on next-generation haptic telemetry and autonomous tissue approximation.',
-    theme: 'magenta',
-    category: 'Robotics',
-    isHighlighted: false,
-  },
-  {
-    id: 'spk-07',
-    initials: 'AR',
-    name: 'Dr. Aisha Rahman',
-    role: 'Health Economist & Healthcare Policy Expert',
-    institute: 'Future Health Research Institute',
-    country: 'United Kingdom',
-    flag: '🇬🇧',
-    tags: ['Health Economics', 'Technology Policy', 'Value-Based Care'],
-    topic: 'The Economics of Robotic Surgery Adoption',
-    sessions: '2 sessions',
-    tag: 'FEATURED',
-    bio: 'Dr. Aisha Rahman is a health economist whose research examines the cost-effectiveness and systemic impact of high-technology surgical equipment...',
-    fullBio: 'Dr. Aisha Rahman is a leading health economist whose research examines the long-term economic models, capital expenditure, and value-based healthcare frameworks of surgical robotics adoption in international healthcare systems.',
-    theme: 'dark',
-    category: 'Strategy & Policy',
-    isHighlighted: false,
-  },
-  {
-    id: 'spk-08',
-    initials: 'JC',
-    name: 'Dr. James Carter',
-    role: 'Trauma & Emergency Surgeon',
-    institute: 'Centre for Intelligent Surgery',
-    country: 'United States',
-    flag: '🇺🇸',
-    tags: ['Trauma Surgery', 'Emergency AI', 'Acute Care Triage'],
-    topic: 'AI Triage and Emergency Surgical Planning',
-    sessions: '1 session',
-    tag: 'FEATURED',
-    bio: 'Dr. James Carter is a trauma and emergency surgeon known for applying AI tools in high-pressure, time-critical surgical decision environments...',
-    fullBio: 'Dr. James Carter is a senior trauma and emergency surgeon known for pioneering algorithmic triage pipelines and machine learning decision-support algorithms in high-pressure surgical critical care.',
-    theme: 'magenta',
-    category: 'AI & Data',
-    isHighlighted: false,
-  },
-];
+
+
 
 export default function SpeakersPage() {
+  const [speakers, setSpeakers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeModalSpeaker, setActiveModalSpeaker] = useState(null);
+
+  // Fetch dynamic speakers from API
+  const fetchSpeakersData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await getSpeakers();
+
+      // Support either { results: [...] } or direct array
+      const rawList = Array.isArray(res) ? res : (res?.results || []);
+
+      const mappedList = rawList.map((item, index) => {
+        const firstName = item.first_name || '';
+        const lastName = item.last_name || '';
+        const fullName = `${firstName} ${lastName}`.trim() || 'Distinguished Speaker';
+
+        // Initials fallback
+        const initials =
+          `${firstName[0] || ''}${lastName[0] || ''}`.toUpperCase() ||
+          fullName
+            .replace(/^Dr\.\s*/i, '')
+            .split(' ')
+            .map((n) => n[0])
+            .slice(0, 2)
+            .join('')
+            .toUpperCase() ||
+          'SC';
+
+        const role = item.designation || 'Surgeon / Specialist';
+        const institution = item.institution || item.institute || '';
+        const speciality = item.speciality || '';
+        const bio = item.bio || '';
+        const description = item.description || item.bio || '';
+        const title = item.title || item.topic || 'Clinical Excellence & Surgical Innovation';
+        const imageUrl = item.profile_image_url ? getImageUrl(item.profile_image_url) : '';
+
+        // Format session timing
+        let sessions = '1 session';
+        if (item.start_time && item.end_time) {
+          const start = item.start_time.slice(0, 5);
+          const end = item.end_time.slice(0, 5);
+          sessions = `${start} - ${end}`;
+        }
+
+        return {
+          id: item.id || item.speaker_id || `spk-${index + 1}`,
+          speakerId: item.speaker_id,
+          name: fullName,
+          firstName,
+          lastName,
+          role,
+          designation: role,
+          institute: institution,
+          institution,
+          speciality,
+          tags: speciality ? [speciality] : [],
+          bio,
+          description,
+          fullBio: description,
+          title,
+          topic: title,
+          image: imageUrl,
+          profile_image_url: imageUrl,
+          initials,
+          sessions,
+          tag: item.session_status === 'scheduled' ? 'FEATURED' : 'SPEAKER',
+          eventDate: item.event_date || '',
+          startTime: item.start_time || '',
+          endTime: item.end_time || '',
+          venue: item.venue && item.venue !== 'string' ? item.venue : '',
+          room: item.room && item.room !== 'string' ? item.room : '',
+          country: item.venue && item.venue !== 'string' ? item.venue : 'International',
+          isHighlighted: index === 0,
+        };
+      });
+
+      setSpeakers(mappedList);
+    } catch (err) {
+      console.error('Failed to load speakers:', err);
+      setError(err?.message || 'Failed to load speakers. Please verify your connection.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSpeakersData();
+  }, [fetchSpeakersData]);
+
+  // Derived dynamic institutions from speakers list
+  const dynamicInstitutions = useMemo(() => {
+    if (!speakers || speakers.length === 0) return DEFAULT_INSTITUTIONS;
+    const map = new Map();
+    speakers.forEach((s) => {
+      const inst = s.institution?.trim();
+      if (inst && inst.toLowerCase() !== 'string') {
+        map.set(inst, (map.get(inst) || 0) + 1);
+      }
+    });
+
+    if (map.size === 0) return DEFAULT_INSTITUTIONS;
+
+    return Array.from(map.entries()).map(([name, count]) => ({
+      name,
+      country: 'Partner Institution',
+      count: `${count} speaker${count > 1 ? 's' : ''}`,
+    }));
+  }, [speakers]);
 
   return (
     <div className="kz-speakers-page-root">
       {/* ----------------------------------------------------
-          1. HERO SECTION (Matches Image 1)
-          - Pill Tag: EXPERT FACULTY
-          - Title: Conference (Dark Plum) Speakers (Magenta)
-          - Subtitle: 150+ leading surgeons...
+          1. HERO SECTION
           ---------------------------------------------------- */}
       <section className="kz-spk-hero-section" aria-label="Conference Speakers Hero">
         <div className="kz-spk-hero-container">
@@ -176,22 +140,24 @@ export default function SpeakersPage() {
             <span className="kz-spk-pill-badge">EXPERT FACULTY</span>
           </div>
 
-          {/* Large Split-Color Headline with precise brand colors */}
+          {/* Large Split-Color Headline */}
           <h1 className="kz-spk-hero-headline">
             <span className="kz-spk-hero-purple">Conference Speakers,</span>
             <span className="kz-spk-hero-magenta">now with intelligence.</span>
           </h1>
 
-          {/* Subtitle / Paragraph */}
+          {/* Subtitle */}
           <p className="kz-spk-hero-subtitle">
-            150+ leading surgeons, clinicians, researchers, and technology experts from over 40
-            countries — united by a shared commitment to advancing surgical intelligence.
+            Leading surgeons, clinicians, researchers, and technology experts
+            united by a shared commitment to advancing surgical intelligence and clinical excellence.
           </p>
 
           {/* Faculty Key Metrics Pill Strip */}
           <div className="kz-spk-metrics-strip">
             <div className="kz-spk-metric-pill">
-              <span className="kz-spk-metric-num">150+</span>
+              <span className="kz-spk-metric-num">
+                {speakers.length > 0 ? `${speakers.length}+` : '150+'}
+              </span>
               <span className="kz-spk-metric-label">Global Faculty</span>
             </div>
             <div className="kz-spk-metric-pill">
@@ -211,11 +177,11 @@ export default function SpeakersPage() {
       </section>
 
       {/* ----------------------------------------------------
-          2. FEATURED FACULTY & CARDS GRID SECTION (Image 2 & 3)
+          2. FEATURED FACULTY & CARDS GRID SECTION
           ---------------------------------------------------- */}
       <section className="kz-spk-main-section" aria-label="Keynote and Featured Speakers">
         <div className="kz-spk-main-container">
-          {/* Section Header (Matches Image 2) */}
+          {/* Section Header */}
           <div className="kz-spk-section-header">
             <div className="kz-spk-pill-badge-wrap">
               <span className="kz-spk-pill-badge">FEATURED FACULTY</span>
@@ -224,36 +190,118 @@ export default function SpeakersPage() {
           </div>
 
           {/* ----------------------------------------------------
-              3. 8 SPEAKERS GRID (Light Pink Shade Cards)
+              3. SPEAKERS GRID (Dynamic Data from API)
               ---------------------------------------------------- */}
           <div className="kz-spk-grid">
-            {SPEAKERS_DATA.map((spk) => (
-              <SpeakerCard
-                key={spk.id}
-                id={spk.id}
-                initials={spk.initials}
-                name={spk.name}
-                role={spk.role}
-                institute={spk.institute}
-                country={spk.country}
-                flag={spk.flag}
-                tags={spk.tags}
-                topic={spk.topic}
-                sessions={spk.sessions}
-                tag={spk.tag}
-                bio={spk.bio}
-                isHighlighted={spk.isHighlighted}
-                onViewDetails={() => setActiveModalSpeaker(spk)}
-              />
-            ))}
+            {loading ? (
+              <div
+                className="kz-spk-state-box"
+                style={{
+                  gridColumn: '1 / -1',
+                  textAlign: 'center',
+                  padding: '70px 20px',
+                  background: '#FFFFFF',
+                  borderRadius: '20px',
+                  border: '1px solid #ECE7EF',
+                }}
+              >
+                <div
+                  className="kz-spk-spinner"
+                  style={{
+                    width: '42px',
+                    height: '42px',
+                    border: '3px solid rgba(182, 52, 115, 0.18)',
+                    borderTopColor: '#B63473',
+                    borderRadius: '50%',
+                    animation: 'kzSpin 0.8s linear infinite',
+                    margin: '0 auto 16px',
+                  }}
+                />
+                <p style={{ color: '#42264C', fontSize: '1.05rem', fontWeight: 600, margin: '0 0 6px 0' }}>
+                  Loading Conference Speakers...
+                </p>
+                <p style={{ color: '#7A6C82', fontSize: '0.9rem', margin: 0 }}>
+                  Fetching verified faculty profiles from server
+                </p>
+              </div>
+            ) : error ? (
+              <div
+                className="kz-spk-state-box"
+                style={{
+                  gridColumn: '1 / -1',
+                  textAlign: 'center',
+                  padding: '50px 24px',
+                  background: '#FFF5F8',
+                  borderRadius: '20px',
+                  border: '1px solid #F3CFDE',
+                }}
+              >
+                <div style={{ fontSize: '2rem', marginBottom: '10px' }}>⚠️</div>
+                <h3 style={{ color: '#881F54', fontSize: '1.15rem', fontWeight: 700, margin: '0 0 8px 0' }}>
+                  Unable to load faculty list
+                </h3>
+                <p style={{ color: '#6A5672', fontSize: '0.92rem', maxWidth: '460px', margin: '0 auto 18px auto' }}>
+                  {error}
+                </p>
+                <button
+                  type="button"
+                  onClick={fetchSpeakersData}
+                  style={{
+                    background: '#B63473',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    padding: '10px 24px',
+                    borderRadius: '30px',
+                    fontWeight: 650,
+                    cursor: 'pointer',
+                    fontSize: '0.92rem',
+                    boxShadow: '0 4px 14px rgba(182, 52, 115, 0.28)',
+                  }}
+                >
+                  Retry Connection
+                </button>
+              </div>
+            ) : speakers.length === 0 ? (
+              <div
+                className="kz-spk-state-box"
+                style={{
+                  gridColumn: '1 / -1',
+                  textAlign: 'center',
+                  padding: '60px 20px',
+                  background: '#FFFFFF',
+                  borderRadius: '20px',
+                  border: '1px solid #ECE7EF',
+                }}
+              >
+                <p style={{ color: '#42264C', fontSize: '1.05rem', fontWeight: 600 }}>
+                  No speakers found at this time.
+                </p>
+              </div>
+            ) : (
+              speakers.map((spk) => (
+                <SpeakerCard
+                  key={spk.id}
+                  id={spk.id}
+                  initials={spk.initials}
+                  image={spk.image}
+                  name={spk.name}
+                  role={spk.role}
+                  institute={spk.institution}
+                  country={spk.country}
+                  tags={spk.tags}
+                  topic={spk.title}
+                  sessions={spk.sessions}
+                  tag={spk.tag}
+                  bio={spk.bio}
+                  isHighlighted={spk.isHighlighted}
+                  onViewDetails={() => setActiveModalSpeaker(spk)}
+                />
+              ))
+            )}
           </div>
 
           {/* ----------------------------------------------------
-              4. CONFERENCE STATS RIBBON (Image 2 - Top Section)
-              - 40+ Countries represented
-              - 150+ Expert speakers
-              - 8 Keynote speakers
-              - 6 Panel discussions
+              4. CONFERENCE STATS RIBBON
               ---------------------------------------------------- */}
           <section className="kz-spk-stats-ribbon" aria-label="Conference Key Statistics">
             <div className="kz-spk-stat-col">
@@ -280,7 +328,9 @@ export default function SpeakersPage() {
                 </svg>
               </div>
               <div className="kz-spk-stat-text-wrap">
-                <span className="kz-spk-stat-value">150+</span>
+                <span className="kz-spk-stat-value">
+                  {speakers.length > 0 ? `${speakers.length}+` : '150+'}
+                </span>
                 <span className="kz-spk-stat-label">Expert speakers</span>
               </div>
             </div>
@@ -295,7 +345,9 @@ export default function SpeakersPage() {
                 </svg>
               </div>
               <div className="kz-spk-stat-text-wrap">
-                <span className="kz-spk-stat-value">8</span>
+                <span className="kz-spk-stat-value">
+                  {speakers.length > 0 ? speakers.length : 8}
+                </span>
                 <span className="kz-spk-stat-label">Keynote speakers</span>
               </div>
             </div>
@@ -314,11 +366,7 @@ export default function SpeakersPage() {
           </section>
 
           {/* ----------------------------------------------------
-              5. REPRESENTED INSTITUTIONS SECTION (Image 2 - Lower Section)
-              - Pill Badge: INSTITUTIONS
-              - Title: Represented institutions
-              - Underline accent
-              - 4 Institution Cards
+              5. REPRESENTED INSTITUTIONS SECTION
               ---------------------------------------------------- */}
           <section className="kz-spk-institutions-section" aria-label="Represented institutions">
             <div className="kz-spk-institutions-header">
@@ -330,70 +378,23 @@ export default function SpeakersPage() {
             </div>
 
             <div className="kz-spk-institutions-grid">
-              {/* Institution 1 */}
-              <div className="kz-spk-institution-card">
-                <div className="kz-spk-inst-icon-wrap" aria-hidden="true">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B63473" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 21h18" />
-                    <path d="M5 21V10l7-5 7 5v11" />
-                    <path d="M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4" />
-                    <line x1="9" y1="10" x2="9" y2="12" />
-                    <line x1="15" y1="10" x2="15" y2="12" />
-                  </svg>
+              {dynamicInstitutions.slice(0, 4).map((inst, idx) => (
+                <div key={idx} className="kz-spk-institution-card">
+                  <div className="kz-spk-inst-icon-wrap" aria-hidden="true">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B63473" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 21h18" />
+                      <path d="M5 21V10l7-5 7 5v11" />
+                      <path d="M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4" />
+                      <line x1="9" y1="10" x2="9" y2="12" />
+                      <line x1="15" y1="10" x2="15" y2="12" />
+                    </svg>
+                  </div>
+                  <h3 className="kz-spk-inst-name">{inst.name}</h3>
+                  <p className="kz-spk-inst-country">{inst.country || 'International'}</p>
+                  <div className="kz-spk-inst-divider" aria-hidden="true" />
+                  <span className="kz-spk-inst-count">{inst.count}</span>
                 </div>
-                <h3 className="kz-spk-inst-name">Global Institute of Surgical Innovation</h3>
-                <p className="kz-spk-inst-country">India</p>
-                <div className="kz-spk-inst-divider" aria-hidden="true" />
-                <span className="kz-spk-inst-count">2 speakers</span>
-              </div>
-
-              {/* Institution 2 */}
-              <div className="kz-spk-institution-card">
-                <div className="kz-spk-inst-icon-wrap" aria-hidden="true">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B63473" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                    <path d="M6 12v5c3 3 9 3 12 0v-5" />
-                  </svg>
-                </div>
-                <h3 className="kz-spk-inst-name">International Centre for Robotic Surgery</h3>
-                <p className="kz-spk-inst-country">France</p>
-                <div className="kz-spk-inst-divider" aria-hidden="true" />
-                <span className="kz-spk-inst-count">2 speakers</span>
-              </div>
-
-              {/* Institution 3 */}
-              <div className="kz-spk-institution-card">
-                <div className="kz-spk-inst-icon-wrap" aria-hidden="true">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B63473" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="16" y1="13" x2="8" y2="13" />
-                    <line x1="16" y1="17" x2="8" y2="17" />
-                    <line x1="10" y1="9" x2="8" y2="9" />
-                  </svg>
-                </div>
-                <h3 className="kz-spk-inst-name">Future Health Research Institute</h3>
-                <p className="kz-spk-inst-country">Nigeria</p>
-                <div className="kz-spk-inst-divider" aria-hidden="true" />
-                <span className="kz-spk-inst-count">2 speakers</span>
-              </div>
-
-              {/* Institution 4 */}
-              <div className="kz-spk-institution-card">
-                <div className="kz-spk-inst-icon-wrap" aria-hidden="true">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B63473" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="18" cy="5" r="3" />
-                    <circle cx="6" cy="12" r="3" />
-                    <circle cx="18" cy="19" r="3" />
-                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-                  </svg>
-                </div>
-                <h3 className="kz-spk-inst-name">Centre for Intelligent Surgery</h3>
-                <p className="kz-spk-inst-country">Singapore</p>
-                <div className="kz-spk-inst-divider" aria-hidden="true" />
-                <span className="kz-spk-inst-count">2 speakers</span>
-              </div>
+              ))}
             </div>
           </section>
 
@@ -427,7 +428,7 @@ export default function SpeakersPage() {
       </section>
 
       {/* ----------------------------------------------------
-          4. SPEAKER DETAILS MODAL
+          6. SPEAKER DETAILS MODAL (Full dynamic speaker data)
           ---------------------------------------------------- */}
       {activeModalSpeaker && (
         <div
@@ -462,16 +463,29 @@ export default function SpeakersPage() {
               >
                 <div
                   className="kz-card-avatar-disc"
-                  style={{ fontSize: '1.4rem' }}
+                  style={{ fontSize: '1.4rem', width: '68px', height: '68px', overflow: 'hidden' }}
                 >
-                  <span>{activeModalSpeaker.initials}</span>
+                  {activeModalSpeaker.image ? (
+                    <img
+                      src={activeModalSpeaker.image}
+                      alt={activeModalSpeaker.name}
+                      style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <span>{activeModalSpeaker.initials}</span>
+                  )}
                 </div>
               </div>
               <div className="kz-spk-modal-title-wrap">
                 <div className="kz-spk-modal-tags">
-                  <span className="kz-card-country-badge">
-                    {activeModalSpeaker.flag} {activeModalSpeaker.country}
-                  </span>
+                  {activeModalSpeaker.speciality && (
+                    <span className="kz-card-country-badge" style={{ backgroundColor: '#FDF2F8', color: '#B63473' }}>
+                      🔬 {activeModalSpeaker.speciality}
+                    </span>
+                  )}
                   <span className="kz-card-featured-tag">
                     ★ {activeModalSpeaker.tag}
                   </span>
@@ -480,12 +494,14 @@ export default function SpeakersPage() {
                   {activeModalSpeaker.name}
                 </h3>
                 <p className="kz-spk-modal-role">{activeModalSpeaker.role}</p>
-                <p className="kz-spk-modal-institute">{activeModalSpeaker.institute}</p>
+                <p className="kz-spk-modal-institute">
+                  {activeModalSpeaker.institution || activeModalSpeaker.institute}
+                </p>
               </div>
             </div>
 
-            {/* Specialty Tags */}
-            {activeModalSpeaker.tags && (
+            {/* Specialty / Tags */}
+            {activeModalSpeaker.tags && activeModalSpeaker.tags.length > 0 && (
               <div className="kz-card-tags-row" style={{ marginTop: '8px' }}>
                 {activeModalSpeaker.tags.map((t, idx) => (
                   <span key={idx} className="kz-card-specialty-pill">
@@ -497,21 +513,25 @@ export default function SpeakersPage() {
 
             <div className="kz-spk-modal-divider" />
 
-            {/* Speaking On */}
-            <div className="kz-spk-modal-section">
-              <span className="kz-card-topic-label">SPEAKING TOPIC</span>
-              <h4 className="kz-spk-modal-topic">{activeModalSpeaker.topic}</h4>
-            </div>
+            {/* Title / Topic */}
+            {activeModalSpeaker.title && (
+              <div className="kz-spk-modal-section">
+                <span className="kz-card-topic-label">SPEAKING TOPIC</span>
+                <h4 className="kz-spk-modal-topic">{activeModalSpeaker.title}</h4>
+              </div>
+            )}
 
-            {/* Full Biography */}
-            <div className="kz-spk-modal-section">
-              <span className="kz-card-topic-label">FACULTY PROFILE &amp; CLINICAL FOCUS</span>
-              <p className="kz-spk-modal-bio">
-                {activeModalSpeaker.fullBio || activeModalSpeaker.bio}
-              </p>
-            </div>
+            {/* Description / Bio */}
+            {(activeModalSpeaker.description || activeModalSpeaker.bio) && (
+              <div className="kz-spk-modal-section">
+                <span className="kz-card-topic-label">FACULTY PROFILE &amp; CLINICAL FOCUS</span>
+                <p className="kz-spk-modal-bio">
+                  {activeModalSpeaker.description || activeModalSpeaker.bio}
+                </p>
+              </div>
+            )}
 
-            {/* Session info & CTA */}
+            {/* Session Info & Footer */}
             <div className="kz-spk-modal-footer">
               <div className="kz-card-sessions-item">
                 <svg
@@ -529,7 +549,12 @@ export default function SpeakersPage() {
                   <line x1="8" y1="2" x2="8" y2="6" />
                   <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
-                <span>{activeModalSpeaker.sessions} scheduled at KaizenCon 2027</span>
+                <span>
+                  {activeModalSpeaker.eventDate ? `${activeModalSpeaker.eventDate} • ` : ''}
+                  {activeModalSpeaker.sessions}
+                  {activeModalSpeaker.room ? ` • ${activeModalSpeaker.room}` : ''}
+                  {activeModalSpeaker.venue ? ` (${activeModalSpeaker.venue})` : ''}
+                </span>
               </div>
 
               <div className="kz-spk-modal-actions">
