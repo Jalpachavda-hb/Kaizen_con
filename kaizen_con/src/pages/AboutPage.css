@@ -566,49 +566,57 @@
   z-index: 2;
 }
 
-.kz-card-icon-badge {
+.kz-story-card .kz-card-icon-badge {
   flex-shrink: 0;
-  width: 60px;
-  height: 60px;
-  border-radius: 16px;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.kz-badge-pink {
-  background: #FDF2F8;
-  border: 1px solid rgba(199, 56, 122, 0.2);
+.kz-story-card:hover .kz-card-icon-badge {
+  transform: scale(1.06);
+}
+
+.kz-story-card .kz-badge-pink {
+  background: linear-gradient(135deg, #FDF2F8 0%, #FCE7F3 100%);
+  border: 1.5px solid rgba(199, 56, 122, 0.28);
   color: #C7387A;
+  box-shadow: 0 4px 14px rgba(199, 56, 122, 0.1);
 }
 
-.kz-badge-teal {
-  background: #F0F9FB;
-  border: 1px solid rgba(14, 110, 142, 0.2);
+.kz-story-card .kz-badge-teal {
+  background: linear-gradient(135deg, #F0F9FB 0%, #E0F2FE 100%);
+  border: 1.5px solid rgba(14, 110, 142, 0.28);
   color: #0E6E8E;
+  box-shadow: 0 4px 14px rgba(14, 110, 142, 0.1);
 }
 
-.kz-badge-ring {
-  width: 44px;
-  height: 44px;
+.kz-story-card .kz-badge-ring {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
-.kz-badge-pink .kz-badge-ring {
+.kz-story-card .kz-badge-pink .kz-badge-ring {
   border: 1.5px solid rgba(199, 56, 122, 0.35);
 }
 
-.kz-badge-teal .kz-badge-ring {
+.kz-story-card .kz-badge-teal .kz-badge-ring {
   border: 1.5px solid rgba(14, 110, 142, 0.35);
 }
 
-
-.kz-card-react-icon {
-  font-size: 22px;
+.kz-story-card .kz-card-react-icon {
+  font-size: 20px;
   display: block;
 }
 

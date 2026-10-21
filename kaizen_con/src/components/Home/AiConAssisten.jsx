@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import './AiConAssisten.css';
 
 // Preset conversation data matching the theme & conference intelligence
@@ -428,45 +429,83 @@ export default function AiConAssisten() {
                       <p className="kz-ai-text">{currentChat.aiText}</p>
                       <span className="kz-ai-time">{currentChat.aiTime}</span>
 
-                      {/* 3 Recommended Session Cards Grid */}
+                      {/* 3 Recommended Session Cards - 3 Horizontal Rows */}
                       {currentChat.sessions && currentChat.sessions.length > 0 && (
                         <div className="kz-session-cards-grid">
                           {currentChat.sessions.map((session, index) => (
-                            <div key={index} className="kz-session-card">
-                              <div className="kz-session-time">
-                                <svg
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                                  <line x1="16" y1="2" x2="16" y2="6" />
-                                  <line x1="8" y1="2" x2="8" y2="6" />
-                                  <line x1="3" y1="10" x2="21" y2="10" />
-                                </svg>
-                                <span>{session.time}</span>
+                            <Link
+                              key={index}
+                              to="/programme"
+                              className="kz-session-card"
+                              title={`View ${session.title} in Programme`}
+                            >
+                              <div className="kz-session-card-left">
+                                <div className="kz-session-icon-box" aria-hidden="true">
+                                  <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                                  </svg>
+                                </div>
+                                <div className="kz-session-main">
+                                  <h4 className="kz-session-title">{session.title}</h4>
+                                  <div className="kz-session-meta">
+                                    <span className="kz-session-time">
+                                      <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      >
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                        <line x1="16" y1="2" x2="16" y2="6" />
+                                        <line x1="8" y1="2" x2="8" y2="6" />
+                                        <line x1="3" y1="10" x2="21" y2="10" />
+                                      </svg>
+                                      <span>{session.time}</span>
+                                    </span>
+                                    <span className="kz-session-divider" aria-hidden="true">•</span>
+                                    <span className="kz-session-venue">
+                                      <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      >
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                        <circle cx="12" cy="10" r="3" />
+                                      </svg>
+                                      <span>{session.venue}</span>
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
-
-                              <h4 className="kz-session-title">{session.title}</h4>
-
-                              <div className="kz-session-venue">
-                                <svg
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                                  <circle cx="12" cy="10" r="3" />
-                                </svg>
-                                <span>{session.venue}</span>
+                              <div className="kz-session-action">
+                                <span className="kz-session-arrow" aria-hidden="true">
+                                  <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                    <polyline points="12 5 19 12 12 19" />
+                                  </svg>
+                                </span>
                               </div>
-                            </div>
+                            </Link>
                           ))}
                         </div>
                       )}

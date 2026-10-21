@@ -117,7 +117,7 @@ export default function SpeakersPage() {
       }
     });
 
-    if (map.size === 0) return DEFAULT_INSTITUTIONS;
+    if (map.size === 0) return DEFAULT_INSTITUTIONS;  
 
     return Array.from(map.entries()).map(([name, count]) => ({
       name,

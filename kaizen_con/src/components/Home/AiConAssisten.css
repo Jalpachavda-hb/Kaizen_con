@@ -429,12 +429,13 @@
   display: block;
 }
 
-/* Recommendation Cards Grid */
+/* Recommendation Cards - 3 Horizontal Rows */
 .kz-session-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+  width: 100%;
 }
 
 .kz-session-card {
@@ -442,58 +443,146 @@
   border: 1px solid rgba(85, 53, 94, 0.12);
   border-left: 3.5px solid #55355E;
   border-radius: 10px;
-  padding: 12px 14px;
+  padding: 10px 14px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  gap: 12px;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 6px rgba(85, 53, 94, 0.03);
+  cursor: pointer;
 }
 
 .kz-session-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(85, 53, 94, 0.1);
-  border-color: #70477C;
-  border-left-color: #55355E;
+  transform: translateX(4px);
+  box-shadow: 0 5px 16px rgba(85, 53, 94, 0.1);
+  border-color: rgba(85, 53, 94, 0.28);
+  border-left-color: #70477C;
+  background: #faf7fb;
+}
+
+.kz-session-card-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.kz-session-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(85, 53, 94, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.kz-session-icon-box svg {
+  width: 17px;
+  height: 17px;
+  stroke: #55355E;
+}
+
+.kz-session-card:hover .kz-session-icon-box {
+  background: rgba(85, 53, 94, 0.14);
+  transform: scale(1.05);
+}
+
+.kz-session-main {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kz-session-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #181829;
+  line-height: 1.35;
+  margin: 0;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+.kz-session-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.74rem;
 }
 
 .kz-session-time {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.72rem;
   font-weight: 600;
-  color: #6b7280;
+  color: #55355E;
 }
 
 .kz-session-time svg {
   stroke: #55355E;
   width: 12px;
   height: 12px;
+  flex-shrink: 0;
 }
 
-.kz-session-title {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #181829;
-  line-height: 1.35;
-  margin: 0;
+.kz-session-divider {
+  color: rgba(85, 53, 94, 0.35);
+  font-size: 0.75rem;
 }
 
 .kz-session-venue {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.72rem;
+  gap: 4px;
   font-weight: 600;
-  color: #55355E;
+  color: #6b7280;
 }
 
 .kz-session-venue svg {
-  stroke: #55355E;
+  stroke: #6b7280;
   width: 12px;
   height: 12px;
+  flex-shrink: 0;
+}
+
+.kz-session-action {
+  flex-shrink: 0;
+}
+
+.kz-session-arrow {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(85, 53, 94, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.kz-session-arrow svg {
+  width: 14px;
+  height: 14px;
+  stroke: #55355E;
+  transition: transform 0.2s ease;
+}
+
+.kz-session-card:hover .kz-session-arrow {
+  background: #55355E;
+}
+
+.kz-session-card:hover .kz-session-arrow svg {
+  stroke: #ffffff;
+  transform: translateX(2px);
 }
 
 /* Typing indicator */
@@ -816,19 +905,12 @@
   .kz-assistant-container {
     padding: 0 30px;
   }
-  .kz-session-cards-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 992px) {
   .kz-assistant-workspace {
     grid-template-columns: 1fr;
     gap: 40px;
-  }
-
-  .kz-session-cards-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -876,11 +958,6 @@
     padding: 16px;
   }
 
-  .kz-session-cards-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
   .kz-user-bubble {
     max-width: 90%;
   }
@@ -907,5 +984,17 @@
   }
   .kz-intel-title {
     font-size: 1.8rem;
+  }
+  .kz-session-card {
+    padding: 9px 12px;
+    gap: 10px;
+  }
+  .kz-session-icon-box {
+    width: 32px;
+    height: 32px;
+  }
+  .kz-session-arrow {
+    width: 24px;
+    height: 24px;
   }
 }
