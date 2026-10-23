@@ -75,19 +75,22 @@
 }
 
 .kz-schedule-dash {
-  display: inline-block;
-  width: 28px;
-  height: 4px;
-  background-color: var(--kz-brand-magenta);
-  border-radius: 2px;
+  display: none;
 }
 
 .kz-schedule-pill {
-  font-size: 0.8125rem;
+  display: inline-block;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.8px;
   text-transform: uppercase;
-  color: var(--kz-brand-magenta);
+  color: #B8387A;
+  background: #FDF0F6;
+  border: 1px solid rgba(216, 90, 154, 0.35);
+  padding: 5px 16px;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(184, 56, 122, 0.06);
 }
 
 .kz-programme-main-title {
@@ -1880,5 +1883,37 @@
 
   .kz-modal-meta-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile Screens: Center Header Badges & Titles */
+@media (max-width: 768px) {
+  .kz-programme-header-left {
+    text-align: center !important;
+    align-items: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+  .kz-schedule-badge-row {
+    justify-content: center !important;
+    width: 100% !important;
+    margin: 0 auto 12px auto !important;
+  }
+  .kz-schedule-pill {
+    margin: 0 auto !important;
+  }
+  .kz-programme-main-title {
+    text-align: center !important;
+    width: 100% !important;
+  }
+  .kz-programme-subtitle {
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .kz-programme-header-right {
+    justify-content: center !important;
+    margin: 16px auto 0 auto !important;
   }
 }

@@ -57,15 +57,16 @@
 .kz-knowledge-badge {
   display: inline-block;
   font-family: 'Roboto', sans-serif;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 1.6px;
+  letter-spacing: 1.8px;
   text-transform: uppercase;
-  color: #A01B68;
-  background: #faeaf2;
-  border: 1px solid rgba(160, 27, 104, 0.15);
+  color: #B8387A;
+  background: #FDF0F6;
+  border: 1px solid rgba(216, 90, 154, 0.35);
   padding: 5px 16px;
   border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(184, 56, 122, 0.06);
 }
 
 /* Section Title */
@@ -432,13 +433,36 @@
 }
 
 @media (max-width: 640px) {
+  .kz-knowledge-left {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .kz-knowledge-badge-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 14px;
+  }
+
+  .kz-knowledge-badge {
+    margin: 0 auto;
+  }
+
   .kz-knowledge-title {
     font-size: 2.1rem;
+    text-align: center;
+    width: 100%;
   }
 
   .kz-knowledge-subtitle {
     font-size: 0.98rem;
     margin-bottom: 20px;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .kz-knowledge-search-box {

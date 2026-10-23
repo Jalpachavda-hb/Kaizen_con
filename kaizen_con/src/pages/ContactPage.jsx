@@ -445,7 +445,7 @@ export default function ContactPage() {
               <div className="kz-venue-map-container">
                 <iframe
                   title="Hyatt Regency Ahmedabad Map"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3671.6979606821217!2d72.56942917591873!3d23.034873715873955!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e84f55f6df8c7%3A0xe54e24efea586119!2sHyatt%20Regency%20Ahmedabad!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3671.4988770176374!2d72.567682!3d23.0437959!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e8461a2095f23%3A0xca272b244270caea!2sHyatt%20Regency%20Ahmedabad!5e0!3m2!1sen!2sin!4v1710000000000!5m2!1sen!2sin"
                   width="100%"
                   height="210"
                   style={{ border: 0 }}
@@ -453,11 +453,27 @@ export default function ContactPage() {
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
                 ></iframe>
+                <a
+                  href="https://www.google.com/maps/place/Hyatt+Regency+Ahmedabad/@23.0437959,72.5676766,17z/data=!3m1!4b1!4m9!3m8!1s0x395e8461a2095f23:0xca272b244270caea!5m2!4m1!1i2!8m2!3d23.0437959!4d72.5702569!16s%2Fg%2F11b6p4j1f1?entry=ttu&g_ep=EgoyMDI2MTAxOS4wIKXMDSoASAFQAw%3D%3D"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="kz-map-click-overlay"
+                  title="Open Hyatt Regency in Google Maps"
+                >
+                  <span className="kz-map-badge-hint">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                      <polyline points="15 3 21 3 21 9" />
+                      <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                    Open in Google Maps
+                  </span>
+                </a>
               </div>
 
               <div className="kz-venue-card-footer">
                 <a
-                  href="https://maps.google.com/?q=Hyatt+Regency+Ahmedabad"
+                  href="https://www.google.com/maps/place/Hyatt+Regency+Ahmedabad/@23.0437959,72.5676766,17z/data=!3m1!4b1!4m9!3m8!1s0x395e8461a2095f23:0xca272b244270caea!5m2!4m1!1i2!8m2!3d23.0437959!4d72.5702569!16s%2Fg%2F11b6p4j1f1?entry=ttu&g_ep=EgoyMDI2MTAxOS4wIKXMDSoASAFQAw%3D%3D"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="kz-btn-directions"
@@ -487,7 +503,7 @@ export default function ContactPage() {
               <div className="kz-venue-map-container">
                 <iframe
                   title="Kaizen Hospital Ahmedabad Map"
-                  src="https://maps.google.com/maps?q=Kaizen+Hospital,+132+Feet+Ring+Road,+Near+Helmet+Cross+Roads,+Memnagar,+Ahmedabad,+Gujarat+380052&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3671.5976582455584!2d72.545196!3d23.040182!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e848f71aaaaab%3A0x4994247854614a9a!2sKaizen%20Hospital!5e0!3m2!1sen!2sin!4v1710000000000!5m2!1sen!2sin"
                   width="100%"
                   height="210"
                   style={{ border: 0 }}
@@ -495,11 +511,27 @@ export default function ContactPage() {
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
                 ></iframe>
+                <a
+                  href="https://www.google.com/maps/@23.0469494,72.5436699,17z?entry=ttu&g_ep=EgoyMDI2MTAxOS4wIKXMDSoASAFQAw%3D%3D"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="kz-map-click-overlay"
+                  title="Open Kaizen Hospital in Google Maps"
+                >
+                  <span className="kz-map-badge-hint">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                      <polyline points="15 3 21 3 21 9" />
+                      <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                    Open in Google Maps
+                  </span>
+                </a>
               </div>
 
               <div className="kz-venue-card-footer">
                 <a
-                  href="https://maps.google.com/?q=Kaizen+Hospital+Helmet+Circle+Memnagar+Ahmedabad"
+                  href="https://www.google.com/maps/@23.0469494,72.5436699,17z?entry=ttu&g_ep=EgoyMDI2MTAxOS4wIKXMDSoASAFQAw%3D%3D"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="kz-btn-directions"

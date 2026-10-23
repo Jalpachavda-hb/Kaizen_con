@@ -334,9 +334,10 @@
   align-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 10px;
-  background: rgba(85, 53, 94, 0.08);
-  border: 1.5px solid rgba(85, 53, 94, 0.25);
+  border-radius: 12px;
+  background: #FFFFFF;
+  border: 1.5px solid rgba(184, 56, 122, 0.28);
+  box-shadow: 0 2px 10px rgba(85, 53, 94, 0.08);
   cursor: pointer;
   padding: 0;
   margin-left: auto;
@@ -345,8 +346,10 @@
 }
 
 .kaizen-hamburger-btn:hover {
-  background: rgba(85, 53, 94, 0.16);
+  background: #FDF0F6;
+  border-color: #B8387A;
   transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(184, 56, 122, 0.2);
 }
 
 .kaizen-hamburger-line {
@@ -711,13 +714,10 @@
     display: flex;
   }
   .kaizen-navbar-bg-left {
-    width: 240px;
-    opacity: 0.18;
+    display: none;
   }
   .kaizen-navbar-bg-right {
-    top: 0;
-    width: 280px;
-    opacity: 0.35;
+    display: none;
   }
 }
 

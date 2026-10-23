@@ -47,7 +47,7 @@ export default function Hero() {
                 <circle cx="8" cy="11" r="0.8" fill="currentColor" />
               </svg>
               <span className="kz-hero-badge-text">
-                KAIZENCON 2027 &nbsp;•&nbsp; 1–3 JANUARY &nbsp;•&nbsp; INTERNATIONAL CONFERENCE
+                KAIZENCON 2027 • 1–3 JANUARY • INTERNATIONAL CONFERENCE
               </span>
             </div>
           </div>

@@ -59,24 +59,25 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 18px;
+  padding: 5px 16px;
   border-radius: 9999px;
-  background: rgba(170, 45, 123, 0.08);
-  border: 1px solid rgba(170, 45, 123, 0.22);
-  color: #AA2D7B;
+  background: #FDF0F6;
+  border: 1px solid rgba(216, 90, 154, 0.35);
+  color: #B8387A;
+  font-family: 'Roboto', sans-serif;
   font-weight: 700;
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  letter-spacing: 1.8px;
   text-transform: uppercase;
   margin-bottom: 18px;
-  box-shadow: 0 2px 8px rgba(170, 45, 123, 0.06);
+  box-shadow: 0 2px 8px rgba(184, 56, 122, 0.06);
 }
 
 .kz-live-intel-pill-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #AA2D7B;
+  background: #B8387A;
 }
 
 /* Title: Theme Dark Color + Highlight Magenta Gradient */

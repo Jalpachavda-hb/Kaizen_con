@@ -1,3 +1,4 @@
+
 /* ====================================================
    KAIZENCON 2027 - CONTACT US PAGE STYLES
    ==================================================== */
@@ -82,16 +83,17 @@
 .kz-hero-simple-badge {
   display: inline-flex;
   align-items: center;
-  background-color: #FDF2F8;
-  border: 1px solid rgba(182, 52, 115, 0.28);
-  color: #B63473;
-  font-size: 0.74rem;
-  font-weight: 750;
-  letter-spacing: 0.12em;
+  background-color: #FDF0F6;
+  border: 1px solid rgba(216, 90, 154, 0.35);
+  color: #B8387A;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.8px;
   text-transform: uppercase;
   padding: 5px 16px;
-  border-radius: 999px;
-  box-shadow: 0 1px 4px rgba(182, 52, 115, 0.06);
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(184, 56, 122, 0.06);
 }
 
 /* 2-Line Split Color Headline Matching Home Hero Exactly */
@@ -1001,6 +1003,37 @@
   width: 100%;
 }
 
+.kz-map-click-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+  text-decoration: none;
+}
+
+.kz-map-badge-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  color: #AA2D7B;
+  border: 1px solid rgba(170, 45, 123, 0.25);
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: all 0.2s ease;
+}
+
+.kz-map-click-overlay:hover .kz-map-badge-hint {
+  background: #AA2D7B;
+  color: #FFFFFF;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(170, 45, 123, 0.35);
+}
+
 .kz-venue-card-footer {
   display: flex;
   flex-direction: column;
@@ -1210,4 +1243,66 @@
 .kz-cta-btn-outline:hover {
   background-color: rgba(255, 255, 255, 0.1);
   border-color: #FFFFFF;
+}
+
+/* Mobile Screens: Center Badges, Titles, Breadcrumbs, Pills & Quick Links */
+@media (max-width: 768px) {
+  .kz-contact-breadcrumb {
+    justify-content: center !important;
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .kz-hero-simple-content {
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: 100% !important;
+  }
+  .kz-contact-eyebrow-wrap {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin: 0 auto 16px auto !important;
+  }
+  .kz-hero-simple-badge {
+    margin: 0 auto !important;
+  }
+  .kz-contact-hero-headline,
+  .kz-hero-simple-title {
+    text-align: center !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  .kz-contact-hero-dark,
+  .kz-contact-hero-magenta {
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .kz-contact-pills-row {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 0 auto 22px auto !important;
+  }
+  .kz-contact-hero-description,
+  .kz-hero-simple-desc {
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .kz-contact-quick-links {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
 }

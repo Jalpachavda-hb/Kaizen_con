@@ -8,10 +8,12 @@ export default function ScrollToTop() {
     if (hash) {
       // Delay slightly to ensure DOM element exists if switching pages
       const timer = setTimeout(() => {
-        const el = document.querySelector(hash);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth' });
-        }
+        try {
+          const el = document.querySelector(hash);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+          }
+        } catch (_) {}
       }, 100);
       return () => clearTimeout(timer);
     } else {

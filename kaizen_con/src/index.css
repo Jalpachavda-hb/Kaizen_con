@@ -35,3 +35,77 @@ a {
 button {
   font-family: inherit;
 }
+
+/* ====================================================
+   UNIFIED PILL BADGE DESIGN ACROSS WHOLE WEBSITE
+   ==================================================== */
+.kz-badge-unified,
+.kz-tracks-pill,
+.kz-idea-pill,
+.kz-hero-badge,
+.kz-ai-pill-badge,
+.kz-live-intel-pill,
+.kz-knowledge-badge,
+.kz-speakers-pill-tag,
+.kz-nextgen-tagline,
+.kz-hero-simple-badge,
+.kz-spk-pill-badge,
+.kz-about-eyebrow-badge,
+.kz-story-badge,
+.kz-schedule-pill,
+.kz-section-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.8px !important;
+  color: #B8387A !important;
+  background: #FDF0F6 !important;
+  border: 1px solid rgba(216, 90, 154, 0.35) !important;
+  padding: 5px 16px !important;
+  border-radius: 9999px !important;
+  text-transform: uppercase !important;
+  box-shadow: 0 2px 8px rgba(184, 56, 122, 0.06) !important;
+  line-height: 1.3 !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+
+/* On mobile / phone screens: all section badges and titles centered */
+@media (max-width: 768px) {
+  .kz-hero-badge-wrapper,
+  .kz-tracks-badge-wrapper,
+  .kz-knowledge-badge-wrapper,
+  .kz-contact-eyebrow-wrap,
+  .kz-about-eyebrow-wrap,
+  .kz-story-eyebrow-wrap,
+  .kz-spk-pill-badge-wrap,
+  .kz-schedule-badge-row,
+  .kz-assistant-tag-wrap {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .kz-hero-badge,
+  .kz-tracks-pill,
+  .kz-idea-pill,
+  .kz-ai-pill-badge,
+  .kz-live-intel-pill,
+  .kz-knowledge-badge,
+  .kz-speakers-pill-tag,
+  .kz-nextgen-tagline,
+  .kz-hero-simple-badge,
+  .kz-spk-pill-badge,
+  .kz-about-eyebrow-badge,
+  .kz-story-badge,
+  .kz-schedule-pill,
+  .kz-section-badge {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}

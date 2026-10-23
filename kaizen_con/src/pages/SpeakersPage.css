@@ -61,16 +61,17 @@
 .kz-spk-pill-badge {
   display: inline-flex;
   align-items: center;
-  background-color: #FDF2F8;
-  border: 1px solid rgba(182, 52, 115, 0.28);
-  color: #B63473;
-  font-size: 0.74rem;
-  font-weight: 750;
-  letter-spacing: 0.12em;
+  background-color: #FDF0F6;
+  border: 1px solid rgba(216, 90, 154, 0.35);
+  color: #B8387A;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.8px;
   text-transform: uppercase;
   padding: 5px 16px;
-  border-radius: 999px;
-  box-shadow: 0 1px 4px rgba(182, 52, 115, 0.06);
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(184, 56, 122, 0.06);
 }
 
 /* Large Split-Color Headline matching Home Hero Typography */
@@ -639,16 +640,20 @@
 }
 
 .kz-spk-cta-badge {
-  display: inline-block;
-  background-color: #FDF2F8;
-  border: 1px solid rgba(182, 52, 115, 0.28);
-  color: #B63473;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #FDF0F6;
+  border: 1px solid rgba(216, 90, 154, 0.35);
+  color: #B8387A;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.72rem;
-  font-weight: 750;
-  letter-spacing: 0.12em;
+  font-weight: 700;
+  letter-spacing: 1.8px;
   text-transform: uppercase;
-  padding: 5px 16px;
-  border-radius: 999px;
+  padding: 6px 18px;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(184, 56, 122, 0.06);
   margin-bottom: 16px;
 }
 
@@ -716,5 +721,51 @@
   border-color: #B63473;
   color: #B63473;
   transform: translateY(-2px);
+}
+
+/* Mobile Screens: Center Badges, Titles, Breadcrumbs & Metrics Strip */
+@media (max-width: 768px) {
+  .kz-spk-breadcrumb {
+    justify-content: center !important;
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .kz-spk-pill-badge-wrap {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin: 0 auto 16px auto !important;
+  }
+  .kz-spk-pill-badge {
+    margin: 0 auto !important;
+  }
+  .kz-spk-hero-headline,
+  .kz-spk-section-title {
+    text-align: center !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  .kz-spk-hero-dark,
+  .kz-spk-hero-magenta {
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .kz-spk-hero-subtitle,
+  .kz-spk-hero-sub {
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .kz-spk-metrics-strip {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 0 auto 24px auto !important;
+  }
 }
 

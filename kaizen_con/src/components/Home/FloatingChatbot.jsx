@@ -128,7 +128,7 @@ export default function FloatingChatbot() {
                 />
               </div>
               <div className="kz-floating-header-text">
-                <h4 className="kz-floating-header-title">KaizenCon AI</h4>
+                <h4 className="kz-floating-header-title">KAI</h4>
                 <span className="kz-floating-header-sub">
                   <span className="kz-online-mini-dot" /> Conference Assistant · Online
                 </span>

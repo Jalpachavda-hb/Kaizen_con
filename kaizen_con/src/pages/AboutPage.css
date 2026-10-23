@@ -97,16 +97,17 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background-color: #FDF2F8;
-  border: 1px solid rgba(182, 52, 115, 0.28);
-  color: #B63473;
-  font-size: 0.74rem;
-  font-weight: 750;
-  letter-spacing: 0.12em;
+  background-color: #FDF0F6;
+  border: 1px solid rgba(216, 90, 154, 0.35);
+  color: #B8387A;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.8px;
   text-transform: uppercase;
   padding: 5px 16px;
-  border-radius: 999px;
-  box-shadow: 0 1px 4px rgba(182, 52, 115, 0.06);
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(184, 56, 122, 0.06);
 }
 
 .kz-about-badge-sparkle {
@@ -376,16 +377,17 @@
 
 .kz-story-badge {
   display: inline-block;
-  background: #FFFFFF;
-  border: 1.5px solid rgba(182, 52, 115, 0.45);
-  color: #B63473;
-  font-size: 0.74rem;
-  font-weight: 750;
-  letter-spacing: 0.12em;
+  background: #FDF0F6;
+  border: 1px solid rgba(216, 90, 154, 0.35);
+  color: #B8387A;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.8px;
   text-transform: uppercase;
   padding: 5px 16px;
-  border-radius: 999px;
-  box-shadow: 0 1px 4px rgba(182, 52, 115, 0.05);
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(184, 56, 122, 0.06);
 }
 
 .kz-story-heading {
@@ -2123,4 +2125,59 @@
   background: rgba(255, 255, 255, 0.18);
   border-color: rgba(255, 255, 255, 0.6);
   transform: translateY(-2px);
+}
+
+/* Mobile Screens: Center Badges, Titles, Breadcrumbs, Pills & Actions */
+@media (max-width: 768px) {
+  .kz-about-breadcrumb {
+    justify-content: center !important;
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .kz-about-eyebrow-wrap,
+  .kz-story-eyebrow-wrap {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin: 0 auto 16px auto !important;
+  }
+  .kz-about-eyebrow-badge,
+  .kz-story-badge {
+    margin: 0 auto !important;
+  }
+  .kz-about-hero-headline,
+  .kz-story-title {
+    text-align: center !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  .kz-about-hero-dark,
+  .kz-about-hero-magenta {
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .kz-about-pills-row {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 0 auto 22px auto !important;
+  }
+  .kz-about-hero-description,
+  .kz-story-desc {
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .kz-about-hero-actions {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
 }
