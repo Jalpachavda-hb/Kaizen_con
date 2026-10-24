@@ -32,6 +32,20 @@ a {
   color: inherit;
 }
 
+a:hover {
+  color: inherit;
+}
+
+p {
+  margin-bottom: 0;
+}
+
+ul, ol {
+  padding-left: 0;
+  margin-bottom: 0;
+  list-style: none;
+}
+
 button {
   font-family: inherit;
 }
