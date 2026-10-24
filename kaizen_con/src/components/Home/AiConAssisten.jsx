@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './AiConAssisten.css';
+import { askKnowledgeChat } from '../../Apipath';
 
 // Preset conversation data matching the theme & conference intelligence
 const PRESET_CONVERSATIONS = {
@@ -135,9 +136,9 @@ export default function AiConAssisten() {
   };
 
   // Handle custom query submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || isTyping) return;
 
     const userQuery = inputValue.trim();
     setInputValue('');
@@ -146,38 +147,41 @@ export default function AiConAssisten() {
 
     const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    setCurrentChat((prev) => ({
-      ...prev,
+    setCurrentChat({
       userText: userQuery,
       userTime: now,
-    }));
+      aiText: '',
+      aiTime: '',
+      sources: [],
+      sessions: [],
+    });
 
-    setTimeout(() => {
+    try {
+      const data = await askKnowledgeChat(userQuery);
+      const reply = data?.answer || "I couldn't find this information in the available knowledge base.";
+      const sources = Array.isArray(data?.sources) ? data.sources : [];
+
       setCurrentChat({
         userText: userQuery,
         userTime: now,
-        aiText: `Regarding "${userQuery}": KaizenCon 2027 covers this extensively across keynotes, panels, and live workshops. Below are the most relevant approved sessions tailored to your query:`,
+        aiText: reply,
         aiTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        sessions: [
-          {
-            time: 'Day 1 · Keynote',
-            title: `Advancements in ${userQuery.slice(0, 26)}`,
-            venue: 'Main Auditorium',
-          },
-          {
-            time: 'Day 2 · Demonstration',
-            title: 'Clinical Implementation & Outcomes',
-            venue: 'Hall B',
-          },
-          {
-            time: 'Day 3 · Masterclass',
-            title: 'Surgical Data Science & Ethics',
-            venue: 'Hall C',
-          },
-        ],
+        sources: sources,
+        sessions: [],
       });
+    } catch (error) {
+      console.error('Error in chatbot API call:', error);
+      setCurrentChat({
+        userText: userQuery,
+        userTime: now,
+        aiText: "I'm having trouble connecting to the conference intelligence assistant right now. Please try again shortly.",
+        aiTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        sources: [],
+        sessions: [],
+      });
+    } finally {
       setIsTyping(false);
-    }, 600);
+    }
   };
 
   return (
@@ -431,6 +435,20 @@ export default function AiConAssisten() {
                   ) : (
                     <>
                       <p className="kz-ai-text">{currentChat.aiText}</p>
+                      {currentChat.sources && currentChat.sources.length > 0 && (
+                        <div className="kz-chat-sources-container">
+                          <span className="kz-chat-sources-label">Sources:</span>
+                          <div className="kz-chat-sources-pills">
+                            {currentChat.sources.map((src, sIdx) => (
+                              <span key={sIdx} className="kz-chat-source-item">
+                                {src.document || 'Document'}
+                                {src.section ? ` · ${src.section}` : ''}
+                                {src.page !== undefined && src.page !== null ? ` (p. ${src.page})` : ''}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                       <span className="kz-ai-time">{currentChat.aiTime}</span>
 
                       {/* 3 Recommended Session Cards - 3 Horizontal Rows */}

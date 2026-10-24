@@ -1,11 +1,13 @@
 // Base API Configuration
 export const BASE_URL = 'http://192.168.29.201:8000';
+// export const BASE_URL = 'https://34g3qd2p-8000.inc1.devtunnels.ms';
 export const API_BASE_URL = `${BASE_URL}/api`;
 
 // API Endpoints
 export const API_ENDPOINTS = {
   SPEAKERS: `${API_BASE_URL}/speakers`,
   SCHEDULES: `${API_BASE_URL}/schedules`,
+  KNOWLEDGE_CHAT: 'https://kaizencondemo2027-1.onrender.com/api/knowledge/chat',
 };
 
 /**
@@ -123,6 +125,37 @@ export const getSchedules = async (params = {}) => {
   }
 };
 
+/**
+ * Call the KaizenCon AI Knowledge Chat API
+ * Endpoint: POST https://kaizencondemo2027-1.onrender.com/api/knowledge/chat
+ * Payload: { "question": string }
+ *
+ * @param {string} question - Question to ask the knowledge assistant
+ * @returns {Promise<{ answer: string, sources: Array<{ document: string, page: number, section: string }> }>}
+ */
+export const askKnowledgeChat = async (question) => {
+  try {
+    const response = await fetch(API_ENDPOINTS.KNOWLEDGE_CHAT, {
+      method: 'POST',
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ question: question || '' }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Chat API request failed with status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error in askKnowledgeChat:', error);
+    throw error;
+  }
+};
+
 export default {
   BASE_URL,
   API_BASE_URL,
@@ -130,4 +163,5 @@ export default {
   getImageUrl,
   getSpeakers,
   getSchedules,
+  askKnowledgeChat,
 };

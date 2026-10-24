@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './AiExperiencePage.css';
+import { askKnowledgeChat } from '../Apipath';
 
 // Preset queries for Section 02 AI Assistant
 const ASSISTANT_PRESETS = [
@@ -226,9 +227,9 @@ export default function AiExperiencePage() {
   };
 
   // Handle Custom Question in Assistant
-  const handleChatSubmit = (e) => {
+  const handleChatSubmit = async (e) => {
     e.preventDefault();
-    if (!chatInput.trim()) return;
+    if (!chatInput.trim() || isAssistantTyping) return;
 
     const userText = chatInput.trim();
     setChatInput('');
@@ -242,34 +243,36 @@ export default function AiExperiencePage() {
       { sender: 'user', text: userText, time: now },
     ]);
 
-    setTimeout(() => {
+    try {
+      const data = await askKnowledgeChat(userText);
+      const reply = data?.answer || "I couldn't find this information in the available knowledge base.";
+      const sources = Array.isArray(data?.sources) ? data.sources : [];
+
       setChatMessages((prev) => [
         ...prev,
         {
           sender: 'ai',
-          text: `Regarding "${userText}": KaizenCon 2027 covers this extensively. Our clinical indexing matches your query to 3 verified programme items:`,
+          text: reply,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          sessions: [
-            {
-              time: 'Day 1 · Keynote',
-              title: `Clinical Perspectives: ${userText.slice(0, 32)}`,
-              venue: 'Main Auditorium',
-            },
-            {
-              time: 'Day 2 · Demonstration',
-              title: 'Live Surgical Simulation & Data Validation',
-              venue: 'Hall B',
-            },
-            {
-              time: 'Day 3 · Panel',
-              title: 'Expert Consensus & Technical Guidelines',
-              venue: 'Hall C',
-            },
-          ],
+          sources: sources,
+          sessions: [],
         },
       ]);
+    } catch (error) {
+      console.error('Error fetching chatbot response:', error);
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          sender: 'ai',
+          text: "I'm having trouble connecting to the conference intelligence assistant right now. Please try again shortly.",
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          sources: [],
+          sessions: [],
+        },
+      ]);
+    } finally {
       setIsAssistantTyping(false);
-    }, 550);
+    }
   };
 
   // Handle Live Question Submit

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './FloatingChatbot.css';
 import chatbotImg from '../../assets/home/chatbot.png';
+import { askKnowledgeChat } from '../../Apipath';
 
 export default function FloatingChatbot() {
   const navigate = useNavigate();
@@ -10,7 +11,8 @@ export default function FloatingChatbot() {
     {
       sender: 'bot',
       text: 'Hello! I am the KaizenCon 2027 AI Assistant. How can I help you today with the scientific programme, speakers, or registration?',
-      time: '10:00 AM'
+      time: '10:00 AM',
+      sources: []
     }
   ]);
   const [inputMsg, setInputMsg] = useState('');
@@ -24,9 +26,9 @@ export default function FloatingChatbot() {
     }
   }, [messages, isOpen, isTyping]);
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!inputMsg.trim()) return;
+    if (!inputMsg.trim() || isTyping) return;
 
     const userText = inputMsg.trim();
     const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -35,45 +37,70 @@ export default function FloatingChatbot() {
     setInputMsg('');
     setIsTyping(true);
 
-    setTimeout(() => {
-      let reply = "Thank you for asking! KaizenCon 2027 takes place 1–3 January 2027 at the Hyatt Regency in Ahmedabad, India. You can explore the Scientific Programme, Faculty list, and registration on this website.";
-      const lower = userText.toLowerCase();
+    try {
+      const data = await askKnowledgeChat(userText);
+      const reply = data?.answer || "I couldn't find this information in the available knowledge base.";
+      const sources = Array.isArray(data?.sources) ? data.sources : [];
 
-      if (lower.includes('date') || lower.includes('when')) {
-        reply = "KaizenCon 2027 is scheduled from 1–3 January 2027 at the Hyatt Regency, Ahmedabad, India.";
-      } else if (lower.includes('venue') || lower.includes('where') || lower.includes('location')) {
-        reply = "The conference venue is the Hyatt Regency, Ashram Road, Ahmedabad, Gujarat, India.";
-      } else if (lower.includes('register') || lower.includes('fee') || lower.includes('cost') || lower.includes('ticket')) {
-        reply = "Registrations are open! Early-bird rates are available for surgeons, trainees, and healthcare professionals.";
-      } else if (lower.includes('speaker') || lower.includes('faculty') || lower.includes('who')) {
-        reply = "We have 150+ international and national faculty leading discussions on surgical robotics, AI precision models, and clinical trials.";
-      } else if (lower.includes('programme') || lower.includes('schedule') || lower.includes('agenda')) {
-        reply = "The 3-day programme includes Live Robotic GI Surgeries, HPB Masterclasses, Computer Vision workshops, and Hands-on Simulator labs.";
-      }
-
-      setMessages((prev) => [...prev, { sender: 'bot', text: reply, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: 'bot',
+          text: reply,
+          sources: sources,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
+    } catch (error) {
+      console.error('Error fetching chatbot response:', error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: 'bot',
+          text: "I'm having trouble connecting to the conference intelligence assistant right now. Please try again shortly.",
+          sources: [],
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
+    } finally {
       setIsTyping(false);
-    }, 600);
+    }
   };
 
-  const handleQuickQuestion = (question) => {
+  const handleQuickQuestion = async (question) => {
+    if (isTyping) return;
     const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     setMessages((prev) => [...prev, { sender: 'user', text: question, time: timeStr }]);
     setIsTyping(true);
 
-    setTimeout(() => {
-      let reply = "";
-      if (question.includes('Programme')) {
-        reply = "The programme covers Robotic GI Surgery, HPB Masterclasses, AI Surgical Models, and Hands-on Simulation labs.";
-      } else if (question.includes('Venue')) {
-        reply = "Hosted at the Hyatt Regency, Ashram Road, Ahmedabad, India — conveniently connected to Sardar Vallabhbhai Patel International Airport.";
-      } else {
-        reply = "Online delegate registration includes access to all scientific tracks, surgical video sessions, simulator hubs, and delegate kits.";
-      }
+    try {
+      const data = await askKnowledgeChat(question);
+      const reply = data?.answer || "I couldn't find this information in the available knowledge base.";
+      const sources = Array.isArray(data?.sources) ? data.sources : [];
 
-      setMessages((prev) => [...prev, { sender: 'bot', text: reply, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: 'bot',
+          text: reply,
+          sources: sources,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
+    } catch (error) {
+      console.error('Error fetching chatbot response:', error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: 'bot',
+          text: "I'm having trouble connecting to the conference intelligence assistant right now. Please try again shortly.",
+          sources: [],
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
+    } finally {
       setIsTyping(false);
-    }, 500);
+    }
   };
 
   return (
@@ -160,6 +187,18 @@ export default function FloatingChatbot() {
                 )}
                 <div className="kz-floating-bubble">
                   <p className="kz-bubble-text">{m.text}</p>
+                  {m.sources && m.sources.length > 0 && (
+                    <div className="kz-floating-sources">
+                      <span className="kz-sources-label">Sources:</span>
+                      {m.sources.map((src, sIdx) => (
+                        <span key={sIdx} className="kz-source-tag">
+                          {src.document || 'Doc'}
+                          {src.section ? ` · ${src.section}` : ''}
+                          {src.page !== undefined && src.page !== null ? ` (p. ${src.page})` : ''}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   {m.time && <span className="kz-bubble-time">{m.time}</span>}
                 </div>
               </div>

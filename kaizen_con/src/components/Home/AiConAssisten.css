@@ -1318,3 +1318,42 @@
     text-align: center !important;
   }
 }
+
+/* Chat Assistant Verified Sources */
+.kz-chat-sources-container {
+  margin-top: 12px;
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  background: #fdf5f9;
+  border-radius: 10px;
+  border: 1px solid rgba(184, 56, 122, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kz-chat-sources-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8b3c6c;
+}
+
+.kz-chat-sources-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.kz-chat-source-item {
+  font-size: 0.76rem;
+  background: #ffffff;
+  color: #55355e;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(139, 60, 108, 0.22);
+  display: inline-block;
+  line-height: 1.4;
+  font-weight: 500;
+}
