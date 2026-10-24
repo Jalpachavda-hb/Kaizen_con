@@ -119,6 +119,7 @@ export default function AiConAssisten() {
   const [currentChat, setCurrentChat] = useState(PRESET_CONVERSATIONS.day2);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const chatFeedRef = React.useRef(null);
 
   // Switch preset conversation
   const handleSelectPreset = (key) => {
@@ -127,6 +128,9 @@ export default function AiConAssisten() {
     setTimeout(() => {
       setCurrentChat(PRESET_CONVERSATIONS[key]);
       setIsTyping(false);
+      if (chatFeedRef.current) {
+        chatFeedRef.current.scrollTop = 0;
+      }
     }, 240);
   };
 
@@ -382,7 +386,7 @@ export default function AiConAssisten() {
             </div>
 
             {/* Chat Conversation Feed */}
-            <div className="kz-chat-feed">
+            <div className="kz-chat-feed" ref={chatFeedRef}>
               {/* User Bubble (Right) */}
               <div className="kz-user-msg-group">
                 <div className="kz-user-bubble">

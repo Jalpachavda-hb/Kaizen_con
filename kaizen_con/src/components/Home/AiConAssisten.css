@@ -328,7 +328,29 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  min-height: 440px;
+  height: 480px;
+  max-height: 480px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+
+.kz-chat-feed::-webkit-scrollbar {
+  width: 6px;
+}
+
+.kz-chat-feed::-webkit-scrollbar-track {
+  background: #faf8fb;
+}
+
+.kz-chat-feed::-webkit-scrollbar-thumb {
+  background: rgba(85, 53, 94, 0.2);
+  border-radius: 4px;
+}
+
+.kz-chat-feed::-webkit-scrollbar-thumb:hover {
+  background: rgba(85, 53, 94, 0.35);
 }
 
 /* User Message */
@@ -337,6 +359,8 @@
   justify-content: flex-end;
   align-items: flex-start;
   gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .kz-user-bubble {
@@ -346,6 +370,7 @@
   padding: 12px 18px;
   max-width: 82%;
   box-shadow: 0 2px 8px rgba(85, 53, 94, 0.04);
+  box-sizing: border-box;
 }
 
 .kz-user-text {
@@ -354,6 +379,8 @@
   color: #1e1b2e;
   line-height: 1.45;
   margin: 0 0 4px 0;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 .kz-user-meta {
@@ -393,6 +420,9 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .kz-ai-avatar {
@@ -415,7 +445,11 @@
   border-radius: 4px 18px 18px 18px;
   padding: 20px 22px;
   box-shadow: 0 4px 16px rgba(85, 53, 94, 0.04);
-  max-width: 90%;
+  flex: 1;
+  min-width: 0;
+  max-width: calc(100% - 48px);
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .kz-ai-text {
@@ -423,6 +457,8 @@
   color: #1f2937;
   line-height: 1.6;
   margin: 0 0 10px 0;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 .kz-ai-time {
@@ -919,11 +955,29 @@
 
 @media (max-width: 768px) {
   .kz-assistant-section {
-    padding: 50px 0 60px 0;
+    padding: 40px 0 50px 0;
+    overflow: hidden;
   }
 
   .kz-assistant-container {
-    padding: 0 20px;
+    padding: 0 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .kz-assistant-workspace {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    gap: 32px;
+  }
+
+  .kz-chat-wrapper {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 16px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .kz-assistant-pills-row {
@@ -932,7 +986,7 @@
     overflow-x: visible;
     gap: 8px;
     padding-bottom: 0;
-    margin-bottom: 22px;
+    margin-bottom: 20px;
   }
   .kz-assistant-pills-row::-webkit-scrollbar {
     display: none;
@@ -941,9 +995,9 @@
   .kz-assistant-pill-btn {
     white-space: normal;
     text-align: center;
-    font-size: 0.8rem;
-    padding: 8px 14px;
-    line-height: 1.35;
+    font-size: 0.78rem;
+    padding: 7px 12px;
+    line-height: 1.3;
   }
 
   .kz-intel-layout {
@@ -957,21 +1011,218 @@
   }
 
   .kz-chat-header {
-    padding: 14px 18px;
+    padding: 12px 14px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
+  .kz-chat-ai-badge {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+  }
+
+  .kz-chat-ai-badge svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .kz-chat-header-right .kz-chat-soundwaves {
+    display: none;
+  }
+
+  /* Internal Chat Feed Scrolling: Pinned header & input, scrollable messages */
   .kz-chat-feed {
-    padding: 18px 14px;
-    min-height: 380px;
+    padding: 14px 10px;
+    height: 380px;
+    max-height: 52vh;
+    min-height: 280px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 14px;
   }
 
-  .kz-ai-bubble-box {
-    max-width: 100%;
-    padding: 16px;
+  /* User Message */
+  .kz-user-msg-group {
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .kz-user-bubble {
-    max-width: 90%;
+    max-width: 86%;
+    padding: 10px 14px;
+    box-sizing: border-box;
+  }
+
+  .kz-user-text {
+    font-size: 0.88rem;
+  }
+
+  /* AI Message: Ensure avatar + bubble never overflow feed */
+  .kz-ai-msg-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .kz-ai-avatar {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    flex-shrink: 0;
+  }
+
+  .kz-ai-avatar svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .kz-ai-bubble-box {
+    flex: 1 1 0%;
+    min-width: 0;
+    max-width: calc(100% - 40px);
+    padding: 12px 12px;
+    box-sizing: border-box;
+    overflow: hidden;
+    border-radius: 4px 14px 14px 14px;
+  }
+
+  .kz-ai-text {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    margin: 0 0 8px 0;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+
+  .kz-ai-time {
+    font-size: 0.7rem;
+    margin-bottom: 10px;
+  }
+
+  /* Recommendation Cards */
+  .kz-session-cards-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .kz-session-card {
+    padding: 8px 10px;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .kz-session-card-left {
+    min-width: 0;
+    flex: 1 1 0%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+  }
+
+  .kz-session-icon-box {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    flex-shrink: 0;
+  }
+
+  .kz-session-icon-box svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .kz-session-main {
+    min-width: 0;
+    flex: 1 1 0%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .kz-session-title {
+    font-size: 0.82rem;
+    line-height: 1.3;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+
+  .kz-session-meta {
+    flex-wrap: wrap;
+    gap: 3px 6px;
+    font-size: 0.68rem;
+  }
+
+  .kz-session-time svg,
+  .kz-session-venue svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  .kz-session-action {
+    flex-shrink: 0;
+  }
+
+  .kz-session-arrow {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+  }
+
+  .kz-session-arrow svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* Chat Bottom Input Bar */
+  .kz-chat-input-bar {
+    padding: 10px 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .kz-chat-input-form {
+    padding: 4px 6px 4px 8px;
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .kz-chat-attach-btn {
+    padding: 2px;
+    flex-shrink: 0;
+  }
+
+  .kz-chat-text-input {
+    min-width: 0;
+    flex: 1 1 0%;
+    font-size: 0.82rem;
+    padding: 4px 0;
+  }
+
+  .kz-chat-send-btn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    flex-shrink: 0;
   }
 
   .kz-intel-card {
@@ -985,29 +1236,60 @@
 }
 
 @media (max-width: 480px) {
-  .kz-chat-header-right .kz-chat-soundwaves {
-    display: none;
+  .kz-assistant-section {
+    padding: 30px 0 40px 0;
   }
+
+  .kz-assistant-container {
+    padding: 0 8px;
+  }
+
+  .kz-chat-feed {
+    padding: 12px 8px;
+    height: 370px;
+    max-height: 50vh;
+    min-height: 260px;
+  }
+
   .kz-chat-ai-name {
-    font-size: 0.95rem;
+    font-size: 0.92rem;
   }
+
   .kz-assistant-title {
-    font-size: 1.8rem;
+    font-size: 1.7rem;
   }
+
   .kz-intel-title {
-    font-size: 1.8rem;
+    font-size: 1.7rem;
   }
+
+  .kz-ai-bubble-box {
+    padding: 10px 10px;
+  }
+
   .kz-session-card {
-    padding: 9px 12px;
-    gap: 10px;
+    padding: 7px 8px;
+    gap: 6px;
   }
+
+  .kz-session-card-left {
+    gap: 6px;
+  }
+
   .kz-session-icon-box {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
   }
+
+  .kz-session-title {
+    font-size: 0.8rem;
+  }
+
   .kz-session-arrow {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
   }
 }
 
