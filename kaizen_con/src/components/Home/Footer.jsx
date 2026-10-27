@@ -103,7 +103,6 @@ export default function Footer() {
             <li><a href="/about" onClick={(e) => handleFooterNav(e, '/about')}>About KaizenCon</a></li>
             <li><a href="/programme" onClick={(e) => handleFooterNav(e, '/programme')}>Programme</a></li>
             <li><a href="/speakers" onClick={(e) => handleFooterNav(e, '/speakers')}>Speakers</a></li>
-            <li><a href="/qa" onClick={(e) => handleFooterNav(e, '/qa')}>Live Q&amp;A</a></li>
             <li><a href="/#venue" onClick={(e) => handleFooterNav(e, '/#venue')}>Venue &amp; Travel</a></li>
             <li><a href="/#registration" onClick={(e) => handleFooterNav(e, '/#registration')}>Registration</a></li>
             <li><a href="/contact" onClick={(e) => handleFooterNav(e, '/contact')}>Contact Us</a></li>
@@ -119,7 +118,6 @@ export default function Footer() {
             <li><a href="/ai-experience" onClick={(e) => handleFooterNav(e, '/ai-experience')}>The AI Experience</a></li>
             <li><a href="/ai-experience#personalization" onClick={(e) => handleFooterNav(e, '/ai-experience#personalization')}>AI Personalization</a></li>
             <li><a href="/ai-experience#assistant" onClick={(e) => handleFooterNav(e, '/ai-experience#assistant')}>Conference Assistant</a></li>
-            <li><a href="/qa" onClick={(e) => handleFooterNav(e, '/qa')}>Live Q&amp;A Intelligence</a></li>
             <li><a href="/ai-experience#perspectives" onClick={(e) => handleFooterNav(e, '/ai-experience#perspectives')}>AI Perspectives</a></li>
             <li><a href="/knowledge" onClick={(e) => handleFooterNav(e, '/knowledge')}>Conference Knowledge</a></li>
           </ul>
