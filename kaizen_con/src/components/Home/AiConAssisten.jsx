@@ -158,8 +158,17 @@ export default function AiConAssisten() {
 
     try {
       const data = await askKnowledgeChat(userQuery);
-      const reply = data?.answer || "I couldn't find this information in the available knowledge base.";
-      const sources = Array.isArray(data?.sources) ? data.sources : [];
+      const reply =
+        data?.answer ||
+        (Array.isArray(data?.results) && (data.results[0]?.answer || data.results[0]?.text || data.results[0]?.response)) ||
+        data?.result?.answer ||
+        "I couldn't find this information in the available knowledge base.";
+      const sources = Array.isArray(data?.sources)
+        ? data.sources
+        : (Array.isArray(data?.results?.[0]?.sources) ? data.results[0].sources : []);
+      const sessions = Array.isArray(data?.sessions)
+        ? data.sessions
+        : (Array.isArray(data?.results?.[0]?.sessions) ? data.results[0].sessions : []);
 
       setCurrentChat({
         userText: userQuery,
@@ -167,7 +176,7 @@ export default function AiConAssisten() {
         aiText: reply,
         aiTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         sources: sources,
-        sessions: [],
+        sessions: sessions,
       });
     } catch (error) {
       console.error('Error in chatbot API call:', error);

@@ -12,6 +12,7 @@ const navItems = [
   { id: 'speakers', label: 'Speakers', href: '/speakers' },
   { id: 'ai-experience', label: 'AI Experience', href: '/ai-experience' },
   { id: 'knowledge', label: 'Knowledge', href: '/knowledge' },
+  { id: 'qa', label: 'Q&A', href: '/qa' },
   { id: 'contact', label: 'Contact Us', href: '/contact' },
 ];
 
@@ -35,6 +36,8 @@ export default function Navbar() {
       setActiveItem('AI Experience');
     } else if (location.pathname === '/knowledge' || location.pathname === '/knowledge-base') {
       setActiveItem('Knowledge');
+    } else if (location.pathname === '/qa' || location.pathname === '/q-a' || location.pathname === '/qna') {
+      setActiveItem('Q&A');
     } else if (location.hash) {
       if (location.hash === '#programme' || location.hash === '#tracks') {
         setActiveItem('Programme');
@@ -114,6 +117,11 @@ export default function Navbar() {
 
     if (href === '/knowledge' || href === '/knowledge-base') {
       navigate('/knowledge');
+      return;
+    }
+
+    if (href === '/qa' || href === '/q-a' || href === '/qna') {
+      navigate('/qa');
       return;
     }
 

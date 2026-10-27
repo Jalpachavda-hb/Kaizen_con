@@ -262,6 +262,25 @@
   margin: 0;
 }
 
+.kz-footer-legal-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.kz-footer-legal-link {
+  font-size: 0.84rem;
+  color: #64748b;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.kz-footer-legal-link:hover {
+  color: #AA2D7B;
+  text-decoration: underline;
+}
+
 .kz-footer-disclaimer-text {
   font-size: 0.76rem;
   color: #94a3b8;

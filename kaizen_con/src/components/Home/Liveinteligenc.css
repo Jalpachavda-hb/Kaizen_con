@@ -380,24 +380,34 @@
 }
 
 /* Option Percentage and Votes */
+.kz-poll-card .kz-poll-meta,
 .kz-poll-meta {
   text-align: right;
   min-width: 72px;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
   line-height: 1.15;
 }
 
+.kz-poll-card .kz-poll-percentage,
 .kz-poll-percentage {
   font-size: 1.05rem;
   font-weight: 800;
   color: #35153F;
+  line-height: 1.15;
 }
 
+.kz-poll-card .kz-poll-votes-count,
 .kz-poll-votes-count {
   font-size: 0.76rem;
   color: #8A7693;
   font-weight: 500;
   margin-top: 3px;
+  line-height: 1.15;
+  white-space: nowrap;
 }
 
 /* ====================================================

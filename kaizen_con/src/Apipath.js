@@ -150,7 +150,58 @@ export const askKnowledgeChat = async (question) => {
     }
 
     const data = await response.json();
-    return data;
+
+    // Extract answer, sources, sessions from various response shapes:
+    // Shape 1 (Live API): { results: [ { answer: "...", sources?: [...] } ] }
+    // Shape 2: { answer: "...", sources: [...] }
+    // Shape 3: { results: { answer: "..." } }
+    // Shape 4: { data: [ { answer: "..." } ] }
+    let extractedAnswer = '';
+    let extractedSources = [];
+    let extractedSessions = [];
+
+    if (Array.isArray(data?.results) && data.results.length > 0) {
+      const firstResult = data.results[0];
+      if (typeof firstResult === 'string') {
+        extractedAnswer = firstResult;
+      } else if (firstResult && typeof firstResult === 'object') {
+        extractedAnswer = firstResult.answer || firstResult.text || firstResult.response || firstResult.content || '';
+        extractedSources = Array.isArray(firstResult.sources) ? firstResult.sources : [];
+        extractedSessions = Array.isArray(firstResult.sessions) ? firstResult.sessions : [];
+      }
+    } else if (data?.results && typeof data.results === 'object') {
+      extractedAnswer = data.results.answer || data.results.text || data.results.response || '';
+      extractedSources = Array.isArray(data.results.sources) ? data.results.sources : [];
+      extractedSessions = Array.isArray(data.results.sessions) ? data.results.sessions : [];
+    } else if (Array.isArray(data?.data) && data.data.length > 0) {
+      const firstData = data.data[0];
+      if (typeof firstData === 'string') {
+        extractedAnswer = firstData;
+      } else if (firstData && typeof firstData === 'object') {
+        extractedAnswer = firstData.answer || firstData.text || firstData.response || '';
+        extractedSources = Array.isArray(firstData.sources) ? firstData.sources : [];
+        extractedSessions = Array.isArray(firstData.sessions) ? firstData.sessions : [];
+      }
+    }
+
+    if (!extractedAnswer) {
+      extractedAnswer = data?.answer || data?.text || data?.response || '';
+    }
+
+    if (extractedSources.length === 0 && Array.isArray(data?.sources)) {
+      extractedSources = data.sources;
+    }
+
+    if (extractedSessions.length === 0 && Array.isArray(data?.sessions)) {
+      extractedSessions = data.sessions;
+    }
+
+    return {
+      ...data,
+      answer: extractedAnswer,
+      sources: extractedSources,
+      sessions: extractedSessions,
+    };
   } catch (error) {
     console.error('Error in askKnowledgeChat:', error);
     throw error;

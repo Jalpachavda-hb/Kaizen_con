@@ -11,6 +11,8 @@ import KnowledgePage from './pages/KnowledgePage';
 import AboutPage from './pages/AboutPage';
 import AiExperiencePage from './pages/AiExperiencePage';
 import ProgrammePage from './pages/ProgrammePage';
+import QaPage from './pages/QaPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import './components/Global.css';
 
 function App() {
@@ -36,8 +38,13 @@ function App() {
           <Route path="/ai" element={<AiExperiencePage />} />
           <Route path="/knowledge" element={<KnowledgePage />} />
           <Route path="/knowledge-base" element={<KnowledgePage />} />
+          <Route path="/qa" element={<QaPage />} />
+          <Route path="/q-a" element={<QaPage />} />
+          <Route path="/qna" element={<QaPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/contact-us" element={<ContactPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
           {/* Fallback route back to home */}
           <Route path="*" element={<HomePage />} />
         </Routes>

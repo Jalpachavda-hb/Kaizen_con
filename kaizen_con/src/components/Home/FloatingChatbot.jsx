@@ -39,8 +39,14 @@ export default function FloatingChatbot() {
 
     try {
       const data = await askKnowledgeChat(userText);
-      const reply = data?.answer || "I couldn't find this information in the available knowledge base.";
-      const sources = Array.isArray(data?.sources) ? data.sources : [];
+      const reply =
+        data?.answer ||
+        (Array.isArray(data?.results) && (data.results[0]?.answer || data.results[0]?.text || data.results[0]?.response)) ||
+        data?.result?.answer ||
+        "I couldn't find this information in the available knowledge base.";
+      const sources = Array.isArray(data?.sources)
+        ? data.sources
+        : (Array.isArray(data?.results?.[0]?.sources) ? data.results[0].sources : []);
 
       setMessages((prev) => [
         ...prev,
@@ -75,8 +81,14 @@ export default function FloatingChatbot() {
 
     try {
       const data = await askKnowledgeChat(question);
-      const reply = data?.answer || "I couldn't find this information in the available knowledge base.";
-      const sources = Array.isArray(data?.sources) ? data.sources : [];
+      const reply =
+        data?.answer ||
+        (Array.isArray(data?.results) && (data.results[0]?.answer || data.results[0]?.text || data.results[0]?.response)) ||
+        data?.result?.answer ||
+        "I couldn't find this information in the available knowledge base.";
+      const sources = Array.isArray(data?.sources)
+        ? data.sources
+        : (Array.isArray(data?.results?.[0]?.sources) ? data.results[0].sources : []);
 
       setMessages((prev) => [
         ...prev,
