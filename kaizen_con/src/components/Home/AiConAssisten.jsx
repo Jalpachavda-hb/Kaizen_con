@@ -355,7 +355,7 @@ export default function AiConAssisten() {
                   </svg>
                 </div>
                 <div className="kz-chat-ai-info">
-                  <span className="kz-chat-ai-name">KaizenCon AI</span>
+                  <span className="kz-chat-ai-name">KAI Assistant</span>
                   <span className="kz-chat-ai-status">
                     <span className="kz-chat-status-dot" />
                     Conference Assistant · Online

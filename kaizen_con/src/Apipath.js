@@ -1,6 +1,6 @@
 // Base API Configuration
-export const BASE_URL = 'http://192.168.29.201:8000';
-// export const BASE_URL = 'https://34g3qd2p-8000.inc1.devtunnels.ms';
+// export const BASE_URL = 'http://192.168.29.201:8000';
+export const BASE_URL = 'https://34g3qd2p-8000.inc1.devtunnels.ms';
 export const API_BASE_URL = `${BASE_URL}/api`;
 
 // API Endpoints
@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
   SPEAKERS: `${API_BASE_URL}/speakers`,
   SCHEDULES: `${API_BASE_URL}/schedules`,
   KNOWLEDGE_CHAT: 'https://kaizencondemo2027-1.onrender.com/api/knowledge/chat',
+  EMAIL_AGENT_CONTACTS: `${BASE_URL}/api/v1/email-agent/contacts`,
 };
 
 /**
@@ -156,6 +157,107 @@ export const askKnowledgeChat = async (question) => {
   }
 };
 
+/**
+ * Get Email Agent Contacts API
+ * Endpoint: GET {BASE_URL}/api/v1/email-agent/contacts?offset=0&limit=100
+ *
+ * @param {number} [offset=0]
+ * @param {number} [limit=100]
+ * @returns {Promise<any[]>}
+ */
+export const getEmailAgentContacts = async (offset = 0, limit = 100) => {
+  try {
+    const url = `${API_ENDPOINTS.EMAIL_AGENT_CONTACTS}?offset=${encodeURIComponent(offset)}&limit=${encodeURIComponent(limit)}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const errorMsg = data?.detail || data?.message || `Request failed with status ${response.status}`;
+      throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+    }
+
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.value)) return data.value;
+    if (data && Array.isArray(data.results)) return data.results;
+    return [];
+  } catch (error) {
+    console.error('Error in getEmailAgentContacts API:', error);
+    throw error;
+  }
+};
+
+/**
+ * Stop Contact API
+ * Endpoint: POST {BASE_URL}/api/v1/email-agent/contacts/{contact_id}/stop
+ *
+ * @param {string} contactId
+ * @returns {Promise<any>}
+ */
+export const stopContact = async (contactId) => {
+  try {
+    const url = `${API_ENDPOINTS.EMAIL_AGENT_CONTACTS}/${encodeURIComponent(contactId)}/stop`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const errorMsg = data?.detail || data?.message || `Failed to stop contact with status ${response.status}`;
+      throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in stopContact API:', error);
+    throw error;
+  }
+};
+
+/**
+ * Import Excel Contacts API
+ * Endpoint: POST {BASE_URL}/api/v1/email-agent/contacts/import-excel
+ * Accepts Excel file with columns: Email, Name, Type
+ *
+ * @param {File|Blob} file - Excel (.xlsx or .xls) file
+ * @returns {Promise<any>} Response with { imported, invalid, duplicate_count, preview_only }
+ */
+export const importExcelContacts = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_ENDPOINTS.EMAIL_AGENT_CONTACTS}/import-excel`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+      },
+      body: formData,
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const errorMsg = data?.detail || data?.message || `Failed to import contacts with status ${response.status}`;
+      throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in importExcelContacts API:', error);
+    throw error;
+  }
+};
+
 export default {
   BASE_URL,
   API_BASE_URL,
@@ -164,4 +266,7 @@ export default {
   getSpeakers,
   getSchedules,
   askKnowledgeChat,
+  getEmailAgentContacts,
+  stopContact,
+  importExcelContacts,
 };
