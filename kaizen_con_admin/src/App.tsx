@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import SignIn from "./pages/AuthPages/SignIn";
 import NotFound from "./pages/OtherPage/NotFound";
 import UserProfiles from "./pages/UserProfiles";
@@ -28,7 +33,7 @@ import StandalonePrivacyPolicy from "./pages/Legal/StandalonePrivacyPolicy";
 export default function App() {
   return (
     <ToastProvider>
-      <Router>
+      <Router  basename="/admin">
         <ScrollToTop />
         <Routes>
           {/* Protected Dashboard & Conference Routes */}
@@ -102,7 +107,7 @@ export default function App() {
           {/* Public Auth Routes */}
           <Route element={<PublicRoute />}>
             <Route path="/signin" element={<SignIn />} />
-            <Route path="/login" element={<Navigate to="/admin" replace />} />
+            <Route path="/login" element={<Navigate to="/signin" replace />} />
             <Route path="/signup" element={<Navigate to="/signin" replace />} />
           </Route>
 
