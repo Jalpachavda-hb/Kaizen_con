@@ -1,0 +1,1938 @@
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router";
+import PageMeta from "../../components/common/PageMeta";
+import { AdminPageContainer } from "../../components/common/AdminPageContainer";
+import { useToast } from "../../context/ToastContext";
+import {
+  getCampaigns,
+  getEmailAgentContacts,
+  getContactById,
+  approveCampaign,
+  startCampaign,
+  stopCampaign,
+  pauseCampaign,
+  resumeCampaign,
+  getCampaignLogs,
+  deleteCampaign,
+} from "../../api/ApiPath";
+import Swal from "sweetalert2";
+
+export interface CampaignConfiguration {
+  registration_url?: string;
+  followup_interval_days?: number;
+
+  sending_delay_seconds?: number;
+  max_followups?: number;
+  max_sends_per_day?: number;
+  re_mail?: boolean;
+  template_ids?: Record<string, any>;
+  contact_ids?: string[];
+  [key: string]: any;
+}
+
+export interface CampaignItem {
+  id: string;
+  name: string;
+  description?: string | null;
+  goal?: string;
+  status: string;
+  configuration?: CampaignConfiguration;
+  created_by?: string | null;
+  approved_by?: string | null;
+  approved_at?: string | null;
+  created_at?: string;
+  started_at?: string | null;
+  paused_at?: string | null;
+  completed_at?: string | null;
+}
+
+export interface ContactOption {
+  id: string;
+  email: string;
+  name: string | null;
+  status: string;
+  unsubscribed: boolean;
+}
+
+export interface TemplateOption {
+  id: string;
+  name: string;
+  purpose?: string;
+  subject?: string;
+  active?: boolean;
+  version?: number;
+  [key: string]: any;
+}
+
+export default function CampaignsPage() {
+  const navigate = useNavigate();
+  const { info } = useToast();
+
+  // Campaign State
+  const [campaigns, setCampaigns] = useState<CampaignItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [search, setSearch] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("All");
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+
+  // Contacts Cache (for logs lookup)
+  const [availableContacts, setAvailableContacts] = useState<ContactOption[]>([]);
+
+  // View Details Modal State
+  const [selectedCampaign, setSelectedCampaign] = useState<CampaignItem | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+
+  // View Logs Modal State
+  const [isLogsModalOpen, setIsLogsModalOpen] = useState<boolean>(false);
+  const [logsCampaign, setLogsCampaign] = useState<CampaignItem | null>(null);
+  const [logs, setLogs] = useState<any[]>([]);
+  const [loadingLogs, setLoadingLogs] = useState<boolean>(false);
+  const [logsError, setLogsError] = useState<string | null>(null);
+  const [logSearch, setLogSearch] = useState<string>("");
+  const [contactsMap, setContactsMap] = useState<Record<string, ContactOption>>({});
+
+  // Fetch available contacts dictionary
+  const fetchContacts = useCallback(async () => {
+    try {
+      const data = await getEmailAgentContacts(0, 100);
+      if (Array.isArray(data)) {
+        setAvailableContacts(data);
+        const map: Record<string, ContactOption> = {};
+        data.forEach((c: any) => {
+          if (c && c.id) {
+            map[c.id] = c;
+            map[c.id.toLowerCase().trim()] = c;
+          }
+        });
+        setContactsMap((prev) => ({ ...prev, ...map }));
+      }
+    } catch (err) {
+      console.error("Failed to load contacts:", err);
+    }
+  }, []);
+
+  // Fetch campaigns from API
+  const fetchCampaigns = useCallback(async () => {
+    setLoading(true);
+    setFetchError(null);
+    try {
+      const data = await getCampaigns(0, 100);
+      if (Array.isArray(data)) {
+        setCampaigns(data);
+      } else {
+        setCampaigns([]);
+      }
+    } catch (err: any) {
+      console.error("Failed to load campaigns:", err);
+      setFetchError(err?.message || "Failed to fetch campaigns from server");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCampaigns();
+    fetchContacts();
+  }, [fetchCampaigns, fetchContacts]);
+
+  // API Call: Approve Campaign
+  const handleApprove = async (c: CampaignItem) => {
+    const isDark = document.documentElement.classList.contains("dark");
+    const result = await Swal.fire({
+      title: "Approve Campaign?",
+      text: `Are you sure you want to approve "${c.name}"? This authorizes the email sequence for dispatch.`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#10B981",
+      cancelButtonColor: "#6B7280",
+      confirmButtonText: "Yes, Approve",
+      cancelButtonText: "Cancel",
+      background: isDark ? "#111827" : "#FFFFFF",
+      color: isDark ? "#F9FAFB" : "#111827",
+    });
+
+    if (!result.isConfirmed) return;
+
+    setActionLoadingId(c.id);
+    try {
+      const res = await approveCampaign(c.id);
+      setActionLoadingId(null);
+      await Swal.fire({
+        title: "Campaign Approved!",
+        text: `Campaign "${res?.name || c.name}" has been approved.`,
+        icon: "success",
+        confirmButtonColor: "#10B981",
+        background: isDark ? "#111827" : "#FFFFFF",
+        color: isDark ? "#F9FAFB" : "#111827",
+      });
+      await fetchCampaigns();
+      if (selectedCampaign && selectedCampaign.id === c.id) {
+        setSelectedCampaign(res || { ...selectedCampaign, status: "approved" });
+      }
+    } catch (err: any) {
+      setActionLoadingId(null);
+      await Swal.fire({
+        title: "Approval Failed",
+        text: err?.message || "Failed to approve campaign.",
+        icon: "error",
+        confirmButtonColor: "#AA2D7B",
+        background: isDark ? "#111827" : "#FFFFFF",
+        color: isDark ? "#F9FAFB" : "#111827",
+      });
+    }
+  };
+
+  // API Call: Start Campaign
+  const handleStart = async (c: CampaignItem) => {
+    const isDark = document.documentElement.classList.contains("dark");
+    const result = await Swal.fire({
+      title: "Start Campaign?",
+      text: `Launch and start sending emails for "${c.name}"?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#10B981",
+      cancelButtonColor: "#6B7280",
+      confirmButtonText: "Yes, Start Now",
+      cancelButtonText: "Cancel",
+      background: isDark ? "#111827" : "#FFFFFF",
+      color: isDark ? "#F9FAFB" : "#111827",
+    });
+
+    if (!result.isConfirmed) return;
+
+    setActionLoadingId(c.id);
+    try {
+      const res = await startCampaign(c.id);
+      setActionLoadingId(null);
+      await Swal.fire({
+        title: "Campaign Started!",
+        text: `"${res?.name || c.name}" is now running and actively dispatching.`,
+        icon: "success",
+        confirmButtonColor: "#10B981",
+        background: isDark ? "#111827" : "#FFFFFF",
+        color: isDark ? "#F9FAFB" : "#111827",
+      });
+      await fetchCampaigns();
+      if (selectedCampaign && selectedCampaign.id === c.id) {
+        setSelectedCampaign(res || { ...selectedCampaign, status: "running" });
+      }
+    } catch (err: any) {
+      setActionLoadingId(null);
+      await Swal.fire({
+        title: "Start Failed",
+        text: err?.message || "Failed to start campaign.",
+        icon: "error",
+        confirmButtonColor: "#AA2D7B",
+        background: isDark ? "#111827" : "#FFFFFF",
+        color: isDark ? "#F9FAFB" : "#111827",
+      });
+    }
+  };
+
+  // API Call: Stop Campaign
+  const handleStop = async (c: CampaignItem) => {
+    const isDark = document.documentElement.classList.contains("dark");
+    const result = await Swal.fire({
+      title: "Stop Campaign?",
+      text: `Are you sure you want to stop/halt email dispatch for "${c.name}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#EF4444",
+      cancelButtonColor: "#6B7280",
+      confirmButtonText: "Yes, Stop Campaign",
+      cancelButtonText: "Cancel",
+      background: isDark ? "#111827" : "#FFFFFF",
+      color: isDark ? "#F9FAFB" : "#111827",
+    });
+
+    if (!result.isConfirmed) return;
+
+    setActionLoadingId(c.id);
+    try {
+      const res = await stopCampaign(c.id);
+      setActionLoadingId(null);
+      await Swal.fire({
+        title: "Campaign Stopped",
+        text: `"${res?.name || c.name}" has been paused/stopped.`,
+        icon: "info",
+        confirmButtonColor: "#AA2D7B",
+        background: isDark ? "#111827" : "#FFFFFF",
+        color: isDark ? "#F9FAFB" : "#111827",
+      });
+      await fetchCampaigns();
+      if (selectedCampaign && selectedCampaign.id === c.id) {
+        setSelectedCampaign(res || { ...selectedCampaign, status: "stopped" });
+      }
+    } catch (err: any) {
+      setActionLoadingId(null);
+      await Swal.fire({
+        title: "Stop Failed",
+        text: err?.message || "Failed to stop campaign.",
+        icon: "error",
+        confirmButtonColor: "#AA2D7B",
+        background: isDark ? "#111827" : "#FFFFFF",
+        color: isDark ? "#F9FAFB" : "#111827",
+      });
+    }
+  };
+
+  // API Call: Pause Campaign
+  const handlePause = async (c: CampaignItem) => {
+    const isDark = document.documentElement.classList.contains("dark");
+    const result = await Swal.fire({
+      title: "Pause Campaign?",
+      text: `Do you want to pause email dispatch for "${c.name}"? You can resume it at any time.`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#F59E0B",
+      cancelButtonColor: "#6B7280",
+      confirmButtonText: "Yes, Pause",
+      cancelButtonText: "Cancel",
+      background: isDark ? "#111827" : "#FFFFFF",
+      color: isDark ? "#F9FAFB" : "#111827",
+    });
+
+    if (!result.isConfirmed) return;
+
+    setActionLoadingId(c.id);
+    try {
+      const res = await pauseCampaign(c.id);
+      setActionLoadingId(null);
+      await Swal.fire({
+        title: "Campaign Paused!",
+        text: `Campaign "${res?.name || c.name}" is now paused.`,
+        icon: "info",
+        confirmButtonColor: "#F59E0B",
+        background: isDark ? "#111827" : "#FFFFFF",
+        color: isDark ? "#F9FAFB" : "#111827",
+      });
+      await fetchCampaigns();
+      if (selectedCampaign && selectedCampaign.id === c.id) {
+        setSelectedCampaign(res || { ...selectedCampaign, status: "paused" });
+      }
+    } catch (err: any) {
+      setActionLoadingId(null);
+      await Swal.fire({
+        title: "Pause Failed",
+        text: err?.message || "Failed to pause campaign.",
+        icon: "error",
+        confirmButtonColor: "#AA2D7B",
+        background: isDark ? "#111827" : "#FFFFFF",
+        color: isDark ? "#F9FAFB" : "#111827",
+      });
+    }
+  };
+
+  // API Call: Resume Campaign
+  const handleResume = async (c: CampaignItem) => {
+    const isDark = document.documentElement.classList.contains("dark");
+    const result = await Swal.fire({
+      title: "Resume Campaign?",
+      text: `Resume automated email dispatch for "${c.name}"?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#10B981",
+      cancelButtonColor: "#6B7280",
+      confirmButtonText: "Yes, Resume Now",
+      cancelButtonText: "Cancel",
+      background: isDark ? "#111827" : "#FFFFFF",
+      color: isDark ? "#F9FAFB" : "#111827",
+    });
+
+    if (!result.isConfirmed) return;
+
+    setActionLoadingId(c.id);
+    try {
+      const res = await resumeCampaign(c.id);
+      setActionLoadingId(null);
+      await Swal.fire({
+        title: "Campaign Resumed!",
+        text: `"${res?.name || c.name}" has been resumed and is actively dispatching.`,
+        icon: "success",
+        confirmButtonColor: "#10B981",
+        background: isDark ? "#111827" : "#FFFFFF",
+        color: isDark ? "#F9FAFB" : "#111827",
+      });
+      await fetchCampaigns();
+      if (selectedCampaign && selectedCampaign.id === c.id) {
+        setSelectedCampaign(res || { ...selectedCampaign, status: "running" });
+      }
+    } catch (err: any) {
+      setActionLoadingId(null);
+      await Swal.fire({
+        title: "Resume Failed",
+        text: err?.message || "Failed to resume campaign.",
+        icon: "error",
+        confirmButtonColor: "#AA2D7B",
+        background: isDark ? "#111827" : "#FFFFFF",
+        color: isDark ? "#F9FAFB" : "#111827",
+      });
+    }
+  };
+
+  const handleCopyId = (id: string) => {
+    navigator.clipboard.writeText(id);
+    info(`Copied ID to clipboard`);
+  };
+
+  const handleViewDetails = (c: CampaignItem) => {
+    setSelectedCampaign(c);
+    setIsDetailsModalOpen(true);
+  };
+
+  // API Call: Delete Campaign
+  const handleDelete = async (c: CampaignItem) => {
+    const isDark = document.documentElement.classList.contains("dark");
+    const result = await Swal.fire({
+      title: "Delete Campaign?",
+      text: `Are you sure you want to permanently delete "${c.name}"? This action cannot be undone.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#EF4444",
+      cancelButtonColor: "#6B7280",
+      confirmButtonText: "Yes, Delete",
+      cancelButtonText: "Cancel",
+      background: isDark ? "#111827" : "#FFFFFF",
+      color: isDark ? "#F9FAFB" : "#111827",
+    });
+
+    if (!result.isConfirmed) return;
+
+    setActionLoadingId(c.id);
+    try {
+      await deleteCampaign(c.id);
+      setActionLoadingId(null);
+      if (isDetailsModalOpen && selectedCampaign?.id === c.id) {
+        setIsDetailsModalOpen(false);
+        setSelectedCampaign(null);
+      }
+      await Swal.fire({
+        title: "Campaign Deleted",
+        text: `Campaign "${c.name}" has been permanently deleted.`,
+        icon: "success",
+        confirmButtonColor: "#AA2D7B",
+        background: isDark ? "#111827" : "#FFFFFF",
+        color: isDark ? "#F9FAFB" : "#111827",
+      });
+      await fetchCampaigns();
+    } catch (err: any) {
+      setActionLoadingId(null);
+      await Swal.fire({
+        title: "Delete Failed",
+        text: err?.message || "Failed to delete campaign.",
+        icon: "error",
+        confirmButtonColor: "#AA2D7B",
+        background: isDark ? "#111827" : "#FFFFFF",
+        color: isDark ? "#F9FAFB" : "#111827",
+      });
+    }
+  };
+
+  // API Call: View Campaign Logs
+  const handleViewLogs = async (c: CampaignItem) => {
+    setLogsCampaign(c);
+    setIsLogsModalOpen(true);
+    setLoadingLogs(true);
+    setLogsError(null);
+    setLogSearch("");
+
+    try {
+      // 1. Fetch logs for this campaign
+      const res = await getCampaignLogs(c.id);
+      const logsList = Array.isArray(res) ? res : [];
+      setLogs(logsList);
+
+      // 2. Resolve contact details for each log entry
+      const contactIdsToFetch = logsList
+        .map((log: any) => (log.contact_id || log.recipient_id || "").trim())
+        .filter((cid: string) => cid && !contactsMap[cid] && !contactsMap[cid.toLowerCase()]);
+
+      if (contactIdsToFetch.length > 0 || availableContacts.length === 0) {
+        // Fetch full contacts list if empty or if there are unresolved contacts
+        try {
+          const contactsData = await getEmailAgentContacts(0, 100);
+          if (Array.isArray(contactsData)) {
+            setAvailableContacts(contactsData);
+            const map: Record<string, ContactOption> = {};
+            contactsData.forEach((ct: any) => {
+              if (ct && ct.id) {
+                map[ct.id] = ct;
+                map[ct.id.toLowerCase().trim()] = ct;
+              }
+            });
+            setContactsMap((prev) => ({ ...prev, ...map }));
+          }
+        } catch (contactErr) {
+          console.warn("Could not batch load contacts:", contactErr);
+        }
+
+        // For any contact still missing, fetch individually via getContactById
+        const uniqueMissing = Array.from(new Set(contactIdsToFetch));
+        for (const cid of uniqueMissing) {
+          try {
+            const contactDetail = await getContactById(cid);
+            if (contactDetail && contactDetail.id) {
+              setContactsMap((prev) => ({
+                ...prev,
+                [contactDetail.id]: contactDetail,
+                [contactDetail.id.toLowerCase().trim()]: contactDetail,
+              }));
+            }
+          } catch (e) {
+            console.warn(`Could not resolve contact ID ${cid}:`, e);
+          }
+        }
+      }
+    } catch (err: any) {
+      console.error("Failed to load campaign logs:", err);
+      setLogsError(err?.message || "Failed to fetch logs for this campaign.");
+    } finally {
+      setLoadingLogs(false);
+    }
+  };
+
+  // Refresh Logs inside modal
+  const handleRefreshLogs = async () => {
+    if (!logsCampaign) return;
+    setLoadingLogs(true);
+    setLogsError(null);
+    try {
+      const res = await getCampaignLogs(logsCampaign.id);
+      const logsList = Array.isArray(res) ? res : [];
+      setLogs(logsList);
+
+      // Resolve any missing contacts
+      const contactIdsToFetch = logsList
+        .map((log: any) => (log.contact_id || log.recipient_id || "").trim())
+        .filter((cid: string) => cid && !contactsMap[cid] && !contactsMap[cid.toLowerCase()]);
+
+      if (contactIdsToFetch.length > 0) {
+        const uniqueMissing = Array.from(new Set(contactIdsToFetch));
+        for (const cid of uniqueMissing) {
+          try {
+            const contactDetail = await getContactById(cid);
+            if (contactDetail && contactDetail.id) {
+              setContactsMap((prev) => ({
+                ...prev,
+                [contactDetail.id]: contactDetail,
+                [contactDetail.id.toLowerCase().trim()]: contactDetail,
+              }));
+            }
+          } catch (e) {
+            console.warn(`Could not resolve contact ID ${cid}:`, e);
+          }
+        }
+      }
+      info("Logs refreshed");
+    } catch (err: any) {
+      setLogsError(err?.message || "Failed to refresh logs.");
+    } finally {
+      setLoadingLogs(false);
+    }
+  };
+
+  // Copy Logs to Clipboard
+  const handleCopyLogs = () => {
+    try {
+      navigator.clipboard.writeText(JSON.stringify(logs, null, 2));
+      info("Logs copied to clipboard");
+    } catch {
+      info("Failed to copy logs");
+    }
+  };
+
+  // Helper formatting
+  const formatDate = (isoString?: string | null) => {
+    if (!isoString) return "—";
+    try {
+      const d = new Date(isoString);
+      return d.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return isoString;
+    }
+  };
+
+  // Status badge styling
+  const renderStatusBadge = (status: string) => {
+    const s = (status || "draft").toLowerCase();
+    let badgeClass =
+      "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700";
+    let dotClass = "bg-gray-400";
+
+    if (s === "running" || s === "active") {
+      badgeClass =
+        "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800";
+      dotClass = "bg-emerald-500 animate-pulse";
+    } else if (s === "approved") {
+      badgeClass =
+        "bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-800";
+      dotClass = "bg-teal-500";
+    } else if (s === "paused" || s === "stopped" || s === "scheduled") {
+      badgeClass =
+        "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800";
+      dotClass = "bg-amber-500";
+    } else if (s === "completed") {
+      badgeClass =
+        "bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800";
+      dotClass = "bg-purple-500";
+    }
+
+    return (
+      <span
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold capitalize border ${badgeClass}`}
+      >
+        <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />
+        {status}
+      </span>
+    );
+  };
+
+  // Log Message Status Badge
+  const renderLogStatusBadge = (status?: string, error?: any) => {
+    const s = (status || (error ? "failed" : "sent")).toLowerCase();
+    let badgeClass =
+      "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700";
+    let dotClass = "bg-gray-400";
+
+    if (s === "sent" || s === "success" || s === "delivered") {
+      badgeClass =
+        "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800";
+      dotClass = "bg-emerald-500";
+    } else if (s === "failed" || s === "error" || s === "bounced" || !!error) {
+      badgeClass =
+        "bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-900";
+      dotClass = "bg-rose-500";
+    } else if (s === "pending" || s === "queued" || s === "processing") {
+      badgeClass =
+        "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800";
+      dotClass = "bg-amber-500 animate-pulse";
+    }
+
+    return (
+      <span
+        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider border ${badgeClass}`}
+      >
+        <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />
+        {status || (error ? "Failed" : "Sent")}
+      </span>
+    );
+  };
+
+  // Dynamic filter lists
+  const availableStatuses = Array.from(
+    new Set(campaigns.map((c) => (c.status || "Unknown").toLowerCase()))
+  );
+
+  const filteredCampaigns = campaigns.filter((c) => {
+    const q = search.toLowerCase();
+    const matchesSearch =
+      c.name.toLowerCase().includes(q) ||
+      (c.description && c.description.toLowerCase().includes(q)) ||
+      c.id.toLowerCase().includes(q) ||
+      (c.configuration?.registration_url &&
+        c.configuration.registration_url.toLowerCase().includes(q));
+
+    if (!matchesSearch) return false;
+
+    if (statusFilter !== "All") {
+      return (c.status || "").toLowerCase() === statusFilter.toLowerCase();
+    }
+
+    return true;
+  });
+
+  // KPI Metrics
+  const totalCampaigns = campaigns.length;
+  const runningCount = campaigns.filter(
+    (c) => (c.status || "").toLowerCase() === "running"
+  ).length;
+  const completedCount = campaigns.filter(
+    (c) => (c.status || "").toLowerCase() === "completed"
+  ).length;
+  const pausedCount = campaigns.filter((c) => {
+    const s = (c.status || "").toLowerCase();
+    return s === "paused" || s === "stopped";
+  }).length;
+
+  // Filter logs inside Logs Modal
+  const filteredLogs = logs.filter((log: any) => {
+    if (!logSearch.trim()) return true;
+    const q = logSearch.toLowerCase().trim();
+    const contactId = (log.contact_id || log.recipient_id || "").trim();
+    const contact = contactId
+      ? contactsMap[contactId] ||
+      contactsMap[contactId.toLowerCase()] ||
+      availableContacts.find((c) => c.id === contactId || c.id?.toLowerCase() === contactId.toLowerCase())
+      : null;
+    const name = (contact?.name || log.name || "").toLowerCase();
+    const email = (contact?.email || log.email || "").toLowerCase();
+    const subject = (log.subject || "").toLowerCase();
+    const status = (log.message_status || log.status || "").toLowerCase();
+    const cid = (contactId || "").toLowerCase();
+    const str = typeof log === "string" ? log : JSON.stringify(log);
+
+    return (
+      name.includes(q) ||
+      email.includes(q) ||
+      subject.includes(q) ||
+      status.includes(q) ||
+      cid.includes(q) ||
+      str.toLowerCase().includes(q)
+    );
+  });
+
+  return (
+    <>
+      <PageMeta
+        title="Campaigns | Kaizen Con 2027"
+        description="Dynamic Email Agent Campaign Automation and Outreach Management"
+      />
+
+      <AdminPageContainer
+        title="Email Campaigns"
+        subtitle="Manage live email outreach sequences, approve workflows, and control start/stop automations via Email Agent API."
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search campaigns by name, UUID, or registration URL..."
+        actionButton={
+          <div className="flex items-center gap-2">
+            {/* Live Refresh button */}
+            <button
+              type="button"
+              onClick={fetchCampaigns}
+              disabled={loading}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/60 rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-60"
+              title="Refresh campaigns from API"
+            >
+              <svg
+                className={`w-3.5 h-3.5 text-gray-500 dark:text-gray-400 ${loading ? "animate-spin" : ""
+                  }`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+              </svg>
+              <span>Refresh</span>
+            </button>
+
+            {/* Create Campaign button */}
+            <button
+              type="button"
+              onClick={() => navigate("/campaigns/create")}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-[#AA2D7B] hover:bg-[#8F2266] rounded-lg shadow-xs transition-colors cursor-pointer"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              <span>Create Campaign</span>
+            </button>
+          </div>
+        }
+      >
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                Total Campaigns
+              </span>
+              <span className="p-1.5 rounded-lg bg-pink-50 dark:bg-pink-950/40 text-[#AA2D7B]">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path d="m3 11 18-5v12L3 14v-3z" />
+                  <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
+                </svg>
+              </span>
+            </div>
+            <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+              {loading ? "..." : totalCampaigns.toLocaleString()}
+            </p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Synchronized via Agent API</p>
+          </div>
+
+          <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                Running Sequences
+              </span>
+              <span className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <polygon points="10 8 16 12 10 16 10 8" />
+                </svg>
+              </span>
+            </div>
+            <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+              {loading ? "..." : runningCount.toLocaleString()}
+            </p>
+            <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">Actively dispatching</p>
+          </div>
+
+          <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                Paused / Completed
+              </span>
+              <span className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <rect x="6" y="4" width="4" height="16" />
+                  <rect x="14" y="4" width="4" height="16" />
+                </svg>
+              </span>
+            </div>
+            <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+              {loading ? "..." : (pausedCount + completedCount).toLocaleString()}
+            </p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {pausedCount} Paused &bull; {completedCount} Done
+            </p>
+          </div>
+        </div>
+
+        {/* Filter bar */}
+        <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+          <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800/60 p-1 rounded-lg flex-wrap">
+            <button
+              type="button"
+              onClick={() => setStatusFilter("All")}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${statusFilter === "All"
+                  ? "bg-white dark:bg-gray-900 text-[#AA2D7B] dark:text-[#D85A9A] shadow-xs font-semibold"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                }`}
+            >
+              All ({campaigns.length})
+            </button>
+            {availableStatuses.map((st) => (
+              <button
+                key={st}
+                type="button"
+                onClick={() => setStatusFilter(st)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer capitalize ${statusFilter.toLowerCase() === st
+                    ? "bg-white dark:bg-gray-900 text-[#AA2D7B] dark:text-[#D85A9A] shadow-xs font-semibold"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                  }`}
+              >
+                {st} ({campaigns.filter((c) => (c.status || "").toLowerCase() === st).length})
+              </button>
+            ))}
+          </div>
+
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            Showing <span className="font-semibold text-gray-800 dark:text-gray-200">{filteredCampaigns.length}</span> of {campaigns.length} campaigns
+          </span>
+        </div>
+
+        {/* Fetch Error Alert */}
+        {fetchError && (
+          <div className="mb-4 p-4 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/20 text-rose-800 dark:text-rose-300 flex items-center justify-between text-xs sm:text-sm">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span>{fetchError}</span>
+            </div>
+            <button
+              type="button"
+              onClick={fetchCampaigns}
+              className="px-3 py-1 rounded-md bg-rose-600 text-white font-medium text-xs hover:bg-rose-700 transition cursor-pointer"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {/* Dynamic Campaigns Table */}
+        <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-left text-xs sm:text-sm">
+            <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 uppercase tracking-wider font-semibold text-[11px]">
+              <tr>
+                <th className="px-5 py-3.5">Campaign Name & ID</th>
+                <th className="px-5 py-3.5 text-center">Status</th>
+                <th className="px-5 py-3.5">Registration Target</th>
+                <th className="px-5 py-3.5">Delays & Throttle</th>
+                <th className="px-5 py-3.5">Created Date</th>
+                <th className="px-5 py-3.5 text-center">Logs</th>
+                <th className="px-5 py-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800/60">
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-14">
+                    <div className="inline-flex items-center gap-2.5 text-sm text-gray-500 dark:text-gray-400">
+                      <svg className="w-5 h-5 animate-spin text-[#AA2D7B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                        <path d="M12 2a10 10 0 0 1 10 10" />
+                      </svg>
+                      Loading campaigns from Email Agent API...
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredCampaigns.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-14 text-gray-400 dark:text-gray-500 text-sm">
+                    <div className="flex flex-col items-center justify-center space-y-3">
+                      <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400">
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                          <path d="m3 11 18-5v12L3 14v-3z" />
+                          <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
+                        </svg>
+                      </div>
+                      <p className="font-medium text-gray-600 dark:text-gray-300">
+                        No campaigns found
+                      </p>
+                      <p className="text-xs text-gray-400 max-w-sm">
+                        Create your first automated email campaign to dispatch followups and registration sequences.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => navigate("/campaigns/create")}
+                        className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#AA2D7B] hover:bg-[#8F2266] rounded-lg transition-colors cursor-pointer"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <line x1="12" y1="5" x2="12" y2="19" />
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        Create Campaign Now
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredCampaigns.map((c) => {
+                  const regUrl = c.configuration?.registration_url;
+                  const sendingDelay = c.configuration?.sending_delay_seconds;
+                  const followupDelay = c.configuration?.followup_delay_minutes;
+                  const maxSends = c.configuration?.max_sends_per_day;
+                  const maxFollowups = c.configuration?.max_followups;
+
+                  const statusLower = (c.status || "").toLowerCase();
+                  const isRunning = statusLower === "running";
+                  const isPaused = statusLower === "paused";
+                  const isStopped = statusLower === "stopped";
+                  const isCompleted = statusLower === "completed";
+                  const isApproved = Boolean(c.approved_at) || statusLower === "approved";
+                  const isLoadingThis = actionLoadingId === c.id;
+
+                  return (
+                    <tr
+                      key={c.id}
+                      className="hover:bg-gray-50/70 dark:hover:bg-gray-800/40 transition-colors"
+                    >
+                      {/* Name & ID */}
+                      <td className="px-5 py-4">
+                        <div
+                          onClick={() => handleViewDetails(c)}
+                          className="font-semibold text-gray-900 dark:text-white hover:text-[#AA2D7B] dark:hover:text-[#D85A9A] transition-colors cursor-pointer group inline-flex items-center gap-1.5"
+                          title="Click to view campaign details"
+                        >
+                          <span className="group-hover:underline">{c.name}</span>
+                          <svg className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#AA2D7B] dark:group-hover:text-[#D85A9A] transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                        {c.description && (
+                          <p
+                            onClick={() => handleViewDetails(c)}
+                            className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mt-0.5 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300"
+                            title={c.description}
+                          >
+                            {c.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span
+                            onClick={() => handleViewDetails(c)}
+                            className="text-[11px] font-mono text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 truncate max-w-[200px] cursor-pointer"
+                            title="Click to view campaign details"
+                          >
+                            {c.id}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopyId(c.id);
+                            }}
+                            className="p-0.5 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition cursor-pointer"
+                            title="Copy Campaign UUID"
+                          >
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-5 py-4 text-center">
+                        {renderStatusBadge(c.status)}
+                      </td>
+
+                      {/* Registration URL */}
+                      <td className="px-5 py-4 max-w-[240px]">
+                        {regUrl ? (
+                          <a
+                            href={regUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-[#AA2D7B] hover:text-[#8F2266] dark:text-[#D85A9A] hover:underline font-mono truncate max-w-[220px]"
+                            title={regUrl}
+                          >
+                            <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                            </svg>
+                            <span className="truncate">{regUrl}</span>
+                          </a>
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">No URL set</span>
+                        )}
+                      </td>
+
+                      {/* Delays & Throttle info */}
+                      <td className="px-5 py-4">
+                        <div className="space-y-0.5 text-xs">
+                          <div className="text-gray-700 dark:text-gray-300">
+                            <span className="text-gray-400">Delay:</span>{" "}
+                            <span className="font-semibold font-mono">{sendingDelay ?? "—"}s</span>
+                            <span className="text-gray-300 dark:text-gray-700 mx-1.5">|</span>
+                            <span className="text-gray-400">Followup:</span>{" "}
+                            <span className="font-semibold font-mono">{followupDelay ?? "—"}m</span>
+                            {c.configuration?.followup_interval_days !== undefined && (
+                              <>
+                                <span className="text-gray-300 dark:text-gray-700 mx-1.5">|</span>
+                                <span className="text-gray-400">Interval:</span>{" "}
+                                <span className="font-semibold font-mono">{c.configuration.followup_interval_days}d</span>
+                              </>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5 flex-wrap">
+                            <span>Max {maxFollowups ?? 0} followups</span>
+                            <span>&bull;</span>
+                            <span>{maxSends ?? 0} sends/day</span>
+                            {c.configuration?.re_mail !== undefined && (
+                              <>
+                                <span>&bull;</span>
+                                <span className={c.configuration.re_mail ? "text-emerald-600 dark:text-emerald-400 font-medium" : "text-gray-400"}>
+                                  {c.configuration.re_mail ? "Re-mail ON" : "Re-mail OFF"}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Created Date */}
+                      <td className="px-5 py-4 text-xs font-mono text-gray-600 dark:text-gray-400">
+                        {formatDate(c.created_at)}
+                      </td>
+
+                      {/* Logs Column */}
+                      <td className="px-5 py-4 text-center whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => handleViewLogs(c)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-lg border border-purple-200 dark:border-purple-800 transition-colors cursor-pointer shadow-2xs"
+                          title="View Campaign Logs"
+                        >
+                          <svg className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <path d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                          </svg>
+                          <span>Logs</span>
+                        </button>
+                      </td>
+
+                      {/* Actions: Approve, Start, Pause, Resume, Stop, Details */}
+                      <td className="px-5 py-4 text-right">
+                        <div className="inline-flex items-center gap-1.5 justify-end">
+                          {/* 1. APPROVE BUTTON (if not approved yet and not stopped or completed) */}
+                          {!isApproved && !isStopped && !isCompleted && (
+                            <button
+                              type="button"
+                              onClick={() => handleApprove(c)}
+                              disabled={isLoadingThis}
+                              className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg border border-emerald-200 dark:border-emerald-800 transition-colors cursor-pointer disabled:opacity-50"
+                              title="Approve Campaign"
+                            >
+                              {isLoadingThis ? (
+                                <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                  <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                                  <path d="M12 2a10 10 0 0 1 10 10" />
+                                </svg>
+                              ) : (
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                  <path d="M20 6 9 17l-5-5" />
+                                </svg>
+                              )}
+                              <span>Approve</span>
+                            </button>
+                          )}
+
+                          {/* 2. RUNNING STATE: Show PAUSE and STOP */}
+                          {isRunning && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handlePause(c)}
+                                disabled={isLoadingThis}
+                                className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 rounded-lg border border-amber-200 dark:border-amber-800 transition-colors cursor-pointer disabled:opacity-50"
+                                title="Pause Campaign"
+                              >
+                                {isLoadingThis ? (
+                                  <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                                    <path d="M12 2a10 10 0 0 1 10 10" />
+                                  </svg>
+                                ) : (
+                                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    <rect x="6" y="4" width="4" height="16" />
+                                    <rect x="14" y="4" width="4" height="16" />
+                                  </svg>
+                                )}
+                                <span>Pause</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleStop(c)}
+                                disabled={isLoadingThis}
+                                className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg border border-rose-200 dark:border-rose-800 transition-colors cursor-pointer disabled:opacity-50"
+                                title="Stop Campaign"
+                              >
+                                {isLoadingThis ? (
+                                  <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                                    <path d="M12 2a10 10 0 0 1 10 10" />
+                                  </svg>
+                                ) : (
+                                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                    <rect x="6" y="6" width="12" height="12" rx="2" />
+                                  </svg>
+                                )}
+                                <span>Stop</span>
+                              </button>
+                            </>
+                          )}
+
+                          {/* 3. PAUSED STATE: Show RESUME and STOP */}
+                          {isPaused && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handleResume(c)}
+                                disabled={isLoadingThis}
+                                className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg border border-emerald-200 dark:border-emerald-800 transition-colors cursor-pointer disabled:opacity-50"
+                                title="Resume Campaign"
+                              >
+                                {isLoadingThis ? (
+                                  <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                                    <path d="M12 2a10 10 0 0 1 10 10" />
+                                  </svg>
+                                ) : (
+                                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                    <polygon points="5 3 19 12 5 21 5 3" />
+                                  </svg>
+                                )}
+                                <span>Resume</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleStop(c)}
+                                disabled={isLoadingThis}
+                                className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg border border-rose-200 dark:border-rose-800 transition-colors cursor-pointer disabled:opacity-50"
+                                title="Stop Campaign"
+                              >
+                                {isLoadingThis ? (
+                                  <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                                    <path d="M12 2a10 10 0 0 1 10 10" />
+                                  </svg>
+                                ) : (
+                                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                    <rect x="6" y="6" width="12" height="12" rx="2" />
+                                  </svg>
+                                )}
+                                <span>Stop</span>
+                              </button>
+                            </>
+                          )}
+
+                          {/* 4. OTHER STATES (not running, not paused, not stopped, not completed): Show START */}
+                          {!isRunning && !isPaused && !isStopped && !isCompleted && (
+                            <button
+                              type="button"
+                              onClick={() => handleStart(c)}
+                              disabled={isLoadingThis}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg border border-blue-200 dark:border-blue-800 transition-colors cursor-pointer disabled:opacity-50"
+                              title="Start Campaign"
+                            >
+                              {isLoadingThis ? (
+                                <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                  <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                                  <path d="M12 2a10 10 0 0 1 10 10" />
+                                </svg>
+                              ) : (
+                                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                  <polygon points="5 3 19 12 5 21 5 3" />
+                                </svg>
+                              )}
+                              <span>Start</span>
+                            </button>
+                          )}
+
+
+                          {/* 6. DELETE BUTTON */}
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(c)}
+                            disabled={isLoadingThis}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg border border-rose-200 dark:border-rose-800 transition-colors cursor-pointer disabled:opacity-50"
+                            title="Delete Campaign"
+                          >
+                            {isLoadingThis ? (
+                              <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                                <path d="M12 2a10 10 0 0 1 10 10" />
+                              </svg>
+                            ) : (
+                              <svg className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                <line x1="10" y1="11" x2="10" y2="17" />
+                                <line x1="14" y1="11" x2="14" y2="17" />
+                              </svg>
+                            )}
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminPageContainer>
+
+      {/* VIEW DETAILS MODAL */}
+      {isDetailsModalOpen && selectedCampaign && (
+        <div className="fixed inset-0 z-99999 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="w-full max-w-4xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-850/80 shrink-0">
+              <div className="flex items-center gap-3.5">
+                <span className="p-2.5 rounded-xl bg-[#AA2D7B]/10 dark:bg-[#AA2D7B]/20 text-[#AA2D7B] dark:text-[#f48fcb]">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                  </svg>
+                </span>
+                <div>
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">
+                      {selectedCampaign.name}
+                    </h3>
+                    <div>{renderStatusBadge(selectedCampaign.status)}</div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs font-mono text-gray-400 dark:text-gray-500">
+                      ID: {selectedCampaign.id}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyId(selectedCampaign.id)}
+                      className="p-1 rounded-md text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-750 transition-colors cursor-pointer"
+                      title="Copy Campaign UUID"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsDetailsModalOpen(false)}
+                className="p-2 rounded-xl text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                title="Close Modal"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Body - Scrollable with 2-column layout */}
+            <div className="p-6 overflow-y-auto space-y-6 text-xs flex-1">
+              {/* Campaign Description Card */}
+              {selectedCampaign.description && (
+                <div className="p-4 rounded-xl bg-purple-50/50 dark:bg-purple-950/20 border border-[#AA2D7B]/15 dark:border-purple-900/40">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#AA2D7B]" />
+                    <span className="font-bold text-[#AA2D7B] dark:text-[#f48fcb] uppercase tracking-wider text-[11px]">
+                      Campaign Overview & Scope
+                    </span>
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap text-xs sm:text-sm pl-4 border-l-2 border-[#AA2D7B]/30">
+                    {selectedCampaign.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Two Column Grid: Configuration & Timestamps */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Column 1: Configuration & Delays */}
+                <div className="p-5 rounded-xl border border-gray-200/90 dark:border-gray-800 bg-white dark:bg-gray-850 space-y-4 shadow-2xs">
+                  <div className="flex items-center gap-2 pb-2.5 border-b border-gray-100 dark:border-gray-800">
+                    <span className="p-1.5 rounded-lg bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="3" />
+                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
+                      </svg>
+                    </span>
+                    <h4 className="font-bold text-gray-900 dark:text-white uppercase tracking-wider text-[11px]">
+                      Dispatch & Throttle Rules
+                    </h4>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-750">
+                      <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 block mb-1">
+                        Registration Target URL
+                      </span>
+                      {selectedCampaign.configuration?.registration_url ? (
+                        <a
+                          href={selectedCampaign.configuration.registration_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-mono text-xs text-[#AA2D7B] hover:text-[#8F2266] dark:text-[#D85A9A] hover:underline flex items-center gap-1.5 break-all"
+                        >
+                          <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                          </svg>
+                          <span>{selectedCampaign.configuration.registration_url}</span>
+                        </a>
+                      ) : (
+                        <span className="text-gray-400 italic">No URL configured</span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      <div className="p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-750">
+                        <span className="text-[11px] text-gray-500 dark:text-gray-400 block">Sending Delay</span>
+                        <span className="text-sm font-bold text-gray-900 dark:text-white mt-0.5 block">
+                          {selectedCampaign.configuration?.sending_delay_seconds ?? "—"} <span className="text-xs font-normal text-gray-500">sec</span>
+                        </span>
+                      </div>
+
+                      <div className="p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-750">
+                        <span className="text-[11px] text-gray-500 dark:text-gray-400 block">Followup Delay</span>
+                        <span className="text-sm font-bold text-gray-900 dark:text-white mt-0.5 block">
+                          {selectedCampaign.configuration?.followup_delay_minutes ?? "—"} <span className="text-xs font-normal text-gray-500">min</span>
+                        </span>
+                      </div>
+
+                      <div className="p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-750">
+                        <span className="text-[11px] text-gray-500 dark:text-gray-400 block">Followup Interval</span>
+                        <span className="text-sm font-bold text-gray-900 dark:text-white mt-0.5 block">
+                          {selectedCampaign.configuration?.followup_interval_days ?? "—"} <span className="text-xs font-normal text-gray-500">days</span>
+                        </span>
+                      </div>
+
+                      <div className="p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-750">
+                        <span className="text-[11px] text-gray-500 dark:text-gray-400 block">Max Followups</span>
+                        <span className="text-sm font-bold text-gray-900 dark:text-white mt-0.5 block">
+                          {selectedCampaign.configuration?.max_followups ?? "—"}
+                        </span>
+                      </div>
+
+                      <div className="p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-750">
+                        <span className="text-[11px] text-gray-500 dark:text-gray-400 block">Max Sends / Day</span>
+                        <span className="text-sm font-bold text-gray-900 dark:text-white mt-0.5 block">
+                          {selectedCampaign.configuration?.max_sends_per_day ?? "—"}
+                        </span>
+                      </div>
+
+                      <div className="p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-750">
+                        <span className="text-[11px] text-gray-500 dark:text-gray-400 block">Re-mail</span>
+                        <span className="text-sm font-bold text-gray-900 dark:text-white mt-0.5 block">
+                          {selectedCampaign.configuration?.re_mail === true
+                            ? "Enabled"
+                            : selectedCampaign.configuration?.re_mail === false
+                            ? "Disabled"
+                            : "—"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Column 2: Lifecycle & Timestamps */}
+                <div className="p-5 rounded-xl border border-gray-200/90 dark:border-gray-800 bg-white dark:bg-gray-850 space-y-4 shadow-2xs">
+                  <div className="flex items-center gap-2 pb-2.5 border-b border-gray-100 dark:border-gray-800">
+                    <span className="p-1.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                      </svg>
+                    </span>
+                    <h4 className="font-bold text-gray-900 dark:text-white uppercase tracking-wider text-[11px]">
+                      Timestamps & Auditing
+                    </h4>
+                  </div>
+
+                  <div className="space-y-2.5 divide-y divide-gray-100 dark:divide-gray-800">
+                    <div className="flex justify-between items-center pt-1 first:pt-0">
+                      <span className="text-gray-500 dark:text-gray-400">Created Date:</span>
+                      <span className="font-mono text-gray-800 dark:text-gray-200 font-medium">
+                        {formatDate(selectedCampaign.created_at)}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center pt-2">
+                      <span className="text-gray-500 dark:text-gray-400">Approved Date:</span>
+                      <span className="font-mono text-gray-800 dark:text-gray-200 font-medium">
+                        {selectedCampaign.approved_at ? formatDate(selectedCampaign.approved_at) : (
+                          <span className="text-amber-600 dark:text-amber-400 font-normal">Pending Approval</span>
+                        )}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center pt-2">
+                      <span className="text-gray-500 dark:text-gray-400">Started Date:</span>
+                      <span className="font-mono text-gray-800 dark:text-gray-200 font-medium">
+                        {selectedCampaign.started_at ? formatDate(selectedCampaign.started_at) : "—"}
+                      </span>
+                    </div>
+
+                    {selectedCampaign.paused_at && (
+                      <div className="flex justify-between items-center pt-2">
+                        <span className="text-gray-500 dark:text-gray-400">Paused Date:</span>
+                        <span className="font-mono text-amber-600 dark:text-amber-400 font-medium">
+                          {formatDate(selectedCampaign.paused_at)}
+                        </span>
+                      </div>
+                    )}
+
+                    {selectedCampaign.completed_at && (
+                      <div className="flex justify-between items-center pt-2">
+                        <span className="text-gray-500 dark:text-gray-400">Completed Date:</span>
+                        <span className="font-mono text-emerald-600 dark:text-emerald-400 font-medium">
+                          {formatDate(selectedCampaign.completed_at)}
+                        </span>
+                      </div>
+                    )}
+
+                    {selectedCampaign.created_by && (
+                      <div className="flex justify-between items-center pt-2">
+                        <span className="text-gray-500 dark:text-gray-400">Author / Creator:</span>
+                        <span className="text-gray-800 dark:text-gray-200 truncate max-w-[220px]">
+                          {selectedCampaign.created_by}
+                        </span>
+                      </div>
+                    )}
+
+                    {selectedCampaign.approved_by && (
+                      <div className="flex justify-between items-center pt-2">
+                        <span className="text-gray-500 dark:text-gray-400">Approved By:</span>
+                        <span className="text-gray-800 dark:text-gray-200 truncate max-w-[220px]">
+                          {selectedCampaign.approved_by}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Controls Toolbar */}
+              <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-850 border border-gray-200/90 dark:border-gray-800 flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
+                    Campaign Controls:
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  {!Boolean(selectedCampaign.approved_at) && (selectedCampaign.status || "").toLowerCase() !== "approved" && (
+                    <button
+                      type="button"
+                      onClick={() => handleApprove(selectedCampaign)}
+                      disabled={actionLoadingId === selectedCampaign.id}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950/60 hover:bg-emerald-200/80 rounded-lg border border-emerald-300 dark:border-emerald-800 cursor-pointer disabled:opacity-50"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
+                      <span>Approve Campaign</span>
+                    </button>
+                  )}
+
+                  {(selectedCampaign.status || "").toLowerCase() === "running" && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => handlePause(selectedCampaign)}
+                        disabled={actionLoadingId === selectedCampaign.id}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-100/80 dark:bg-amber-950/60 hover:bg-amber-200/80 rounded-lg border border-amber-300 dark:border-amber-800 cursor-pointer disabled:opacity-50 transition-colors"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <rect x="6" y="4" width="4" height="16" />
+                          <rect x="14" y="4" width="4" height="16" />
+                        </svg>
+                        <span>Pause Campaign</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleStop(selectedCampaign)}
+                        disabled={actionLoadingId === selectedCampaign.id}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-100/80 dark:bg-rose-950/60 hover:bg-rose-200/80 rounded-lg border border-rose-300 dark:border-rose-800 cursor-pointer disabled:opacity-50 transition-colors"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                          <rect x="6" y="6" width="12" height="12" rx="2" />
+                        </svg>
+                        <span>Stop Campaign</span>
+                      </button>
+                    </>
+                  )}
+
+                  {(selectedCampaign.status || "").toLowerCase() === "paused" && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => handleResume(selectedCampaign)}
+                        disabled={actionLoadingId === selectedCampaign.id}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-950/60 hover:bg-emerald-200/80 rounded-lg border border-emerald-300 dark:border-emerald-800 cursor-pointer disabled:opacity-50 transition-colors"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                          <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
+                        <span>Resume Campaign</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleStop(selectedCampaign)}
+                        disabled={actionLoadingId === selectedCampaign.id}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-100/80 dark:bg-rose-950/60 hover:bg-rose-200/80 rounded-lg border border-rose-300 dark:border-rose-800 cursor-pointer disabled:opacity-50 transition-colors"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                          <rect x="6" y="6" width="12" height="12" rx="2" />
+                        </svg>
+                        <span>Stop Campaign</span>
+                      </button>
+                    </>
+                  )}
+
+                  {(selectedCampaign.status || "").toLowerCase() !== "running" && (selectedCampaign.status || "").toLowerCase() !== "paused" && (
+                    <button
+                      type="button"
+                      onClick={() => handleStart(selectedCampaign)}
+                      disabled={actionLoadingId === selectedCampaign.id}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-100/80 dark:bg-blue-950/60 hover:bg-blue-200/80 rounded-lg border border-blue-300 dark:border-blue-800 cursor-pointer disabled:opacity-50 transition-colors"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                      </svg>
+                      <span>Start Campaign</span>
+                    </button>
+                  )}
+
+                  {/* View Logs */}
+                  <button
+                    type="button"
+                    onClick={() => handleViewLogs(selectedCampaign)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-purple-700 dark:text-purple-300 bg-purple-100/80 dark:bg-purple-950/60 hover:bg-purple-200/80 rounded-lg border border-purple-300 dark:border-purple-800 cursor-pointer transition-colors"
+                    title="View Detailed Logs"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                    <span>View Logs</span>
+                  </button>
+
+                  {/* Delete Campaign */}
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(selectedCampaign)}
+                    disabled={actionLoadingId === selectedCampaign.id}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg border border-rose-200 dark:border-rose-800 cursor-pointer disabled:opacity-50 transition-colors"
+                    title="Delete Campaign"
+                  >
+                    <svg className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                    <span>Delete</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-850/80 flex items-center justify-between shrink-0">
+              <span className="text-[11px] text-gray-500 dark:text-gray-400">
+                Kaizen Con 2027 Automated Email Agent Engine
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsDetailsModalOpen(false)}
+                className="px-5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-750 border border-gray-300 dark:border-gray-700 rounded-xl shadow-2xs transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* VIEW LOGS MODAL */}
+      {isLogsModalOpen && logsCampaign && (
+        <div className="fixed inset-0 z-99999 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div className="w-full max-w-5xl xl:max-w-6xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-6 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
+              <div className="flex items-center gap-3">
+                <span className="p-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                  </svg>
+                </span>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-base font-bold text-gray-900 dark:text-white">
+                      Campaign Logs
+                    </h3>
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                      {logsCampaign.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-[11px] font-mono text-gray-400 truncate max-w-xs">
+                      Campaign ID: {logsCampaign.id}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyId(logsCampaign.id)}
+                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                      title="Copy Campaign UUID"
+                    >
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Header Right Actions */}
+              <div className="flex items-center gap-2">
+                {/* Refresh Logs Button */}
+                <button
+                  type="button"
+                  onClick={handleRefreshLogs}
+                  disabled={loadingLogs}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition cursor-pointer disabled:opacity-60"
+                  title="Refresh Logs from API"
+                >
+                  <svg
+                    className={`w-3.5 h-3.5 text-gray-500 dark:text-gray-400 ${loadingLogs ? "animate-spin" : ""
+                      }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+                  </svg>
+                  <span>Refresh</span>
+                </button>
+
+                {/* Copy JSON Button */}
+                <button
+                  type="button"
+                  onClick={handleCopyLogs}
+                  disabled={logs.length === 0}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 transition cursor-pointer disabled:opacity-40"
+                  title="Copy All Logs JSON"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                  </svg>
+                  <span>Copy</span>
+                </button>
+
+                {/* Close modal */}
+                <button
+                  type="button"
+                  onClick={() => setIsLogsModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer ml-1"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Sub-toolbar: Search & View Toggle */}
+            <div className="flex items-center justify-between gap-3 py-3 border-b border-gray-100 dark:border-gray-800 shrink-0 flex-wrap">
+              <div className="relative flex-1 min-w-[240px]">
+                <svg
+                  className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  type="text"
+                  value={logSearch}
+                  onChange={(e) => setLogSearch(e.target.value)}
+                  placeholder="Filter logs by recipient name, email, contact ID, status, or subject..."
+                  className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-hidden focus:ring-1 focus:ring-[#AA2D7B]"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400">
+                  {filteredLogs.length} of {logs.length} entries
+                </span>
+              </div>
+            </div>
+
+            {/* Modal Body / Logs Display */}
+            <div className="flex-1 overflow-y-auto py-3 min-h-[300px]">
+              {loadingLogs ? (
+                <div className="h-full flex flex-col items-center justify-center py-16 space-y-3">
+                  <svg className="w-7 h-7 animate-spin text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                    <path d="M12 2a10 10 0 0 1 10 10" />
+                  </svg>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Fetching campaign logs and recipient contacts...
+                  </p>
+                </div>
+              ) : logsError ? (
+                <div className="p-4 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/20 text-rose-800 dark:text-rose-300 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="8" x2="12" y2="12" />
+                      <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    <span>{logsError}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRefreshLogs}
+                    className="px-3 py-1 rounded-md bg-rose-600 text-white font-medium text-xs hover:bg-rose-700 transition"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : logs.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center py-16 text-center space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-600 flex items-center justify-center">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                    No Logs Recorded Yet
+                  </p>
+                  <p className="text-xs text-gray-400 max-w-sm">
+                    Events and dispatch status updates will automatically appear here once the campaign begins sending emails.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleRefreshLogs}
+                    className="mt-1 px-3 py-1.5 text-xs font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 rounded-lg transition cursor-pointer"
+                  >
+                    Check for New Logs
+                  </button>
+                </div>
+              ) : (
+                /* Structured Table Format */
+                <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-left text-xs">
+                    <thead className="bg-gray-50 dark:bg-gray-800/60 text-gray-600 dark:text-gray-400 uppercase tracking-wider font-semibold text-[11px]">
+                      <tr>
+                        <th className="px-4 py-3">Recipient Name</th>
+                        <th className="px-4 py-3">Email Address</th>
+                        <th className="px-4 py-3">Subject & Info</th>
+                        <th className="px-4 py-3 text-center">Status</th>
+                        <th className="px-4 py-3">Sent Time</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800/60">
+                      {filteredLogs.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="py-12 text-center text-xs text-gray-400">
+                            No logs match your search "{logSearch}".
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredLogs.map((log: any, idx: number) => {
+                          const contactId = (log.contact_id || log.recipient_id || "").trim();
+                          const contact = contactId
+                            ? contactsMap[contactId] ||
+                            contactsMap[contactId.toLowerCase()] ||
+                            availableContacts.find(
+                              (c) => c.id === contactId || c.id?.toLowerCase() === contactId.toLowerCase()
+                            )
+                            : null;
+                          const contactName = contact?.name || log.name || (contactId ? `Contact (${contactId.slice(0, 8)}...)` : "Unknown Recipient");
+                          const contactEmail = contact?.email || log.email || log.recipient || log.contact_email || "—";
+                          const initial = (contactName.trim().charAt(0) || "U").toUpperCase();
+                          const logTime = log.created_at || log.timestamp || log.time || log.date;
+
+                          return (
+                            <React.Fragment key={log.id || idx}>
+                              <tr className="hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition">
+                                {/* Recipient Name & Contact ID */}
+                                <td className="px-4 py-3">
+                                  <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-full bg-linear-to-tr from-[#AA2D7B] to-purple-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+                                      {initial}
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="font-semibold text-gray-900 dark:text-white truncate">
+                                        {contactName}
+                                      </p>
+                                      {contactId && (
+                                        <div className="flex items-center gap-1 mt-0.5">
+                                          <span className="text-[10px] font-mono text-gray-400 truncate max-w-[130px]" title={contactId}>
+                                            ID: {contactId.slice(0, 8)}...{contactId.slice(-4)}
+                                          </span>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleCopyId(contactId)}
+                                            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                                            title="Copy Contact UUID"
+                                          >
+                                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                            </svg>
+                                          </button>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </td>
+
+                                {/* Email Address */}
+                                <td className="px-4 py-3">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-mono text-xs text-gray-700 dark:text-gray-300">
+                                      {contactEmail}
+                                    </span>
+                                    {contactEmail !== "—" && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(contactEmail);
+                                          info("Email copied to clipboard");
+                                        }}
+                                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                                        title="Copy Email"
+                                      >
+                                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                        </svg>
+                                      </button>
+                                    )}
+                                  </div>
+                                </td>
+
+                                {/* Subject & Meta Info */}
+                                <td className="px-4 py-3 max-w-xs">
+                                  <div>
+                                    <p className="font-medium text-gray-900 dark:text-white truncate" title={log.subject || log.message}>
+                                      {log.subject || log.message || "—"}
+                                    </p>
+                                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                                      {log.template_version && (
+                                        <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 font-mono">
+                                          tpl: {log.template_version}
+                                        </span>
+                                      )}
+                                      {log.direction && (
+                                        <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-mono capitalize">
+                                          {log.direction}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </td>
+
+                                {/* Status */}
+                                <td className="px-4 py-3 text-center">
+                                  {renderLogStatusBadge(log.message_status || log.status, log.error_details || log.error)}
+                                </td>
+
+                                {/* Sent Time */}
+                                <td className="px-4 py-3 whitespace-nowrap">
+                                  <span className="font-mono text-[11px] text-gray-600 dark:text-gray-400">
+                                    {formatDate(logTime)}
+                                  </span>
+                                </td>
+                              </tr>
+                            </React.Fragment>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end pt-4 border-t border-gray-100 dark:border-gray-800 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsLogsModalOpen(false)}
+                className="px-4 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
