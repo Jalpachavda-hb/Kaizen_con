@@ -102,7 +102,7 @@ export default function App() {
           {/* Public Auth Routes */}
           <Route element={<PublicRoute />}>
             <Route path="/signin" element={<SignIn />} />
-            <Route path="/login" element={<Navigate to="/signin" replace />} />
+            <Route path="/login" element={<Navigate to="/admin" replace />} />
             <Route path="/signup" element={<Navigate to="/signin" replace />} />
           </Route>
 
