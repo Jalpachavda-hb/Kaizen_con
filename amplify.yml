@@ -1,0 +1,26 @@
+
+version: 1
+
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci --prefix kaizen_con
+        - npm ci --prefix kaizen_con_admin
+
+    build:
+      commands:
+        - npm run build --prefix kaizen_con_admin
+        - npm run build --prefix kaizen_con
+        - mkdir -p kaizen_con/dist/admin
+        - cp -a kaizen_con_admin/dist/. kaizen_con/dist/admin/
+
+  artifacts:
+    baseDirectory: kaizen_con/dist
+    files:
+      - '**/*'
+
+  cache:
+    paths:
+      - kaizen_con/node_modules/**/*
+      - kaizen_con_admin/node_modules/**/*
