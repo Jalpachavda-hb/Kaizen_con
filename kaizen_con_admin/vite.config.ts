@@ -17,6 +17,7 @@ export default defineConfig({
       },
     }),
   ],
+   base: '/admin/',
   server: {
     host: true,
     port: 5173
