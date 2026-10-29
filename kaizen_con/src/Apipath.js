@@ -8,7 +8,7 @@ export const API_BASE_URL = `${BASE_URL}/api`;
 export const API_ENDPOINTS = {
   SPEAKERS: `${API_BASE_URL}/speakers`,
   SCHEDULES: `${API_BASE_URL}/schedules`,
-  KNOWLEDGE_CHAT: 'https://kaizencondemo2027-1.onrender.com/api/knowledge/chat',
+  KNOWLEDGE_CHAT: 'https://kaizencon.in/api/knowledge/chat',
   EMAIL_AGENT_CONTACTS: `${BASE_URL}/api/v1/email-agent/contacts`,
 };
 
