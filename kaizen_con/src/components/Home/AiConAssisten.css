@@ -938,11 +938,29 @@
 }
 
 /* ----------------------------------------------------
-   RESPONSIVE BREAKPOINTS
+   RESPONSIVE BREAKPOINTS (LAPTOPS, TABLETS, MOBILE)
    ---------------------------------------------------- */
-@media (max-width: 1200px) {
+@media (max-width: 1440px) {
+  .kz-assistant-section {
+    padding: 50px 0 65px 0;
+  }
+  .kz-assistant-title {
+    font-size: clamp(1.9rem, 2.7vw, 2.5rem);
+  }
   .kz-assistant-container {
-    padding: 0 30px;
+    padding: 0 32px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .kz-assistant-section {
+    padding: 45px 0 55px 0;
+  }
+  .kz-assistant-container {
+    padding: 0 28px;
+  }
+  .kz-assistant-workspace {
+    gap: 28px;
   }
 }
 

@@ -472,6 +472,24 @@
 /* ----------------------------------------------------
    3. RESPONSIVE DESIGN
    ---------------------------------------------------- */
+@media (max-width: 1440px) {
+  .kz-floating-chatbot-btn {
+    width: 70px;
+    height: 70px;
+    min-width: 70px;
+    min-height: 70px;
+    bottom: 20px;
+    right: 20px;
+  }
+  .kz-floating-btn-content {
+    width: 70px;
+    height: 70px;
+  }
+  .kz-floating-chat-modal {
+    height: min(580px, 80vh);
+  }
+}
+
 @media (max-width: 768px) {
   .kz-floating-chat-modal {
     width: 410px;

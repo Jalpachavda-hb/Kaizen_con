@@ -11,9 +11,9 @@
 .kz-hero-section {
   position: relative;
   width: 100%;
-  height: 600px;
-  min-height: 700px;
-  max-height: 600px;
+  height: 620px;
+  min-height: 580px;
+  max-height: 640px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -24,7 +24,7 @@
   box-sizing: border-box;
 }
 
-/* Banner background image in full crisp brilliance */
+/* Banner background image in full crisp brilliance - anchored to top to prevent head cut-off */
 .kz-hero-section::before {
   content: '';
   position: absolute;
@@ -33,7 +33,7 @@
   height: 100%;
   background-image: url('../../assets/home/bannerbg.png');
   background-size: cover;
-  background-position: right center;
+  background-position: right top;
   background-repeat: no-repeat;
   opacity: 1;
   pointer-events: none;
@@ -260,15 +260,168 @@
 }
 
 /* ----------------------------------------------------
-   RESPONSIVE DESIGN
+   RESPONSIVE DESIGN (LAPTOPS, TABLETS, MOBILES)
    ---------------------------------------------------- */
-@media (max-width: 1200px) {
-  .kz-hero-title {
-    font-size: 2.75rem;
+
+/* Laptop Screens (1201px - 1440px / 1366px / 1280px high-res laptops) */
+@media (max-width: 1440px) {
+  .kz-hero-section {
+    height: 480px;
+    min-height: 450px;
+    max-height: 500px;
+  }
+
+  .kz-hero-container {
+    padding: 0 40px;
   }
 
   .kz-hero-content {
-    max-width: 620px;
+    max-width: 580px;
+  }
+
+  .kz-hero-badge-wrapper {
+    margin-bottom: 12px;
+  }
+
+  .kz-hero-badge {
+    padding: 4px 14px;
+    gap: 7px;
+  }
+
+  .kz-hero-badge-text {
+    font-size: 0.68rem;
+    letter-spacing: 1.4px;
+  }
+
+  .kz-hero-title {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    gap: 2px;
+  }
+
+  .kz-hero-description {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 18px;
+    max-width: 520px;
+  }
+
+  .kz-hero-actions {
+    gap: 12px;
+  }
+
+  .kz-btn {
+    padding: 11px 22px;
+    font-size: 0.92rem;
+    border-radius: 9px;
+  }
+
+  .kz-btn-arrow {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+/* Medium / Compact Laptops (993px - 1200px) */
+@media (max-width: 1200px) {
+  .kz-hero-section {
+    height: 440px;
+    min-height: 420px;
+    max-height: 460px;
+  }
+
+  .kz-hero-container {
+    padding: 0 32px;
+  }
+
+  .kz-hero-content {
+    max-width: 490px;
+  }
+
+  .kz-hero-badge-wrapper {
+    margin-bottom: 10px;
+  }
+
+  .kz-hero-title {
+    font-size: 2.15rem;
+    margin-bottom: 10px;
+    gap: 2px;
+  }
+
+  .kz-hero-description {
+    font-size: 0.88rem;
+    line-height: 1.45;
+    margin-bottom: 16px;
+    max-width: 440px;
+  }
+
+  .kz-hero-actions {
+    gap: 10px;
+  }
+
+  .kz-btn {
+    padding: 10px 18px;
+    font-size: 0.88rem;
+    border-radius: 8px;
+  }
+}
+
+/* Compact Height Laptops (e.g. 1366x768, 1280x720, 1920x1080 scaled) */
+@media (max-height: 820px) and (min-width: 993px) {
+  .kz-hero-section {
+    height: 440px;
+    min-height: 420px;
+    max-height: 450px;
+  }
+
+  .kz-hero-title {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+  }
+
+  .kz-hero-description {
+    font-size: 0.88rem;
+    line-height: 1.45;
+    margin-bottom: 14px;
+    max-width: 490px;
+  }
+
+  .kz-hero-badge-wrapper {
+    margin-bottom: 8px;
+  }
+
+  .kz-btn {
+    padding: 10px 18px;
+    font-size: 0.88rem;
+  }
+}
+
+@media (max-height: 720px) and (min-width: 993px) {
+  .kz-hero-section {
+    height: 390px;
+    min-height: 370px;
+    max-height: 410px;
+  }
+
+  .kz-hero-title {
+    font-size: 1.95rem;
+    margin-bottom: 8px;
+  }
+
+  .kz-hero-description {
+    font-size: 0.84rem;
+    line-height: 1.4;
+    margin-bottom: 12px;
+    max-width: 440px;
+  }
+
+  .kz-hero-badge-wrapper {
+    margin-bottom: 6px;
+  }
+
+  .kz-btn {
+    padding: 8px 16px;
+    font-size: 0.84rem;
   }
 }
 

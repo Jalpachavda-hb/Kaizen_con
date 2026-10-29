@@ -414,8 +414,30 @@
 }
 
 /* ----------------------------------------------------
-   RESPONSIVE ADAPTATIONS
+   RESPONSIVE ADAPTATIONS (LAPTOPS, TABLETS, MOBILE)
    ---------------------------------------------------- */
+@media (max-width: 1440px) {
+  .kz-knowledge-section {
+    padding: 60px 0;
+  }
+  .kz-knowledge-title {
+    font-size: clamp(2rem, 3.1vw, 2.85rem);
+  }
+  .kz-knowledge-subtitle {
+    font-size: 0.98rem;
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .kz-knowledge-section {
+    padding: 50px 0;
+  }
+  .kz-knowledge-grid {
+    gap: 28px;
+  }
+}
+
 @media (max-width: 992px) {
   .kz-knowledge-section {
     padding: 60px 0;

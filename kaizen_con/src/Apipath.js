@@ -1,7 +1,7 @@
 // Base API Configuration
 // export const BASE_URL = 'http://192.168.29.201:8000';
 // export const BASE_URL = 'https://34g3qd2p-8000.inc1.devtunnels.ms';
-export const BASE_URL = 'hhttps://kaizencon.in';
+export const BASE_URL = 'https://api.kaizencon.in';
 export const API_BASE_URL = `${BASE_URL}/api`;
 
 // API Endpoints
@@ -9,7 +9,7 @@ export const API_ENDPOINTS = {
   SPEAKERS: `${API_BASE_URL}/speakers`,
 
   SCHEDULES: `${API_BASE_URL}/schedules`,
-  KNOWLEDGE_CHAT: 'https://kaizencon.in/api/knowledge/chat',
+  KNOWLEDGE_CHAT: `${API_BASE_URL}/knowledge/chat`,
   EMAIL_AGENT_CONTACTS: `${BASE_URL}/api/v1/email-agent/contacts`,
 };
 /**

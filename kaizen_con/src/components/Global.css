@@ -171,8 +171,8 @@
   position: relative;
   width: 100%;
   background: var(--kz-white);
-  min-height: calc(8rem + 24px);
-  height: calc(8rem + 24px);
+  min-height: calc(6.8rem + 16px);
+  height: calc(6.8rem + 16px);
   display: flex;
   align-items: center;
   border-bottom: 1px solid rgba(85, 53, 94, 0.08);
@@ -199,19 +199,19 @@
 
 .kaizen-navbar-bg-right {
   position: absolute;
-  top: 38px; /* Starts directly below topbar ribbon so graphics are never cut off at top */
+  top: 36px; /* Starts directly below topbar ribbon so graphics are never cut off at top */
   right: 0;
   bottom: 0;
-  width: 500px;
-  max-width: 45vw;
+  width: 380px;
+  max-width: 24vw;
   background-repeat: no-repeat;
   background-position: right center;
   background-size: contain;
   opacity: var(--kz-right-bg-opacity);
   pointer-events: none;
   z-index: 1;
-  mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.35) 20%, rgba(0, 0, 0, 1) 50%);
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.35) 20%, rgba(0, 0, 0, 1) 50%);
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.35) 25%, rgba(0, 0, 0, 1) 65%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.35) 25%, rgba(0, 0, 0, 1) 65%);
 }
 
 /* Main Inner Container (Unified 1440px Container across whole website) */
@@ -226,8 +226,8 @@
   justify-content: space-between;
   position: relative;
   z-index: 3;
-  min-height: calc(8rem + 24px);
-  height: calc(8rem + 24px);
+  min-height: calc(6.8rem + 16px);
+  height: calc(6.8rem + 16px);
 }
 
 /* Logo in Dedicated Container (With clean, comfortable space on top and bottom) */
@@ -237,9 +237,9 @@
   flex-shrink: 0;
   position: relative;
   z-index: 4;
-  min-height: calc(8rem + 24px);
-  height: calc(8rem + 24px);
-  padding: 12px 0; /* clean spacing on top and bottom so logo breathes */
+  min-height: calc(6.8rem + 16px);
+  height: calc(6.8rem + 16px);
+  padding: 8px 0; /* clean spacing on top and bottom so logo breathes */
   box-sizing: border-box;
 }
 
@@ -247,7 +247,7 @@
   display: inline-flex;
   align-items: center;
   text-decoration: none;
-  height: 8rem;
+  height: 6.8rem;
   transition: transform 0.25s ease;
 }
 
@@ -256,9 +256,9 @@
 }
 
 .kaizen-logo-img {
-  height: 8rem;
+  height: 6.8rem;
   width: auto;
-  max-width: 340px;
+  max-width: 320px;
   object-fit: contain;
   display: block;
 }
@@ -566,122 +566,145 @@
 /* 1600px Viewport */
 @media (max-width: 1600px) {
   .kaizen-nav-menu {
-    margin-right: 140px;
-    gap: 28px;
+    margin-right: 60px;
+    gap: 22px;
   }
 }
 
-/* 1440px Viewport: Navbar calc(7.5rem + 20px), Logo 7.5rem -> clean space top/bottom */
+/* 1440px Viewport (Standard Laptops): Navbar calc(5.6rem + 14px), Logo 5.6rem -> sleek & responsive */
 @media (max-width: 1440px) {
-  .kaizen-navbar,
-  .kaizen-navbar-inner,
-  .kaizen-logo-container {
-    height: calc(7.5rem + 20px);
-    min-height: calc(7.5rem + 20px);
-  }
-  .kaizen-logo-container {
-    padding: 10px 0;
-  }
-  .kaizen-logo-link,
-  .kaizen-logo-img {
-    height: 7.5rem;
-    max-width: 310px;
-  }
-  .kaizen-topbar-wrapper,
-  .kaizen-topbar-track,
-  .kaizen-topbar-swoop-svg,
-  .kaizen-topbar-body {
-    height: 36px;
-  }
+  /* Hide right AI background graphic on laptop screens so "Contact Us" never overlays on it */
   .kaizen-navbar-bg-right {
-    top: 36px;
+    display: none !important;
   }
-  .kaizen-nav-menu {
-    margin-top: 36px;
-    margin-right: 90px;
-    gap: 24px;
-  }
-  .kaizen-nav-link {
-    font-size: 0.98rem;
-  }
-}
 
-/* 1366px Viewport: Navbar calc(7rem + 20px), Logo 7rem -> clean space top/bottom */
-@media (max-width: 1366px) {
   .kaizen-navbar,
   .kaizen-navbar-inner,
   .kaizen-logo-container {
-    height: calc(7rem + 20px);
-    min-height: calc(7rem + 20px);
+    height: calc(5.6rem + 14px);
+    min-height: calc(5.6rem + 14px);
   }
   .kaizen-logo-container {
-    padding: 10px 0;
+    padding: 7px 0;
   }
   .kaizen-logo-link,
   .kaizen-logo-img {
-    height: 7rem;
-    max-width: 290px;
-  }
-  .kaizen-topbar-wrapper,
-  .kaizen-topbar-track,
-  .kaizen-topbar-swoop-svg,
-  .kaizen-topbar-body {
-    height: 34px;
-  }
-  .kaizen-navbar-bg-right {
-    top: 34px;
-  }
-  .kaizen-topbar-content {
-    gap: 14px;
-  }
-  .kaizen-nav-menu {
-    margin-top: 34px;
-    margin-right: 50px;
-    gap: 18px;
-  }
-  .kaizen-nav-link {
-    font-size: 0.94rem;
-  }
-}
-
-/* 1200px Viewport: Navbar calc(6.25rem + 18px), Logo 6.25rem -> clean space top/bottom */
-@media (max-width: 1200px) {
-  .kaizen-navbar,
-  .kaizen-navbar-inner,
-  .kaizen-logo-container {
-    height: calc(6.25rem + 18px);
-    min-height: calc(6.25rem + 18px);
-  }
-  .kaizen-logo-container {
-    padding: 9px 0;
-  }
-  .kaizen-logo-link,
-  .kaizen-logo-img {
-    height: 6.25rem;
+    height: 5.6rem;
     max-width: 260px;
   }
   .kaizen-topbar-wrapper,
   .kaizen-topbar-track,
   .kaizen-topbar-swoop-svg,
   .kaizen-topbar-body {
-    height: 32px;
+    height: 33px;
   }
   .kaizen-navbar-bg-right {
-    top: 32px;
+    top: 33px;
+  }
+  .kaizen-topbar-content {
+    gap: 14px;
+  }
+  .kaizen-topbar-text,
+  .kaizen-topbar-venue-title {
+    font-size: 0.78rem;
+  }
+  .kaizen-nav-menu {
+    margin-top: 33px;
+    margin-right: 36px;
+    gap: 18px;
+  }
+  .kaizen-nav-link {
+    font-size: 0.92rem;
+  }
+}
+
+/* 1366px Viewport (Common Laptop Screen): Navbar calc(5rem + 14px), Logo 5rem */
+@media (max-width: 1366px) {
+  .kaizen-navbar,
+  .kaizen-navbar-inner,
+  .kaizen-logo-container {
+    height: calc(5rem + 14px);
+    min-height: calc(5rem + 14px);
+  }
+  .kaizen-logo-container {
+    padding: 6px 0;
+  }
+  .kaizen-logo-link,
+  .kaizen-logo-img {
+    height: 5rem;
+    max-width: 230px;
+  }
+  .kaizen-topbar-wrapper,
+  .kaizen-topbar-track,
+  .kaizen-topbar-swoop-svg,
+  .kaizen-topbar-body {
+    height: 31px;
+  }
+  .kaizen-navbar-bg-right {
+    top: 31px;
+  }
+  .kaizen-topbar-content {
+    gap: 12px;
+  }
+  .kaizen-topbar-text,
+  .kaizen-topbar-venue-title {
+    font-size: 0.74rem;
+  }
+  .kaizen-topbar-venue-subtitle {
+    font-size: 0.64rem;
+  }
+  .kaizen-nav-menu {
+    margin-top: 31px;
+    margin-right: 20px;
+    gap: 14px;
+  }
+  .kaizen-nav-link {
+    font-size: 0.86rem;
+  }
+}
+
+/* 1200px Viewport (Compact Laptops): Navbar calc(4.5rem + 12px), Logo 4.5rem */
+@media (max-width: 1200px) {
+  .kaizen-navbar,
+  .kaizen-navbar-inner,
+  .kaizen-logo-container {
+    height: calc(4.5rem + 12px);
+    min-height: calc(4.5rem + 12px);
+  }
+  .kaizen-logo-container {
+    padding: 5px 0;
+  }
+  .kaizen-logo-link,
+  .kaizen-logo-img {
+    height: 4.5rem;
+    max-width: 200px;
+  }
+  .kaizen-topbar-wrapper,
+  .kaizen-topbar-track,
+  .kaizen-topbar-swoop-svg,
+  .kaizen-topbar-body {
+    height: 30px;
+  }
+  .kaizen-navbar-bg-right {
+    top: 30px;
   }
   .kaizen-topbar-venue-subtitle {
     display: none;
   }
   .kaizen-topbar-content {
-    gap: 12px;
+    gap: 10px;
+  }
+  .kaizen-topbar-text,
+  .kaizen-topbar-venue-title {
+    font-size: 0.71rem;
   }
   .kaizen-nav-menu {
-    margin-top: 32px;
-    margin-right: 24px;
-    gap: 14px;
+    margin-top: 30px;
+    margin-right: 14px;
+    gap: 11px;
   }
   .kaizen-nav-link {
-    font-size: 0.88rem;
+    font-size: 0.82rem;
   }
 }
 

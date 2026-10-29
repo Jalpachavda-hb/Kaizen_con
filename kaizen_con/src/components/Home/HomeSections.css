@@ -1183,7 +1183,75 @@
    RESPONSIVE DESIGN FOR SECTIONS
    ==================================================== */
 
+/* Laptop Screens (1201px - 1440px / 1366px / 1280px) */
+@media (max-width: 1440px) {
+  .kz-section-container {
+    padding: 0 32px;
+  }
+  .kz-stats-section {
+    padding: 60px 0 70px 0;
+  }
+  .kz-metrics-title {
+    font-size: clamp(1.85rem, 2.7vw, 2.5rem);
+  }
+  .kz-metrics-desc {
+    font-size: 0.95rem;
+  }
+  .kz-idea-section {
+    padding: 60px 0 50px 0;
+  }
+  .kz-idea-title {
+    font-size: clamp(2rem, 3.4vw, 2.8rem);
+  }
+  .kz-idea-desc {
+    margin: 16px auto 38px auto;
+    font-size: 0.98rem;
+  }
+  .kz-tracks-section {
+    padding: 65px 0;
+  }
+  .kz-ai-showcase-section {
+    padding: 65px 0;
+  }
+  .kz-ai-showcase-layout {
+    gap: 40px;
+  }
+  .kz-venue-section {
+    padding: 65px 0;
+  }
+}
+
 @media (max-width: 1200px) {
+  .kz-section-container {
+    padding: 0 28px;
+  }
+  .kz-stats-section {
+    padding: 50px 0 60px 0;
+  }
+  .kz-metrics-split-layout {
+    gap: 24px;
+  }
+  .kz-metrics-cards-2x2 {
+    gap: 16px;
+  }
+  .kz-idea-section {
+    padding: 50px 0 45px 0;
+  }
+  .kz-tracks-section {
+    padding: 55px 0;
+  }
+  .kz-tracks-grid {
+    gap: 20px;
+  }
+  .kz-ai-showcase-section {
+    padding: 55px 0;
+  }
+  .kz-ai-showcase-layout {
+    gap: 28px;
+  }
+  .kz-venue-section {
+    padding: 55px 0;
+  }
   .kz-stats-grid {
     grid-template-columns: repeat(3, 1fr);
   }

@@ -136,8 +136,26 @@
 }
 
 /* ----------------------------------------------------
-   RESPONSIVE DESIGN (Pixel-perfect across viewports)
+   RESPONSIVE DESIGN (LAPTOPS, TABLETS, MOBILES)
    ---------------------------------------------------- */
+@media (max-width: 1440px) {
+  .kz-featured-speakers-section {
+    padding: 65px 0 80px 0;
+  }
+  .kz-featured-speakers-grid {
+    gap: 24px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .kz-featured-speakers-section {
+    padding: 55px 0 65px 0;
+  }
+  .kz-featured-speakers-grid {
+    gap: 20px;
+  }
+}
+
 @media (max-width: 1080px) {
   .kz-featured-speakers-grid {
     grid-template-columns: repeat(2, 1fr);
