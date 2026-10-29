@@ -7,6 +7,7 @@ export const API_BASE_URL = `${BASE_URL}/api`;
 // API Endpoints
 export const API_ENDPOINTS = {
   SPEAKERS: `${API_BASE_URL}/speakers`,
+  
   SCHEDULES: `${API_BASE_URL}/schedules`,
   KNOWLEDGE_CHAT: 'https://kaizencon.in/api/knowledge/chat',
   EMAIL_AGENT_CONTACTS: `${BASE_URL}/api/v1/email-agent/contacts`,
