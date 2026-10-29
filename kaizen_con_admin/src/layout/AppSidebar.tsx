@@ -15,6 +15,8 @@ import {
   ShieldCheckIcon,
 } from "../icons/conferenceIcons";
 
+const logoUrl = `${import.meta.env.BASE_URL}images/logokaizecon.png`;
+
 export interface NavItem {
   name: string;
   path: string;
@@ -167,7 +169,7 @@ const AppSidebar: React.FC = () => {
             }`}
           >
             <img
-              src="/logokaizecon.png"
+              src={logoUrl}
               alt="Kaizen Con 2027 Logo"  
               className={`${
                 showFullSidebar ? "h-20 max-h-20" : "h-8 max-h-8"

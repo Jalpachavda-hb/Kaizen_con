@@ -2,6 +2,9 @@ import GridShape from "../../components/common/GridShape";
 import { Link } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
 import { isAuthenticated } from "../../services/authService";
+const error404Url = `${import.meta.env.BASE_URL}images/error/404.svg`;
+const error404DarkUrl = `${import.meta.env.BASE_URL}images/error/404-dark.svg`;
+
 export default function NotFound() {
   const isAuth = isAuthenticated();
 
@@ -19,9 +22,9 @@ export default function NotFound() {
           </h1>
 
           <div className="max-w-[260px] sm:max-w-[320px] mx-auto my-4">
-            <img src="/images/error/404.svg" alt="404 Not Found" className="dark:hidden w-full h-auto" />
+            <img src={error404Url} alt="404 Not Found" className="dark:hidden w-full h-auto" />
             <img
-              src="/images/error/404-dark.svg"
+              src={error404DarkUrl}
               alt="404 Not Found"
               className="hidden dark:block w-full h-auto"
             />

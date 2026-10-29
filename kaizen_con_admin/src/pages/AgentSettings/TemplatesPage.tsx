@@ -759,7 +759,7 @@ export default function TemplatesPage() {
     let html = selectedPreviewTemplate.html_body;
 
     // 1. Replace broken cid logo with clean official logo
-    html = html.replace(/src=["']cid:kaizencon_logo["']/gi, 'src="/logokaizecon.png"');
+    html = html.replace(/src=["']cid:kaizencon_logo["']/gi, `src="${import.meta.env.BASE_URL}images/logokaizecon.png"`);
 
     // 2. Comprehensive variable substitutions (with or without spaces)
     const nameVal = previewRecipientName.trim() || "Dr. Jane Doe";

@@ -1,5 +1,7 @@
 import { HelmetProvider, Helmet } from "react-helmet-async";
 
+const faviconUrl = `${import.meta.env.BASE_URL}favicon.png`;
+
 const PageMeta = ({
   title,
   description,
@@ -10,7 +12,7 @@ const PageMeta = ({
   <Helmet>
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/png" href={faviconUrl} />
   </Helmet>
 );
 

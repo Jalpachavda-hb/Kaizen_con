@@ -11,6 +11,8 @@ import {
   CheckCircleIcon,
 } from "../../icons";
 
+const logoUrl = `${import.meta.env.BASE_URL}images/logokaizecon.png`;
+
 interface AuthLayoutProps {
   children?: React.ReactNode;
 }
@@ -333,7 +335,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           <div className="relative z-10">
             <div className="inline-block p-2 rounded-lg bg-white/95 backdrop-blur-xs border border-white/20 shadow-xs">
               <img
-                src="/logokaizecon.png"
+                src={logoUrl}
                 alt="Kaizen Con 2027"
                 className="h-9 w-auto object-contain"
               />

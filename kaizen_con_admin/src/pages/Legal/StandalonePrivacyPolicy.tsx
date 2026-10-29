@@ -2,6 +2,8 @@ import { Navigate, Link } from "react-router";
 import { isAuthenticated } from "../../services/authService";
 import PrivacyPolicyPage from "./PrivacyPolicyPage";
 
+const logoUrl = `${import.meta.env.BASE_URL}images/logokaizecon.png`;
+
 export default function StandalonePrivacyPolicy() {
   const isAuth = isAuthenticated();
 
@@ -28,7 +30,7 @@ export default function StandalonePrivacyPolicy() {
               Kaizen Con 2027 Portal
             </span>
             <img
-              src="/logokaizecon.png"
+              src={logoUrl}
               alt="Kaizen Con 2027"
               className="h-8 w-auto object-contain"
               onError={(e) => {
