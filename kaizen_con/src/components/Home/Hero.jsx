@@ -1,21 +1,8 @@
 import React from 'react';
 import './Hero.css';
+import brochurePdf from '../../assets/home/Kaizencon_2027_Second_Annoucement.pdf';
 
 export default function Hero() {
-  const scrollToExplore = () => {
-    const el = document.querySelector('#explore') || document.querySelector('#highlights') || document.querySelector('#idea');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const scrollToAi = () => {
-    const el = document.querySelector('#ai-layer') || document.querySelector('#ai-experience');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   return (
     <section className="kz-hero-section" id="home" aria-label="KaizenCon 2027 Hero">
       {/* Blueprint Grid Overlay */}
@@ -66,29 +53,17 @@ export default function Hero() {
 
           {/* 4. Action Buttons */}
           <div className="kz-hero-actions">
-            <button
-              type="button"
+            <a
+              href={brochurePdf}
+              download="Kaizencon_2027_Second_Announcement.pdf"
               className="kz-btn kz-btn-primary"
-              onClick={scrollToExplore}
-              aria-label="Explore the Experience"
+              aria-label="Download Brochure"
             >
-              <span>Explore the Experience</span>
+              <span>Download Brochure</span>
               <svg className="kz-btn-arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-            </button>
-
-            <button
-              type="button"
-              className="kz-btn kz-btn-secondary"
-              onClick={scrollToAi}
-              aria-label="Discover the AI Layer"
-            >
-              <span>Discover the AI Layer</span>
-              <svg className="kz-btn-arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
+            </a>
           </div>
         </div>
       </div>

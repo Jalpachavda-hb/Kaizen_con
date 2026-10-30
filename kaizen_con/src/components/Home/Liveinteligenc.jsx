@@ -147,8 +147,8 @@ export default function Liveinteligenc() {
 
                 <div className="kz-poll-header-right">
                   <div className="kz-poll-live-status">
-                    <span className="kz-pulse-circle" aria-hidden="true" />
-                    <span>LIVE NOW</span>
+                   
+                   
                   </div>
                   <div className="kz-poll-timer-box">
                     <div className="kz-poll-time-now">14:32</div>
