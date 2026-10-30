@@ -334,20 +334,7 @@ export default function QAPage() {
         }
       >
         {/* Session Info Ribbon */}
-        {sessionInfo && (
-          <div className="mb-5 p-3.5 bg-purple-50/60 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/50 rounded-xl flex items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-[#AA2D7B] uppercase tracking-wider">Active Channel:</span>
-              <strong className="text-gray-900 dark:text-white text-sm">{sessionInfo.title}</strong>
-              {sessionInfo.speaker_name && (
-                <span className="text-gray-600 dark:text-gray-300">
-                  • Speaker: <strong>{sessionInfo.speaker_name}</strong>
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-
+      
         {/* Error notification if any */}
         {errorMessage && (
           <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-lg text-xs text-red-700 dark:text-red-300 flex items-center justify-between">

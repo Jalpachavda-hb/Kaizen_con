@@ -1718,7 +1718,7 @@ export const downloadPollQrCode = async (pollId, filename = null) => {
 };
 
 export const QA_DEFAULT_SESSION_ID = '00000000-0000-0000-0000-000000000001';
-export const QA_WS_URL = `wss://kaizencon.in/api/sessions/${QA_DEFAULT_SESSION_ID}/ws?role=moderator`;
+export const QA_WS_URL = `wss://api.kaizencon.in/api/sessions/${QA_DEFAULT_SESSION_ID}/ws?role=moderator`;
 
 export const approveQuestionApi = async (sessionId, questionId) => {
   const targetSession = sessionId || QA_DEFAULT_SESSION_ID;

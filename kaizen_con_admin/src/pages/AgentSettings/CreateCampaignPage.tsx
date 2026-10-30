@@ -88,7 +88,6 @@ export default function CreateCampaignPage() {
     template_ids: [] as string[],
     registration_url: "https://example.com/",
     followup_interval_days: 1,
-    
     sending_delay_seconds: 30,
     max_followups: 1,
     max_sends_per_day: 1000,
@@ -423,7 +422,6 @@ export default function CreateCampaignPage() {
         contact_ids: formData.contact_ids,
         registration_url: formData.registration_url.trim(),
         followup_interval_days: Number(formData.followup_interval_days) || 1,
-     
         sending_delay_seconds: Number(formData.sending_delay_seconds) || 0,
         max_followups: Number(formData.max_followups) || 0,
         max_sends_per_day: Number(formData.max_sends_per_day) || 10,
@@ -938,7 +936,7 @@ export default function CreateCampaignPage() {
               </div>
             </div>
 
-            {/* 6 timing & automation inputs */}
+            {/* Timing & automation inputs */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Sending Delay */}
               <div>
@@ -962,9 +960,6 @@ export default function CreateCampaignPage() {
                   Interval between outbound messages (e.g. 30 seconds)
                 </p>
               </div>
-
-            
-         
 
               {/* Followup Interval */}
               <div>

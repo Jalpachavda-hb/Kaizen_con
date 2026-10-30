@@ -28,7 +28,6 @@ export interface CampaignAttachment {
 export interface CampaignConfiguration {
   registration_url?: string;
   followup_interval_days?: number;
-  followup_delay_minutes?: number;
   sending_delay_seconds?: number;
   max_followups?: number;
   max_sends_per_day?: number;
@@ -928,7 +927,6 @@ export default function CampaignsPage() {
                 filteredCampaigns.map((c) => {
                   const regUrl = c.configuration?.registration_url;
                   const sendingDelay = c.configuration?.sending_delay_seconds;
-                  const followupDelay = c.configuration?.followup_delay_minutes;
                   const maxSends = c.configuration?.max_sends_per_day;
                   const maxFollowups = c.configuration?.max_followups;
 
@@ -1039,9 +1037,6 @@ export default function CampaignsPage() {
                           <div className="text-gray-700 dark:text-gray-300">
                             <span className="text-gray-400">Delay:</span>{" "}
                             <span className="font-semibold font-mono">{sendingDelay ?? "—"}s</span>
-                            <span className="text-gray-300 dark:text-gray-700 mx-1.5">|</span>
-                            <span className="text-gray-400">Followup:</span>{" "}
-                            <span className="font-semibold font-mono">{followupDelay ?? "—"}m</span>
                             {c.configuration?.followup_interval_days !== undefined && (
                               <>
                                 <span className="text-gray-300 dark:text-gray-700 mx-1.5">|</span>
@@ -1422,13 +1417,6 @@ export default function CampaignsPage() {
                         <span className="text-[11px] text-gray-500 dark:text-gray-400 block">Sending Delay</span>
                         <span className="text-sm font-bold text-gray-900 dark:text-white mt-0.5 block">
                           {selectedCampaign.configuration?.sending_delay_seconds ?? "—"} <span className="text-xs font-normal text-gray-500">sec</span>
-                        </span>
-                      </div>
-
-                      <div className="p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-750">
-                        <span className="text-[11px] text-gray-500 dark:text-gray-400 block">Followup Delay</span>
-                        <span className="text-sm font-bold text-gray-900 dark:text-white mt-0.5 block">
-                          {selectedCampaign.configuration?.followup_delay_minutes ?? "—"} <span className="text-xs font-normal text-gray-500">min</span>
                         </span>
                       </div>
 
