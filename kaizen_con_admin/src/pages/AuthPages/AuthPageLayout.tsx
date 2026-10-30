@@ -34,8 +34,8 @@ export function LoginForm() {
     useState<boolean>(isSessionExpired);
 
   // Form State
-  const [email, setEmail] = useState("user@example.com");
-  const [password, setPassword] = useState("string");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
 
@@ -216,7 +216,7 @@ export function LoginForm() {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="user@example.com"
+              placeholder="Enter your email"
               disabled={isLoading}
               className="w-full h-10.5 pl-10 pr-3.5 rounded-xl border border-gray-200 bg-white text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#AA2D7B]/20 focus:border-[#AA2D7B] transition-all disabled:opacity-60"
             />

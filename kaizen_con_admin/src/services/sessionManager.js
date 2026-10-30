@@ -174,7 +174,7 @@ export function getAdminProfile() {
     firstName: firstName || 'Admin',
     lastName: lastName || '',
     fullName: user?.fullName || `${firstName} ${lastName}`.trim() || 'Admin User',
-    emailId: user?.emailId || user?.email || 'user@example.com',
+    emailId: user?.emailId || user?.email ,
     mobileNumber: user?.mobileNumber || '',
     profileImage: user?.profileImage || user?.avatar || '',
     adminRoleName: user?.adminRoleName || user?.role || 'Super Administrator',
