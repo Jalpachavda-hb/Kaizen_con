@@ -565,26 +565,32 @@ export default function QAPage() {
 
                       {/* Moderator Action Buttons */}
                       <td className="px-4 py-3 align-top text-right whitespace-nowrap">
-                        <div className="inline-flex items-center gap-1.5">
+                        <div className="inline-flex items-center gap-1.5 justify-end">
                           {q.status !== "approved" && (
                             <button
+                              type="button"
                               onClick={() => handleApprove(q.id)}
                               disabled={isLoading}
-                              className="px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 transition-colors disabled:opacity-50"
-                              title="Approve question and push to stage presentation screen"
+                              className="p-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg border border-emerald-200 dark:border-emerald-800 transition-colors disabled:opacity-50 cursor-pointer inline-flex items-center justify-center"
+                              data-tooltip="Approve Question"
                             >
-                              Approve
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <path d="M20 6 9 17l-5-5" />
+                              </svg>
                             </button>
                           )}
 
                           {q.status !== "rejected" && (
                             <button
+                              type="button"
                               onClick={() => handleReject(q.id)}
                               disabled={isLoading}
-                              className="px-2.5 py-1 rounded-md text-xs font-semibold bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-950/40 dark:text-red-300 transition-colors disabled:opacity-50"
-                              title="Reject question"
+                              className="p-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg border border-rose-200 dark:border-rose-800 transition-colors disabled:opacity-50 cursor-pointer inline-flex items-center justify-center"
+                              data-tooltip="Reject Question"
                             >
-                              Reject
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <path d="M6 18L18 6M6 6l12 12" />
+                              </svg>
                             </button>
                           )}
                         </div>

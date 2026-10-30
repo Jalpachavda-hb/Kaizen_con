@@ -12,6 +12,7 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import { ToastProvider } from "./context/ToastContext";
+import { InstantTooltipProvider } from "./components/common/InstantTooltip";
 
 // Kaizen Con Conference & System Pages
 import Home from "./pages/Dashboard/Home";
@@ -33,9 +34,10 @@ import StandalonePrivacyPolicy from "./pages/Legal/StandalonePrivacyPolicy";
 export default function App() {
   return (
     <ToastProvider>
-      <Router  basename="/admin">
-        <ScrollToTop />
-        <Routes>
+      <InstantTooltipProvider>
+        <Router  basename="/admin">
+          <ScrollToTop />
+          <Routes>
           {/* Protected Dashboard & Conference Routes */}
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
@@ -115,6 +117,7 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
-    </ToastProvider>
-  );
+    </InstantTooltipProvider>
+  </ToastProvider>
+);
 }

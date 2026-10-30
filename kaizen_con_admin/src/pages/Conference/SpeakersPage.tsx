@@ -726,33 +726,52 @@ export default function SpeakersPage() {
 
                       {/* Actions */}
                       <td className="py-3.5 px-4 text-right">
-                        <div className="inline-flex items-center gap-1.5">
+                        <div className="inline-flex items-center gap-1.5 justify-end">
                           {/* View Button */}
                           <button
+                            type="button"
                             onClick={() => setViewingSpeaker(speaker)}
-                            className="px-2.5 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 rounded-md transition-colors cursor-pointer"
-                            title="View Details"
+                            className="p-1.5 text-xs font-semibold text-[#AA2D7B] dark:text-[#D85A9A] bg-[#faedf5]/70 hover:bg-[#faedf5] dark:bg-pink-950/40 dark:hover:bg-pink-900/50 rounded-lg border border-[#AA2D7B]/20 dark:border-[#AA2D7B]/40 transition-colors cursor-pointer inline-flex items-center justify-center"
+                            data-tooltip="View Details"
                           >
-                            View
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                              <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
                           </button>
 
                           {/* Edit Button */}
                           <button
+                            type="button"
                             onClick={() => handleOpenEditModal(speaker)}
-                            className="px-2.5 py-1 text-xs font-semibold text-[#AA2D7B] hover:text-[#55355E] bg-[#faedf5] hover:bg-[#faedf5]/80 rounded-md transition-colors cursor-pointer"
-                            title="Edit Speaker via GET ?id="
+                            className="p-1.5 text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg border border-blue-200 dark:border-blue-800 transition-colors cursor-pointer inline-flex items-center justify-center"
+                            data-tooltip="Edit Speaker"
                           >
-                            Edit
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                              <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
                           </button>
 
                           {/* Delete Button */}
                           <button
+                            type="button"
                             onClick={() => handleDeleteSpeaker(speaker)}
                             disabled={deletingId === speaker.id}
-                            className="px-2.5 py-1 text-xs font-medium text-red-600 hover:text-red-800 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 rounded-md transition-colors disabled:opacity-50 cursor-pointer"
-                            title="Delete Speaker"
+                            className="p-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg border border-rose-200 dark:border-rose-800 transition-colors disabled:opacity-50 cursor-pointer inline-flex items-center justify-center"
+                            data-tooltip="Delete Speaker"
                           >
-                            {deletingId === speaker.id ? "..." : "Delete"}
+                            {deletingId === speaker.id ? (
+                              <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                                <path d="M12 2a10 10 0 0 1 10 10" />
+                              </svg>
+                            ) : (
+                              <svg className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                <line x1="10" y1="11" x2="10" y2="17" />
+                                <line x1="14" y1="11" x2="14" y2="17" />
+                              </svg>
+                            )}
                           </button>
                         </div>
                       </td>

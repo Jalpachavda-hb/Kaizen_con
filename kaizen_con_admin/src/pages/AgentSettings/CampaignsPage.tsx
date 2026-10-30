@@ -871,13 +871,13 @@ export default function CampaignsPage() {
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-left text-xs sm:text-sm">
             <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 uppercase tracking-wider font-semibold text-[11px]">
               <tr>
-                <th className="px-5 py-3.5">Campaign Name & ID</th>
-                <th className="px-5 py-3.5 text-center">Status</th>
-                <th className="px-5 py-3.5">Registration Target</th>
-                <th className="px-5 py-3.5">Delays & Throttle</th>
-                <th className="px-5 py-3.5">Created Date</th>
-                <th className="px-5 py-3.5 text-center">Logs</th>
-                <th className="px-5 py-3.5 text-right">Actions</th>
+                <th className="px-5 py-3.5 w-[280px] min-w-[240px] max-w-[300px]">Campaign Name & ID</th>
+                <th className="px-5 py-3.5 text-center whitespace-nowrap">Status</th>
+                <th className="px-5 py-3.5 max-w-[200px]">Registration Target</th>
+                <th className="px-5 py-3.5 whitespace-nowrap">Delays & Throttle</th>
+                <th className="px-5 py-3.5 whitespace-nowrap">Created Date</th>
+                <th className="px-5 py-3.5 text-center whitespace-nowrap">Logs</th>
+                <th className="px-5 py-3.5 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800/60">
@@ -944,81 +944,78 @@ export default function CampaignsPage() {
                       className="hover:bg-gray-50/70 dark:hover:bg-gray-800/40 transition-colors"
                     >
                       {/* Name & ID */}
-                      <td className="px-5 py-4">
-                        <div
-                          onClick={() => handleViewDetails(c)}
-                          className="font-semibold text-gray-900 dark:text-white hover:text-[#AA2D7B] dark:hover:text-[#D85A9A] transition-colors cursor-pointer group inline-flex items-center gap-1.5"
-                          title="Click to view campaign details"
-                        >
-                          <span className="group-hover:underline">{c.name}</span>
-                          <svg className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#AA2D7B] dark:group-hover:text-[#D85A9A] transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                            <path d="M9 5l7 7-7 7" />
-                          </svg>
-                        </div>
-                        {c.description && (
-                          <p
+                      <td className="px-5 py-4 w-[280px] min-w-[240px] max-w-[300px]">
+                        <div className="w-full space-y-1">
+                          <div
                             onClick={() => handleViewDetails(c)}
-                            className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mt-0.5 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300"
-                            title={c.description}
+                            className="font-semibold text-gray-900 dark:text-white hover:text-[#AA2D7B] dark:hover:text-[#D85A9A] transition-colors cursor-pointer group flex items-start gap-1.5"
                           >
-                            {c.description}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-1.5 mt-1">
-                          <span
-                            onClick={() => handleViewDetails(c)}
-                            className="text-[11px] font-mono text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 truncate max-w-[200px] cursor-pointer"
-                            title="Click to view campaign details"
-                          >
-                            {c.id}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCopyId(c.id);
-                            }}
-                            className="p-0.5 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition cursor-pointer"
-                            title="Copy Campaign UUID"
-                          >
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                            <span className="group-hover:underline break-words line-clamp-2">{c.name}</span>
+                            <svg className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#AA2D7B] dark:group-hover:text-[#D85A9A] transition-transform group-hover:translate-x-0.5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                              <path d="M9 5l7 7-7 7" />
                             </svg>
-                          </button>
-                        </div>
-                        {c.configuration?.attachments && c.configuration.attachments.length > 0 && (
-                          <div className="flex items-center gap-1.5 mt-1.5">
+                          </div>
+                          {c.description && (
+                            <p
+                              onClick={() => handleViewDetails(c)}
+                              className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 break-words cursor-pointer hover:text-gray-700 dark:hover:text-gray-300"
+                            >
+                              {c.description}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-1.5 pt-0.5">
                             <span
                               onClick={() => handleViewDetails(c)}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-semibold bg-pink-50 dark:bg-pink-950/40 text-[#AA2D7B] dark:text-[#f48fcb] border border-[#AA2D7B]/20 hover:bg-pink-100 transition cursor-pointer"
-                              title={c.configuration.attachments.map((a: any) => a.filename).join(", ")}
+                              className="text-[11px] font-mono text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 truncate max-w-[190px] cursor-pointer"
                             >
-                              <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                <path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                              </svg>
-                              <span>
-                                {c.configuration.attachments.length} attachment{c.configuration.attachments.length !== 1 ? "s" : ""}
-                              </span>
+                              {c.id}
                             </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCopyId(c.id);
+                              }}
+                              className="p-0.5 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition cursor-pointer"
+                              data-tooltip="Copy UUID"
+                            >
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                              </svg>
+                            </button>
                           </div>
-                        )}
+                          {c.configuration?.attachments && c.configuration.attachments.length > 0 && (
+                            <div className="flex items-center gap-1.5 pt-0.5">
+                              <span
+                                onClick={() => handleViewDetails(c)}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-semibold bg-pink-50 dark:bg-pink-950/40 text-[#AA2D7B] dark:text-[#f48fcb] border border-[#AA2D7B]/20 hover:bg-pink-100 transition cursor-pointer"
+                              >
+                                <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                  <path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                </svg>
+                                <span>
+                                  {c.configuration.attachments.length} attachment{c.configuration.attachments.length !== 1 ? "s" : ""}
+                                </span>
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </td>
 
                       {/* Status */}
-                      <td className="px-5 py-4 text-center">
+                      <td className="px-5 py-4 text-center whitespace-nowrap">
                         {renderStatusBadge(c.status)}
                       </td>
 
                       {/* Registration URL */}
-                      <td className="px-5 py-4 max-w-[240px]">
+                      <td className="px-5 py-4 max-w-[200px]">
                         {regUrl ? (
                           <a
                             href={regUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-[#AA2D7B] hover:text-[#8F2266] dark:text-[#D85A9A] hover:underline font-mono truncate max-w-[220px]"
-                            title={regUrl}
+                            className="inline-flex items-center gap-1 text-xs text-[#AA2D7B] hover:text-[#8F2266] dark:text-[#D85A9A] hover:underline font-mono truncate max-w-[190px]"
                           >
                             <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                               <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
@@ -1032,7 +1029,7 @@ export default function CampaignsPage() {
                       </td>
 
                       {/* Delays & Throttle info */}
-                      <td className="px-5 py-4">
+                      <td className="px-5 py-4 whitespace-nowrap">
                         <div className="space-y-0.5 text-xs">
                           <div className="text-gray-700 dark:text-gray-300">
                             <span className="text-gray-400">Delay:</span>{" "}
@@ -1062,7 +1059,7 @@ export default function CampaignsPage() {
                       </td>
 
                       {/* Created Date */}
-                      <td className="px-5 py-4 text-xs font-mono text-gray-600 dark:text-gray-400">
+                      <td className="px-5 py-4 text-xs font-mono text-gray-600 dark:text-gray-400 whitespace-nowrap">
                         {formatDate(c.created_at)}
                       </td>
 
@@ -1071,18 +1068,17 @@ export default function CampaignsPage() {
                         <button
                           type="button"
                           onClick={() => handleViewLogs(c)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-lg border border-purple-200 dark:border-purple-800 transition-colors cursor-pointer shadow-2xs"
-                          title="View Campaign Logs"
+                          className="p-1.5 text-xs font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-lg border border-purple-200 dark:border-purple-800 transition-colors cursor-pointer shadow-2xs inline-flex items-center justify-center"
+                          data-tooltip="View Campaign Logs"
                         >
                           <svg className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                             <path d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                           </svg>
-                          <span>Logs</span>
                         </button>
                       </td>
 
                       {/* Actions: Approve, Start, Pause, Resume, Stop, Details */}
-                      <td className="px-5 py-4 text-right">
+                      <td className="px-5 py-4 text-right whitespace-nowrap">
                         <div className="inline-flex items-center gap-1.5 justify-end">
                           {/* 1. APPROVE BUTTON (if not approved yet and not stopped or completed) */}
                           {!isApproved && !isStopped && !isCompleted && (
@@ -1090,8 +1086,8 @@ export default function CampaignsPage() {
                               type="button"
                               onClick={() => handleApprove(c)}
                               disabled={isLoadingThis}
-                              className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg border border-emerald-200 dark:border-emerald-800 transition-colors cursor-pointer disabled:opacity-50"
-                              title="Approve Campaign"
+                              className="p-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg border border-emerald-200 dark:border-emerald-800 transition-colors cursor-pointer disabled:opacity-50"
+                              data-tooltip="Approve Campaign"
                             >
                               {isLoadingThis ? (
                                 <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -1103,7 +1099,6 @@ export default function CampaignsPage() {
                                   <path d="M20 6 9 17l-5-5" />
                                 </svg>
                               )}
-                              <span>Approve</span>
                             </button>
                           )}
 
@@ -1114,8 +1109,8 @@ export default function CampaignsPage() {
                                 type="button"
                                 onClick={() => handlePause(c)}
                                 disabled={isLoadingThis}
-                                className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 rounded-lg border border-amber-200 dark:border-amber-800 transition-colors cursor-pointer disabled:opacity-50"
-                                title="Pause Campaign"
+                                className="p-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 rounded-lg border border-amber-200 dark:border-amber-800 transition-colors cursor-pointer disabled:opacity-50"
+                                data-tooltip="Pause Campaign"
                               >
                                 {isLoadingThis ? (
                                   <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -1128,15 +1123,14 @@ export default function CampaignsPage() {
                                     <rect x="14" y="4" width="4" height="16" />
                                   </svg>
                                 )}
-                                <span>Pause</span>
                               </button>
 
                               <button
                                 type="button"
                                 onClick={() => handleStop(c)}
                                 disabled={isLoadingThis}
-                                className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg border border-rose-200 dark:border-rose-800 transition-colors cursor-pointer disabled:opacity-50"
-                                title="Stop Campaign"
+                                className="p-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg border border-rose-200 dark:border-rose-800 transition-colors cursor-pointer disabled:opacity-50"
+                                data-tooltip="Stop Campaign"
                               >
                                 {isLoadingThis ? (
                                   <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -1148,7 +1142,6 @@ export default function CampaignsPage() {
                                     <rect x="6" y="6" width="12" height="12" rx="2" />
                                   </svg>
                                 )}
-                                <span>Stop</span>
                               </button>
                             </>
                           )}
@@ -1160,8 +1153,8 @@ export default function CampaignsPage() {
                                 type="button"
                                 onClick={() => handleResume(c)}
                                 disabled={isLoadingThis}
-                                className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg border border-emerald-200 dark:border-emerald-800 transition-colors cursor-pointer disabled:opacity-50"
-                                title="Resume Campaign"
+                                className="p-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg border border-emerald-200 dark:border-emerald-800 transition-colors cursor-pointer disabled:opacity-50"
+                                data-tooltip="Resume Campaign"
                               >
                                 {isLoadingThis ? (
                                   <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -1173,15 +1166,14 @@ export default function CampaignsPage() {
                                     <polygon points="5 3 19 12 5 21 5 3" />
                                   </svg>
                                 )}
-                                <span>Resume</span>
                               </button>
 
                               <button
                                 type="button"
                                 onClick={() => handleStop(c)}
                                 disabled={isLoadingThis}
-                                className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg border border-rose-200 dark:border-rose-800 transition-colors cursor-pointer disabled:opacity-50"
-                                title="Stop Campaign"
+                                className="p-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg border border-rose-200 dark:border-rose-800 transition-colors cursor-pointer disabled:opacity-50"
+                                data-tooltip="Stop Campaign"
                               >
                                 {isLoadingThis ? (
                                   <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -1193,7 +1185,6 @@ export default function CampaignsPage() {
                                     <rect x="6" y="6" width="12" height="12" rx="2" />
                                   </svg>
                                 )}
-                                <span>Stop</span>
                               </button>
                             </>
                           )}
@@ -1204,8 +1195,8 @@ export default function CampaignsPage() {
                               type="button"
                               onClick={() => handleStart(c)}
                               disabled={isLoadingThis}
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg border border-blue-200 dark:border-blue-800 transition-colors cursor-pointer disabled:opacity-50"
-                              title="Start Campaign"
+                              className="p-1.5 text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg border border-blue-200 dark:border-blue-800 transition-colors cursor-pointer disabled:opacity-50"
+                              data-tooltip="Start Campaign"
                             >
                               {isLoadingThis ? (
                                 <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -1217,18 +1208,16 @@ export default function CampaignsPage() {
                                   <polygon points="5 3 19 12 5 21 5 3" />
                                 </svg>
                               )}
-                              <span>Start</span>
                             </button>
                           )}
 
-
-                          {/* 6. DELETE BUTTON */}
+                          {/* 5. DELETE BUTTON */}
                           <button
                             type="button"
                             onClick={() => handleDelete(c)}
                             disabled={isLoadingThis}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg border border-rose-200 dark:border-rose-800 transition-colors cursor-pointer disabled:opacity-50"
-                            title="Delete Campaign"
+                            className="p-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg border border-rose-200 dark:border-rose-800 transition-colors cursor-pointer disabled:opacity-50"
+                            data-tooltip="Delete Campaign"
                           >
                             {isLoadingThis ? (
                               <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -1242,7 +1231,6 @@ export default function CampaignsPage() {
                                 <line x1="14" y1="11" x2="14" y2="17" />
                               </svg>
                             )}
-                            <span>Delete</span>
                           </button>
                         </div>
                       </td>

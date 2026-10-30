@@ -2556,10 +2556,15 @@ export default function DelegatesPage() {
                       {/* Actions */}
                       <td className="py-3.5 px-4 text-right whitespace-nowrap">
                         <button
+                          type="button"
                           onClick={() => setSelectedDelegate(delegate)}
-                          className="px-2.5 py-1 text-xs font-semibold text-[#AA2D7B] hover:text-[#55355E] dark:hover:text-[#D85A9A] bg-[#faedf5]/70 hover:bg-[#faedf5] dark:bg-gray-800 rounded transition-colors cursor-pointer"
+                          className="p-1.5 text-xs font-semibold text-[#AA2D7B] dark:text-[#D85A9A] bg-[#faedf5]/70 hover:bg-[#faedf5] dark:bg-pink-950/40 dark:hover:bg-pink-900/50 rounded-lg border border-[#AA2D7B]/20 dark:border-[#AA2D7B]/40 transition-colors cursor-pointer inline-flex items-center justify-center"
+                          data-tooltip="View Details"
                         >
-                          View Details
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
                         </button>
                       </td>
                     </tr>
