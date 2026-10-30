@@ -1017,12 +1017,13 @@
   display: flex;
   flex-direction: column;
   gap: 52px;
+  padding-left: 28px;
 }
 
 .kz-day-section-row {
   display: grid;
   grid-template-columns: 76px 1fr;
-  gap: 28px;
+  gap: 36px;
   align-items: stretch;
   position: relative;
 }
@@ -1175,11 +1176,11 @@
   color: var(--kz-brand-magenta);
 }
 
-/* 4 Cards per Row Grid */
+/* 3 Cards per Row Grid */
 .kz-sessions-responsive-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
 }
 
 /* Session Card Block */
@@ -1766,6 +1767,12 @@
   .kz-programme-container {
     padding: 0 24px;
   }
+  .kz-programme-days-stack {
+    padding-left: 20px;
+  }
+  .kz-day-section-row {
+    gap: 28px;
+  }
   .kz-sessions-responsive-grid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -1786,6 +1793,9 @@
   .kz-programme-columns-grid {
     grid-template-columns: 1fr;
     gap: 24px;
+  }
+  .kz-programme-days-stack {
+    padding-left: 12px;
   }
   .kz-day-section-row {
     grid-template-columns: 66px 1fr;
@@ -1844,6 +1854,11 @@
   }
 
   /* Sessions View on Mobile */
+  .kz-programme-days-stack {
+    padding-left: 0;
+    gap: 36px;
+  }
+
   .kz-day-section-row {
     display: flex;
     flex-direction: column;

@@ -324,21 +324,7 @@ export default function AboutPage() {
             <span className="kz-about-hero-magenta">now with intelligence.</span>
           </h1>
 
-          {/* Capsule Pills Row */}
-          <div className="kz-about-pills-row" aria-label="Event Details">
-            <div className="kz-about-pill">
-              <span className="kz-about-pill-dot" />
-              <span>1–3 January 2027</span>
-            </div>
-            <div className="kz-about-pill">
-              <span className="kz-about-pill-dot" />
-              <span>Ahmedabad, India</span>
-            </div>
-            <div className="kz-about-pill">
-              <span className="kz-about-pill-dot" />
-              <span>International Conference Centre</span>
-            </div>
-          </div>
+ 
 
           {/* Shortened Subtitle / Lead Paragraph */}
           <p className="kz-about-hero-description">
