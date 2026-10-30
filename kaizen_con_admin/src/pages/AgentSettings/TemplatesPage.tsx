@@ -13,7 +13,7 @@ import Swal from "sweetalert2";
 export interface TemplateItem {
   id: string;
   name: string;
-  purpose: "initial" | "followup" | "registration" | string;
+  purpose: "general" | "initial" | "followup" | "registration" | string;
   subject: string;
   html_body?: string;
   active: boolean;
@@ -340,15 +340,46 @@ export default function TemplatesPage() {
   // Create Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [createSubmitting, setCreateSubmitting] = useState(false);
-  const [createMethod, setCreateMethod] = useState<"editor" | "upload">("editor");
   const [createFormData, setCreateFormData] = useState({
     name: "",
-    purpose: "initial" as "initial" | "followup" | "registration",
+    purpose: "general" as "general" | "initial" | "followup" | "registration",
     subject: "",
-    html_body: DYNAMIC_TEMPLATES_DATA[0].html_body || "",
     active: true,
   });
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [docxFile, setDocxFile] = useState<File | null>(null);
+  const [isDraggingDocx, setIsDraggingDocx] = useState(false);
+  const [docxFileError, setDocxFileError] = useState<string | null>(null);
+
+  const MAX_DOCX_SIZE_MB = 25;
+  const MAX_DOCX_SIZE_BYTES = MAX_DOCX_SIZE_MB * 1024 * 1024;
+
+  const handleSelectDocxFile = (file: File | null) => {
+    if (!file) {
+      setDocxFile(null);
+      setDocxFileError(null);
+      return;
+    }
+
+    const fileName = file.name.toLowerCase();
+    if (!fileName.endsWith(".docx") && !fileName.endsWith(".doc")) {
+      setDocxFile(null);
+      setDocxFileError("Invalid file type: Please upload a Microsoft Word document (.docx).");
+      toastError("Please upload a Microsoft Word document (.docx).");
+      return;
+    }
+
+    if (file.size > MAX_DOCX_SIZE_BYTES) {
+      const actualMb = (file.size / (1024 * 1024)).toFixed(2);
+      setDocxFile(null);
+      setDocxFileError(`File size exceeds the 25 MB maximum limit (Selected file is ${actualMb} MB). Please choose a smaller document.`);
+      toastError(`File size exceeds 25 MB limit (${actualMb} MB).`);
+      return;
+    }
+
+    // Valid docx file under 25 MB
+    setDocxFile(file);
+    setDocxFileError(null);
+  };
 
   // Edit Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -416,12 +447,13 @@ export default function TemplatesPage() {
   const stats = useMemo(() => {
     const total = templates.length;
     const active = templates.filter((t) => t.active).length;
+    const general = templates.filter((t) => (t.purpose || "").trim().toLowerCase() === "general").length;
     const initial = templates.filter((t) => (t.purpose || "").trim().toLowerCase() === "initial").length;
     const followup = templates.filter((t) => (t.purpose || "").trim().toLowerCase() === "followup").length;
     const registration = templates.filter((t) => (t.purpose || "").trim().toLowerCase() === "registration").length;
     const activePercent = total > 0 ? Math.round((active / total) * 100) : 0;
 
-    return { total, active, initial, followup, registration, activePercent };
+    return { total, active, general, initial, followup, registration, activePercent };
   }, [templates]);
 
   // Format title
@@ -438,6 +470,13 @@ export default function TemplatesPage() {
   const getPurposeBadge = (purpose?: string) => {
     const p = (purpose || "").trim().toLowerCase();
     switch (p) {
+      case "general":
+        return {
+          label: "General Announcement",
+          bg: "bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800",
+          dot: "bg-purple-500",
+          iconColor: "text-[#A92E83]",
+        };
       case "initial":
         return {
           label: "Initial Outreach",
@@ -577,8 +616,31 @@ export default function TemplatesPage() {
   // Submit Create
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!createFormData.name.trim() || !createFormData.subject.trim()) {
-      toastError("Please enter template name and subject.");
+    if (!createFormData.name.trim()) {
+      toastError("Please enter template name.");
+      return;
+    }
+    if (!createFormData.subject.trim()) {
+      toastError("Please enter email subject line.");
+      return;
+    }
+    if (!docxFile) {
+      setDocxFileError("Word document (.docx) is required. Please upload a file under 25 MB.");
+      toastError("Please upload a Word document (.docx) for the email body.");
+      return;
+    }
+
+    const fileName = docxFile.name.toLowerCase();
+    if (!fileName.endsWith(".docx") && !fileName.endsWith(".doc")) {
+      setDocxFileError("Invalid file format. Only Microsoft Word (.docx) documents are supported.");
+      toastError("Invalid file type. Please upload a Microsoft Word document (.docx).");
+      return;
+    }
+
+    if (docxFile.size > MAX_DOCX_SIZE_BYTES) {
+      const actualMb = (docxFile.size / (1024 * 1024)).toFixed(2);
+      setDocxFileError(`File size exceeds 25 MB limit (${actualMb} MB). Please choose a file up to 25 MB.`);
+      toastError(`File size exceeds 25 MB limit (${actualMb} MB).`);
       return;
     }
 
@@ -586,33 +648,33 @@ export default function TemplatesPage() {
     try {
       const payload: any = {
         name: createFormData.name.trim(),
-        purpose: createFormData.purpose,
         subject: createFormData.subject.trim(),
+        purpose: createFormData.purpose,
         active: createFormData.active,
+        docx_file: docxFile,
       };
-      if (createMethod === "upload" && uploadFile) payload.html_file = uploadFile;
-      else payload.html_body = createFormData.html_body;
 
       const res = await createTemplate(payload);
+      const resItem = res?.results?.[0] || (res?.id ? res : null);
 
       const newTemplateItem: TemplateItem = {
-        id: res?.id || `tpl-${Date.now()}`,
-        name: res?.name || createFormData.name,
-        purpose: res?.purpose || createFormData.purpose,
-        subject: res?.subject || createFormData.subject,
-        html_body: res?.html_body || createFormData.html_body,
-        active: res?.active !== undefined ? res.active : createFormData.active,
-        version: res?.version || 1,
-        created_at: res?.created_at || new Date().toISOString(),
-        updated_at: res?.updated_at || new Date().toISOString(),
+        id: resItem?.id || `tpl-${Date.now()}`,
+        name: resItem?.name || createFormData.name,
+        purpose: resItem?.purpose || createFormData.purpose,
+        subject: resItem?.subject || createFormData.subject,
+        html_body: resItem?.html_body || "",
+        active: resItem?.active !== undefined ? resItem.active : createFormData.active,
+        version: resItem?.version || 1,
+        created_at: resItem?.created_at || new Date().toISOString(),
+        updated_at: resItem?.updated_at || new Date().toISOString(),
       };
 
       setTemplates((prev) => [newTemplateItem, ...prev]);
 
       const isDark = document.documentElement.classList.contains("dark");
       await Swal.fire({
-        title: "Template Created",
-        text: `"${newTemplateItem.name}" is now ready for deployment.`,
+        title: "Template Created!",
+        text: `"${newTemplateItem.name}" has been created successfully from "${docxFile.name}".`,
         icon: "success",
         confirmButtonColor: "#A92E83",
         background: isDark ? "#111827" : "#FFFFFF",
@@ -622,27 +684,26 @@ export default function TemplatesPage() {
       setIsCreateModalOpen(false);
       setCreateFormData({
         name: "",
-        purpose: "initial",
+        purpose: "general",
         subject: "",
-        html_body: DYNAMIC_TEMPLATES_DATA[0].html_body || "",
         active: true,
       });
-      setUploadFile(null);
-    } catch {
-      const localNew: TemplateItem = {
-        id: `tpl-${Date.now()}`,
-        name: createFormData.name,
-        purpose: createFormData.purpose,
-        subject: createFormData.subject,
-        html_body: createFormData.html_body,
-        active: createFormData.active,
-        version: 1,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-      setTemplates((prev) => [localNew, ...prev]);
-      setIsCreateModalOpen(false);
-      info("Template created.");
+      setDocxFile(null);
+      setDocxFileError(null);
+
+      // Refresh from server
+      fetchTemplates();
+    } catch (err: any) {
+      console.error("Create template error:", err);
+      const isDark = document.documentElement.classList.contains("dark");
+      await Swal.fire({
+        title: "Creation Failed",
+        text: err?.message || "Failed to create template on server.",
+        icon: "error",
+        confirmButtonColor: "#A92E83",
+        background: isDark ? "#111827" : "#FFFFFF",
+        color: isDark ? "#F9FAFB" : "#111827",
+      });
     } finally {
       setCreateSubmitting(false);
     }
@@ -937,6 +998,19 @@ export default function TemplatesPage() {
                 <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${purposeFilter === "All" ? "bg-white/20 text-white" : "bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200"}`}>
                   {stats.total}
                 </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPurposeFilter("general")}
+                className={`px-3 py-1.5 rounded-xl font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${purposeFilter === "general"
+                    ? "bg-purple-700 text-white shadow-xs"
+                    : "bg-gray-100 dark:bg-gray-700/70 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                  }`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                <span>General</span>
+                <span className="text-[10px] opacity-80">({stats.general})</span>
               </button>
 
               <button
@@ -1531,213 +1605,371 @@ export default function TemplatesPage() {
 
       {/* ======================= CREATE TEMPLATE MODAL ======================= */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 w-full max-w-3xl max-h-[92vh] flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
-              <div className="flex items-center gap-2.5">
-                <span className="p-2 rounded-xl bg-[#A92E83]/10 text-[#A92E83]">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M12 4v16m8-8H4" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-black/65 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
+          <div className="bg-white dark:bg-gray-900 rounded-[28px] shadow-2xl border border-gray-200/90 dark:border-gray-700/80 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden transition-all duration-300">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 sm:px-8 py-5 border-b border-gray-200/90 dark:border-gray-800 bg-gray-50/40 dark:bg-gray-900/60">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#A92E83]/15 to-[#801B5F]/25 text-[#A92E83] dark:text-purple-400 flex items-center justify-center border border-[#A92E83]/25 shadow-xs">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                </span>
+                </div>
                 <div>
-                  <h2 className="text-base font-bold text-gray-900 dark:text-white">Create Email Template</h2>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Add a responsive email template for automated campaign outreach
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight">Create Email Template</h2>
+                    <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-800">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                      DOCX Parser
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    Configure template metadata and upload a Word document (.docx) to automatically compose the email layout.
                   </p>
                 </div>
               </div>
+
               <button
                 type="button"
-                onClick={() => setIsCreateModalOpen(false)}
-                className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg cursor-pointer"
+                onClick={() => {
+                  setIsCreateModalOpen(false);
+                  setDocxFile(null);
+                  setDocxFileError(null);
+                }}
+                className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 flex items-center justify-center transition-colors cursor-pointer"
+                title="Close"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
                   <path d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
-            <form onSubmit={handleCreateSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Modal Body Form */}
+            <form onSubmit={handleCreateSubmit} className="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-5">
+              {/* Row 1: Name & Purpose */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                    Template Title <span className="text-rose-500">*</span>
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
+                      Template Name <span className="text-rose-500">*</span>
+                    </label>
+                    <span className="text-[11px] text-gray-400">Max 255 chars</span>
+                  </div>
                   <input
                     type="text"
                     required
+                    maxLength={255}
                     value={createFormData.name}
                     onChange={(e) => setCreateFormData({ ...createFormData, name: e.target.value })}
-                    placeholder="e.g. Speaker Acceptance & Guidelines"
-                    className="w-full px-3 py-2 text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#A92E83] dark:text-white"
+                    placeholder="e.g. KAIZENCON INVITATION"
+                    className="w-full px-4 py-2.5 text-sm bg-gray-50/60 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 rounded-xl focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-[#A92E83]/20 focus:border-[#A92E83] dark:focus:border-[#A92E83] text-gray-900 dark:text-white placeholder:text-gray-400 transition-all shadow-2xs"
                   />
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+                    Descriptive name shown in campaign studio and template lists
+                  </p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                    Purpose / Category <span className="text-rose-500">*</span>
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
+                      Purpose / Category <span className="text-rose-500">*</span>
+                    </label>
+                    <span className="text-[11px] text-gray-400">Campaign cadence</span>
+                  </div>
                   <select
                     value={createFormData.purpose}
                     onChange={(e) =>
                       setCreateFormData({
                         ...createFormData,
-                        purpose: e.target.value as "initial" | "followup" | "registration",
+                        purpose: e.target.value as "general" | "initial" | "followup" | "registration",
                       })
                     }
-                    className="w-full px-3 py-2 text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#A92E83] dark:text-white"
+                    className="w-full px-4 py-2.5 text-sm bg-gray-50/60 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 rounded-xl focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-[#A92E83]/20 focus:border-[#A92E83] dark:focus:border-[#A92E83] text-gray-900 dark:text-white transition-all shadow-2xs cursor-pointer"
                   >
+                    <option value="general">general — General Announcement / Official Invitation</option>
                     <option value="initial">initial — Initial Campaign Outreach</option>
-                    <option value="followup">followup — Automated Follow-up Reminder</option>
+                    <option value="followup">followup — Automated Follow-Up Reminder</option>
                     <option value="registration">registration — Registration Confirmation Pass</option>
                   </select>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+                    Determines automatic email workflow triggers and audience segmentation
+                  </p>
                 </div>
               </div>
 
+              {/* Row 2: Subject Line with dynamic token inserter */}
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                  <label className="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
                     Email Subject Line <span className="text-rose-500">*</span>
                   </label>
-                  <div className="flex items-center gap-1 text-[11px] text-gray-500">
-                    <span>Insert dynamic token:</span>
-                    {["{{name}}", "{{conference_url}}", "{{contact_email}}"].map((tag) => (
+
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                    <span className="text-[11px] text-gray-400 font-medium">Insert token:</span>
+                    {[
+                      { tag: "{{name}}", label: "Recipient Name" },
+                      { tag: "{{hospital_name}}", label: "Hospital Name" },
+                      { tag: "{{registration_url}}", label: "Registration Link" },
+                      { tag: "{{conference_url}}", label: "Conference Link" },
+                    ].map(({ tag }) => (
                       <button
                         key={tag}
                         type="button"
                         onClick={() => insertVariableInSubject(tag, false)}
-                        className="px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-950/40 text-[#A92E83] dark:text-purple-300 border border-purple-200 dark:border-purple-800 hover:bg-purple-100 font-mono text-[10px] cursor-pointer"
+                        className="px-2 py-0.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-[#A92E83] dark:text-purple-300 border border-purple-200 dark:border-purple-800 hover:bg-[#A92E83] hover:text-white dark:hover:bg-[#A92E83] dark:hover:text-white font-mono text-[11px] font-semibold transition-all cursor-pointer shadow-2xs"
+                        title={`Append ${tag} to subject line`}
                       >
                         +{tag}
                       </button>
                     ))}
                   </div>
                 </div>
-                <input
-                  type="text"
-                  required
-                  value={createFormData.subject}
-                  onChange={(e) => setCreateFormData({ ...createFormData, subject: e.target.value })}
-                  placeholder="e.g. KaizenCon 2027: Welcome {{name}} to Robotics & AI in GI Surgery"
-                  className="w-full px-3 py-2 text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#A92E83] dark:text-white"
-                />
+
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    maxLength={998}
+                    value={createFormData.subject}
+                    onChange={(e) => setCreateFormData({ ...createFormData, subject: e.target.value })}
+                    placeholder="e.g. Join me at KAIZENCON 2027, Ahmedabad, 1–3 January 2027"
+                    className="w-full px-4 py-2.5 text-sm bg-gray-50/60 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 rounded-xl focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-[#A92E83]/20 focus:border-[#A92E83] dark:focus:border-[#A92E83] text-gray-900 dark:text-white placeholder:text-gray-400 transition-all shadow-2xs"
+                  />
+                </div>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+                  Recipient inboxes will see this subject line. Tokens are replaced with dynamic delegate data automatically.
+                </p>
               </div>
 
-              <div className="flex items-center gap-2 pt-1">
-                <input
-                  type="checkbox"
-                  id="create-active"
-                  checked={createFormData.active}
-                  onChange={(e) => setCreateFormData({ ...createFormData, active: e.target.checked })}
-                  className="w-4 h-4 text-[#A92E83] rounded border-gray-300 focus:ring-[#A92E83] cursor-pointer"
-                />
-                <label htmlFor="create-active" className="text-xs font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                  Activate template immediately for campaign dispatches
-                </label>
-              </div>
-
-              <div className="pt-2 border-t border-gray-200 dark:border-gray-800">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="font-semibold text-gray-700 dark:text-gray-300">Template Content:</span>
-                  <div className="flex items-center bg-gray-100 dark:bg-gray-800 p-0.5 rounded-xl">
-                    <button
-                      type="button"
-                      onClick={() => setCreateMethod("editor")}
-                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${createMethod === "editor"
-                          ? "bg-white dark:bg-gray-700 text-[#A92E83] dark:text-white shadow-xs"
-                          : "text-gray-600 dark:text-gray-400"
-                        }`}
-                    >
-                      HTML Editor
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCreateMethod("upload")}
-                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${createMethod === "upload"
-                          ? "bg-white dark:bg-gray-700 text-[#A92E83] dark:text-white shadow-xs"
-                          : "text-gray-600 dark:text-gray-400"
-                        }`}
-                    >
-                      Upload .html File
-                    </button>
+              {/* Row 3: Active Status Interactive Switch Card */}
+              <div
+                onClick={() => setCreateFormData({ ...createFormData, active: !createFormData.active })}
+                className="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-gray-50/70 dark:bg-gray-800/50 border border-gray-200/90 dark:border-gray-700/80 cursor-pointer hover:bg-gray-100/70 dark:hover:bg-gray-800/80 transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
+                    createFormData.active
+                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
+                      : "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                  }`}>
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-900 dark:text-white">
+                      Activate Template Immediately
+                    </p>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                      When active, this template can be scheduled for immediate automated campaign dispatch.
+                    </p>
                   </div>
                 </div>
 
-                {createMethod === "editor" ? (
-                  <div>
-                    <div className="flex items-center justify-between text-[11px] text-gray-500 mb-1">
-                      <span>HTML Body code (pre-styled responsive KaizenCon template provided)</span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setCreateFormData({
-                            ...createFormData,
-                            html_body: DYNAMIC_TEMPLATES_DATA[0].html_body || "",
-                          })
-                        }
-                        className="text-[#A92E83] hover:underline cursor-pointer"
-                      >
-                        Reset to sample
-                      </button>
-                    </div>
-                    <textarea
-                      rows={12}
-                      value={createFormData.html_body}
-                      onChange={(e) => setCreateFormData({ ...createFormData, html_body: e.target.value })}
-                      className="w-full p-3 font-mono text-[11px] bg-gray-900 text-gray-100 rounded-2xl border border-gray-700 focus:outline-none focus:ring-1 focus:ring-[#A92E83]"
-                      placeholder="<!DOCTYPE html><html>...</html>"
-                    />
-                  </div>
-                ) : (
-                  <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl p-8 text-center bg-gray-50/50 dark:bg-gray-800/30">
-                    <svg className="w-10 h-10 mx-auto text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeWidth="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                      Upload responsive HTML template (.html)
-                    </p>
-                    <input
-                      type="file"
-                      accept=".html,.htm"
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          setUploadFile(e.target.files[0]);
-                        }
-                      }}
-                      className="mt-3 text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#A92E83] file:text-white hover:file:bg-[#8e246d] cursor-pointer"
-                    />
-                    {uploadFile && (
-                      <p className="mt-2 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                        Selected: {uploadFile.name} ({(uploadFile.size / 1024).toFixed(1)} KB)
-                      </p>
-                    )}
-                  </div>
-                )}
+                <div className={`w-11 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
+                  createFormData.active ? "bg-emerald-500" : "bg-gray-300 dark:bg-gray-600"
+                }`}>
+                  <div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                    createFormData.active ? "translate-x-5" : "translate-x-0"
+                  }`} />
+                </div>
               </div>
 
-              <div className="pt-4 border-t border-gray-200 dark:border-gray-800 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+              {/* Row 4: Word Document (.docx) Upload Area */}
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
+                    Email Body Word Document (.docx) <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400">
+                      Max Size: <strong className="text-gray-800 dark:text-gray-200">25 MB</strong>
+                    </span>
+                    <span className="hidden sm:inline-block text-gray-300 dark:text-gray-600">•</span>
+                    <span className="hidden sm:inline-block text-[11px] font-semibold text-[#A92E83] dark:text-purple-400">
+                      docx_file
+                    </span>
+                  </div>
+                </div>
+
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDraggingDocx(true);
+                  }}
+                  onDragLeave={() => setIsDraggingDocx(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDraggingDocx(false);
+                    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                      handleSelectDocxFile(e.dataTransfer.files[0]);
+                    }
+                  }}
+                  className={`relative border-2 border-dashed rounded-2xl p-7 text-center transition-all duration-200 ${
+                    docxFileError
+                      ? "border-rose-500/80 bg-rose-50/30 dark:bg-rose-950/20 ring-2 ring-rose-500/20"
+                      : isDraggingDocx
+                      ? "border-[#A92E83] bg-purple-50/70 dark:bg-purple-950/30 scale-[1.005]"
+                      : docxFile
+                      ? "border-emerald-500/70 bg-emerald-50/30 dark:bg-emerald-950/20"
+                      : "border-gray-300 dark:border-gray-700 bg-gradient-to-b from-gray-50/60 to-white dark:from-gray-800/30 dark:to-gray-900/30 hover:border-[#A92E83]/60 dark:hover:border-purple-500/60"
+                  }`}
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={createSubmitting}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#A92E83] hover:bg-[#8e246d] rounded-xl shadow-xs transition-colors cursor-pointer disabled:opacity-60"
-                >
-                  {createSubmitting ? (
-                    <>
-                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Saving Template...</span>
-                    </>
+                  <input
+                    type="file"
+                    id="docx_file_input"
+                    accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.doc"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        handleSelectDocxFile(e.target.files[0]);
+                      }
+                      e.target.value = "";
+                    }}
+                    className="hidden"
+                  />
+
+                  {docxFile ? (
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-2">
+                      <div className="flex items-center gap-3.5 text-left">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex flex-col items-center justify-center font-bold shadow-md shrink-0">
+                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" />
+                          </svg>
+                          <span className="text-[8px] -mt-1 tracking-wider uppercase font-mono font-extrabold">DOCX</span>
+                        </div>
+
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-bold text-gray-900 dark:text-white">
+                              {docxFile.name}
+                            </p>
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                <path d="M5 13l4 4L19 7" />
+                              </svg>
+                              Ready to Parse
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            {(docxFile.size / 1024).toFixed(1)} KB ({(docxFile.size / (1024 * 1024)).toFixed(2)} MB) • Microsoft Word Document
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <label
+                          htmlFor="docx_file_input"
+                          className="px-3.5 py-1.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-xs font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer shadow-2xs transition-colors"
+                        >
+                          Change File
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => handleSelectDocxFile(null)}
+                          className="px-3 py-1.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 text-xs font-semibold rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/60 cursor-pointer transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
                   ) : (
-                    <span>Create Template</span>
+                    <label htmlFor="docx_file_input" className="cursor-pointer block py-3">
+                      <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 border border-blue-500/20 shadow-xs">
+                        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+                          <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+
+                      <p className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                        <span className="text-[#A92E83] dark:text-purple-400 hover:underline">Click to browse</span> or drag and drop your Word document here
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Accepts Microsoft Word <span className="font-semibold text-gray-700 dark:text-gray-300">.docx</span> • Maximum file size <span className="font-bold text-gray-800 dark:text-gray-200">25 MB</span>
+                      </p>
+
+                      <div className="mt-4">
+                        <span className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold text-[#A92E83] bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 rounded-xl border border-purple-200 dark:border-purple-800 transition-colors shadow-2xs">
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                          </svg>
+                          Select .docx File (Up to 25 MB)
+                        </span>
+                      </div>
+                    </label>
                   )}
-                </button>
+                </div>
+
+                {/* Red validation error line if file exceeds 25 MB or is invalid */}
+                {docxFileError && (
+                  <div className="flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-rose-50/90 dark:bg-rose-950/50 border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-semibold animate-in fade-in slide-in-from-top-1 duration-200 shadow-2xs">
+                    <span className="p-1 rounded-full bg-rose-200/80 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 shrink-0">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                    </span>
+                    <span className="flex-1">{docxFileError}</span>
+                    <button
+                      type="button"
+                      onClick={() => setDocxFileError(null)}
+                      className="text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-200 text-xs font-bold underline cursor-pointer"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                )}
+
+                {/* Conversion information notice */}
+                <div className="p-3.5 bg-gradient-to-r from-purple-50/70 to-fuchsia-50/40 dark:from-purple-950/30 dark:to-fuchsia-950/20 border border-purple-200/80 dark:border-purple-900/60 rounded-2xl text-xs text-purple-950 dark:text-purple-200 flex items-start gap-2.5">
+                  <span className="p-1 rounded-lg bg-[#A92E83]/10 text-[#A92E83] dark:text-purple-400 shrink-0 mt-0.5">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                      <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </span>
+                  <div className="leading-relaxed">
+                    <span className="font-bold">Automated Agent Conversion:</span> The email agent parses typography, headings, tables, bullet points, links, and imagery from your Word document (<code className="px-1 py-0.5 rounded bg-purple-100 dark:bg-purple-900/50 font-mono text-[11px]">.docx</code>), generating a responsive, mobile-tested email template automatically.
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer Actions */}
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                <span className="text-xs text-gray-400">
+                  Required fields marked with <span className="text-rose-500">*</span>
+                </span>
+
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCreateModalOpen(false);
+                      setDocxFile(null);
+                      setDocxFileError(null);
+                    }}
+                    className="px-5 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={createSubmitting || !docxFile}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-[#A92E83] via-[#942672] to-[#7a195b] hover:from-[#8e246d] hover:to-[#63144a] rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {createSubmitting ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Uploading & Parsing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Create Template</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </form>
           </div>

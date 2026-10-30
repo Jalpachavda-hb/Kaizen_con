@@ -23,7 +23,7 @@ export default function HomePage() {
       <IdeaSection />
 
       {/* Scientific Themes & Tracks */}
-      <TracksSection />
+      <TracksSection /> 
 
       {/* Live AI Layer Experience */}
       <AiExperienceShowcase />

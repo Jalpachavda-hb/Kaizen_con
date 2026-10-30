@@ -17,16 +17,25 @@ import {
 } from "../../api/ApiPath";
 import Swal from "sweetalert2";
 
+export interface CampaignAttachment {
+  id?: string;
+  filename: string;
+  content_type?: string;
+  size?: number;
+  url?: string;
+}
+
 export interface CampaignConfiguration {
   registration_url?: string;
   followup_interval_days?: number;
-
+  followup_delay_minutes?: number;
   sending_delay_seconds?: number;
   max_followups?: number;
   max_sends_per_day?: number;
   re_mail?: boolean;
   template_ids?: Record<string, any>;
   contact_ids?: string[];
+  attachments?: CampaignAttachment[];
   [key: string]: any;
 }
 
@@ -980,6 +989,22 @@ export default function CampaignsPage() {
                             </svg>
                           </button>
                         </div>
+                        {c.configuration?.attachments && c.configuration.attachments.length > 0 && (
+                          <div className="flex items-center gap-1.5 mt-1.5">
+                            <span
+                              onClick={() => handleViewDetails(c)}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-semibold bg-pink-50 dark:bg-pink-950/40 text-[#AA2D7B] dark:text-[#f48fcb] border border-[#AA2D7B]/20 hover:bg-pink-100 transition cursor-pointer"
+                              title={c.configuration.attachments.map((a: any) => a.filename).join(", ")}
+                            >
+                              <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                              </svg>
+                              <span>
+                                {c.configuration.attachments.length} attachment{c.configuration.attachments.length !== 1 ? "s" : ""}
+                              </span>
+                            </span>
+                          </div>
+                        )}
                       </td>
 
                       {/* Status */}
@@ -1300,6 +1325,56 @@ export default function CampaignsPage() {
                   <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap text-xs sm:text-sm pl-4 border-l-2 border-[#AA2D7B]/30">
                     {selectedCampaign.description}
                   </p>
+                </div>
+              )}
+
+              {/* Campaign Attachments Card */}
+              {selectedCampaign.configuration?.attachments && selectedCampaign.configuration.attachments.length > 0 && (
+                <div className="p-4 rounded-xl bg-pink-50/40 dark:bg-pink-950/20 border border-[#AA2D7B]/20 dark:border-pink-900/40 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="p-1.5 rounded-lg bg-pink-100 dark:bg-pink-900/60 text-[#AA2D7B] dark:text-[#f48fcb]">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                        </svg>
+                      </span>
+                      <h4 className="font-bold text-gray-900 dark:text-white uppercase tracking-wider text-[11px]">
+                        Campaign Attachments ({selectedCampaign.configuration.attachments.length})
+                      </h4>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                    {selectedCampaign.configuration.attachments.map((att: any, aIdx: number) => {
+                      const formatSize = (b?: number) => {
+                        if (!b) return "—";
+                        const k = 1024;
+                        const sizes = ["B", "KB", "MB", "GB"];
+                        const i = Math.floor(Math.log(b) / Math.log(k));
+                        return parseFloat((b / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+                      };
+                      const ext = (att.filename || "").split(".").pop()?.toUpperCase() || "FILE";
+                      return (
+                        <div
+                          key={att.id || aIdx}
+                          className="p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-between gap-2 shadow-2xs"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span className="px-1.5 py-0.5 rounded text-[9.5px] font-black uppercase bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300">
+                              {ext}
+                            </span>
+                            <div className="min-w-0">
+                              <p className="text-xs font-semibold text-gray-900 dark:text-white truncate" title={att.filename}>
+                                {att.filename}
+                              </p>
+                              <p className="text-[10.5px] text-gray-400 font-mono mt-0.5">
+                                {formatSize(att.size)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 

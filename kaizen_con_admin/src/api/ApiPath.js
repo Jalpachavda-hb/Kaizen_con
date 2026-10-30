@@ -759,42 +759,92 @@ export const getCampaigns = async (offset = 0, limit = 100, campaignId = null) =
  */
 export const createCampaign = async (campaignData) => {
   try {
-    const payload = {
-      name: campaignData.name || '',
-      description: campaignData.description !== undefined && campaignData.description !== null && campaignData.description !== ''
-        ? String(campaignData.description).trim()
-        : null,
-      goal: campaignData.goal || 'registration',
-      contact_ids: Array.isArray(campaignData.contact_ids) ? campaignData.contact_ids : [],
-      registration_url: campaignData.registration_url || '',
-      followup_interval_days: Number(campaignData.followup_interval_days ?? 1),
-    
-      sending_delay_seconds: Number(campaignData.sending_delay_seconds ?? 10),
-      max_followups: Number(campaignData.max_followups ?? 10),
-      max_sends_per_day: Number(campaignData.max_sends_per_day ?? 10),
-      re_mail: campaignData.re_mail !== undefined ? Boolean(campaignData.re_mail) : true,
+    let body;
+    const headers = {
+      'Accept': '*/*',
     };
 
-    // Pass template_id directly as an array of IDs
-    const templateIdList = Array.isArray(campaignData.template_id)
-      ? campaignData.template_id
-      : Array.isArray(campaignData.template_ids)
-      ? campaignData.template_ids
-      : campaignData.template_id
-      ? [campaignData.template_id]
-      : [];
+    if (campaignData instanceof FormData) {
+      body = campaignData;
+    } else {
+      const formData = new FormData();
+      formData.append('name', campaignData.name ? String(campaignData.name).trim() : '');
 
-    if (templateIdList.length > 0) {
-      payload.template_id = templateIdList;
+      if (campaignData.description !== undefined && campaignData.description !== null && campaignData.description !== '') {
+        formData.append('description', String(campaignData.description).trim());
+      }
+
+      formData.append('goal', campaignData.goal || 'registration');
+
+      if (campaignData.registration_url) {
+        formData.append('registration_url', String(campaignData.registration_url).trim());
+      }
+
+      if (campaignData.followup_interval_days !== undefined && campaignData.followup_interval_days !== null && campaignData.followup_interval_days !== '') {
+        formData.append('followup_interval_days', String(campaignData.followup_interval_days));
+      }
+
+      if (campaignData.followup_delay_minutes !== undefined && campaignData.followup_delay_minutes !== null && campaignData.followup_delay_minutes !== '') {
+        formData.append('followup_delay_minutes', String(campaignData.followup_delay_minutes));
+      }
+
+      if (campaignData.sending_delay_seconds !== undefined && campaignData.sending_delay_seconds !== null && campaignData.sending_delay_seconds !== '') {
+        formData.append('sending_delay_seconds', String(campaignData.sending_delay_seconds));
+      }
+
+      if (campaignData.max_followups !== undefined && campaignData.max_followups !== null && campaignData.max_followups !== '') {
+        formData.append('max_followups', String(campaignData.max_followups));
+      }
+
+      if (campaignData.max_sends_per_day !== undefined && campaignData.max_sends_per_day !== null && campaignData.max_sends_per_day !== '') {
+        formData.append('max_sends_per_day', String(campaignData.max_sends_per_day));
+      }
+
+      if (campaignData.re_mail !== undefined) {
+        formData.append('re_mail', String(Boolean(campaignData.re_mail)));
+      }
+
+      // Contact IDs: comma-separated or array
+      const contactIds = Array.isArray(campaignData.contact_ids)
+        ? campaignData.contact_ids
+        : campaignData.contact_ids
+        ? String(campaignData.contact_ids).split(',').map((id) => id.trim()).filter(Boolean)
+        : [];
+      if (contactIds.length > 0) {
+        formData.append('contact_ids', contactIds.join(','));
+      }
+
+      // Template IDs: comma-separated or array
+      const templateIdList = Array.isArray(campaignData.template_id)
+        ? campaignData.template_id
+        : Array.isArray(campaignData.template_ids)
+        ? campaignData.template_ids
+        : campaignData.template_id
+        ? [campaignData.template_id]
+        : [];
+      if (templateIdList.length > 0) {
+        formData.append('template_id', templateIdList.join(','));
+      }
+
+      // Attachments (files)
+      if (campaignData.attachments) {
+        const files = Array.isArray(campaignData.attachments)
+          ? campaignData.attachments
+          : [campaignData.attachments];
+        files.forEach((file) => {
+          if (file) {
+            formData.append('attachments', file, file.name || 'attachment');
+          }
+        });
+      }
+
+      body = formData;
     }
 
     const response = await fetch(API_ENDPOINTS.EMAIL_AGENT_CAMPAIGNS, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify(payload),
+      headers,
+      body,
     });
 
     const data = await response.json().catch(() => null);
@@ -1199,23 +1249,26 @@ export const createTemplate = async (templateData) => {
       body = templateData;
     } else {
       body = new FormData();
-      body.append('name', templateData.name);
-      body.append('purpose', templateData.purpose);
-      body.append('subject', templateData.subject);
+      body.append('name', templateData.name || '');
+      body.append('subject', templateData.subject || '');
+      if (templateData.purpose) {
+        body.append('purpose', templateData.purpose);
+      }
       body.append('active', templateData.active !== undefined ? String(templateData.active) : 'true');
 
-      if (templateData.html_file instanceof File || templateData.html_file instanceof Blob) {
-        body.append('html_file', templateData.html_file, 'template.html');
-      } else if (typeof templateData.html_body === 'string') {
-        const blob = new Blob([templateData.html_body], { type: 'text/html' });
-        body.append('html_file', blob, 'template.html');
+      // Attach file as both docx_file and html_file for dual compatibility
+      // (http://192.168.29.201:8000 expects docx_file, while https://api.kaizencon.in expects html_file)
+      const file = templateData.docx_file || templateData.file || templateData.doc_file || templateData.html_file;
+      if (file instanceof File || file instanceof Blob) {
+        body.append('docx_file', file, file.name || 'template.docx');
+        body.append('html_file', file, file.name || 'template.docx');
       }
     }
 
     const response = await fetch(API_ENDPOINTS.EMAIL_AGENT_TEMPLATES, {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
+        'Accept': '*/*',
       },
       body,
     });
