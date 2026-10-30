@@ -189,7 +189,7 @@ export default function UsersPage() {
                   <th className="py-3 px-4">Assigned Group</th>
                   <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4">Last Login</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -245,8 +245,8 @@ export default function UsersPage() {
                     <td className="py-3.5 px-4 text-gray-500 text-[11px]">
                       {user.lastLogin}
                     </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <div className="inline-flex items-center gap-1.5 justify-end">
+                    <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                      <div className="inline-flex items-center gap-1.5 justify-center">
                         <button
                           type="button"
                           onClick={() => handleOpenEditModal(user)}

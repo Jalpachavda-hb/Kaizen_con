@@ -502,7 +502,7 @@ export default function SessionsPage() {
                   <th className="py-3 px-4">Speaker</th>
                   <th className="py-3 px-4">Schedule & Venue</th>
                   <th className="py-3 px-4">Category</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800/70">
@@ -584,8 +584,8 @@ export default function SessionsPage() {
                       </td>
 
                       {/* Actions */}
-                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                        <div className="inline-flex items-center gap-1.5 justify-end">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1.5 justify-center">
                           <button
                             type="button"
                             onClick={() => handleViewSessionById(session)}

@@ -877,7 +877,7 @@ export default function CampaignsPage() {
                 <th className="px-5 py-3.5 whitespace-nowrap">Delays & Throttle</th>
                 <th className="px-5 py-3.5 whitespace-nowrap">Created Date</th>
                 <th className="px-5 py-3.5 text-center whitespace-nowrap">Logs</th>
-                <th className="px-5 py-3.5 text-right whitespace-nowrap">Actions</th>
+                <th className="px-5 py-3.5 text-center whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800/60">
@@ -1078,8 +1078,8 @@ export default function CampaignsPage() {
                       </td>
 
                       {/* Actions: Approve, Start, Pause, Resume, Stop, Details */}
-                      <td className="px-5 py-4 text-right whitespace-nowrap">
-                        <div className="inline-flex items-center gap-1.5 justify-end">
+                      <td className="px-5 py-4 text-center whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1.5 justify-center">
                           {/* 1. APPROVE BUTTON (if not approved yet and not stopped or completed) */}
                           {!isApproved && !isStopped && !isCompleted && (
                             <button

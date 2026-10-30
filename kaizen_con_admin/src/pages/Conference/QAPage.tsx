@@ -461,8 +461,8 @@ export default function QAPage() {
                 <th scope="col" className="px-4 py-3">
                   Time
                 </th>
-                <th scope="col" className="px-4 py-3 text-right">
-                  Moderator Action
+                <th scope="col" className="px-4 py-3 text-center">
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -564,8 +564,8 @@ export default function QAPage() {
                       </td>
 
                       {/* Moderator Action Buttons */}
-                      <td className="px-4 py-3 align-top text-right whitespace-nowrap">
-                        <div className="inline-flex items-center gap-1.5 justify-end">
+                      <td className="px-4 py-3 align-top text-center whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1.5 justify-center">
                           {q.status !== "approved" && (
                             <button
                               type="button"

@@ -599,7 +599,7 @@ export default function SpeakersPage() {
                   <th className="py-3 px-4">Contact</th>
                   <th className="py-3 px-4">Session Status</th>
                   <th className="py-3 px-4">Active</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-gray-900">
@@ -725,8 +725,8 @@ export default function SpeakersPage() {
                       </td>
 
                       {/* Actions */}
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="inline-flex items-center gap-1.5 justify-end">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1.5 justify-center">
                           {/* View Button */}
                           <button
                             type="button"

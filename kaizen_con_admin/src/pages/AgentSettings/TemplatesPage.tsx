@@ -1288,7 +1288,7 @@ export default function TemplatesPage() {
                     <th className="py-3.5 px-4">Subject Line</th>
                     <th className="py-3.5 px-4">Version</th>
                     <th className="py-3.5 px-4">Status</th>
-                    <th className="py-3.5 px-4 text-right">Actions</th>
+                    <th className="py-3.5 px-4 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -1330,8 +1330,8 @@ export default function TemplatesPage() {
                             {template.active ? "Active" : "Inactive"}
                           </button>
                         </td>
-                        <td className="py-3.5 px-4 text-right">
-                          <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                        <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                          <div className="flex items-center justify-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                             <button
                               type="button"
                               onClick={() => handleOpenPreview(template)}

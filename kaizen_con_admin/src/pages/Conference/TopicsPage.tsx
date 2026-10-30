@@ -191,7 +191,7 @@ export default function TopicsPage() {
                   <th className="py-3 px-4">Description</th>
                   <th className="py-3 px-4 text-center">Sessions</th>
                   <th className="py-3 px-4 text-center">Abstracts</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -228,8 +228,8 @@ export default function TopicsPage() {
                     <td className="py-3.5 px-4 text-center font-semibold text-gray-700 dark:text-gray-300">
                       {topic.abstractsCount}
                     </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <div className="inline-flex items-center gap-1.5 justify-end">
+                    <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                      <div className="inline-flex items-center gap-1.5 justify-center">
                         <button
                           type="button"
                           onClick={() => handleOpenEditModal(topic)}

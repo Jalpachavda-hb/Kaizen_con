@@ -2406,7 +2406,7 @@ export default function DelegatesPage() {
                   <th className="py-3 px-4">Location</th>
                   <th className="py-3 px-4">MCI No.</th>
                   <th className="py-3 px-4">Reg. Date</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-gray-900">
@@ -2554,7 +2554,7 @@ export default function DelegatesPage() {
                       </td>
 
                       {/* Actions */}
-                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
                         <button
                           type="button"
                           onClick={() => setSelectedDelegate(delegate)}

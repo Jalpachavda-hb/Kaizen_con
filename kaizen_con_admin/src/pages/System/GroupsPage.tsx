@@ -205,7 +205,7 @@ export default function GroupsPage() {
                   <th className="py-3 px-4">Description</th>
                   <th className="py-3 px-4">Permissions</th>
                   <th className="py-3 px-4 text-center">Members</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -253,8 +253,8 @@ export default function GroupsPage() {
                         {group.userCount} users
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <div className="inline-flex items-center gap-1.5 justify-end">
+                    <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                      <div className="inline-flex items-center gap-1.5 justify-center">
                         <button
                           type="button"
                           onClick={() => handleOpenEditModal(group)}
