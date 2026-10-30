@@ -9,6 +9,7 @@ import {
   deleteContact,
 } from "../../api/ApiPath";
 import Swal from "sweetalert2";
+import emailTemplateUrl from "../../assets/email_agent_template.xlsx";
 
 export interface ContactItem {
   id: string;
@@ -577,7 +578,7 @@ export default function SendToEmailPage() {
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
             {/* Download Template Button */}
             <a
-              href="/email agent.xlsx"
+              href={emailTemplateUrl}
               download="email agent.xlsx"
               className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/60 rounded-lg shadow-xs transition-colors cursor-pointer"
               title="Download Sample Excel Template"
@@ -1123,7 +1124,7 @@ export default function SendToEmailPage() {
                   <span className="text-gray-600 dark:text-gray-300 truncate font-medium">Need the format?</span>
                 </div>
                 <a
-                  href="/email agent.xlsx"
+                  href={emailTemplateUrl}
                   download="email agent.xlsx"
                   className="font-semibold text-[#AA2D7B] hover:text-[#8F2266] hover:underline inline-flex items-center gap-1 shrink-0"
                 >

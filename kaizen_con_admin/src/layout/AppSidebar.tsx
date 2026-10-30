@@ -291,16 +291,7 @@ const AppSidebar: React.FC = () => {
         </nav>
       </div>
 
-      {/* Sidebar Footer info / Theme Badge */}
-      {showFullSidebar && (
-        <div className="p-3 border-t border-gray-100 dark:border-gray-800 text-[11px] text-gray-400 flex items-center justify-between">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#AA2D7B] animate-pulse" />
-            <span className="font-semibold text-gray-600 dark:text-gray-300">Kaizen Con 2027</span>
-          </span>
-          <span className="font-mono text-[10px] text-gray-400">Admin v2.0</span>
-        </div>
-      )}
+
     </aside>
   );
 };

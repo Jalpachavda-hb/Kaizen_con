@@ -365,19 +365,7 @@ export default function PrivacyPolicyPage() {
           )}
         </div>
 
-        {/* Bottom Compliance Badge */}
-        <div className="mt-8 p-4 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 text-xs text-gray-500 dark:text-gray-400 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span>Kaizen Con 2027 Data Protection Secretariat • ISO/IEC 27001 Aligned Controls</span>
-          </div>
-          <div>
-            Need privacy support? Contact{" "}
-            <a href="mailto:privacy@kaizencon.demo" className="text-[#AA2D7B] dark:text-[#f5d8e9] font-semibold hover:underline">
-              privacy@kaizencon.demo
-            </a>
-          </div>
-        </div>
+
       </div>
     </>
   );
