@@ -472,11 +472,7 @@ export default function AboutPage() {
                       </div>
                       <span className="kz-pill-name">{item.title}</span>
                     </div>
-                    <span className="kz-pill-arrow" aria-hidden="true">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="9 18 15 12 9 6" />
-                      </svg>
-                    </span>
+                   
                   </div>
                 ))}
               </div>
@@ -505,11 +501,7 @@ export default function AboutPage() {
                       </div>
                       <span className="kz-pill-name">{item.title}</span>
                     </div>
-                    <span className="kz-pill-arrow" aria-hidden="true">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="9 18 15 12 9 6" />
-                      </svg>
-                    </span>
+                    
                   </div>
                 ))}
               </div>
@@ -573,15 +565,7 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              <div className="kz-pillar-action-row">
-                <span className="kz-pillar-action-text">Explore Capability</span>
-                <span className="kz-pillar-action-arrow" aria-hidden="true">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                    <polyline points="12 5 19 12 12 19" />
-                  </svg>
-                </span>
-              </div>
+            
             </div>
 
             {/* Pillar 02: Intelligent */}
@@ -620,15 +604,7 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              <div className="kz-pillar-action-row">
-                <span className="kz-pillar-action-text">Explore Capability</span>
-                <span className="kz-pillar-action-arrow" aria-hidden="true">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                    <polyline points="12 5 19 12 12 19" />
-                  </svg>
-                </span>
-              </div>
+              
             </div>
 
             {/* Pillar 03: Interactive */}
@@ -669,15 +645,7 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              <div className="kz-pillar-action-row">
-                <span className="kz-pillar-action-text">Explore Capability</span>
-                <span className="kz-pillar-action-arrow" aria-hidden="true">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                    <polyline points="12 5 19 12 12 19" />
-                  </svg>
-                </span>
-              </div>
+             
             </div>
 
             {/* Pillar 04: Connected */}
@@ -710,15 +678,7 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              <div className="kz-pillar-action-row">
-                <span className="kz-pillar-action-text">Explore Capability</span>
-                <span className="kz-pillar-action-arrow" aria-hidden="true">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                    <polyline points="12 5 19 12 12 19" />
-                  </svg>
-                </span>
-              </div>
+              
             </div>
           </div>
 

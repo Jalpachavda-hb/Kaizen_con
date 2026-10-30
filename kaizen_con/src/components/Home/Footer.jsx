@@ -103,10 +103,9 @@ export default function Footer() {
             <li><a href="/about" onClick={(e) => handleFooterNav(e, '/about')}>About KaizenCon</a></li>
             <li><a href="/programme" onClick={(e) => handleFooterNav(e, '/programme')}>Programme</a></li>
             <li><a href="/speakers" onClick={(e) => handleFooterNav(e, '/speakers')}>Speakers</a></li>
-            <li><a href="/#venue" onClick={(e) => handleFooterNav(e, '/#venue')}>Venue &amp; Travel</a></li>
-            <li><a href="/#registration" onClick={(e) => handleFooterNav(e, '/#registration')}>Registration</a></li>
+                   
             <li><a href="/contact" onClick={(e) => handleFooterNav(e, '/contact')}>Contact Us</a></li>
-            <li><a href="/privacy-policy" onClick={(e) => handleFooterNav(e, '/privacy-policy')}>Privacy Policy</a></li>
+
           </ul>
         </div>
 
@@ -137,7 +136,7 @@ export default function Footer() {
                 </svg>
               </span>
               <a href="mailto:hello@kaizencon.demo" className="kz-footer-contact-link">
-                hello@kaizencon.demo
+              kaizencon2027@gmail.com
               </a>
             </li>
 
@@ -149,23 +148,12 @@ export default function Footer() {
                 </svg>
               </span>
               <a href="tel:+917912345678" className="kz-footer-contact-link">
-                +91 79 1234 5678
+                +91 90163 40044
               </a>
             </li>
 
-            {/* Address */}
-            <li className="kz-footer-contact-item kz-footer-contact-address">
-              <span className="kz-footer-contact-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-              </span>
-              <div className="kz-footer-contact-multiline">
-                <span>International Conference Centre</span>
-                <span>Ahmedabad, India</span>
-              </div>
-            </li>
+          
+           
 
             {/* Website */}
             <li className="kz-footer-contact-item">
@@ -176,8 +164,8 @@ export default function Footer() {
                   <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                 </svg>
               </span>
-              <a href="https://www.kaizencon.demo" target="_blank" rel="noopener noreferrer" className="kz-footer-contact-link">
-                www.kaizencon.demo
+              <a href="https://www.kaizencon.in/" target="_blank" rel="noopener noreferrer" className="kz-footer-contact-link">
+                kaizencon.in
               </a>
             </li>
           </ul>

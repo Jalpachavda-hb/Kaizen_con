@@ -8,7 +8,7 @@ import AiConAssisten from '../components/Home/AiConAssisten';
 import Liveinteligenc from '../components/Home/Liveinteligenc';
 import KnowledgeSection from '../components/Home/KnowledgeSection';
 import SpeakersSection from '../components/Home/SpeakersSection';
-import VenueSection from '../components/Home/VenueSection';
+
 
 export default function HomePage() {
   return (
@@ -40,8 +40,8 @@ export default function HomePage() {
       {/* Leading Global Faculty */}
       <SpeakersSection />
 
-      {/* Venue & Registration Banner */}
-      <VenueSection />
+    
+     
     </main>
   );
 }

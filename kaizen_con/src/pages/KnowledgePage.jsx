@@ -949,86 +949,8 @@ export default function KnowledgePage() {
         </div>
       </section>
 
-      {/* ----------------------------------------------------
-          6. AI KNOWLEDGE ASSISTANT BANNER
-          Connects page with KaizenCon 2027 AI Brain
-          ---------------------------------------------------- */}
-      <section className="kz-kp-ai-cta-section" aria-label="Interactive AI Brain Assistant">
-        <div className="kz-kp-main-container">
-          <div className="kz-kp-ai-cta-card">
-            <div className="kz-kp-ai-cta-content">
-              <span className="kz-kp-badge light">PERMANENTLY SEARCHABLE</span>
-              <h2 className="kz-kp-ai-cta-title">
-                Need specific clinical guidance from KaizenCon?
-              </h2>
-              <p className="kz-kp-ai-cta-subtitle">
-                Our fine-tuned clinical assistant indexes every session transcript, surgical video timestamp,
-                and research slide. Ask questions in natural medical language anytime.
-              </p>
 
-              <div className="kz-kp-ai-cta-pills">
-                <button
-                  type="button"
-                  className="kz-kp-ai-sample-pill"
-                  onClick={() => handleTopicClick('Robotic colorectal surgery')}
-                >
-                  &ldquo;Compare da Vinci vs Hugo in low anterior resection&rdquo;
-                </button>
-                <button
-                  type="button"
-                  className="kz-kp-ai-sample-pill"
-                  onClick={() => handleTopicClick('AI in surgical planning')}
-                >
-                  &ldquo;What are the margin limits suggested by Dr. Laurent?&rdquo;
-                </button>
-              </div>
-            </div>
-
-            <div className="kz-kp-ai-cta-action">
-              <button
-                type="button"
-                className="kz-kp-ai-launch-btn"
-                onClick={() => {
-                  const chatbotBtn = document.querySelector('.kz-floating-chatbot-btn');
-                  if (chatbotBtn) chatbotBtn.click();
-                }}
-              >
-                <span>Launch AI Assistant</span>
-                <span className="kz-kp-btn-arrow" aria-hidden="true">→</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Cross-page Navigation Strip */}
-      <section className="kz-kp-cross-nav-section" aria-label="Explore other conference sections">
-        <div className="kz-kp-cross-container">
-          <div className="kz-kp-cross-card">
-            <div className="kz-kp-cross-left">
-              <span className="kz-kp-cross-tag">LOOKING FOR MORE?</span>
-              <h3 className="kz-kp-cross-title">Connect with researchers or contact conference organizers</h3>
-              <p className="kz-kp-cross-desc">
-                Have scientific papers or questions regarding CME credits, registrations, or keynote faculty?
-              </p>
-            </div>
-            <div className="kz-kp-cross-actions">
-              <Link to="/contact" className="kz-kp-cross-btn primary">
-                <span>Contact Us</span>
-                <span aria-hidden="true">→</span>
-              </Link>
-              <Link to="/speakers" className="kz-kp-cross-btn secondary">
-                <span>Meet the Speakers</span>
-                <span aria-hidden="true">→</span>
-              </Link>
-              <Link to="/about" className="kz-kp-cross-btn tertiary">
-                <span>About KaizenCon</span>
-                <span aria-hidden="true">→</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+     
 
       {/* ----------------------------------------------------
           7. IN-DEPTH DETAIL MODAL

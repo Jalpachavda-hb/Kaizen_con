@@ -403,7 +403,7 @@ const transformApiSchedules = (rawList, speakerMap = {}) => {
 };
 
 export default function ProgrammePage() {
-  const [activeTab, setActiveTab] = useState('glance');
+  const [activeTab, setActiveTab] = useState('sessions');
   const [selectedTopic, setSelectedTopic] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTrack, setSelectedTrack] = useState('ALL');
@@ -793,11 +793,8 @@ export default function ProgrammePage() {
 
          
 
-            {/* 5. Conference Website Link */}
-            <Link to="/" className="kz-view-tab-btn kz-external-link-btn" title="Back to Conference Home">
-              <LuGlobe size={16} />
-              <span>Conference Website</span>
-            </Link>
+           
+            
           </div>
 
           {/* Search Input & Filter Button */}
@@ -916,10 +913,7 @@ export default function ProgrammePage() {
           ))}
         </div>
 
-        {/* ====================================================
-            4. VIEW 1: "AT A GLANCE" 3-COLUMN TIMELINE (DEFAULT VIEW)
-               Pixel-perfect match to User's Screenshot 2!
-           ==================================================== */}
+      
         {activeTab === 'glance' && (
           <main className="kz-programme-columns-grid">
             {filteredGlanceProgramme.map((dayCol) => {
@@ -1175,7 +1169,7 @@ export default function ProgrammePage() {
                   className="kz-topic-showcase-card"
                   onClick={() => {
                     setSelectedTopic(topicItem.id);
-                    setActiveTab('glance');
+                    setActiveTab('sessions');
                   }}
                 >
                   <div className="kz-topic-showcase-badge">
