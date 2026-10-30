@@ -1,6 +1,5 @@
 import { HelmetProvider, Helmet } from "react-helmet-async";
-
-const faviconUrl = `${import.meta.env.BASE_URL}favicon.png`;
+import faviconUrl from "../../assets/images/favicon.png";
 
 const PageMeta = ({
   title,

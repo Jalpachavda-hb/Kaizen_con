@@ -10,8 +10,7 @@ import {
   ErrorIcon,
   CheckCircleIcon,
 } from "../../icons";
-
-const logoUrl = `${import.meta.env.BASE_URL}images/logokaizecon.png`;
+import logoUrl from "../../assets/images/logokaizecon.png";
 
 interface AuthLayoutProps {
   children?: React.ReactNode;
@@ -338,7 +337,36 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
                 src={logoUrl}
                 alt="Kaizen Con 2027"
                 className="h-9 w-auto object-contain"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (!target.dataset.tried1) {
+                    target.dataset.tried1 = "true";
+                    target.src = "/assets/logokaizecon-CnNRsUqz.png";
+                    return;
+                  }
+                  if (!target.dataset.tried2) {
+                    target.dataset.tried2 = "true";
+                    target.src = "/images/logokaizecon.png";
+                    return;
+                  }
+                  if (!target.dataset.tried3) {
+                    target.dataset.tried3 = "true";
+                    target.src = "/logokaizecon.png";
+                    return;
+                  }
+                  target.style.display = "none";
+                  const fallbackEl = target.nextElementSibling as HTMLElement;
+                  if (fallbackEl) fallbackEl.style.display = "flex";
+                }}
               />
+              <div
+                style={{ display: "none" }}
+                className="items-center gap-1.5 font-black text-sm tracking-tight text-[#AA2D7B] uppercase"
+              >
+                <span>Kaizen</span>
+                <span className="text-[#55355E]">Con</span>
+                <span className="text-[10px] text-gray-500 font-semibold lowercase">2027</span>
+              </div>
             </div>
           </div>
 

@@ -88,10 +88,10 @@ export default function CreateCampaignPage() {
     template_ids: [] as string[],
     registration_url: "https://example.com/",
     followup_interval_days: 1,
-    followup_delay_minutes: "" as string | number,
+    
     sending_delay_seconds: 30,
     max_followups: 1,
-    max_sends_per_day: 100,
+    max_sends_per_day: 1000,
     re_mail: true,
     contact_ids: [] as string[],
   });
@@ -423,7 +423,7 @@ export default function CreateCampaignPage() {
         contact_ids: formData.contact_ids,
         registration_url: formData.registration_url.trim(),
         followup_interval_days: Number(formData.followup_interval_days) || 1,
-        followup_delay_minutes: formData.followup_delay_minutes !== "" ? Number(formData.followup_delay_minutes) : undefined,
+     
         sending_delay_seconds: Number(formData.sending_delay_seconds) || 0,
         max_followups: Number(formData.max_followups) || 0,
         max_sends_per_day: Number(formData.max_sends_per_day) || 10,
@@ -963,29 +963,8 @@ export default function CreateCampaignPage() {
                 </p>
               </div>
 
-              {/* Followup Delay (minutes) */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                  Followup Delay (minutes) <span className="text-gray-400 font-normal">(Optional)</span>
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="525600"
-                  placeholder="e.g. 1440 (1 day) or leave empty"
-                  value={formData.followup_delay_minutes}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      followup_delay_minutes: e.target.value === "" ? "" : Number(e.target.value),
-                    })
-                  }
-                  className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#AA2D7B]"
-                />
-                <p className="text-[11px] text-gray-400 mt-1">
-                  Initial delay in minutes before automatic follow-up sequence
-                </p>
-              </div>
+            
+         
 
               {/* Followup Interval */}
               <div>

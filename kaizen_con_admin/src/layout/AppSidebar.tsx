@@ -15,7 +15,7 @@ import {
   ShieldCheckIcon,
 } from "../icons/conferenceIcons";
 
-const logoUrl = `${import.meta.env.BASE_URL}images/logokaizecon.png`;
+import logoUrl from "../assets/images/logokaizecon.png";
 
 export interface NavItem {
   name: string;
@@ -175,8 +175,23 @@ const AppSidebar: React.FC = () => {
                 showFullSidebar ? "h-20 max-h-20" : "h-8 max-h-8"
               } w-auto max-w-full object-contain transition-all`}
               onError={(e) => {
-                // fallback to text if image fails
-                (e.currentTarget as HTMLElement).style.display = "none";
+                const target = e.currentTarget;
+                if (!target.dataset.tried1) {
+                  target.dataset.tried1 = "true";
+                  target.src = "/assets/logokaizecon-CnNRsUqz.png";
+                  return;
+                }
+                if (!target.dataset.tried2) {
+                  target.dataset.tried2 = "true";
+                  target.src = "/images/logokaizecon.png";
+                  return;
+                }
+                if (!target.dataset.tried3) {
+                  target.dataset.tried3 = "true";
+                  target.src = "/logokaizecon.png";
+                  return;
+                }
+                target.style.display = "none";
               }}
             />
             <span className="font-extrabold text-base tracking-tight text-[#AA2D7B] uppercase hidden only-child:block">

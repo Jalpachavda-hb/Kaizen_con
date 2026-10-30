@@ -1,8 +1,7 @@
 import { Navigate, Link } from "react-router";
 import { isAuthenticated } from "../../services/authService";
 import PrivacyPolicyPage from "./PrivacyPolicyPage";
-
-const logoUrl = `${import.meta.env.BASE_URL}images/logokaizecon.png`;
+import logoUrl from "../../assets/images/logokaizecon.png";
 
 export default function StandalonePrivacyPolicy() {
   const isAuth = isAuthenticated();
@@ -34,7 +33,18 @@ export default function StandalonePrivacyPolicy() {
               alt="Kaizen Con 2027"
               className="h-8 w-auto object-contain"
               onError={(e) => {
-                (e.currentTarget as HTMLElement).style.display = "none";
+                const target = e.currentTarget;
+                if (!target.dataset.tried1) {
+                  target.dataset.tried1 = "true";
+                  target.src = "/assets/logokaizecon-CnNRsUqz.png";
+                  return;
+                }
+                if (!target.dataset.tried2) {
+                  target.dataset.tried2 = "true";
+                  target.src = "/images/logokaizecon.png";
+                  return;
+                }
+                target.style.display = "none";
               }}
             />
           </div>

@@ -2,8 +2,8 @@ import GridShape from "../../components/common/GridShape";
 import { Link } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
 import { isAuthenticated } from "../../services/authService";
-const error404Url = `${import.meta.env.BASE_URL}images/error/404.svg`;
-const error404DarkUrl = `${import.meta.env.BASE_URL}images/error/404-dark.svg`;
+import error404Url from "../../assets/images/error/404.svg";
+import error404DarkUrl from "../../assets/images/error/404-dark.svg";
 
 export default function NotFound() {
   const isAuth = isAuthenticated();
