@@ -1,8 +1,8 @@
 import React from 'react';
 import './Hero.css';
-import brochurePdf from '../../assets/home/Kaizencon_2027_Second_Annoucement.pdf';
 
 export default function Hero() {
+  const brochureUrl = `${import.meta.env.BASE_URL}Kaizencon_2027_Second_Announcement.pdf`;
   return (
     <section className="kz-hero-section" id="home" aria-label="KaizenCon 2027 Hero">
       {/* Blueprint Grid Overlay */}
@@ -54,8 +54,10 @@ export default function Hero() {
           {/* 4. Action Buttons */}
           <div className="kz-hero-actions">
             <a
-              href={brochurePdf}
+              href={brochureUrl}
               download="Kaizencon_2027_Second_Announcement.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
               className="kz-btn kz-btn-primary"
               aria-label="Download Brochure"
             >
