@@ -15,9 +15,6 @@ export default function PrivacyPolicyPage() {
   const [activeTab, setActiveTab] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  const handlePrint = () => {
-    window.print();
-  };
 
   const policySections: PolicySection[] = [
     {

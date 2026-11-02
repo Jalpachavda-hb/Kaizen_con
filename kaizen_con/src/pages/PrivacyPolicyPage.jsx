@@ -32,9 +32,7 @@ export default function PrivacyPolicyPage() {
     }
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
+
 
   const navigationSections = [
     { id: 'intro', title: '1. Introduction & Overview', icon: FiShield },
