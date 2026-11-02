@@ -18,38 +18,46 @@ const navItems = [
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeItem, setActiveItem] = useState('Home');
+
+  // Helper to determine the active nav item based on route pathname and hash
+  const getActiveItem = (pathname, hash) => {
+    if (pathname === '/programme' || pathname === '/program') {
+      return 'Programme';
+    } else if (pathname === '/contact' || pathname === '/contact-us') {
+      return 'Contact Us';
+    } else if (pathname === '/about' || pathname === '/about-us') {
+      return 'About';
+    } else if (pathname === '/speakers' || pathname === '/speaker') {
+      return 'Speakers';
+    } else if (pathname === '/ai-experience' || pathname === '/ai') {
+      return 'AI Experience';
+    } else if (pathname === '/knowledge' || pathname === '/knowledge-base') {
+      return 'Knowledge';
+    } else if (pathname === '/') {
+      if (hash) {
+        if (hash === '#programme' || hash === '#tracks') {
+          return 'Programme';
+        } else if (hash === '#ai-experience' || hash === '#ai-layer') {
+          return 'AI Experience';
+        } else {
+          const match = navItems.find((item) => item.href.endsWith(hash));
+          if (match) {
+            return match.label;
+          }
+        }
+      }
+      return 'Home';
+    }
+    // Any other page (e.g., /privacy-policy, /privacy) should not highlight any nav item as active
+    return '';
+  };
+
+  const [activeItem, setActiveItem] = useState(() => getActiveItem(location.pathname, location.hash));
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Sync active nav item with current route and hash
   useEffect(() => {
-    if (location.pathname === '/programme' || location.pathname === '/program') {
-      setActiveItem('Programme');
-    } else if (location.pathname === '/contact' || location.pathname === '/contact-us') {
-      setActiveItem('Contact Us');
-    } else if (location.pathname === '/about' || location.pathname === '/about-us') {
-      setActiveItem('About');
-    } else if (location.pathname === '/speakers' || location.pathname === '/speaker') {
-      setActiveItem('Speakers');
-    } else if (location.pathname === '/ai-experience' || location.pathname === '/ai') {
-      setActiveItem('AI Experience');
-    } else if (location.pathname === '/knowledge' || location.pathname === '/knowledge-base') {
-      setActiveItem('Knowledge');
-    } 
-     else if (location.hash) {
-      if (location.hash === '#programme' || location.hash === '#tracks') {
-        setActiveItem('Programme');
-      } else if (location.hash === '#ai-experience' || location.hash === '#ai-layer') {
-        setActiveItem('AI Experience');
-      } else {
-        const match = navItems.find(item => item.href.endsWith(location.hash));
-        if (match) {
-          setActiveItem(match.label);
-        }
-      }
-    } else if (location.pathname === '/') {
-      setActiveItem('Home');
-    }
+    setActiveItem(getActiveItem(location.pathname, location.hash));
   }, [location.pathname, location.hash]);
 
   // Close drawer on ESC key

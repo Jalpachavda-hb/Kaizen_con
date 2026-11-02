@@ -474,11 +474,6 @@ export default function KnowledgePage() {
             <span className="kz-kp-crumb-current">Knowledge Base</span>
           </nav>
 
-          {/* Pill Badge (Matches Screenshot 2) */}
-          <div className="kz-kp-badge-wrap">
-            <span className="kz-kp-badge">CONFERENCE KNOWLEDGE</span>
-          </div>
-
           {/* Large Split Heading matching About Page */}
           <h1 className="kz-kp-hero-headline">
             <span className="kz-kp-hero-dark">Conference Knowledge,</span>
@@ -490,30 +485,6 @@ export default function KnowledgePage() {
             Search every session, AI summary, Q&amp;A exchange, and topic across KaizenCon 2027.
             The conference, made permanently searchable.
           </p>
-
-          {/* Scale & Index Metrics Strip */}
-          <div className="kz-kp-metrics-strip">
-            <div className="kz-kp-metric-item">
-              <span className="kz-kp-metric-num">20+</span>
-              <span className="kz-kp-metric-label">Keynote Sessions</span>
-            </div>
-            <div className="kz-kp-metric-item">
-              <span className="kz-kp-metric-num">65+</span>
-              <span className="kz-kp-metric-label">AI Summaries</span>
-            </div>
-            <div className="kz-kp-metric-item">
-              <span className="kz-kp-metric-num">180+</span>
-              <span className="kz-kp-metric-label">Audience Q&amp;A</span>
-            </div>
-            <div className="kz-kp-metric-item">
-              <span className="kz-kp-metric-num">8</span>
-              <span className="kz-kp-metric-label">Clinical Tracks</span>
-            </div>
-            <div className="kz-kp-metric-item">
-              <span className="kz-kp-metric-num">100%</span>
-              <span className="kz-kp-metric-label">AI Searchable</span>
-            </div>
-          </div>
         </div>
       </section>
 

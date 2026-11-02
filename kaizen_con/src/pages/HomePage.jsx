@@ -8,6 +8,7 @@ import AiConAssisten from '../components/Home/AiConAssisten';
 import Liveinteligenc from '../components/Home/Liveinteligenc';
 import KnowledgeSection from '../components/Home/KnowledgeSection';
 import SpeakersSection from '../components/Home/SpeakersSection';
+import AppDownloadSection from '../components/Home/AppDownloadSection';
 
 
 export default function HomePage() {
@@ -40,8 +41,9 @@ export default function HomePage() {
       {/* Leading Global Faculty */}
       <SpeakersSection />
 
-    
-     
+      {/* Download Our App Section */}
+      <AppDownloadSection />
+
     </main>
   );
 }

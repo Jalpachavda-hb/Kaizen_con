@@ -350,63 +350,18 @@ export default function AiExperiencePage() {
           </nav>
 
           <div className="kz-ai-hero-content">
-            <div className="kz-ai-eyebrow-wrap">
-              <span className="kz-hero-simple-badge">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: '6px' }}>
-                  <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="currentColor" />
-                </svg>
-                AI-NATIVE CONFERENCE · KAIZENCON 2027
-              </span>
-            </div>
-
             <h1 className="kz-ai-hero-headline">
               <span className="kz-ai-headline-dark">The AI Experience,</span>
               <span className="kz-ai-headline-gradient">now with intelligence.</span>
             </h1>
 
-            {/* Event Details Pills Row matching other pages exactly */}
-            <div className="kz-ai-pills-row" aria-label="Event Details">
-              <div className="kz-ai-pill">
-                <span className="kz-ai-pill-dot" />
-                <span>1–3 January 2027</span>
-              </div>
-              <div className="kz-ai-pill">
-                <span className="kz-ai-pill-dot" />
-                <span>Ahmedabad, India</span>
-              </div>
-              <div className="kz-ai-pill">
-                <span className="kz-ai-pill-dot" />
-                <span>International Conference Centre</span>
-              </div>
-            </div>
+           
 
             <p className="kz-ai-hero-desc">
               KaizenCon 2027 is built on an AI layer that personalises, assists, clusters, compares, and preserves knowledge — across every moment of the conference.
             </p>
 
-            {/* Quick Section Navigation Pills */}
-            <div className="kz-ai-quick-nav-row" aria-label="Quick jump to sections">
-              <button type="button" onClick={() => scrollToSection('personalization')} className="kz-ai-nav-chip">
-                <span>01 — Personalization</span>
-                <span className="kz-chip-arrow">↓</span>
-              </button>
-              <button type="button" onClick={() => scrollToSection('assistant')} className="kz-ai-nav-chip">
-                <span>02 — Conference Assistant</span>
-                <span className="kz-chip-arrow">↓</span>
-              </button>
-              <button type="button" onClick={() => scrollToSection('live-qa')} className="kz-ai-nav-chip">
-                <span>03 — Live Q&amp;A</span>
-                <span className="kz-chip-arrow">↓</span>
-              </button>
-              <button type="button" onClick={() => scrollToSection('perspectives')} className="kz-ai-nav-chip">
-                <span>04 — Perspective Comparison</span>
-                <span className="kz-chip-arrow">↓</span>
-              </button>
-              <button type="button" onClick={() => scrollToSection('knowledge')} className="kz-ai-nav-chip">
-                <span>05 — Conference Knowledge</span>
-                <span className="kz-chip-arrow">↓</span>
-              </button>
-            </div>
+           
           </div>
         </div>
       </section>

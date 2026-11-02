@@ -140,11 +140,6 @@ export default function SpeakersPage() {
             <span className="kz-spk-crumb-current">Speakers</span>
           </nav>
 
-          {/* Pill Badge */}
-          <div className="kz-spk-pill-badge-wrap">
-            <span className="kz-spk-pill-badge">EXPERT FACULTY</span>
-          </div>
-
           {/* Large Split-Color Headline */}
           <h1 className="kz-spk-hero-headline">
             <span className="kz-spk-hero-purple">Conference Speakers,</span>
@@ -157,27 +152,8 @@ export default function SpeakersPage() {
             united by a shared commitment to advancing surgical intelligence and clinical excellence.
           </p>
 
-          {/* Faculty Key Metrics Pill Strip */}
-          <div className="kz-spk-metrics-strip">
-            <div className="kz-spk-metric-pill">
-              <span className="kz-spk-metric-num">
-                {speakers.length > 0 ? `${speakers.length}+` : '150+'}
-              </span>
-              <span className="kz-spk-metric-label">Global Faculty</span>
-            </div>
-            <div className="kz-spk-metric-pill">
-              <span className="kz-spk-metric-num">40+</span>
-              <span className="kz-spk-metric-label">Countries Represented</span>
-            </div>
-            <div className="kz-spk-metric-pill">
-              <span className="kz-spk-metric-num">32</span>
-              <span className="kz-spk-metric-label">Scientific Sessions</span>
-            </div>
-            <div className="kz-spk-metric-pill">
-              <span className="kz-spk-metric-num">100%</span>
-              <span className="kz-spk-metric-label">CME Accredited</span>
-            </div>
-          </div>
+      
+         
         </div>
       </section>
 
@@ -370,38 +346,8 @@ export default function SpeakersPage() {
             </div>
           </section>
 
-          {/* ----------------------------------------------------
-              5. REPRESENTED INSTITUTIONS SECTION
-              ---------------------------------------------------- */}
-          <section className="kz-spk-institutions-section" aria-label="Represented institutions">
-            <div className="kz-spk-institutions-header">
-              <div className="kz-spk-pill-badge-wrap">
-                <span className="kz-spk-pill-badge">INSTITUTIONS</span>
-              </div>
-              <h2 className="kz-spk-institutions-title">Represented institutions</h2>
-              <div className="kz-spk-institutions-accent-line" aria-hidden="true" />
-            </div>
-
-            <div className="kz-spk-institutions-grid">
-              {dynamicInstitutions.slice(0, 4).map((inst, idx) => (
-                <div key={idx} className="kz-spk-institution-card">
-                  <div className="kz-spk-inst-icon-wrap" aria-hidden="true">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B63473" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M3 21h18" />
-                      <path d="M5 21V10l7-5 7 5v11" />
-                      <path d="M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4" />
-                      <line x1="9" y1="10" x2="9" y2="12" />
-                      <line x1="15" y1="10" x2="15" y2="12" />
-                    </svg>
-                  </div>
-                  <h3 className="kz-spk-inst-name">{inst.name}</h3>
-                  <p className="kz-spk-inst-country">{inst.country || 'International'}</p>
-                  <div className="kz-spk-inst-divider" aria-hidden="true" />
-                  <span className="kz-spk-inst-count">{inst.count}</span>
-                </div>
-              ))}
-            </div>
-          </section>
+       
+     
 
           {/* Cross-page Navigation Banner */}
           <section className="kz-spk-bottom-cta-banner" aria-label="Connect with speakers and secretariat">

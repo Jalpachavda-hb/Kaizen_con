@@ -50,6 +50,24 @@ export default function PrivacyPolicyPage() {
   return (
     <div className="kz-privacy-page">
       {/* HERO SECTION */}
+      <section className="kz-privacy-hero" aria-label="Privacy Policy Header">
+        <div className="kz-privacy-container">
+          <nav className="kz-privacy-breadcrumb" aria-label="Breadcrumb">
+            <Link to="/" className="kz-privacy-crumb-link">Home</Link>
+            <span className="kz-privacy-crumb-sep">/</span>
+            <span className="kz-privacy-crumb-current">Privacy Policy</span>
+          </nav>
+          <div className="kz-privacy-hero-content">
+            <h1 className="kz-privacy-hero-headline">
+              <span className="kz-privacy-hero-dark">Privacy Policy &amp; Data Protection,</span>
+              <span className="kz-privacy-hero-magenta">now with intelligence.</span>
+            </h1>
+            <p className="kz-privacy-hero-desc">
+              KaizenCon 2027 is committed to safeguarding the privacy and confidential data of all delegates, faculty, researchers, and partners.
+            </p>
+          </div>
+        </div>
+      </section>
     
 
       {/* MAIN CONTENT WITH STICKY SIDEBAR */}

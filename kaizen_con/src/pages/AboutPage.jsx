@@ -308,16 +308,6 @@ export default function AboutPage() {
             <span className="kz-about-crumb-current">About Us</span>
           </nav>
 
-          {/* Top Eyebrow Badge: ABOUT KAIZENCON 2027 */}
-          <div className="kz-about-eyebrow-wrap">
-            <span className="kz-about-eyebrow-badge">
-              <svg className="kz-about-badge-sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="currentColor" />
-              </svg>
-              ABOUT KAIZENCON 2027
-            </span>
-          </div>
-
           {/* Main Headline in 2 lines with distinct font colors */}
           <h1 className="kz-about-hero-headline">
             <span className="kz-about-hero-dark">Continuous Improvement,</span>

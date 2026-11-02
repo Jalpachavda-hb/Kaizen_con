@@ -26,50 +26,68 @@
 }
 
 /* ====================================================
-   1. HERO HEADER
+   1. HERO HEADER (Unified gradient background, consistent size, no banner image)
    ==================================================== */
 .kz-ai-hero-section {
   position: relative;
-  background: linear-gradient(180deg, #FDF7FA 0%, #F8EDF4 55%, #FFFFFF 100%);
-  padding: 42px 0 54px;
-  border-bottom: 1px solid rgba(170, 45, 123, 0.08);
+  background: linear-gradient(135deg, #ffffff 0%, #fdf8fb 40%, #faf3f8 75%, #f7f1f9 100%);
+  padding: 40px 0 38px 0;
+  min-height: 195px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid rgba(85, 53, 94, 0.07);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.kz-ai-hero-section .kz-ai-container {
+  position: relative;
+  z-index: 2;
 }
 
 .kz-ai-breadcrumb {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  font-size: 0.88rem;
-  color: #718096;
-  margin-bottom: 24px;
+  font-size: 0.85rem;
+  color: #B63473;
+  margin-bottom: 12px;
 }
 
 .kz-ai-crumb-link {
-  color: #718096;
+  color: #B63473;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s ease;
 }
 
 .kz-ai-crumb-link:hover {
-  color: #AA2D7B;
+  color: #8c1e52;
 }
 
 .kz-ai-crumb-sep {
   opacity: 0.5;
+  color: #B63473;
 }
 
 .kz-ai-crumb-current {
-  color: #AA2D7B;
+  color: #B63473;
   font-weight: 600;
 }
 
 .kz-ai-hero-content {
   max-width: 1040px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .kz-ai-eyebrow-wrap {
-  margin-bottom: 18px;
+  display: none;
 }
 
 .kz-hero-simple-badge {
@@ -90,13 +108,15 @@
 
 .kz-ai-hero-headline {
   font-family: 'Roboto', sans-serif;
-  font-size: clamp(2.2rem, 3.8vw, 3.85rem);
+  font-size: clamp(2rem, 3.2vw, 3.2rem);
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.15;
   letter-spacing: -0.015em;
-  margin: 0 0 20px;
+  margin: 0 0 12px;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .kz-ai-headline-dark,
@@ -104,6 +124,7 @@
   font-family: 'Roboto', sans-serif;
   font-weight: 800;
   color: #55355E;
+  text-align: center;
 }
 
 .kz-ai-headline-gradient,
@@ -116,6 +137,8 @@
   background-clip: text !important;
   color: transparent !important;
   display: inline-block;
+  text-align: center;
+  margin: 0 auto;
   width: fit-content;
 }
 
@@ -123,9 +146,10 @@
 .kz-ai-pills-row {
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 22px;
+  margin: 0 auto 16px auto;
 }
 
 .kz-ai-pill {
@@ -172,7 +196,16 @@
   box-shadow: 0 1px 4px rgba(182, 52, 115, 0.06);
 }
 
-.kz-ai-hero-desc,
+.kz-ai-hero-desc {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: #6F5876;
+  margin: 0 auto;
+  max-width: 720px;
+  text-align: center;
+}
+
 .kz-section-lead {
   font-family: 'Roboto', sans-serif;
   font-size: 1.05rem;
@@ -185,8 +218,10 @@
 /* Quick Nav Row */
 .kz-ai-quick-nav-row {
   display: flex;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 12px;
+  margin: 0 auto;
 }
 
 .kz-ai-nav-chip {

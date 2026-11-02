@@ -30,39 +30,51 @@
    1. HERO BANNER WITH REDUCED HEIGHT & THEME OVERLAY
    ==================================================== */
 /* ====================================================
-   1. SIMPLE CENTERED HERO SECTION
+   1. SIMPLE CENTERED HERO SECTION (Unified gradient background, consistent size, no banner image)
    ==================================================== */
 .kz-contact-hero-simple {
   position: relative;
-  background: linear-gradient(180deg, #FBF4F8 0%, #FAF4F8 50%, #FFFFFF 100%);
-  padding: 40px 0 46px;
-  text-align: left;
+  background: linear-gradient(135deg, #ffffff 0%, #fdf8fb 40%, #faf3f8 75%, #f7f1f9 100%);
+  padding: 40px 0 38px 0;
+  min-height: 195px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid rgba(85, 53, 94, 0.07);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.kz-contact-hero-simple .kz-contact-container {
+  position: relative;
+  z-index: 2;
 }
 
 /* Breadcrumb Navigation */
 .kz-contact-breadcrumb {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 8px;
-  font-size: 0.88rem;
-  color: #718096;
-  margin-bottom: 24px;
+  font-size: 0.85rem;
+  color: #B63473;
+  margin-bottom: 12px;
 }
 
 .kz-contact-crumb-link {
-  color: #718096;
+  color: #B63473;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s ease;
 }
 
 .kz-contact-crumb-link:hover {
-  color: #B63473;
+  color: #8c1e52;
 }
 
 .kz-contact-crumb-sep {
   opacity: 0.5;
+  color: #B63473;
 }
 
 .kz-contact-crumb-current {
@@ -72,12 +84,15 @@
 
 .kz-hero-simple-content {
   max-width: 920px;
-  margin: 0;
-  text-align: left;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .kz-contact-eyebrow-wrap {
-  margin-bottom: 18px;
+  display: none;
 }
 
 .kz-hero-simple-badge {
@@ -99,19 +114,21 @@
 /* 2-Line Split Color Headline Matching Home Hero Exactly */
 .kz-contact-hero-headline {
   font-family: 'Roboto', sans-serif;
-  font-size: clamp(2.2rem, 3.8vw, 3.85rem);
+  font-size: clamp(2rem, 3.2vw, 3.2rem);
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.15;
   letter-spacing: -0.015em;
-  margin: 0 0 22px 0;
+  margin: 0 0 12px 0;
   display: flex;
   flex-direction: column;
-  text-align: left;
+  align-items: center;
+  text-align: center;
 }
 
 .kz-contact-hero-dark {
   color: #55355E;
   display: block;
+  text-align: center;
 }
 
 .kz-contact-hero-magenta {
@@ -121,16 +138,31 @@
   background-clip: text;
   color: transparent;
   display: inline-block;
+  text-align: center;
+  margin: 0 auto;
   width: fit-content;
+}
+
+/* Subtitle matching Home Hero */
+.kz-contact-hero-subtitle {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.02rem;
+  font-weight: 400;
+  line-height: 1.55;
+  color: #6D5774;
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
 }
 
 /* Event Details Pills Row matching user reference */
 .kz-contact-pills-row {
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 22px;
+  margin: 0 auto 16px auto;
 }
 
 .kz-contact-pill {
@@ -166,22 +198,23 @@
 
 .kz-hero-simple-desc {
   font-family: 'Roboto', sans-serif;
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   font-weight: 400;
-  line-height: 1.62;
+  line-height: 1.55;
   color: #6D5774;
   max-width: 680px;
-  margin: 0 0 28px 0;
-  text-align: left;
+  margin: 0 auto 20px auto;
+  text-align: center;
 }
 
 /* Quick cross-page links */
 .kz-contact-quick-links {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
+  margin: 0 auto;
 }
 
 .kz-contact-quick-link {
@@ -586,10 +619,44 @@
   margin-top: 8px;
 }
 
-.kz-contact-btn-submit:hover {
+.kz-contact-btn-submit:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(170, 45, 123, 0.38);
   opacity: 0.96;
+}
+
+.kz-contact-btn-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.kz-btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #FFFFFF;
+  border-radius: 50%;
+  animation: kz-spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes kz-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.kz-form-error-alert {
+  background-color: #FEF2F2;
+  color: #991B1B;
+  border: 1px solid #FCA5A5;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-top: 10px;
 }
 
 /* Success Card */

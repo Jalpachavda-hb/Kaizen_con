@@ -646,49 +646,30 @@ export default function ProgrammePage() {
 
   return (
     <div className="kz-programme-page-wrapper">
+      {/* ====================================================
+          1. PAGE HERO HEADER (Centered with banner background)
+         ==================================================== */}
+      <section className="kz-programme-hero-section" aria-label="Programme Overview">
+        <div className="kz-programme-hero-container">
+          {/* Breadcrumb Navigation */}
+          <nav className="kz-programme-breadcrumb" aria-label="Breadcrumb">
+            <Link to="/" className="kz-programme-crumb-link">Home</Link>
+            <span className="kz-programme-crumb-sep">/</span>
+            <span className="kz-programme-crumb-current">Programme</span>
+          </nav>
+
+          <h1 className="kz-programme-main-title">
+            <span className="kz-programme-title-dark">Programme at </span>{' '}
+            <span className="kz-programme-title-magenta"> a Glance</span>
+          </h1>
+
+          <p className="kz-programme-subtitle">
+            Three days of groundbreaking talks, live surgeries, AI innovations and expert discussions.
+          </p>
+        </div>
+      </section>
+
       <div className="kz-programme-container">
-
-        {/* ====================================================
-            1. PAGE HEADER
-           ==================================================== */}
-        <header className="kz-programme-header">
-          <div className="kz-programme-header-left">
-            <div className="kz-schedule-badge-row">
-              <span className="kz-schedule-dash" aria-hidden="true" />
-              <span className="kz-schedule-pill">SCHEDULE</span>
-            </div>
-
-            <h1 className="kz-programme-main-title">Programme at a Glance</h1>
-
-            <p className="kz-programme-subtitle">
-              Three days of groundbreaking talks, live surgeries, AI innovations and expert discussions.
-            </p>
-          </div>
-
-          {/* Right Info Meta (Calendar & Location with React Icons) */}
-          <div className="kz-programme-header-right">
-            <div className="kz-header-meta-item">
-              <span className="kz-header-meta-icon" aria-hidden="true">
-                <LuCalendar size={20} />
-              </span>
-              <div className="kz-header-meta-text">
-                <span className="kz-header-meta-primary">{activeDateRange}</span>
-              </div>
-            </div>
-
-            <span className="kz-header-meta-divider" aria-hidden="true" />
-
-            <div className="kz-header-meta-item">
-              <span className="kz-header-meta-icon" aria-hidden="true">
-                <LuMapPin size={20} />
-              </span>
-              <div className="kz-header-meta-text">
-                <span className="kz-header-meta-primary">{activeVenueName}</span>
-                <span className="kz-header-meta-secondary">Ahmedabad, India &rarr;</span>
-              </div>
-            </div>
-          </div>
-        </header>
 
         {/* Loading and Error Feedback */}
         {loading && (

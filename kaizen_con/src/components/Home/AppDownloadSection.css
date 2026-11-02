@@ -1,0 +1,432 @@
+/* ====================================================
+   KAIZENCON 2027 - DOWNLOAD OUR APP SECTION
+   - Exact purple background gradient match
+   - bg.svg constellation overlay touching card borders (opacity 10)
+   - Clean spacing between Kai and mockup images
+   - Fully responsive for mobile, tablet, laptop & desktop
+   ==================================================== */
+
+.kz-app-download-section {
+  position: relative;
+  width: 100%;
+  background: #ffffff;
+  padding: 40px 0 85px 0;
+  overflow: hidden;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  box-sizing: border-box;
+}
+
+/* Site Grid Container */
+.kz-app-download-container {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+/* Main Banner Card */
+.kz-app-banner-card {
+  position: relative;
+  width: 100%;
+  border-radius: 28px;
+  background: linear-gradient(108deg, #85346f 0%, #76346a 36%, #653264 68%, #542e5b 100%);
+  overflow: hidden;
+  box-shadow: 0 20px 48px rgba(85, 53, 94, 0.22), 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-sizing: border-box;
+}
+
+/* ====================================================
+   BACKGROUND CONSTELLATION PATTERN (Opacity 10)
+   Touches the top-left and bottom-right borders directly
+   ==================================================== */
+.kz-app-bg-pattern {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+  /* Exactly 10% opacity */
+  opacity: 0.10;
+  user-select: none;
+  display: block;
+}
+
+/* Touching the top-left border */
+.kz-app-bg-pattern-left {
+  top: 0;
+  left: 0;
+  width: clamp(340px, 38vw, 530px);
+  height: auto;
+  transform: scaleX(-1);
+}
+
+/* Touching the bottom-right border */
+.kz-app-bg-pattern-right {
+  bottom: 0;
+  right: 0;
+  width: clamp(340px, 38vw, 530px);
+  height: auto;
+  transform: scaleX(-1);
+}
+
+/* ====================================================
+   CONTENT ROW LAYOUT
+   ==================================================== */
+.kz-app-content-row {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 360px;
+  padding: 0 44px 0 52px;
+  box-sizing: border-box;
+}
+
+/* ====================================================
+   LEFT COLUMN: HEADING & STORE BUTTONS
+   ==================================================== */
+.kz-app-text-col {
+  flex: 1 1 50%;
+  max-width: 580px;
+  padding: 44px 20px 44px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.kz-app-heading {
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: clamp(2.1rem, 3.4vw, 2.75rem);
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.15;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.02em;
+}
+
+.kz-app-subtext {
+  font-family: 'Roboto', sans-serif;
+  font-size: clamp(0.95rem, 1.15vw, 1.05rem);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0 0 32px 0;
+  max-width: 490px;
+  font-weight: 400;
+}
+
+/* Store Badges Group */
+.kz-app-buttons-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.kz-app-store-btn {
+  display: inline-block;
+  line-height: 0;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), 
+              filter 0.25s ease;
+}
+
+.kz-app-store-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  filter: brightness(1.08);
+}
+
+.kz-app-store-btn:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.kz-app-badge-img {
+  height: 48px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+/* ====================================================
+   RIGHT COLUMN: KAI MASCOT & MOCKUP (SPACE BETWEEN)
+   ==================================================== */
+.kz-app-visuals-col {
+  flex: 1 1 50%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  align-self: flex-end;
+  height: 100%;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* Visuals Stage: Side by Side with Proper Space */
+.kz-app-visuals-stage {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: clamp(16px, 2.6vw, 36px); /* Space between Kai and mockup */
+  position: relative;
+  z-index: 2;
+  width: auto;
+  box-sizing: border-box;
+}
+
+/* Kai Mascot Wrapper */
+.kz-app-mascot-wrap {
+  display: flex;
+  align-items: flex-end;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.kz-app-mascot-img {
+  height: clamp(120px, 11.5vw, 145px);
+  width: auto;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.32));
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Phone Mockup Wrapper */
+.kz-app-mockup-wrap {
+  display: flex;
+  align-items: flex-end;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.kz-app-mockup-img {
+  height: clamp(260px, 23.5vw, 320px);
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 18px 36px rgba(0, 0, 0, 0.38));
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ====================================================
+   RESPONSIVE DESIGN: LAPTOPS (1024px to 1280px)
+   ==================================================== */
+@media screen and (max-width: 1200px) {
+  .kz-app-content-row {
+    padding: 0 32px 0 40px;
+    min-height: 330px;
+  }
+
+  .kz-app-text-col {
+    padding: 36px 16px 36px 0;
+    max-width: 480px;
+  }
+
+  .kz-app-subtext {
+    font-size: 0.95rem;
+    margin-bottom: 24px;
+  }
+
+  .kz-app-visuals-stage {
+    gap: 20px;
+  }
+
+  .kz-app-mockup-img {
+    height: 290px;
+  }
+
+  .kz-app-mascot-img {
+    height: 130px;
+  }
+
+  .kz-app-badge-img {
+    height: 44px;
+  }
+}
+
+/* Tablets Landscape & Smaller Laptops (920px to 1023px) */
+@media screen and (max-width: 1023px) {
+  .kz-app-content-row {
+    padding: 0 24px 0 32px;
+    min-height: 300px;
+  }
+
+  .kz-app-subtext {
+    font-size: 0.9rem;
+    line-height: 1.55;
+    margin-bottom: 22px;
+  }
+
+  .kz-app-visuals-stage {
+    gap: 16px;
+  }
+
+  .kz-app-mockup-img {
+    height: 260px;
+  }
+
+  .kz-app-mascot-img {
+    height: 115px;
+  }
+
+  .kz-app-badge-img {
+    height: 40px;
+  }
+}
+
+/* Tablets Portrait & Medium Screens (768px to 919px) */
+@media screen and (max-width: 919px) {
+  .kz-app-download-section {
+    padding: 30px 0 65px 0;
+  }
+
+  .kz-app-banner-card {
+    border-radius: 24px;
+  }
+
+  .kz-app-content-row {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 40px 24px 0 24px;
+    min-height: auto;
+  }
+
+  .kz-app-text-col {
+    flex: 1 1 100%;
+    max-width: 600px;
+    padding: 0 0 28px 0;
+    align-items: center;
+  }
+
+  .kz-app-subtext {
+    max-width: 100%;
+  }
+
+  .kz-app-buttons-group {
+    justify-content: center;
+  }
+
+  .kz-app-visuals-col {
+    width: 100%;
+    justify-content: center;
+    align-items: flex-end;
+  }
+
+  .kz-app-visuals-stage {
+    justify-content: center;
+    align-items: flex-end;
+    gap: 22px;
+    margin: 0 auto;
+  }
+
+  .kz-app-mockup-img {
+    height: 250px;
+  }
+
+  .kz-app-mascot-img {
+    height: 115px;
+  }
+}
+
+/* ====================================================
+   MOBILE SCREENS (< 768px)
+   ==================================================== */
+@media screen and (max-width: 767px) {
+  .kz-app-download-section {
+    padding: 24px 0 50px 0;
+  }
+
+  .kz-app-download-container {
+    padding: 0 16px;
+  }
+
+  .kz-app-banner-card {
+    border-radius: 20px;
+  }
+
+  .kz-app-bg-pattern-left,
+  .kz-app-bg-pattern-right {
+    width: 320px;
+    opacity: 0.10;
+  }
+
+  .kz-app-content-row {
+    padding: 32px 16px 0 16px;
+  }
+
+  .kz-app-subtext {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+
+  .kz-app-buttons-group {
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .kz-app-badge-img {
+    height: 40px;
+  }
+
+  .kz-app-visuals-stage {
+    justify-content: center;
+    align-items: flex-end;
+    gap: 14px;
+    width: 100%;
+  }
+
+  .kz-app-mockup-img {
+    height: clamp(190px, 48vw, 240px);
+  }
+
+  .kz-app-mascot-img {
+    height: clamp(85px, 22vw, 110px);
+  }
+}
+
+/* Matching Speakers Title breakpoint at <= 600px */
+@media screen and (max-width: 600px) {
+  .kz-app-heading {
+    font-size: 1.95rem;
+  }
+}
+
+/* Extra Small Phones (< 420px) */
+@media screen and (max-width: 420px) {
+  .kz-app-content-row {
+    padding: 28px 12px 0 12px;
+  }
+
+  .kz-app-subtext {
+    font-size: 0.85rem;
+  }
+
+  .kz-app-buttons-group {
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+  }
+
+  .kz-app-badge-img {
+    height: 42px;
+  }
+
+  .kz-app-visuals-stage {
+    gap: 10px;
+  }
+
+  .kz-app-mockup-img {
+    height: 185px;
+  }
+
+  .kz-app-mascot-img {
+    height: 82px;
+  }
+}

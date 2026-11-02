@@ -32,25 +32,28 @@
 }
 
 /* ----------------------------------------------------
-   1. HERO SECTION (Matches Image 1)
+   1. HERO SECTION (Unified gradient background, consistent size, no banner image)
    ---------------------------------------------------- */
 .kz-spk-hero-section {
   position: relative;
-  background: linear-gradient(180deg, #FAF4F8 0%, #FAF2F7 45%, #FFFFFF 100%);
-  padding: 60px 0 48px;
-  border-bottom: 1px solid #F0E8F2;
+  background: linear-gradient(135deg, #ffffff 0%, #fdf8fb 40%, #faf3f8 75%, #f7f1f9 100%);
+  padding: 40px 0 38px 0;
+  min-height: 195px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid rgba(85, 53, 94, 0.07);
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-/* Subtle ambient background glow effect */
-.kz-spk-hero-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 5%;
-  width: 500px;
-  height: 380px;
-  background: radial-gradient(circle, rgba(182, 52, 115, 0.08) 0%, rgba(250, 244, 248, 0) 70%);
-  pointer-events: none;
+.kz-spk-hero-container {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .kz-spk-pill-badge-wrap {
@@ -77,18 +80,21 @@
 /* Large Split-Color Headline matching Home Hero Typography */
 .kz-spk-hero-headline {
   font-family: 'Roboto', sans-serif;
-  font-size: clamp(2.2rem, 3.8vw, 3.85rem);
+  font-size: clamp(2rem, 3.2vw, 3.2rem);
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.15;
   letter-spacing: -0.015em;
-  margin: 0 0 22px 0;
+  margin: 0 0 12px 0;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .kz-spk-hero-purple {
   color: #55355E;
   display: block;
+  text-align: center;
 }
 
 .kz-spk-hero-magenta {
@@ -98,25 +104,29 @@
   background-clip: text;
   color: transparent;
   display: inline-block;
+  text-align: center;
   width: fit-content;
 }
 
 /* Hero Subtitle matching Home Hero */
 .kz-spk-hero-subtitle {
   font-family: 'Roboto', sans-serif;
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   font-weight: 400;
-  line-height: 1.62;
+  line-height: 1.55;
   color: #6D5774;
-  max-width: 680px;
-  margin: 0 0 32px 0;
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
 }
 
 /* Metrics Pill Strip */
 .kz-spk-metrics-strip {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 14px;
+  margin: 0 auto;
 }
 
 .kz-spk-metric-pill {
@@ -594,26 +604,27 @@
 .kz-spk-breadcrumb {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 8px;
-  font-size: 0.88rem;
-  color: #718096;
-  margin-bottom: 22px;
+  font-size: 0.85rem;
+  color: #B63473;
+  margin-bottom: 12px;
 }
 
 .kz-spk-crumb-link {
-  color: #718096;
+  color: #B63473;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s ease;
 }
 
 .kz-spk-crumb-link:hover {
-  color: #B63473;
+  color: #8c1e52;
 }
 
 .kz-spk-crumb-sep {
   opacity: 0.5;
+  color: #B63473;
 }
 
 .kz-spk-crumb-current {

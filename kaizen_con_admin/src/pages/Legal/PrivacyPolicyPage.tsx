@@ -268,22 +268,9 @@ export default function PrivacyPolicyPage() {
               <span>•</span>
               <span className="text-emerald-300 font-medium">DPDP 2023 &amp; GDPR Compliant</span>
             </div>
-          </div>
+          </div>         
 
-          <div className="mt-5 sm:mt-0 sm:absolute sm:bottom-6 sm:right-6 flex items-center gap-2 z-10">
-            <button
-              onClick={handlePrint}
-              type="button"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white text-gray-800 text-xs font-semibold shadow-xs hover:bg-gray-100 transition-all cursor-pointer"
-            >
-              <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-              </svg>
-              <span>Print Policy</span>
-            </button>
-          </div>
-
-          {/* Background Decorative Rings */}
+          
           <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
           <div className="absolute top-0 right-1/4 w-32 h-32 bg-[#D85A9A]/20 rounded-full blur-xl pointer-events-none" />
         </div>
