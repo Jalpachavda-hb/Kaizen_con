@@ -7,7 +7,6 @@ import ScrollToTop from './components/Common/ScrollToTop';
 import HomePage from './pages/HomePage';
 import ContactPage from './pages/ContactPage';
 import SpeakersPage from './pages/SpeakersPage';
-import KnowledgePage from './pages/KnowledgePage';
 import AboutPage from './pages/AboutPage';
 import AiExperiencePage from './pages/AiExperiencePage';
 import ProgrammePage from './pages/ProgrammePage';
@@ -31,12 +30,11 @@ function App() {
           <Route path="/about-us" element={<AboutPage />} />
           <Route path="/programme" element={<ProgrammePage />} />
           <Route path="/program" element={<ProgrammePage />} />
+          <Route path="/faculty" element={<SpeakersPage />} />
           <Route path="/speakers" element={<SpeakersPage />} />
           <Route path="/speaker" element={<SpeakersPage />} />
           <Route path="/ai-experience" element={<AiExperiencePage />} />
           <Route path="/ai" element={<AiExperiencePage />} />
-          <Route path="/knowledge" element={<KnowledgePage />} />
-          <Route path="/knowledge-base" element={<KnowledgePage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/contact-us" element={<ContactPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />

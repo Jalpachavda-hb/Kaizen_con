@@ -11,7 +11,7 @@ const capabilities = [
     ),
     title: 'Personalized',
     description:
-      'AI maps your clinical speciality and interests to a tailored programme — recommended sessions, curated speakers, and relevant topics surfaced before you arrive.'
+      'AI maps your clinical speciality and interests to a tailored programme — recommended sessions, curated faculty, and relevant topics surfaced before you arrive.'
   },
   {
     icon: (
@@ -22,7 +22,7 @@ const capabilities = [
     ),
     title: 'Intelligent',
     description:
-      'A conference-trained AI assistant answers questions about sessions, speakers, and clinical topics in real time — grounded entirely in approved KaizenCon content.'
+      'A conference-trained AI assistant answers questions about sessions, faculty, and clinical topics in real time — grounded entirely in approved KAIZENCON content.'
   },
   {
     icon: (

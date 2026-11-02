@@ -1,0 +1,362 @@
+/* ====================================================
+   WELCOME MESSAGE SECTION - KAIZENCON 2027
+   ==================================================== */
+
+.kz-welcome-section {
+  position: relative;
+  width: 100%;
+  background-color: #fbf9fb;
+  padding: 56px 24px 68px 24px;
+  box-sizing: border-box;
+}
+
+.kz-welcome-container {
+  max-width: 1380px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Header Area */
+.kz-welcome-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.kz-welcome-eyebrow-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.kz-welcome-eyebrow-line {
+  width: 50px;
+  height: 1px;
+  background: #a98099;
+  display: inline-block;
+}
+
+.kz-welcome-eyebrow-text {
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #55143a;
+  text-transform: uppercase;
+}
+
+.kz-welcome-title {
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 2.65rem;
+  font-weight: 800;
+  color: #4a1033;
+  margin: 0;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+
+.kz-welcome-title-bar {
+  width: 54px;
+  height: 3.5px;
+  background: #56153a;
+  border-radius: 2px;
+  margin: 12px auto 0 auto;
+}
+
+/* Main Outer Content Card (No outside border, wide layout, both columns stretch) */
+.kz-welcome-card {
+  background: #ffffff;
+  border-radius: 24px;
+  border: none;
+  box-shadow: 0 10px 42px rgba(74, 16, 51, 0.05);
+  padding: 32px 36px;
+  display: flex;
+  align-items: stretch;
+  gap: 40px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* Left Column: Doctor Portrait + Anchored Plum Badge */
+.kz-welcome-left {
+  flex: 0 0 350px;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  box-sizing: border-box;
+}
+
+.kz-welcome-photo-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 480px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.kz-welcome-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+/* Plum Info Badge Pinned Directly to Bottom with zero gap */
+.kz-welcome-badge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #460e33;
+  border-radius: 0 0 20px 20px;
+  padding: 16px 22px 18px 22px;
+  z-index: 3;
+  box-sizing: border-box;
+}
+
+.kz-welcome-badge-body {
+  color: #ffffff;
+}
+
+.kz-welcome-badge-name {
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 1.22rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+  line-height: 1.25;
+  letter-spacing: -0.2px;
+}
+
+.kz-welcome-badge-sub {
+  border-left: 2px solid rgba(255, 255, 255, 0.45);
+  padding-left: 10px;
+}
+
+.kz-welcome-badge-role {
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: #ebdce6;
+  margin: 0;
+}
+
+/* Right Column: Letter Content */
+.kz-welcome-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.kz-welcome-salutation {
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 1.38rem;
+  font-weight: 800;
+  color: #350a27;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+/* Highlighted Callout Box */
+.kz-welcome-highlight {
+  background: #fdf2f7;
+  border-left: 4px solid #8e1853;
+  border-radius: 6px;
+  padding: 14px 20px;
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #3b333a;
+}
+
+.kz-welcome-highlight strong {
+  color: #58123a;
+  font-weight: 700;
+}
+
+/* Body Paragraphs */
+.kz-welcome-para {
+  font-size: 0.93rem;
+  line-height: 1.7;
+  color: #484248;
+  margin: 0 0 14px 0;
+}
+
+/* Early-Bird Deadline Alert Card */
+.kz-welcome-notice {
+  display: flex;
+  align-items: center;
+  background: #fdf2f7;
+  border: 1px solid #ebd0df;
+  border-radius: 12px;
+  padding: 14px 20px;
+  margin: 16px 0 18px 0;
+  gap: 16px;
+}
+
+.kz-welcome-notice-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 9px;
+  background: #5c1039;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #ffffff;
+}
+
+.kz-welcome-notice-text {
+  flex: 1;
+}
+
+.kz-welcome-notice-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #500e35;
+  margin-bottom: 3px;
+  line-height: 1.4;
+}
+
+.kz-welcome-notice-desc {
+  font-size: 0.86rem;
+  color: #5c4e57;
+  line-height: 1.4;
+}
+
+/* Closing Sign-off */
+.kz-welcome-closing {
+  margin-top: 6px;
+}
+
+.kz-welcome-closing-text {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #350a27;
+  margin: 0 0 6px 0;
+}
+
+.kz-welcome-closing-bar {
+  width: 46px;
+  height: 3.5px;
+  background: #500f36;
+  border-radius: 2px;
+}
+
+/* ====================================================
+   RESPONSIVENESS
+   ==================================================== */
+@media (max-width: 1080px) {
+  .kz-welcome-card {
+    gap: 30px;
+    padding: 26px;
+  }
+
+  .kz-welcome-left {
+    flex: 0 0 320px;
+    max-width: 320px;
+  }
+
+  .kz-welcome-photo-wrap {
+    min-height: 440px;
+  }
+}
+
+@media (max-width: 991px) {
+  .kz-welcome-card {
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 22px;
+  }
+
+  .kz-welcome-left {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 360px;
+    align-self: center;
+  }
+
+  .kz-welcome-photo-wrap {
+    min-height: 440px;
+    height: 440px;
+  }
+
+  .kz-welcome-right {
+    padding: 0;
+    width: 100%;
+  }
+
+  .kz-welcome-title {
+    font-size: 2.2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .kz-welcome-section {
+    padding: 38px 14px 48px 14px;
+  }
+
+  .kz-welcome-title {
+    font-size: 1.8rem;
+  }
+
+  .kz-welcome-eyebrow-text {
+    font-size: 0.74rem;
+    letter-spacing: 2.2px;
+  }
+
+  .kz-welcome-eyebrow-line {
+    width: 32px;
+  }
+
+  .kz-welcome-card {
+    padding: 18px 16px;
+    border-radius: 18px;
+  }
+
+  .kz-welcome-photo-wrap {
+    min-height: 380px;
+    height: 380px;
+  }
+
+  .kz-welcome-salutation {
+    font-size: 1.2rem;
+  }
+
+  .kz-welcome-highlight {
+    padding: 12px 14px;
+    font-size: 0.88rem;
+  }
+
+  .kz-welcome-para {
+    font-size: 0.86rem;
+  }
+
+  .kz-welcome-notice {
+    gap: 12px;
+    padding: 11px 14px;
+  }
+
+  .kz-welcome-notice-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .kz-welcome-notice-title {
+    font-size: 0.85rem;
+  }
+
+  .kz-welcome-notice-desc {
+    font-size: 0.80rem;
+  }
+}

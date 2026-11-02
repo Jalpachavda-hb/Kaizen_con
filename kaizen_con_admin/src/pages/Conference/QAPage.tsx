@@ -271,13 +271,13 @@ export default function QAPage() {
   return (
     <>
       <PageMeta
-        title="Live Q&A Management | KaizenCon Admin"
+        title="Live Q&A Management | KAIZENCON Admin"
         description="Real-time WebSocket audience questions, live moderation table, and stage presentation feed."
       />
 
       <AdminPageContainer
         title="Live Conference Q&A Moderation"
-        subtitle="Real-time WebSocket connection to KaizenCon Session Stream. Review, approve, and project live audience inquiries."
+        subtitle="Real-time WebSocket connection to KAIZENCON Session Stream. Review, approve, and project live audience inquiries."
         actionButton={
           <div className="flex items-center gap-2">
             {/* WebSocket Status Indicator */}

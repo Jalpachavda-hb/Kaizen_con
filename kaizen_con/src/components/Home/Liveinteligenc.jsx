@@ -113,23 +113,23 @@ export default function Liveinteligenc() {
         {/* Section Header */}
         <div className="kz-live-intel-header">
           <div className="kz-live-intel-pill">
-            <span className="kz-live-intel-pill-dot" aria-hidden="true" />
-            <span>LIVE INTELLIGENCE</span>
+         
+            <span>INTERACTIVE CONFERENCE EXPERIENCE</span>
           </div>
 
           <h2 className="kz-live-intel-title">
-            <span className="kz-title-dark-theme">The room, made </span>
-            <span className="kz-title-magenta-theme">intelligent</span>
+            <span className="kz-title-dark-theme">Discover the </span>
+            <span className="kz-title-magenta-theme">interactive conference experience</span>
           </h2>
 
           <p className="kz-live-intel-desc">
-            AI clusters live audience questions by theme and surfaces the most clinically relevant — turning a queue into structured clinical discourse.
+            Explore how KAIZENCON 2027 will bring audience participation and AI-powered discussions together through interactive polls and intelligent question grouping.
           </p>
         </div>
 
         {/* Two Columns Grid */}
         <div className="kz-live-intel-grid">
-          {/* ================= LEFT CARD: Live Audience Poll ================= */}
+          {/* ================= LEFT CARD: Interactive Audience Polling ================= */}
           <div className="kz-live-card kz-poll-card">
             <div>
               {/* Header */}
@@ -142,20 +142,22 @@ export default function Liveinteligenc() {
                       <line x1="6" y1="20" x2="6" y2="14" />
                     </svg>
                   </div>
-                  <h3 className="kz-card-title">Live Audience Poll</h3>
+                  <h3 className="kz-card-title">Interactive Audience Polling</h3>
                 </div>
 
                 <div className="kz-poll-header-right">
-                  <div className="kz-poll-live-status">
-                   
-                   
-                  </div>
+                  <span className="kz-concept-badge">Concept Preview</span>
                   <div className="kz-poll-timer-box">
                     <div className="kz-poll-time-now">14:32</div>
                     <div className="kz-poll-time-total">of 45:00</div>
                   </div>
                 </div>
               </div>
+
+              {/* Card Sub-description */}
+              <p className="kz-card-subdesc">
+                Preview of how attendees will participate in conference polls and share their perspectives during sessions.
+              </p>
 
               {/* Question */}
               <h4 className="kz-poll-prompt">
@@ -260,7 +262,7 @@ export default function Liveinteligenc() {
             </div>
           </div>
 
-          {/* ================= RIGHT CARD: AI Q&A Clustering ================= */}
+          {/* ================= RIGHT CARD: AI-Powered Question Insights ================= */}
           <div className="kz-live-card kz-qa-card">
             <div>
               {/* Header */}
@@ -273,13 +275,21 @@ export default function Liveinteligenc() {
                       <line x1="8" y1="13" x2="13" y2="13" />
                     </svg>
                   </div>
-                  <h3 className="kz-card-title">AI Q&A Clustering</h3>
+                  <h3 className="kz-card-title">AI-Powered Question Insights</h3>
                 </div>
 
-                <div className="kz-qa-count-badge">
-                  24 QUESTIONS
+                <div className="kz-qa-header-badges">
+                  <span className="kz-concept-badge">Concept Preview</span>
+                  <div className="kz-qa-count-badge">
+                    24 QUESTIONS
+                  </div>
                 </div>
               </div>
+
+              {/* Card Sub-description */}
+              <p className="kz-card-subdesc">
+                Preview of how AI will organize audience questions into relevant clinical topics for focused discussions.
+              </p>
 
               {/* Clusters List */}
               <div className="kz-qa-list" role="list" aria-label="AI Q&A Question Clusters">

@@ -64,14 +64,14 @@ export default function StatsSection() {
                 </svg>
               </div>
               <div className="kz-metric-card-body">
-                <div className="kz-metric-number">100+</div>
+                <div className="kz-metric-number">50+</div>
                 <div className="kz-metric-label">Scientific Sessions</div>
                 <div className="kz-metric-divider" />
-                <div className="kz-metric-detail">Across 4 halls</div>
+                <div className="kz-metric-detail">Across 2 halls</div>
               </div>
             </div>
 
-            {/* Card 3: 150+ Expert Speakers */}
+            {/* Card 3: 50+ Expert Faculty */}
             <div className="kz-metric-grid-card">
               <div className="kz-metric-icon-circle">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="kz-metric-icon">
@@ -82,10 +82,10 @@ export default function StatsSection() {
                 </svg>
               </div>
               <div className="kz-metric-card-body">
-                <div className="kz-metric-number">150+</div>
-                <div className="kz-metric-label">Expert Speakers</div>
+                <div className="kz-metric-number">50+</div>
+                <div className="kz-metric-label">Expert Faculty</div>
                 <div className="kz-metric-divider" />
-                <div className="kz-metric-detail">From 40+ countries</div>
+                <div className="kz-metric-detail">From 20+ cities</div>
               </div>
             </div>
 
@@ -100,7 +100,7 @@ export default function StatsSection() {
                 </svg>
               </div>
               <div className="kz-metric-card-body">
-                <div className="kz-metric-number">250+</div>
+                <div className="kz-metric-number">350+</div>
                 <div className="kz-metric-label">Delegates</div>
                 <div className="kz-metric-divider" />
                 <div className="kz-metric-detail">International audience</div>

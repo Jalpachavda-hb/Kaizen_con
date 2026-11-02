@@ -50,7 +50,7 @@ export default function Footer() {
       <div className="kz-footer-container">
         {/* Column 1: Brand & Conference Meta */}
         <div className="kz-footer-brand-col">
-          <a href="/" className="kz-footer-brand-logo-link" onClick={handleLogoClick} aria-label="KaizenCon 2027 Home">
+          <a href="/" className="kz-footer-brand-logo-link" onClick={handleLogoClick} aria-label="KAIZENCON 2027 Home">
             <img
               src={logoImg}
               alt="KaizenCon 2027 International Medical Conference"
@@ -102,7 +102,7 @@ export default function Footer() {
           <ul className="kz-footer-nav-list">
             <li><a href="/about" onClick={(e) => handleFooterNav(e, '/about')}>About KaizenCon</a></li>
             <li><a href="/programme" onClick={(e) => handleFooterNav(e, '/programme')}>Programme</a></li>
-            <li><a href="/speakers" onClick={(e) => handleFooterNav(e, '/speakers')}>Speakers</a></li>
+            <li><a href="/faculty" onClick={(e) => handleFooterNav(e, '/faculty')}>Faculty</a></li>
                    
             <li><a href="/contact" onClick={(e) => handleFooterNav(e, '/contact')}>Contact Us</a></li>
 
@@ -118,7 +118,6 @@ export default function Footer() {
             <li><a href="/ai-experience#personalization" onClick={(e) => handleFooterNav(e, '/ai-experience#personalization')}>AI Personalization</a></li>
             <li><a href="/ai-experience#assistant" onClick={(e) => handleFooterNav(e, '/ai-experience#assistant')}>Conference Assistant</a></li>
             <li><a href="/ai-experience#perspectives" onClick={(e) => handleFooterNav(e, '/ai-experience#perspectives')}>AI Perspectives</a></li>
-            <li><a href="/knowledge" onClick={(e) => handleFooterNav(e, '/knowledge')}>Conference Knowledge</a></li>
           </ul>
         </div>
 
@@ -176,7 +175,7 @@ export default function Footer() {
       <div className="kz-footer-bottom-bar">
         <div className="kz-footer-bottom-container">
           <p className="kz-footer-copyright-text">
-            &copy; 2027 KaizenCon International Medical Conference. All rights reserved.
+            &copy; 2027 KAIZENCON International Medical Conference. All rights reserved.
           </p>
           <div className="kz-footer-legal-links">
             <a

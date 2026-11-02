@@ -108,10 +108,10 @@ export default function SpeakerCard({
       {/* Divider */}
       <div className="kz-card-soft-divider" aria-hidden="true" />
 
-      {/* 4. "SPEAKING ON" TOPIC BLOCK */}
+      {/* 4. "SESSION TOPIC" BLOCK */}
       {topic && (
         <div className="kz-card-topic-block">
-          <span className="kz-card-topic-label">SPEAKING ON</span>
+          <span className="kz-card-topic-label">SESSION TOPIC</span>
           <div className="kz-card-topic-row">
             <div className="kz-card-mic-icon-disc" aria-hidden="true">
               <svg

@@ -56,29 +56,29 @@ export default function SpeakersSection() {
   const navigate = useNavigate();
 
   return (
-    <section className="kz-featured-speakers-section" id="speakers" aria-label="Featured Speakers">
+    <section className="kz-featured-speakers-section" id="faculty" aria-label="Featured Faculty">
       <div className="kz-featured-speakers-container">
         {/* Header Bar */}
         <div className="kz-speakers-top-bar">
           <div className="kz-speakers-header-left">
-            {/* Tag: | SPEAKERS */}
+            {/* Tag: | FACULTY */}
             <div className="kz-speakers-pill-tag">
               <span className="kz-speakers-bar-accent" aria-hidden="true" />
-              <span className="kz-speakers-tag-label">SPEAKERS</span>
+              <span className="kz-speakers-tag-label">FACULTY</span>
             </div>
 
-            {/* Headline: Featured speakers */}
+            {/* Headline: Featured Faculty */}
             <h2 className="kz-speakers-main-title">
-              Featured<span className="kz-speakers-title-magenta">speakers</span>
+              Featured <span className="kz-speakers-title-magenta">Faculty</span>
             </h2>
 
             {/* Underline accent beneath Featured */}
             <div className="kz-speakers-title-underline" aria-hidden="true" />
           </div>
 
-          {/* Right link: All speakers → (Navigates directly to dedicated /speakers page) */}
-          <Link to="/speakers" className="kz-speakers-all-link" aria-label="View all conference speakers">
-            <span>All speakers</span>
+          {/* Right link: All faculty → (Navigates directly to dedicated /faculty page) */}
+          <Link to="/faculty" className="kz-speakers-all-link" aria-label="View all conference faculty">
+            <span>All faculty</span>
             <svg
               width="18"
               height="18"
@@ -96,7 +96,7 @@ export default function SpeakersSection() {
           </Link>
         </div>
 
-        {/* 3 Featured Speakers Grid using the reusable SpeakerCard component */}
+        {/* 3 Featured Faculty Grid using the reusable SpeakerCard component */}
         <div className="kz-featured-speakers-grid">
           {HOME_FEATURED_SPEAKERS.map((spk) => (
             <SpeakerCard
@@ -113,7 +113,7 @@ export default function SpeakersSection() {
               tag={spk.tag}
               bio={spk.bio}
               isHighlighted={spk.isHighlighted}
-              onViewDetails={() => navigate('/speakers')}
+              onViewDetails={() => navigate('/faculty')}
             />
           ))}
         </div>

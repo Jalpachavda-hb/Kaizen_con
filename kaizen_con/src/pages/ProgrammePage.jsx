@@ -90,15 +90,15 @@ const getCategoryStyle = (category = '') => {
 
   if (cat.includes('cardio') || cat.includes('heart')) {
     return {
-      cardColor: '#ef4444',
-      cardBg: '#fffbfb',
-      badgeBg: '#fee2e2',
-      badgeColor: '#ef4444',
-      tagBg: '#fee2e2',
-      tagColor: '#dc2626',
-      tagBorder: '#fecaca',
+      cardColor: '#aa2d7b',
+      cardBg: '#fffbfd',
+      badgeBg: '#fdf2f8',
+      badgeColor: '#aa2d7b',
+      tagBg: '#fdf2f8',
+      tagColor: '#aa2d7b',
+      tagBorder: 'rgba(170, 45, 123, 0.25)',
       icon: 'monitor',
-      tagType: 'ai'
+      tagType: 'cardio'
     };
   }
 
@@ -200,14 +200,28 @@ const getCategoryStyle = (category = '') => {
     };
   }
 
+  if (cat.includes('panel') || cat.includes('closing')) {
+    return {
+      cardColor: '#55355e',
+      cardBg: '#faf7fa',
+      badgeBg: '#f3eef5',
+      badgeColor: '#55355e',
+      tagBg: '#f3eef5',
+      tagColor: '#55355e',
+      tagBorder: 'rgba(85, 53, 94, 0.22)',
+      icon: 'podium',
+      tagType: 'panel'
+    };
+  }
+
   return {
-    cardColor: '#6366f1',
-    cardBg: '#fbfbfe',
-    badgeBg: '#eef2ff',
-    badgeColor: '#6366f1',
-    tagBg: '#eef2ff',
-    tagColor: '#4f46e5',
-    tagBorder: '#c7d2fe',
+    cardColor: '#aa2d7b',
+    cardBg: '#fdf9fb',
+    badgeBg: '#fdf2f8',
+    badgeColor: '#aa2d7b',
+    tagBg: '#fdf2f8',
+    tagColor: '#aa2d7b',
+    tagBorder: 'rgba(170, 45, 123, 0.25)',
     icon: 'podium',
     tagType: 'oral'
   };
@@ -278,7 +292,7 @@ const transformApiSchedules = (rawList, speakerMap = {}) => {
 
       let speakerName;
       if (s.speaker_id) {
-        speakerName = speakerMap[s.speaker_id] || `Speaker #${s.speaker_id}`;
+        speakerName = speakerMap[s.speaker_id] || `Faculty #${s.speaker_id}`;
       } else if (s.category && s.category.toLowerCase().includes('break')) {
         speakerName = 'Hospitality & Refreshments';
       } else {
@@ -330,7 +344,7 @@ const transformApiSchedules = (rawList, speakerMap = {}) => {
         sessionsCount: String(sessions.length),
         sessionsLabel: 'Sessions',
         speakersCount: String(uniqueSpeakers || sessions.length),
-        speakersLabel: 'Speakers',
+        speakersLabel: 'Faculty',
         tracksCount: String(uniqueCategories || 1),
         tracksLabel: 'Tracks'
       },
@@ -358,7 +372,7 @@ const transformApiSchedules = (rawList, speakerMap = {}) => {
 
       let speakerName;
       if (s.speaker_id) {
-        speakerName = speakerMap[s.speaker_id] || `Speaker #${s.speaker_id}`;
+        speakerName = speakerMap[s.speaker_id] || `Faculty #${s.speaker_id}`;
       } else if (s.category && s.category.toLowerCase().includes('break')) {
         speakerName = 'Hospitality & Refreshments';
       } else {
@@ -402,7 +416,7 @@ const transformApiSchedules = (rawList, speakerMap = {}) => {
 };
 
 export default function ProgrammePage() {
-  const [activeTab, setActiveTab] = useState('sessions');
+  const [activeTab, setActiveTab] = useState('glance');
   const [selectedTopic, setSelectedTopic] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTrack, setSelectedTrack] = useState('ALL');
@@ -645,9 +659,7 @@ export default function ProgrammePage() {
 
   return (
     <div className="kz-programme-page-wrapper">
-      {/* ====================================================
-          1. PAGE HERO HEADER (Centered with banner background)
-         ==================================================== */}
+      
       <section className="kz-programme-hero-section" aria-label="Programme Overview">
         <div className="kz-programme-hero-container">
           <h1 className="kz-programme-main-title">
@@ -779,7 +791,7 @@ export default function ProgrammePage() {
               <input
                 type="text"
                 className="kz-search-input"
-                placeholder="Search sessions, topics, speakers..."
+                placeholder="Search sessions, topics, faculty..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label="Search programme"
@@ -955,9 +967,20 @@ export default function ProgrammePage() {
                         >
                           {/* Left Timeline Rail */}
                           <div className="kz-glance-timeline-rail" aria-hidden="true">
-                            <span className="kz-glance-timeline-dot" />
+                            <span
+                              className="kz-glance-timeline-dot"
+                              style={{
+                                backgroundColor: session.cardColor || '#aa2d7b',
+                                boxShadow: `0 0 0 1.5px ${session.cardColor || '#aa2d7b'}`
+                              }}
+                            />
                             {idx < dayCol.sessions.length - 1 && (
-                              <span className="kz-glance-timeline-line" />
+                              <span
+                                className="kz-glance-timeline-line"
+                                style={{
+                                  backgroundColor: session.cardColor ? `${session.cardColor}33` : 'rgba(170, 45, 123, 0.22)'
+                                }}
+                              />
                             )}
                           </div>
 
@@ -1167,7 +1190,7 @@ export default function ProgrammePage() {
         {activeTab === 'speakers' && (
           <div className="kz-topics-overview-section">
             <div className="kz-topics-overview-header">
-              <h2 className="kz-topics-overview-title">Keynote Faculty & Speakers</h2>
+              <h2 className="kz-topics-overview-title">Keynote Faculty</h2>
               <p className="kz-topics-overview-subtitle">
                 World-renowned clinical surgeons, robotic pioneers, and AI researchers leading the scientific programme.
               </p>
@@ -1181,7 +1204,7 @@ export default function ProgrammePage() {
                 { name: 'Dr. Sofia Laurent', role: 'Global Surgical Innovation Chair', sessions: 'Global Access, Next-Gen Robotics' },
                 { name: 'Dr. Daniel Okafor', role: 'Laparoscopic & Robotic Specialist', sessions: 'Next Era Panel, Autonomous Suite' },
                 { name: 'Dr. Aisha Rahman', role: 'Surgical VR & AI Simulation Chair', sessions: 'Surgeon Training, Education in AI' },
-                { name: 'Dr. Thomas Weber', role: 'KaizenCon Scientific Committee President', sessions: 'Humanity in AI, Valedictory Keynote' }
+                { name: 'Dr. Thomas Weber', role: 'KAIZENCON Scientific Committee President', sessions: 'Humanity in AI, Valedictory Keynote' }
               ].map((spk, idx) => (
                 <div key={idx} className="kz-speaker-faculty-card">
                   <div className="kz-speaker-initials-badge">
@@ -1254,7 +1277,7 @@ export default function ProgrammePage() {
                 <div className="kz-modal-meta-cell">
                   <span className="kz-modal-meta-label">
                     <LuUser size={13} style={{ marginRight: 5, verticalAlign: 'text-bottom' }} />
-                    Faculty / Speaker
+                    Faculty
                   </span>
                   <span className="kz-modal-meta-val">{selectedSession.speaker}</span>
                 </div>

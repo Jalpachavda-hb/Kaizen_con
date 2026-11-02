@@ -566,6 +566,16 @@
   box-sizing: border-box;
 }
 
+.kz-form-group input,
+.kz-form-group textarea {
+  text-transform: uppercase;
+}
+
+.kz-form-group input::placeholder,
+.kz-form-group textarea::placeholder {
+  text-transform: none;
+}
+
 .kz-form-group input:focus,
 .kz-form-group select:focus,
 .kz-form-group textarea:focus {

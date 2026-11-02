@@ -251,6 +251,36 @@
   color: #AA2D7B;
 }
 
+.kz-qa-header-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Concept Preview Badge */
+.kz-concept-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(85, 53, 94, 0.08);
+  border: 1px solid rgba(85, 53, 94, 0.2);
+  color: #55355E;
+  white-space: nowrap;
+}
+
+/* Card Subtitle / Description */
+.kz-card-subdesc {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: #6a5372;
+  margin: -8px 0 20px 0;
+}
+
 /* ====================================================
    LEFT CARD: POLL CONTENT
    ==================================================== */
@@ -637,7 +667,8 @@
     gap: 12px;
   }
 
-  .kz-poll-header-right {
+  .kz-poll-header-right,
+  .kz-qa-header-badges {
     flex-direction: column;
     align-items: flex-end;
     gap: 6px;

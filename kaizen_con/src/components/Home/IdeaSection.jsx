@@ -42,7 +42,7 @@ const ideaSteps = [
       </svg>
     ),
     title: 'Programme',
-    subtitle: '100+ sessions',
+    subtitle: '50+ sessions',
     isHighlight: false
   },
   {
@@ -87,7 +87,7 @@ export default function IdeaSection() {
 
           {/* Subtitle description */}
           <p className="kz-idea-desc">
-            KaizenCon 2027 is not a conference about AI. It is an AI-native conference — one where
+            KAIZENCON 2027 is not a conference about AI. It is an AI-native conference — one where
             intelligence is woven into every layer of the experience, from the moment you register to
             the knowledge you carry home.
           </p>

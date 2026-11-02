@@ -238,7 +238,7 @@ export default function AiConAssisten() {
           {/* 2-Line Headline with Theme Colors */}
           <h2 className="kz-assistant-title">
             <span className="kz-title-line-dark">Get instant answers</span>
-            <span className="kz-title-line-magenta">about KaizenCon 2027</span>
+            <span className="kz-title-line-magenta">about KAIZENCON 2027</span>
           </h2>
 
           {/* Quick Prompt Filter Buttons Row */}
@@ -572,10 +572,10 @@ export default function AiConAssisten() {
                 <input
                   type="text"
                   className="kz-chat-text-input"
-                  placeholder="Ask about sessions, speakers, topics..."
+                  placeholder="Ask about sessions, faculty, topics..."
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  aria-label="Ask about sessions, speakers, topics"
+                  aria-label="Ask about sessions, faculty, topics"
                 />
 
                 <button
@@ -637,9 +637,9 @@ export default function AiConAssisten() {
               </h3>
 
               <p className="kz-intel-desc">
-                The KaizenCon AI is trained on the complete programme — every session, speaker
-                biography, abstract, and topic. It helps you navigate 100+ sessions, find the right
-                speaker, and make the most of three days.
+                The KAIZENCON AI is trained on the complete programme — every session, faculty
+                biography, abstract, and topic. It helps you navigate, find the right
+                faculty, and make the most of three days.
               </p>
             </div>
 
@@ -673,7 +673,7 @@ export default function AiConAssisten() {
                     </div>
                     <div className="kz-intel-card-content">
                       <h4 className="kz-intel-card-heading">Session discovery</h4>
-                      <p className="kz-intel-card-sub">Find sessions by topic, speaker, or day</p>
+                      <p className="kz-intel-card-sub">Find sessions by topic, faculty, or day</p>
                     </div>
                   </div>
                   <div className="kz-intel-arrow" aria-hidden="true">
@@ -694,7 +694,7 @@ export default function AiConAssisten() {
                 </div>
               </div>
 
-              {/* Card 2: Speaker profiles */}
+              {/* Card 2: Faculty profiles */}
               <div className="kz-intel-card-wrapper">
                 <div className="kz-card-timeline-dot" aria-hidden="true" />
                 <div
@@ -723,7 +723,7 @@ export default function AiConAssisten() {
                       </svg>
                     </div>
                     <div className="kz-intel-card-content">
-                      <h4 className="kz-intel-card-heading">Speaker profiles</h4>
+                      <h4 className="kz-intel-card-heading">Faculty profiles</h4>
                       <p className="kz-intel-card-sub">Learn about expertise, histories, and sessions</p>
                     </div>
                   </div>
@@ -800,7 +800,7 @@ export default function AiConAssisten() {
 
             {/* Disclaimer text */}
             <p className="kz-intel-disclaimer">
-              All responses are based on approved KaizenCon conference content and do not
+              All responses are based on approved KAIZENCON conference content and do not
               constitute clinical advice.
             </p>
           </div>

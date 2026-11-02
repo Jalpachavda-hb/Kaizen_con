@@ -729,9 +729,9 @@
   width: 8px !important;
   height: 8px !important;
   border-radius: 50% !important;
-  background-color: #ef4444 !important;
+  background-color: var(--kz-brand-magenta, #aa2d7b);
   border: 2px solid #ffffff !important;
-  box-shadow: 0 0 0 1.5px #ef4444 !important;
+  box-shadow: 0 0 0 1.5px var(--kz-brand-magenta, #aa2d7b);
   z-index: 2;
   flex-shrink: 0;
 }
@@ -741,7 +741,7 @@
   top: 22px;
   bottom: -14px;
   width: 1.5px !important;
-  background-color: #fecdd3 !important;
+  background-color: var(--kz-brand-border-tint, rgba(170, 45, 123, 0.22)) !important;
   z-index: 1;
 }
 
@@ -1043,9 +1043,14 @@
   color: #a21caf;
 }
 
+.kz-tag-cardio {
+  background-color: #fdf2f8;
+  color: #aa2d7b;
+}
+
 .kz-tag-keynote {
-  background-color: #fef2f2;
-  color: #b91c1c;
+  background-color: #fdf2f8;
+  color: #aa2d7b;
 }
 
 .kz-tag-tech {
@@ -1385,10 +1390,16 @@
   border: 1px solid rgba(21, 128, 61, 0.2);
 }
 
+.kz-pill-cardio {
+  background-color: #fdf2f8;
+  color: #aa2d7b;
+  border: 1px solid rgba(170, 45, 123, 0.25);
+}
+
 .kz-pill-keynote {
-  background-color: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid rgba(185, 28, 28, 0.22);
+  background-color: #fdf2f8;
+  color: #aa2d7b;
+  border: 1px solid rgba(170, 45, 123, 0.25);
 }
 
 .kz-pill-panel {

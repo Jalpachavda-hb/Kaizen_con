@@ -10,7 +10,7 @@ export default function FloatingChatbot() {
   const [messages, setMessages] = useState([
     {
       sender: 'bot',
-      text: 'Hello! I am the KaizenCon 2027 AI Assistant. How can I help you today with the scientific programme, speakers, or registration?',
+      text: 'Hello! I am the KAIZENCON 2027 AI Assistant. How can I help you today with the scientific programme, faculty, or registration?',
       time: '10:00 AM',
       sources: []
     }
@@ -122,8 +122,8 @@ export default function FloatingChatbot() {
         type="button"
         className={`kz-floating-chatbot-btn ${isOpen ? 'is-active' : ''}`}
         onClick={() => setIsOpen(!isOpen)}
-        aria-label={isOpen ? 'Close AI Chatbot' : 'Open KaizenCon AI Chatbot'}
-        title="KaizenCon AI Assistant"
+        aria-label={isOpen ? 'Close AI Chatbot' : 'Open KAIZENCON AI Chatbot'}
+        title="KAIZENCON AI Assistant"
       >
         {/* Mascot Image (80 by 80) with Close Overlay on Active */}
         <div className="kz-floating-btn-content">
@@ -155,14 +155,14 @@ export default function FloatingChatbot() {
 
       {/* Floating Chat Modal Window */}
       {isOpen && (
-        <div className="kz-floating-chat-modal" role="dialog" aria-label="KaizenCon AI Assistant Window">
+        <div className="kz-floating-chat-modal" role="dialog" aria-label="KAIZENCON AI Assistant Window">
           {/* Header in Dark Theme Gradient */}
           <div className="kz-floating-modal-header">
             <div className="kz-floating-header-info">
               <div className="kz-floating-header-avatar" aria-hidden="true">
                 <img
                   src={chatbotImg}
-                  alt="KaizenCon AI"
+                  alt="KAIZENCON AI"
                   className="kz-floating-header-avatar-img"
                 />
               </div>
@@ -243,11 +243,8 @@ export default function FloatingChatbot() {
             <button type="button" onClick={() => { navigate('/contact'); setIsOpen(false); }}>
               ✉️ Contact Us
             </button>
-            <button type="button" onClick={() => { navigate('/speakers'); setIsOpen(false); }}>
+            <button type="button" onClick={() => { navigate('/faculty'); setIsOpen(false); }}>
               🎙️ Faculty
-            </button>
-            <button type="button" onClick={() => { navigate('/knowledge'); setIsOpen(false); }}>
-              📚 Knowledge Base
             </button>
           </div>
 
@@ -255,7 +252,7 @@ export default function FloatingChatbot() {
           <form className="kz-floating-modal-footer" onSubmit={handleSendMessage}>
             <input
               type="text"
-              placeholder="Ask about sessions, speakers, venue..."
+              placeholder="Ask about sessions, faculty, venue..."
               value={inputMsg}
               onChange={(e) => setInputMsg(e.target.value)}
               className="kz-floating-input"

@@ -54,7 +54,7 @@ export default function AboutPage() {
     {
       aspect: 'Conference Structure',
       traditional: 'Static slide presentations with isolated Q&A microphones',
-      kaizen: 'Live AI-synthesized sessions, semantic questioning & dynamic speaker dialogue'
+      kaizen: 'Live AI-synthesized sessions, semantic questioning & dynamic faculty dialogue'
     },
     {
       aspect: 'Knowledge Retention',
@@ -106,20 +106,20 @@ export default function AboutPage() {
 
   const faqs = [
     {
-      q: 'What is the core theme of KaizenCon 2027?',
-      a: 'KaizenCon 2027 is an international, AI-native medical technology conference dedicated to the convergence of advanced robotic surgery and artificial intelligence. Our motto is "Continuous improvement, now with intelligence," uniting surgeons, engineers, and clinical leaders.'
+      q: 'What is the core theme of KAIZENCON 2027?',
+      a: 'KAIZENCON 2027 is an international, AI-native medical technology conference dedicated to the convergence of advanced robotic surgery and artificial intelligence. Our motto is "Continuous improvement, now with intelligence," uniting surgeons, engineers, and clinical leaders.'
     },
     {
-      q: 'Who should attend KaizenCon 2027?',
+      q: 'Who should attend KAIZENCON 2027?',
       a: 'The summit is designed for gastrointestinal surgeons, oncologists, minimally invasive & robotic surgeons, biomedical engineers, medical AI researchers, hospital directors, and surgical trainees eager to master next-generation operative technology.'
     },
     {
       q: 'Where and when does the conference take place?',
-      a: 'KaizenCon 2027 takes place from 1–3 January 2027 at the International Conference Centre, Hyatt Regency, Ashram Road, Ahmedabad, India.'
+      a: 'KAIZENCON 2027 takes place from 1–3 January 2027 at the International Conference Centre, Hyatt Regency, Ashram Road, Ahmedabad, India.'
     },
     {
-      q: 'How does KaizenCon incorporate AI into the attendee experience?',
-      a: 'Attendees receive personalized agenda curation, an intelligent AI conference companion trained on all sessions, instant semantic Q&A clustering during keynotes, and lifetime access to the searchable KaizenCon Knowledge Base.'
+      q: 'How does KAIZENCON incorporate AI into the attendee experience?',
+      a: 'Attendees receive personalized agenda curation, an intelligent AI conference companion trained on all sessions, instant semantic Q&A clustering during keynotes, and lifetime access to the searchable KAIZENCON Knowledge Base.'
     }
   ];
 
@@ -297,7 +297,7 @@ export default function AboutPage() {
       {/* ====================================================
           1. HERO SECTION (Light Theme matching Contact & Knowledge page)
           ==================================================== */}
-      <section className="kz-about-hero-section" aria-label="About KaizenCon 2027">
+      <section className="kz-about-hero-section" aria-label="About KAIZENCON 2027">
         <div className="kz-about-hero-ambient" aria-hidden="true" />
 
         <div className="kz-about-container kz-about-hero-inner">
@@ -329,7 +329,7 @@ export default function AboutPage() {
               </div>
 
               <h2 className="kz-story-heading">
-                Why KaizenCon <br />
+                Why KAIZENCON <br />
                 <span className="kz-story-heading-accent">exists</span>
               </h2>
 
@@ -340,7 +340,7 @@ export default function AboutPage() {
               </p>
 
               <p className="kz-story-body">
-                KaizenCon 2027 answers with a conference that thinks with you. Intelligence is woven into every layer, from the moment you register to the knowledge you carry home. It is built to augment clinicians, never replace them.
+                KAIZENCON 2027 answers with a conference that thinks with you. Intelligence is woven into every layer, from the moment you register to the knowledge you carry home. It is built to augment clinicians, never replace them.
               </p>
 
               {/* Kaizen (改善) Concept Card */}
@@ -478,255 +478,6 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
-
-      {/* ====================================================
-          4. WHAT MAKES IT DIFFERENT: 4 PILLARS & STATS
-          ==================================================== */}
-      <section className="kz-diff-pillars-section" id="four-pillars">
-        <div className="kz-about-container">
-          {/* Section Header */}
-          <div className="kz-pillars-header">
-            <div className="kz-pillars-badge-wrap">
-              <span className="kz-pillars-badge">CORE CAPABILITIES</span>
-            </div>
-            <h2 className="kz-pillars-main-title">
-              An AI-native conference, built <br />
-              <span className="kz-pillars-title-gradient">on four pillars</span>
-            </h2>
-            <div className="kz-pillars-accent-bar" aria-hidden="true" />
-            <p className="kz-pillars-header-desc">
-              From real-time clinical personalisation to lasting post-event intelligence, every touchpoint is architected to empower surgical leaders and clinicians.
-            </p>
-          </div>
-
-          {/* 4 Pillars Cards - Elevated Creative Architectural UI */}
-          <div className="kz-pillars-grid">
-            {/* Pillar 01: Personalized */}
-            <div className="kz-pillar-card kz-pillar-card-01">
-              <div className="kz-pillar-top-stripe kz-stripe-pink" aria-hidden="true" />
-              <div className="kz-pillar-watermark" aria-hidden="true">01</div>
-
-              <div className="kz-pillar-header-row">
-                <div className="kz-pillar-badge kz-badge-pink">
-                  <span className="kz-pillar-badge-dot kz-dot-pink" />
-                  <span>PILLAR 01</span>
-                </div>
-                <div className="kz-pillar-icon-box kz-icon-box-pink">
-                  <svg className="kz-pillar-svg" viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="5" y="7" width="26" height="24" rx="4" />
-                    <line x1="11" y1="3.5" x2="11" y2="8" />
-                    <line x1="25" y1="3.5" x2="25" y2="8" />
-                    <line x1="5" y1="14" x2="31" y2="14" />
-                    <circle cx="23.5" cy="23.5" r="6.5" fill="#C0266A" stroke="#C0266A" strokeWidth="1" />
-                    <path d="M23.5 19.8l1 2 2.2.3-1.6 1.6.4 2.2-2-1-2 1 .4-2.2-1.6-1.6 2.2-.3z" fill="#FFFFFF" stroke="#FFFFFF" strokeWidth="0.5" strokeLinejoin="round" />
-                  </svg>
-                </div>
-              </div>
-
-              <div className="kz-pillar-content">
-                <h3 className="kz-pillar-title">Personalized</h3>
-                <p className="kz-pillar-desc">
-                  A tailored programme based on your speciality and interests, ready before you arrive.
-                </p>
-                <div className="kz-pillar-chips">
-                  <span className="kz-pillar-chip">Agenda AI</span>
-                  <span className="kz-pillar-chip">Clinical Focus</span>
-                </div>
-              </div>
-
-            
-            </div>
-
-            {/* Pillar 02: Intelligent */}
-            <div className="kz-pillar-card kz-pillar-card-02">
-              <div className="kz-pillar-top-stripe kz-stripe-purple" aria-hidden="true" />
-              <div className="kz-pillar-watermark" aria-hidden="true">02</div>
-
-              <div className="kz-pillar-header-row">
-                <div className="kz-pillar-badge kz-badge-purple">
-                  <span className="kz-pillar-badge-dot kz-dot-purple" />
-                  <span>PILLAR 02</span>
-                </div>
-                <div className="kz-pillar-icon-box kz-icon-box-purple">
-                  <svg className="kz-pillar-svg" viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="3" x2="18" y2="7.5" />
-                    <circle cx="18" cy="3.5" r="1.8" fill="currentColor" stroke="none" />
-                    <rect x="7.5" y="7.5" width="21" height="17" rx="6" />
-                    <line x1="4.5" y1="16" x2="7.5" y2="16" strokeWidth="3" strokeLinecap="round" />
-                    <line x1="28.5" y1="16" x2="31.5" y2="16" strokeWidth="3" strokeLinecap="round" />
-                    <circle cx="13.5" cy="14.5" r="1.8" fill="currentColor" stroke="none" />
-                    <circle cx="22.5" cy="14.5" r="1.8" fill="currentColor" stroke="none" />
-                    <line x1="14" y1="19.5" x2="22" y2="19.5" strokeWidth="2" strokeLinecap="round" />
-                    <path d="M12 24.5v2.5c0 2 2.5 3.5 6 3.5s6-1.5 6-3.5v-2.5" />
-                  </svg>
-                </div>
-              </div>
-
-              <div className="kz-pillar-content">
-                <h3 className="kz-pillar-title">Intelligent</h3>
-                <p className="kz-pillar-desc">
-                  A conference AI assistant that answers questions using approved KaizenCon content only.
-                </p>
-                <div className="kz-pillar-chips">
-                  <span className="kz-pillar-chip">Grounded AI</span>
-                  <span className="kz-pillar-chip">Verified Corpus</span>
-                </div>
-              </div>
-
-              
-            </div>
-
-            {/* Pillar 03: Interactive */}
-            <div className="kz-pillar-card kz-pillar-card-03">
-              <div className="kz-pillar-top-stripe kz-stripe-rose" aria-hidden="true" />
-              <div className="kz-pillar-watermark" aria-hidden="true">03</div>
-
-              <div className="kz-pillar-header-row">
-                <div className="kz-pillar-badge kz-badge-rose">
-                  <span className="kz-pillar-badge-dot kz-dot-rose" />
-                  <span>PILLAR 03</span>
-                </div>
-                <div className="kz-pillar-icon-box kz-icon-box-rose">
-                  <svg className="kz-pillar-svg" viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="9" y="4" width="18" height="12" rx="3.5" />
-                    <path d="M15 16v3.5l4-3.5" />
-                    <circle cx="13.5" cy="10" r="1" fill="currentColor" stroke="none" />
-                    <circle cx="18" cy="10" r="1" fill="currentColor" stroke="none" />
-                    <circle cx="22.5" cy="10" r="1" fill="currentColor" stroke="none" />
-                    <circle cx="9.5" cy="23.5" r="2.4" />
-                    <path d="M5.5 31c0-2.2 1.8-3.6 4-3.6s4 1.4 4 3.6" />
-                    <circle cx="26.5" cy="23.5" r="2.4" />
-                    <path d="M22.5 31c0-2.2 1.8-3.6 4-3.6s4 1.4 4 3.6" />
-                    <circle cx="18" cy="22" r="2.8" />
-                    <path d="M13.5 31c0-2.5 2-4.2 4.5-4.2s4.5 1.7 4.5 4.2" />
-                  </svg>
-                </div>
-              </div>
-
-              <div className="kz-pillar-content">
-                <h3 className="kz-pillar-title">Interactive</h3>
-                <p className="kz-pillar-desc">
-                  Live polls and Q&amp;A clustering turn a queue of questions into structured discussion.
-                </p>
-                <div className="kz-pillar-chips">
-                  <span className="kz-pillar-chip">Semantic Q&amp;A</span>
-                  <span className="kz-pillar-chip">Live Clustering</span>
-                </div>
-              </div>
-
-             
-            </div>
-
-            {/* Pillar 04: Connected */}
-            <div className="kz-pillar-card kz-pillar-card-04">
-              <div className="kz-pillar-top-stripe kz-stripe-indigo" aria-hidden="true" />
-              <div className="kz-pillar-watermark" aria-hidden="true">04</div>
-
-              <div className="kz-pillar-header-row">
-                <div className="kz-pillar-badge kz-badge-indigo">
-                  <span className="kz-pillar-badge-dot kz-dot-indigo" />
-                  <span>PILLAR 04</span>
-                </div>
-                <div className="kz-pillar-icon-box kz-icon-box-indigo">
-                  <svg className="kz-pillar-svg" viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 17c.5-3.3-2-6-5.5-6-2.5 0-4.6 1.4-5.4 3.5-1-.5-2.2-.7-3.4-.3-2.6.9-4.2 3.6-3.7 6.3.5 2.7 2.8 4.5 5.5 4.5h6" />
-                    <circle cx="23.5" cy="22.5" r="5" />
-                    <line x1="27.2" y1="26.2" x2="31.5" y2="30.5" strokeWidth="2.8" />
-                  </svg>
-                </div>
-              </div>
-
-              <div className="kz-pillar-content">
-                <h3 className="kz-pillar-title">Connected</h3>
-                <p className="kz-pillar-desc">
-                  Every session becomes a searchable knowledge asset that lives on after the event.
-                </p>
-                <div className="kz-pillar-chips">
-                  <span className="kz-pillar-chip">Searchable Corpus</span>
-                  <span className="kz-pillar-chip">Lifetime Access</span>
-                </div>
-              </div>
-
-              
-            </div>
-          </div>
-
-          {/* Elevated Impact Metrics Strip (Directly below 4 pillars) */}
-          <div className="kz-impact-stats-banner">
-            <div className="kz-impact-stats-mesh" aria-hidden="true" />
-            <div className="kz-impact-stats-inner">
-              {/* Stat 1: 3 Days */}
-              <div className="kz-impact-stat-pod">
-                <div className="kz-impact-icon-circle">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                  </svg>
-                </div>
-                <div className="kz-impact-stat-num">3</div>
-                <div className="kz-impact-stat-title">Days</div>
-                <div className="kz-impact-stat-detail">Intensive surgical &amp; AI immersion</div>
-              </div>
-
-              <div className="kz-impact-pod-sep" aria-hidden="true" />
-
-              {/* Stat 2: 100+ Sessions */}
-              <div className="kz-impact-stat-pod">
-                <div className="kz-impact-icon-circle">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                    <line x1="9" y1="7" x2="16" y2="7" />
-                    <line x1="9" y1="11" x2="14" y2="11" />
-                  </svg>
-                </div>
-                <div className="kz-impact-stat-num">100+</div>
-                <div className="kz-impact-stat-title">Scientific sessions</div>
-                <div className="kz-impact-stat-detail">Across 4 dedicated halls</div>
-              </div>
-
-              <div className="kz-impact-pod-sep" aria-hidden="true" />
-
-              {/* Stat 3: 150+ Speakers */}
-              <div className="kz-impact-stat-pod">
-                <div className="kz-impact-icon-circle">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                    <line x1="12" y1="19" x2="12" y2="22" />
-                  </svg>
-                </div>
-                <div className="kz-impact-stat-num">150+</div>
-                <div className="kz-impact-stat-title">Expert speakers</div>
-                <div className="kz-impact-stat-detail">From 40+ countries worldwide</div>
-              </div>
-
-              <div className="kz-impact-pod-sep" aria-hidden="true" />
-
-              {/* Stat 4: 2,500+ Delegates */}
-              <div className="kz-impact-stat-pod">
-                <div className="kz-impact-icon-circle">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
-                </div>
-                <div className="kz-impact-stat-num">2,500+</div>
-                <div className="kz-impact-stat-title">International delegates</div>
-                <div className="kz-impact-stat-detail">Surgeons, engineers &amp; leaders</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-   
-
     </div>
   );
 }

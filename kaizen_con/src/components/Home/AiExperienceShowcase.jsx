@@ -4,7 +4,7 @@ import './HomeSections.css';
 const AI_FEATURES = [
   'AI-scored session recommendations based on your speciality',
   'Personalised daily schedule across all three days',
-  'Speaker matching based on research alignment',
+  'Faculty matching based on research alignment',
   'Live updates if schedule changes affect your plan',
 ];
 
@@ -52,7 +52,7 @@ export default function AiExperienceShowcase() {
               <span className="kz-gradient-text">curated by AI</span>
             </h2>
             <p className="kz-ai-showcase-desc">
-              Before KaizenCon begins, your AI profile is built from your speciality, interests, and clinical context. The result: a programme that feels like it was designed specifically for you.
+              Before KAIZENCON begins, your AI profile is built from your speciality, interests, and clinical context. The result: a programme that feels like it was designed specifically for you.
             </p>
 
             <ul className="kz-ai-feature-list">
@@ -89,9 +89,7 @@ export default function AiExperienceShowcase() {
                     <p className="kz-ai-user-role">GI Surgeon · Global Institute of Surgical Innovation</p>
                   </div>
                 </div>
-                <div className="kz-ai-status-pill">
-                  AI PROFILE ACTIVE
-                </div>
+               
               </div>
 
               {/* Interests Section */}
@@ -125,7 +123,7 @@ export default function AiExperienceShowcase() {
               {/* Disclaimer Footer */}
               <div className="kz-ai-card-footer">
                 <p className="kz-ai-card-disclaimer">
-                  AI recommendations are based on your profile and approved KaizenCon session data only.
+                  AI recommendations are based on your profile and approved KAIZENCON session data only.
                 </p>
               </div>
             </div>

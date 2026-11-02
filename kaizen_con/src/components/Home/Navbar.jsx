@@ -9,9 +9,8 @@ const navItems = [
   { id: 'home', label: 'Home', href: '/' },
   { id: 'about', label: 'About', href: '/about' },
   { id: 'programme', label: 'Programme', href: '/programme' },
-  { id: 'speakers', label: 'Speakers', href: '/speakers' },
+  { id: 'faculty', label: 'Faculty', href: '/faculty' },
   { id: 'ai-experience', label: 'AI Experience', href: '/ai-experience' },
-  { id: 'knowledge', label: 'Knowledge', href: '/knowledge' },
   { id: 'contact', label: 'Contact Us', href: '/contact' },
 ];
 
@@ -27,12 +26,10 @@ export default function Navbar() {
       return 'Contact Us';
     } else if (pathname === '/about' || pathname === '/about-us') {
       return 'About';
-    } else if (pathname === '/speakers' || pathname === '/speaker') {
-      return 'Speakers';
+    } else if (pathname === '/faculty' || pathname === '/speakers' || pathname === '/speaker') {
+      return 'Faculty';
     } else if (pathname === '/ai-experience' || pathname === '/ai') {
       return 'AI Experience';
-    } else if (pathname === '/knowledge' || pathname === '/knowledge-base') {
-      return 'Knowledge';
     } else if (pathname === '/') {
       if (hash) {
         if (hash === '#programme' || hash === '#tracks') {
@@ -111,8 +108,8 @@ export default function Navbar() {
       return;
     }
 
-    if (href === '/speakers' || href === '/speaker') {
-      navigate('/speakers');
+    if (href === '/faculty' || href === '/speakers' || href === '/speaker') {
+      navigate('/faculty');
       return;
     }
 
@@ -121,12 +118,6 @@ export default function Navbar() {
       return;
     }
 
-    if (href === '/knowledge' || href === '/knowledge-base') {
-      navigate('/knowledge');
-      return;
-    }
-
- 
     if (href && href.startsWith('/#')) {
       const hash = href.substring(1); // e.g. '#programme'
       if (location.pathname !== '/') {

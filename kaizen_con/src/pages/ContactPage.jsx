@@ -10,7 +10,6 @@ export default function ContactPage() {
     email: '',
     phone: '',
     affiliation: '',
-    category: 'General Inquiry',
     message: '',
     agreed: false
   });
@@ -22,18 +21,21 @@ export default function ContactPage() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
+    let processedValue = value;
+    if (type === 'checkbox') {
+      processedValue = checked;
+    } else if (name === 'phone') {
+      // Only digits allowed (0-9)
+      processedValue = value.replace(/\D/g, '');
+    } else if (typeof value === 'string') {
+      processedValue = value.toUpperCase();
+    }
+
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: processedValue
     }));
-  };
-
-  const selectCategoryAndScroll = (category) => {
-    setFormData(prev => ({ ...prev, category }));
-    const formEl = document.querySelector('.kz-contact-form-wrapper');
-    if (formEl) {
-      formEl.scrollIntoView({ behavior: 'smooth' });
-    }
   };
 
   const handleSubmit = (e) => {
@@ -53,13 +55,12 @@ export default function ContactPage() {
       'Email Address': formData.email,
       'Phone / WhatsApp': formData.phone || '-',
       'Hospital / Institution': formData.affiliation || '-',
-      'Inquiry Subject': formData.category,
       'Message / Query': formData.message,
       'Consent to Updates': formData.agreed ? 'Yes' : 'No',
-      _subject: `New KaizenCon Inquiry from ${formData.firstName} ${formData.lastName || ''} - ${formData.category}`.trim(),
+      _subject: `New KAIZENCON Inquiry from ${formData.firstName} ${formData.lastName || ''}`.trim(),
       _template: 'table',
       _captcha: 'false',
-      _replyto: formData.email
+      _replyto: formData.email ? formData.email.trim().toLowerCase() : ''
     };
 
     // Dispatch email asynchronously with keepalive so it delivers reliably in the background
@@ -93,7 +94,6 @@ export default function ContactPage() {
       email: '',
       phone: '',
       affiliation: '',
-      category: 'General Inquiry',
       message: '',
       agreed: false
     });
@@ -107,7 +107,7 @@ export default function ContactPage() {
 
   const faqs = [
     {
-      q: 'How do I register for KaizenCon 2027 and the AI Hands-on Workshop?',
+      q: 'How do I register for KAIZENCON 2027 and the AI Hands-on Workshop?',
       a: 'Registrations are open online through the portal. Early bird registration gives you priority access to specialized AI simulation labs and robotic surgery masterclasses.'
     },
     {
@@ -118,10 +118,7 @@ export default function ContactPage() {
       q: 'Is accommodation provided at Hyatt Regency Ahmedabad?',
       a: 'Special discounted delegate rates are available at Hyatt Regency Ahmedabad and partner hotels along Ashram Road. Please contact our hospitality desk for reservations.'
     },
-    {
-      q: 'Will CME credit points be awarded to delegates?',
-      a: 'Yes, KaizenCon 2027 is accredited by national and international surgical boards. CME credit certificates will be issued upon attendance verification.'
-    }
+    
   ];
 
   return (
@@ -135,7 +132,7 @@ export default function ContactPage() {
               <span className="kz-contact-hero-magenta">now with intelligence.</span>
             </h1>
             <p className="kz-contact-hero-subtitle">
-              Get in touch with the KaizenCon 2027 organising committee, scientific secretariat, and delegate support.
+              Get in touch with the KAIZENCON 2027 organising committee, scientific secretariat, and delegate support.
             </p>
           </div>
         </div>
@@ -155,7 +152,7 @@ export default function ContactPage() {
                     Send Your <span className="kz-gradient-text">Inquiry</span>
                   </h2>
                   <p className="kz-contact-form-desc">
-                    Fill out the form below. A member of the KaizenCon Organizing Committee will respond within 24 business hours.
+                    Fill out the form below. A member of the KAIZENCON Organizing Committee will respond within 24 business hours.
                   </p>
                 </div>
 
@@ -168,7 +165,7 @@ export default function ContactPage() {
                     </div>
                     <h3 className="kz-success-title">Message Sent Successfully!</h3>
                     <p className="kz-success-desc">
-                      Thank you, <strong>{formData.firstName}</strong>. Your inquiry regarding <strong>{formData.category}</strong> has been registered with KaizenCon 2027 Secretariat. A confirmation has been logged.
+                      Thank you, <strong>{formData.firstName}</strong>. Your inquiry has been registered with KAIZENCON 2027 Secretariat. A confirmation has been logged.
                     </p>
                     <button type="button" className="kz-contact-btn-reset" onClick={resetForm}>
                       Send Another Message
@@ -221,42 +218,25 @@ export default function ContactPage() {
                           type="tel"
                           id="phone"
                           name="phone"
-                          placeholder="+91 98765 00000"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          placeholder="e.g. 9876500000"
                           value={formData.phone}
                           onChange={handleChange}
                         />
                       </div>
                     </div>
 
-                    <div className="kz-form-row">
-                      <div className="kz-form-group">
-                        <label htmlFor="affiliation">Hospital / Institution / University</label>
-                        <input
-                          type="text"
-                          id="affiliation"
-                          name="affiliation"
-                          placeholder="e.g. AIIMS / Apollo / Kaizen Hospital"
-                          value={formData.affiliation}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <div className="kz-form-group">
-                        <label htmlFor="category">Inquiry Subject <span className="req">*</span></label>
-                        <select
-                          id="category"
-                          name="category"
-                          value={formData.category}
-                          onChange={handleChange}
-                        >
-                          <option value="Registration & Badges">Registration &amp; Delegate Badges</option>
-                          <option value="Abstracts & Papers">Abstract Submissions &amp; Posters</option>
-                          <option value="Faculty & Speakers">Faculty, Speakers &amp; Panellists</option>
-                          <option value="AI Workshop & Demos">AI Experience &amp; Live Demos</option>
-                          <option value="Sponsorship & Exhibits">Sponsorship, Stalls &amp; Industry</option>
-                          <option value="Accommodation & Travel">Accommodation &amp; Transport</option>
-                          <option value="General Inquiry">General / Other Inquiries</option>
-                        </select>
-                      </div>
+                    <div className="kz-form-group">
+                      <label htmlFor="affiliation">Hospital / Institution / University</label>
+                      <input
+                        type="text"
+                        id="affiliation"
+                        name="affiliation"
+                        placeholder="e.g. AIIMS / Apollo / Kaizen Hospital"
+                        value={formData.affiliation}
+                        onChange={handleChange}
+                      />
                     </div>
 
                     <div className="kz-form-group">
@@ -569,7 +549,7 @@ export default function ContactPage() {
             <h2 className="kz-faq-title">
               Quick Answers to <span className="kz-gradient-text">Common Queries</span>
             </h2>
-            <p className="kz-faq-subtitle">Everything you need to know about registering, attending, and connecting at KaizenCon 2027.</p>
+            <p className="kz-faq-subtitle">Everything you need to know about registering, attending, and connecting at KAIZENCON 2027.</p>
           </div>
 
           <div className="kz-faq-list">

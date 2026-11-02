@@ -6,10 +6,10 @@ import './SpeakersPage.css';
 
 // Default fallback institutions if dynamic data is empty
 const DEFAULT_INSTITUTIONS = [
-  { name: 'Global Institute of Surgical Innovation', country: 'India', count: '4 speakers' },
-  { name: 'International Centre for Robotic Surgery', country: 'France', count: '3 speakers' },
-  { name: 'Future Health Research Institute', country: 'Nigeria', count: '2 speakers' },
-  { name: 'Centre for Intelligent Surgery', country: 'Singapore', count: '2 speakers' },
+  { name: 'Global Institute of Surgical Innovation', country: 'India', count: '4 faculty members' },
+  { name: 'International Centre for Robotic Surgery', country: 'France', count: '3 faculty members' },
+  { name: 'Future Health Research Institute', country: 'Nigeria', count: '2 faculty members' },
+  { name: 'Centre for Intelligent Surgery', country: 'Singapore', count: '2 faculty members' },
 ];
 
 export default function SpeakersPage() {
@@ -31,7 +31,7 @@ export default function SpeakersPage() {
       const mappedList = rawList.map((item, index) => {
         const firstName = item.first_name || '';
         const lastName = item.last_name || '';
-        const fullName = `${firstName} ${lastName}`.trim() || 'Distinguished Speaker';
+        const fullName = `${firstName} ${lastName}`.trim() || 'Distinguished Faculty';
 
         // Initials fallback
         const initials =
@@ -82,7 +82,7 @@ export default function SpeakersPage() {
           profile_image_url: imageUrl,
           initials,
           sessions,
-          tag: item.session_status === 'scheduled' ? 'FEATURED' : 'SPEAKER',
+          tag: item.session_status === 'scheduled' ? 'FEATURED' : 'FACULTY',
           eventDate: item.event_date || '',
           startTime: item.start_time || '',
           endTime: item.end_time || '',
@@ -122,7 +122,7 @@ export default function SpeakersPage() {
     return Array.from(map.entries()).map(([name, count]) => ({
       name,
       country: 'Partner Institution',
-      count: `${count} speaker${count > 1 ? 's' : ''}`,
+      count: `${count} faculty member${count > 1 ? 's' : ''}`,
     }));
   }, [speakers]);
 
@@ -131,11 +131,11 @@ export default function SpeakersPage() {
       {/* ----------------------------------------------------
           1. HERO SECTION
           ---------------------------------------------------- */}
-      <section className="kz-spk-hero-section" aria-label="Conference Speakers Hero">
+      <section className="kz-spk-hero-section" aria-label="Conference Faculty Hero">
         <div className="kz-spk-hero-container">
           {/* Large Split-Color Headline */}
           <h1 className="kz-spk-hero-headline">
-            <span className="kz-spk-hero-purple">Conference Speakers,</span>
+            <span className="kz-spk-hero-purple">Conference Faculty,</span>
             <span className="kz-spk-hero-magenta">now with intelligence.</span>
           </h1>
 
@@ -153,14 +153,14 @@ export default function SpeakersPage() {
       {/* ----------------------------------------------------
           2. FEATURED FACULTY & CARDS GRID SECTION
           ---------------------------------------------------- */}
-      <section className="kz-spk-main-section" aria-label="Keynote and Featured Speakers">
+      <section className="kz-spk-main-section" aria-label="Keynote and Featured Faculty">
         <div className="kz-spk-main-container">
           {/* Section Header */}
           <div className="kz-spk-section-header">
             <div className="kz-spk-pill-badge-wrap">
               <span className="kz-spk-pill-badge">FEATURED FACULTY</span>
             </div>
-            <h2 className="kz-spk-section-title">Keynote &amp; featured speakers</h2>
+            <h2 className="kz-spk-section-title">Keynote &amp; featured faculty</h2>
           </div>
 
           {/* ----------------------------------------------------
@@ -192,7 +192,7 @@ export default function SpeakersPage() {
                   }}
                 />
                 <p style={{ color: '#42264C', fontSize: '1.05rem', fontWeight: 600, margin: '0 0 6px 0' }}>
-                  Loading Conference Speakers...
+                  Loading Conference Faculty...
                 </p>
                 <p style={{ color: '#7A6C82', fontSize: '0.9rem', margin: 0 }}>
                   Fetching verified faculty profiles from server
@@ -248,7 +248,7 @@ export default function SpeakersPage() {
                 }}
               >
                 <p style={{ color: '#42264C', fontSize: '1.05rem', fontWeight: 600 }}>
-                  No speakers found at this time.
+                  No faculty found at this time.
                 </p>
               </div>
             ) : (
@@ -274,85 +274,20 @@ export default function SpeakersPage() {
             )}
           </div>
 
-          {/* ----------------------------------------------------
-              4. CONFERENCE STATS RIBBON
-              ---------------------------------------------------- */}
-          <section className="kz-spk-stats-ribbon" aria-label="Conference Key Statistics">
-            <div className="kz-spk-stat-col">
-              <div className="kz-spk-stat-icon-wrap" aria-hidden="true">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B63473" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="2" y1="12" x2="22" y2="12" />
-                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                </svg>
-              </div>
-              <div className="kz-spk-stat-text-wrap">
-                <span className="kz-spk-stat-value">40+</span>
-                <span className="kz-spk-stat-label">Countries represented</span>
-              </div>
-            </div>
-
-            <div className="kz-spk-stat-col">
-              <div className="kz-spk-stat-icon-wrap" aria-hidden="true">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B63473" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-              </div>
-              <div className="kz-spk-stat-text-wrap">
-                <span className="kz-spk-stat-value">
-                  {speakers.length > 0 ? `${speakers.length}+` : '150+'}
-                </span>
-                <span className="kz-spk-stat-label">Expert speakers</span>
-              </div>
-            </div>
-
-            <div className="kz-spk-stat-col">
-              <div className="kz-spk-stat-icon-wrap" aria-hidden="true">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B63473" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                  <line x1="12" y1="19" x2="12" y2="23" />
-                  <line x1="8" y1="23" x2="16" y2="23" />
-                </svg>
-              </div>
-              <div className="kz-spk-stat-text-wrap">
-                <span className="kz-spk-stat-value">
-                  {speakers.length > 0 ? speakers.length : 8}
-                </span>
-                <span className="kz-spk-stat-label">Keynote speakers</span>
-              </div>
-            </div>
-
-            <div className="kz-spk-stat-col">
-              <div className="kz-spk-stat-icon-wrap" aria-hidden="true">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B63473" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-              </div>
-              <div className="kz-spk-stat-text-wrap">
-                <span className="kz-spk-stat-value">6</span>
-                <span className="kz-spk-stat-label">Panel discussions</span>
-              </div>
-            </div>
-          </section>
-
-       
+          
      
 
           {/* Cross-page Navigation Banner */}
-          <section className="kz-spk-bottom-cta-banner" aria-label="Connect with speakers and secretariat">
+          <section className="kz-spk-bottom-cta-banner" aria-label="Connect with faculty and secretariat">
             <div className="kz-spk-cta-content">
               <span className="kz-spk-cta-badge">ACADEMIC &amp; CLINICAL COLLABORATION</span>
               <h3 className="kz-spk-cta-title">Want to engage with our global faculty?</h3>
               <p className="kz-spk-cta-desc">
-                Submit session queries, propose panel discussions, or connect with our speaker relations team directly.
+                Submit session queries, propose panel discussions, or connect with our faculty relations team directly.
               </p>
               <div className="kz-spk-cta-actions">
                 <Link to="/contact" className="kz-spk-cta-primary-btn">
-                  <span>Contact Speaker Desk</span>
+                  <span>Contact Faculty Desk</span>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <line x1="5" y1="12" x2="19" y2="12" />
                     <polyline points="12 5 19 12 12 19" />
@@ -454,7 +389,7 @@ export default function SpeakersPage() {
             {/* Title / Topic */}
             {activeModalSpeaker.title && (
               <div className="kz-spk-modal-section">
-                <span className="kz-card-topic-label">SPEAKING TOPIC</span>
+                <span className="kz-card-topic-label">SESSION TOPIC</span>
                 <h4 className="kz-spk-modal-topic">{activeModalSpeaker.title}</h4>
               </div>
             )}
@@ -501,7 +436,7 @@ export default function SpeakersPage() {
                   className="kz-spk-modal-cta-btn"
                   onClick={() => setActiveModalSpeaker(null)}
                 >
-                  Connect with Speaker Desk
+                  Connect with Faculty Desk
                 </Link>
               </div>
             </div>

@@ -29,17 +29,17 @@ const DYNAMIC_TEMPLATES_DATA: TemplateItem[] = [
     id: "f76f0e6f-32d1-4064-87ee-6c0833cc0369",
     name: "followup",
     purpose: "followup",
-    subject: "A Gentle Reminder: Join Us at KaizenCon 2027",
+    subject: "A Gentle Reminder: Join Us at KAIZENCON 2027",
     html_body: `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KaizenCon 2027 | Follow-Up Invitation</title>
+  <title>KAIZENCON 2027 | Follow-Up Invitation</title>
 </head>
 <body style="margin:0;padding:0;background-color:#F6F7FB;font-family:Arial,Helvetica,sans-serif;color:#49304F;">
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
-    Following up on our invitation to KaizenCon 2027 — Robotics &amp; AI: Shaping the Future of GI Surgery.
+    Following up on our invitation to KAIZENCON 2027 — Robotics &amp; AI: Shaping the Future of GI Surgery.
   </div>
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F6F7FB;margin:0;padding:24px 10px;">
     <tr>
@@ -47,7 +47,7 @@ const DYNAMIC_TEMPLATES_DATA: TemplateItem[] = [
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:1000px;background-color:#FFFFFF;border:1px solid #E7DDE9;">
           <tr>
             <td align="center" style="padding:28px 28px 18px;background-color:#FFFFFF;">
-              <img src="cid:kaizencon_logo" width="100" alt="KaizenCon 2027 — Robotics &amp; AI" style="display:block;width:25%;max-width:500px;height:auto;border:0;outline:none;text-decoration:none;">
+              <img src="cid:kaizencon_logo" width="100" alt="KAIZENCON 2027 — Robotics &amp; AI" style="display:block;width:25%;max-width:500px;height:auto;border:0;outline:none;text-decoration:none;">
             </td>
           </tr>
           <tr>
@@ -58,13 +58,13 @@ const DYNAMIC_TEMPLATES_DATA: TemplateItem[] = [
           <tr>
             <td style="padding:28px 34px 10px;">
               <p style="margin:0 0 8px;font-size:12px;line-height:18px;letter-spacing:2px;text-transform:uppercase;color:#A92E83;font-weight:bold;">Follow-Up Invitation</p>
-              <h1 style="margin:0;color:#51345B;font-size:28px;line-height:35px;font-weight:700;">We Hope to Welcome You to KaizenCon 2027</h1>
+              <h1 style="margin:0;color:#51345B;font-size:28px;line-height:35px;font-weight:700;">We Hope to Welcome You to KAIZENCON 2027</h1>
             </td>
           </tr>
           <tr>
             <td style="padding:8px 34px 0;font-size:15px;line-height:25px;color:#51465A;">
               <p style="margin:0 0 16px;">Dear <strong>{{name}}</strong>,</p>
-              <p style="margin:0 0 16px;">We are writing to follow up on our invitation to <strong>{{hospital_name}}</strong> to participate in <strong>KaizenCon 2027 — “Robotics &amp; AI: Shaping the Future of GI Surgery.”</strong></p>
+              <p style="margin:0 0 16px;">We are writing to follow up on our invitation to <strong>{{hospital_name}}</strong> to participate in <strong>KAIZENCON 2027 — “Robotics &amp; AI: Shaping the Future of GI Surgery.”</strong></p>
               <p style="margin:0 0 16px;">As we prepare for this exciting gathering, we would be delighted to have your institution join us in exploring the latest advances in robotic surgery, artificial intelligence, and innovative gastrointestinal surgical techniques.</p>
               <p style="margin:0 0 16px;">The conference will offer opportunities to exchange clinical insights, engage with leading experts, and discuss how emerging technologies can help shape the future of surgical care.</p>
             </td>
@@ -105,7 +105,7 @@ const DYNAMIC_TEMPLATES_DATA: TemplateItem[] = [
             <td style="padding:22px 34px;background-color:#51345B;color:#FFFFFF;">
               <p style="margin:0 0 5px;font-size:15px;line-height:22px;font-weight:bold;color:#FFFFFF;">Warm regards,</p>
               <p style="margin:0 0 3px;font-size:15px;line-height:22px;color:#FFFFFF;">{{sender_name}}</p>
-              <p style="margin:0 0 12px;font-size:13px;line-height:20px;color:#EADFEA;">{{sender_title}} | KaizenCon 2027 Organising Team</p>
+              <p style="margin:0 0 12px;font-size:13px;line-height:20px;color:#EADFEA;">{{sender_title}} | KAIZENCON 2027 Organising Team</p>
               <p style="margin:0;font-size:12px;line-height:19px;color:#EADFEA;">Robotics &amp; AI: Shaping the Future of GI Surgery<br>Evidence • Technique • Intelligence</p>
             </td>
           </tr>
@@ -125,17 +125,17 @@ const DYNAMIC_TEMPLATES_DATA: TemplateItem[] = [
     id: "b2f74abc-79b4-4f7e-8a23-edb64bef1eb4",
     name: "invitation ",
     purpose: "initial",
-    subject: "Official Invitation | KaizenCon 2027",
+    subject: "Official Invitation | KAIZENCON 2027",
     html_body: `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KaizenCon 2027 | Official Invitation</title>
+  <title>KAIZENCON 2027 | Official Invitation</title>
 </head>
 <body style="margin:0;padding:0;background-color:#F6F7FB;font-family:Arial,Helvetica,sans-serif;color:#49304F;">
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
-    Invitation to KaizenCon 2027 — Robotics &amp; AI: Shaping the Future of GI Surgery.
+    Invitation to KAIZENCON 2027 — Robotics &amp; AI: Shaping the Future of GI Surgery.
   </div>
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F6F7FB;margin:0;padding:24px 10px;">
     <tr>
@@ -143,7 +143,7 @@ const DYNAMIC_TEMPLATES_DATA: TemplateItem[] = [
         <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:1000px;background-color:#FFFFFF;border:1px solid #E7DDE9;">
           <tr>
             <td align="center" style="padding:28px 28px 18px;background-color:#FFFFFF;">
-              <img src="cid:kaizencon_logo" width="100" alt="KaizenCon 2027 — Robotics &amp; AI" style="display:block;width:25%;max-width:500px;height:auto;border:0;outline:none;text-decoration:none;">
+              <img src="cid:kaizencon_logo" width="100" alt="KAIZENCON 2027 — Robotics &amp; AI" style="display:block;width:25%;max-width:500px;height:auto;border:0;outline:none;text-decoration:none;">
             </td>
           </tr>
           <tr>
@@ -160,7 +160,7 @@ const DYNAMIC_TEMPLATES_DATA: TemplateItem[] = [
           <tr>
             <td style="padding:8px 34px 0;font-size:15px;line-height:25px;color:#51465A;">
               <p style="margin:0 0 16px;">Dear <strong>{{ name }}</strong>,</p>
-              <p style="margin:0 0 16px;">On behalf of <strong>KaizenCon 2027</strong>, we are pleased to invite <strong>{{hospital_name}}</strong> to participate in our upcoming conference, <strong>“Robotics &amp; AI: Shaping the Future of GI Surgery.”</strong></p>
+              <p style="margin:0 0 16px;">On behalf of <strong>KAIZENCON 2027</strong>, we are pleased to invite <strong>{{hospital_name}}</strong> to participate in our upcoming conference, <strong>“Robotics &amp; AI: Shaping the Future of GI Surgery.”</strong></p>
               <p style="margin:0 0 16px;">The meeting will bring together surgeons, healthcare leaders, researchers, and technology innovators to explore how artificial intelligence, robotics, and evidence-based techniques are transforming gastrointestinal surgery.</p>
             </td>
           </tr>
@@ -200,7 +200,7 @@ const DYNAMIC_TEMPLATES_DATA: TemplateItem[] = [
             <td style="padding:22px 34px;background-color:#51345B;color:#FFFFFF;">
               <p style="margin:0 0 5px;font-size:15px;line-height:22px;font-weight:bold;color:#FFFFFF;">Warm regards,</p>
               <p style="margin:0 0 3px;font-size:15px;line-height:22px;color:#FFFFFF;">{{sender_name}}</p>
-              <p style="margin:0 0 12px;font-size:13px;line-height:20px;color:#EADFEA;">{{sender_title}} | KaizenCon 2027 Organising Team</p>
+              <p style="margin:0 0 12px;font-size:13px;line-height:20px;color:#EADFEA;">{{sender_title}} | KAIZENCON 2027 Organising Team</p>
               <p style="margin:0;font-size:12px;line-height:19px;color:#EADFEA;">Robotics &amp; AI: Shaping the Future of GI Surgery<br>Evidence • Technique • Intelligence</p>
             </td>
           </tr>
@@ -220,17 +220,17 @@ const DYNAMIC_TEMPLATES_DATA: TemplateItem[] = [
     id: "cc7071f4-74d9-45b0-b29e-a3056abe1f6b",
     name: "registration",
     purpose: "registration",
-    subject: "You're In! Join Us for KaizenCon 2027",
+    subject: "You're In! Join Us for KAIZENCON 2027",
     html_body: `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KaizenCon 2027 | Registration Confirmation</title>
+  <title>KAIZENCON 2027 | Registration Confirmation</title>
 </head>
 <body style="margin:0;padding:0;background-color:#F6F7FB;font-family:Arial,Helvetica,sans-serif;color:#49304F;">
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
-    Your registration for KaizenCon 2027 — Robotics &amp; AI: Shaping the Future of GI Surgery.
+    Your registration for KAIZENCON 2027 — Robotics &amp; AI: Shaping the Future of GI Surgery.
   </div>
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F6F7FB;margin:0;padding:24px 10px;">
     <tr>
@@ -238,7 +238,7 @@ const DYNAMIC_TEMPLATES_DATA: TemplateItem[] = [
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:1000px;background-color:#FFFFFF;border:1px solid #E7DDE9;">
           <tr>
             <td align="center" style="padding:28px 28px 18px;background-color:#FFFFFF;">
-              <img src="cid:kaizencon_logo" width="100" alt="KaizenCon 2027 — Robotics &amp; AI" style="display:block;width:25%;max-width:500px;height:auto;border:0;outline:none;text-decoration:none;">
+              <img src="cid:kaizencon_logo" width="100" alt="KAIZENCON 2027 — Robotics &amp; AI" style="display:block;width:25%;max-width:500px;height:auto;border:0;outline:none;text-decoration:none;">
             </td>
           </tr>
           <tr>
@@ -249,13 +249,13 @@ const DYNAMIC_TEMPLATES_DATA: TemplateItem[] = [
           <tr>
             <td style="padding:28px 34px 10px;">
               <p style="margin:0 0 8px;font-size:12px;line-height:18px;letter-spacing:2px;text-transform:uppercase;color:#A92E83;font-weight:bold;">Registration Confirmation</p>
-              <h1 style="margin:0;color:#51345B;font-size:28px;line-height:35px;font-weight:700;">You're Registered for KaizenCon 2027!</h1>
+              <h1 style="margin:0;color:#51345B;font-size:28px;line-height:35px;font-weight:700;">You're Registered for KAIZENCON 2027!</h1>
             </td>
           </tr>
           <tr>
             <td style="padding:8px 34px 0;font-size:15px;line-height:25px;color:#51465A;">
               <p style="margin:0 0 16px;">Dear <strong>{{name}}</strong>,</p>
-              <p style="margin:0 0 16px;">Thank you for registering for <strong>KaizenCon 2027</strong>, themed <strong>“Robotics &amp; AI: Shaping the Future of GI Surgery.”</strong></p>
+              <p style="margin:0 0 16px;">Thank you for registering for <strong>KAIZENCON 2027</strong>, themed <strong>“Robotics &amp; AI: Shaping the Future of GI Surgery.”</strong></p>
               <p style="margin:0 0 16px;">We are pleased to confirm your registration and look forward to welcoming you to this exciting gathering of surgeons, healthcare leaders, researchers, and technology innovators.</p>
               <p style="margin:0 0 16px;">Your participation will contribute to meaningful discussions, knowledge sharing, and collaboration on the evolving role of artificial intelligence and robotics in gastrointestinal surgery.</p>
             </td>
@@ -266,7 +266,7 @@ const DYNAMIC_TEMPLATES_DATA: TemplateItem[] = [
                 <tr>
                   <td style="padding:18px 20px;">
                     <p style="margin:0 0 9px;font-size:13px;line-height:18px;color:#A92E83;font-weight:bold;letter-spacing:1px;text-transform:uppercase;">Conference Details</p>
-                    <p style="margin:0 0 7px;font-size:15px;line-height:23px;color:#51345B;"><strong>Conference:</strong> KaizenCon 2027</p>
+                    <p style="margin:0 0 7px;font-size:15px;line-height:23px;color:#51345B;"><strong>Conference:</strong> KAIZENCON 2027</p>
                     <p style="margin:0 0 7px;font-size:15px;line-height:23px;color:#51345B;"><strong>Theme:</strong> Robotics &amp; AI: Shaping the Future of GI Surgery</p>
                     <p style="margin:0 0 7px;font-size:15px;line-height:23px;color:#51345B;"><strong>Date:</strong> 1–3 January 2027</p>
                     <p style="margin:0 0 7px;font-size:15px;line-height:23px;color:#51345B;"><strong>Venue:</strong> Hyatt Regency, Ashram Road</p>
@@ -298,12 +298,12 @@ const DYNAMIC_TEMPLATES_DATA: TemplateItem[] = [
             <td style="padding:22px 34px;background-color:#51345B;color:#FFFFFF;">
               <p style="margin:0 0 5px;font-size:15px;line-height:22px;font-weight:bold;color:#FFFFFF;">Warm regards,</p>
               <p style="margin:0 0 3px;font-size:15px;line-height:22px;color:#FFFFFF;">{{sender_name}}</p>
-              <p style="margin:0 0 12px;font-size:13px;line-height:20px;color:#EADFEA;">{{sender_title}} | KaizenCon 2027 Organising Team</p>
+              <p style="margin:0 0 12px;font-size:13px;line-height:20px;color:#EADFEA;">{{sender_title}} | KAIZENCON 2027 Organising Team</p>
               <p style="margin:0;font-size:12px;line-height:19px;color:#EADFEA;">Robotics &amp; AI: Shaping the Future of GI Surgery<br>Evidence • Technique • Intelligence</p>
             </td>
           </tr>
         </table>
-        <p style="max-width:600px;margin:14px auto 0;font-size:11px;line-height:17px;color:#817587;text-align:center;">This email confirms your registration for KaizenCon 2027. Please retain it for your records.</p>
+        <p style="max-width:600px;margin:14px auto 0;font-size:11px;line-height:17px;color:#817587;text-align:center;">This email confirms your registration for KAIZENCON 2027. Please retain it for your records.</p>
       </td>
     </tr>
   </table>
@@ -834,7 +834,7 @@ export default function TemplatesPage() {
     html = html.replace(/\{\{\s*conference_url\s*\}\}/gi, "https://kaizencon2027.com");
     html = html.replace(/\{\{\s*contact_email\s*\}\}/gi, "secretariat@kaizencon2027.com");
     html = html.replace(/\{\{\s*sender_name\s*\}\}/gi, "Dr. Rajesh Sharma");
-    html = html.replace(/\{\{\s*sender_title\s*\}\}/gi, "Organizing Chairman | KaizenCon 2027");
+    html = html.replace(/\{\{\s*sender_title\s*\}\}/gi, "Organizing Chairman | KAIZENCON 2027");
 
     return html;
   }, [selectedPreviewTemplate, previewRecipientName, previewHospitalName]);

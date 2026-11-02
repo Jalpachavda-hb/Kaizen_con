@@ -55,7 +55,7 @@ export default function PrivacyPolicyPage() {
               <span className="kz-privacy-hero-magenta">now with intelligence.</span>
             </h1>
             <p className="kz-privacy-hero-desc">
-              KaizenCon 2027 is committed to safeguarding the privacy and confidential data of all delegates, faculty, researchers, and partners.
+              KAIZENCON 2027 is committed to safeguarding the privacy and confidential data of all delegates, faculty, researchers, and partners.
             </p>
           </div>
         </div>
@@ -135,7 +135,7 @@ export default function PrivacyPolicyPage() {
               </div>
               <div className="kz-privacy-block-body">
                 <p>
-                  Welcome to <strong>KaizenCon 2027</strong> ("KaizenCon", "we", "our", or "us"). KaizenCon 2027 is a premier international medical and AI surgical conference convening world-leading surgeons, clinical researchers, robotic engineering teams, and healthcare professionals from 1–3 January 2027 in Ahmedabad, India.
+                  Welcome to <strong>KAIZENCON 2027</strong> ("KaizenCon", "we", "our", or "us"). KAIZENCON 2027 is a premier international medical and AI surgical conference convening world-leading surgeons, clinical researchers, robotic engineering teams, and healthcare professionals from 1–3 January 2027 in Ahmedabad, India.
                 </p>
                 <p>
                   This Privacy Policy applies to all personal data collected through:
@@ -163,7 +163,7 @@ export default function PrivacyPolicyPage() {
               </div>
               <div className="kz-privacy-block-body">
                 <p>
-                  Depending on how you interact with KaizenCon 2027, we collect the following types of information:
+                  Depending on how you interact with KAIZENCON 2027, we collect the following types of information:
                 </p>
 
                 <div className="kz-privacy-card-grid">
@@ -171,7 +171,7 @@ export default function PrivacyPolicyPage() {
                     <div className="kz-privacy-card-icon-wrap">
                       <FiUserCheck />
                     </div>
-                    <h4>Delegate &amp; Speaker Profile</h4>
+                    <h4>Delegate &amp; Faculty Profile</h4>
                     <p>Full name, title, medical specialty, institutional or hospital affiliation, professional designation, country of practice, and medical council registration number (for CME accreditation).</p>
                   </div>
 
@@ -196,7 +196,7 @@ export default function PrivacyPolicyPage() {
                       <FiCpu />
                     </div>
                     <h4>Interactions &amp; AI Queries</h4>
-                    <p>Audience questions submitted during Live Q&amp;A sessions, queries posed to the KaizenCon AI Conference Assistant, session bookmarks, and personalized agenda preferences.</p>
+                    <p>Audience questions submitted during Live Q&amp;A sessions, queries posed to the KAIZENCON AI Conference Assistant, session bookmarks, and personalized agenda preferences.</p>
                   </div>
                 </div>
 
@@ -217,7 +217,7 @@ export default function PrivacyPolicyPage() {
               </div>
               <div className="kz-privacy-block-body">
                 <p>
-                  KaizenCon 2027 integrates state-of-the-art conversational AI assistants, semantic search, and real-time session synthesis. Because our attendees include clinical surgeons and academic researchers, our AI system incorporates stringent privacy safeguards:
+                  KAIZENCON 2027 integrates state-of-the-art conversational AI assistants, semantic search, and real-time session synthesis. Because our attendees include clinical surgeons and academic researchers, our AI system incorporates stringent privacy safeguards:
                 </p>
 
                 <div className="kz-privacy-ai-commitments">
@@ -238,7 +238,7 @@ export default function PrivacyPolicyPage() {
                   <div className="kz-privacy-ai-item">
                     <div className="kz-privacy-ai-check">&#10003;</div>
                     <div>
-                      <strong>Verified Medical Knowledge Retrieval:</strong> Answers provided by the KaizenCon AI are grounded in peer-reviewed scientific literature and vetted conference proceedings, preventing hallucinations and preserving medical integrity.
+                      <strong>Verified Medical Knowledge Retrieval:</strong> Answers provided by the KAIZENCON AI are grounded in peer-reviewed scientific literature and vetted conference proceedings, preventing hallucinations and preserving medical integrity.
                     </div>
                   </div>
                 </div>
@@ -259,7 +259,7 @@ export default function PrivacyPolicyPage() {
                 <ul className="kz-privacy-bullet-list">
                   <li><strong>Registration &amp; Access Control:</strong> Processing registrations, issuing RFID/QR delegate badges, validating workshop admissions, and managing hall capacity.</li>
                   <li><strong>Continuing Medical Education (CME):</strong> Verifying session attendance hours and reporting verified participation to medical councils to issue official credit certificates.</li>
-                  <li><strong>Scientific Programme Delivery:</strong> Coordinating speaker schedules, publishing faculty bios, facilitating poster sessions, and streaming live surgical demonstrations.</li>
+                  <li><strong>Scientific Programme Delivery:</strong> Coordinating faculty schedules, publishing faculty bios, facilitating poster sessions, and streaming live surgical demonstrations.</li>
                   <li><strong>Attendee Communications:</strong> Sending essential logistical notifications, emergency alerts, scheduling changes, and post-conference proceeding downloads.</li>
                   <li><strong>Security &amp; Fraud Prevention:</strong> Protecting our infrastructure, preventing unauthorized portal access, and maintaining cybersecurity monitoring.</li>
                 </ul>
@@ -356,7 +356,7 @@ export default function PrivacyPolicyPage() {
               </div>
               <div className="kz-privacy-block-body">
                 <p>
-                  If you have inquiries, complaints, or suggestions regarding this Privacy Policy or KaizenCon 2027’s data governance practices, please contact our designated Data Protection Officer:
+                  If you have inquiries, complaints, or suggestions regarding this Privacy Policy or KAIZENCON 2027’s data governance practices, please contact our designated Data Protection Officer:
                 </p>
 
                 <div className="kz-privacy-contact-box">
@@ -364,7 +364,7 @@ export default function PrivacyPolicyPage() {
                     <FiShield className="kz-privacy-contact-icon" />
                     <div>
                       <h3>Data Protection Secretariat</h3>
-                      <span>KaizenCon 2027 International Organizing Committee</span>
+                      <span>KAIZENCON 2027 International Organizing Committee</span>
                     </div>
                   </div>
 
