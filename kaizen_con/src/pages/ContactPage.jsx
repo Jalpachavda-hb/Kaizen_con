@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { FaHandshake } from 'react-icons/fa6';
 import connectBg from '../assets/home/connect_bg.jpg';
 import './ContactPage.css';
@@ -130,13 +129,6 @@ export default function ContactPage() {
       {/* 1. HERO SECTION WITH MATCHING TYPOGRAPHY */}
       <section className="kz-contact-hero-simple">
         <div className="kz-contact-container">
-          {/* Breadcrumb Navigation */}
-          <nav className="kz-contact-breadcrumb" aria-label="Breadcrumb">
-            <Link to="/" className="kz-contact-crumb-link">Home</Link>
-            <span className="kz-contact-crumb-sep">/</span>
-            <span className="kz-contact-crumb-current">Contact Us</span>
-          </nav>
-
           <div className="kz-hero-simple-content">
             <h1 className="kz-contact-hero-headline">
               <span className="kz-contact-hero-dark">Connect With Us,</span>

@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import { getSchedules, getSpeakers } from '../Apipath';
 import {
   LuCoffee,
@@ -651,13 +650,6 @@ export default function ProgrammePage() {
          ==================================================== */}
       <section className="kz-programme-hero-section" aria-label="Programme Overview">
         <div className="kz-programme-hero-container">
-          {/* Breadcrumb Navigation */}
-          <nav className="kz-programme-breadcrumb" aria-label="Breadcrumb">
-            <Link to="/" className="kz-programme-crumb-link">Home</Link>
-            <span className="kz-programme-crumb-sep">/</span>
-            <span className="kz-programme-crumb-current">Programme</span>
-          </nav>
-
           <h1 className="kz-programme-main-title">
             <span className="kz-programme-title-dark">Programme at </span>{' '}
             <span className="kz-programme-title-magenta"> a Glance</span>

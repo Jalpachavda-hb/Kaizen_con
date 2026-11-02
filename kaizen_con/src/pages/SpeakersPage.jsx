@@ -133,13 +133,6 @@ export default function SpeakersPage() {
           ---------------------------------------------------- */}
       <section className="kz-spk-hero-section" aria-label="Conference Speakers Hero">
         <div className="kz-spk-hero-container">
-          {/* Breadcrumb Navigation */}
-          <nav className="kz-spk-breadcrumb" aria-label="Breadcrumb">
-            <Link to="/" className="kz-spk-crumb-link">Home</Link>
-            <span className="kz-spk-crumb-sep">/</span>
-            <span className="kz-spk-crumb-current">Speakers</span>
-          </nav>
-
           {/* Large Split-Color Headline */}
           <h1 className="kz-spk-hero-headline">
             <span className="kz-spk-hero-purple">Conference Speakers,</span>

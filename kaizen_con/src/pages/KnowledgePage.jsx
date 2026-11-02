@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import './KnowledgePage.css';
 
 // ====================================================
@@ -467,13 +466,6 @@ export default function KnowledgePage() {
           ---------------------------------------------------- */}
       <section className="kz-kp-hero-section" aria-label="Conference Knowledge Base Header">
         <div className="kz-kp-hero-container">
-          {/* Breadcrumb Navigation */}
-          <nav className="kz-kp-breadcrumb" aria-label="Breadcrumb">
-            <Link to="/" className="kz-kp-crumb-link">Home</Link>
-            <span className="kz-kp-crumb-sep">/</span>
-            <span className="kz-kp-crumb-current">Knowledge Base</span>
-          </nav>
-
           {/* Large Split Heading matching About Page */}
           <h1 className="kz-kp-hero-headline">
             <span className="kz-kp-hero-dark">Conference Knowledge,</span>

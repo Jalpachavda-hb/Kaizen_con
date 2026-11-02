@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { FiEye, FiTarget } from 'react-icons/fi';
 import { GiStomach } from 'react-icons/gi';
 import './AboutPage.css';
@@ -301,13 +301,6 @@ export default function AboutPage() {
         <div className="kz-about-hero-ambient" aria-hidden="true" />
 
         <div className="kz-about-container kz-about-hero-inner">
-          {/* Breadcrumb Navigation */}
-          <nav className="kz-about-breadcrumb" aria-label="Breadcrumb">
-            <Link to="/" className="kz-about-crumb-link">Home</Link>
-            <span className="kz-about-crumb-sep">/</span>
-            <span className="kz-about-crumb-current">About Us</span>
-          </nav>
-
           {/* Main Headline in 2 lines with distinct font colors */}
           <h1 className="kz-about-hero-headline">
             <span className="kz-about-hero-dark">Continuous Improvement,</span>

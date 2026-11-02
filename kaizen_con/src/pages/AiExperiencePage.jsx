@@ -342,13 +342,6 @@ export default function AiExperiencePage() {
           ==================================================== */}
       <section className="kz-ai-hero-section">
         <div className="kz-ai-container">
-          {/* Breadcrumb Navigation */}
-          <nav className="kz-ai-breadcrumb" aria-label="Breadcrumb">
-            <Link to="/" className="kz-ai-crumb-link">Home</Link>
-            <span className="kz-ai-crumb-sep">/</span>
-            <span className="kz-ai-crumb-current">AI Experience</span>
-          </nav>
-
           <div className="kz-ai-hero-content">
             <h1 className="kz-ai-hero-headline">
               <span className="kz-ai-headline-dark">The AI Experience,</span>
