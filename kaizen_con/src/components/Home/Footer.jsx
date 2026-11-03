@@ -80,7 +80,13 @@ export default function Footer() {
             </div>
 
             {/* Event Location */}
-            <div className="kz-footer-meta-item">
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=Hyatt+Regency+Ahmedabad+Ashram+Road+Gujarat"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="kz-footer-meta-item kz-footer-meta-link"
+              title="Open Hyatt Regency Ahmedabad in Google Maps"
+            >
               <div className="kz-footer-meta-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
@@ -88,10 +94,10 @@ export default function Footer() {
                 </svg>
               </div>
               <div className="kz-footer-meta-text">
-                <span className="kz-footer-meta-primary">International Conference Centre</span>
-                <span className="kz-footer-meta-secondary">Ahmedabad, India</span>
+                <span className="kz-footer-meta-primary">Hyatt Regency</span>
+                <span className="kz-footer-meta-secondary">Ashram Road, Ahmedabad, India</span>
               </div>
-            </div>
+            </a>
           </div>
         </div>
 

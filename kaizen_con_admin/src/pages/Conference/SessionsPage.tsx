@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import { AdminPageContainer } from "../../components/common/AdminPageContainer";
+import { TablePagination } from "../../components/common/TablePagination";
 import {
   getSessions,
   getSessionById,
@@ -337,6 +338,19 @@ export default function SessionsPage() {
     });
   }, [sessions, search, categoryFilter, dateFilter, getSpeakerDisplayName]);
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, categoryFilter, dateFilter]);
+
+  const paginatedSessions = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredSessions.slice(startIndex, startIndex + pageSize);
+  }, [filteredSessions, currentPage, pageSize]);
+
   // Statistics
   const stats = useMemo(() => {
     const total = sessions.length;
@@ -506,7 +520,7 @@ export default function SessionsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800/70">
-                {filteredSessions.map((session) => {
+                {paginatedSessions.map((session) => {
                   const speaker = getSpeakerInfo(session.speaker_id);
                   const isBreak = session.category?.toLowerCase() === "break" || !session.speaker_id;
 
@@ -626,6 +640,19 @@ export default function SessionsPage() {
                 })}
               </tbody>
             </table>
+
+            {/* Pagination Controls Bar */}
+            <TablePagination
+              currentPage={currentPage}
+              totalItems={filteredSessions.length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              }}
+              itemName="sessions"
+            />
           </div>
         )}
       </AdminPageContainer>

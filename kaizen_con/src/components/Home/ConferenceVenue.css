@@ -1,0 +1,427 @@
+/* ====================================================
+   KAIZENCON 2027 - CONFERENCE VENUE SECTION
+   - Smooth, unclipped shaped hotel image
+   - Clean icons matching requested mockup
+   - Responsive: Image displays FIRST, then content below
+   ==================================================== */
+
+.kz-venue-section {
+  position: relative;
+  width: 100%;
+  background: #ffffff;
+  padding: 40px 0 75px 0;
+  box-sizing: border-box;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow: visible;
+}
+
+/* Site Container */
+.kz-venue-container {
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+/* ====================================================
+   1. SECTION HEADER
+   ==================================================== */
+.kz-venue-header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding: 0 16px;
+}
+
+.kz-venue-eyebrow-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.kz-venue-eyebrow-line {
+  display: inline-block;
+  width: 44px;
+  height: 1.5px;
+  background-color: #85346f;
+  opacity: 0.65;
+}
+
+.kz-venue-eyebrow-text {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #85346f;
+  text-transform: uppercase;
+}
+
+.kz-venue-title {
+  font-size: clamp(2rem, 3.2vw, 2.7rem);
+  font-weight: 800;
+  color: #48123e;
+  margin: 0;
+  letter-spacing: -0.4px;
+  line-height: 1.2;
+}
+
+/* ====================================================
+   2. MAIN PRESENTATION GRID
+   ==================================================== */
+.kz-venue-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: clamp(24px, 4vw, 52px);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 1. Shaped Image Column (Unclipped, fully natural) */
+.kz-venue-image-col {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.kz-venue-shape-img {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  display: block;
+  user-select: none;
+}
+
+/* 2. Venue Content Column */
+.kz-venue-content-col {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Hotel Name & Location Header */
+.kz-venue-location-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.kz-venue-loc-icon-box {
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
+  border-radius: 14px;
+  background: #faebf6;
+  color: #551248;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.kz-venue-loc-icon {
+  display: block;
+}
+
+.kz-venue-loc-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.kz-venue-hotel-name {
+  font-size: clamp(1.45rem, 2.1vw, 1.95rem);
+  font-weight: 800;
+  color: #3b0e35;
+  margin: 0 0 4px 0;
+  line-height: 1.25;
+}
+
+.kz-venue-hotel-address {
+  font-size: clamp(0.88rem, 1.1vw, 0.98rem);
+  color: #555555;
+  margin: 0;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+/* Description Text */
+.kz-venue-description {
+  font-size: clamp(0.95rem, 1.18vw, 1.05rem);
+  line-height: 1.72;
+  color: #475569;
+  margin: 0 0 28px 0;
+  max-width: 600px;
+}
+
+/* ====================================================
+   4 FEATURES ROW WITH DIVIDERS
+   ==================================================== */
+.kz-venue-features-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 32px;
+  padding: 6px 0;
+  box-sizing: border-box;
+  max-width: 620px;
+}
+
+.kz-venue-feature-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  padding: 0 4px;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.kz-venue-feature-icon-box {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: #faebf6;
+  color: #551248;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 21px;
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.kz-venue-feature-item:hover .kz-venue-feature-icon-box {
+  transform: translateY(-2px);
+  background: #f8def2;
+}
+
+.kz-venue-feature-icon {
+  display: block;
+}
+
+.kz-venue-feature-text {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #2b3648;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.kz-venue-feature-divider {
+  width: 1px;
+  height: 44px;
+  background-color: #ebd5e5;
+  margin: 0 2px;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+/* ====================================================
+   CENTERED VIEW ON MAP CTA BUTTON
+   ==================================================== */
+.kz-venue-btn-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 620px;
+  margin-top: 4px;
+}
+
+.kz-venue-map-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 40px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #781358 0%, #9a1a67 100%);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.98rem;
+  text-decoration: none;
+  box-shadow: 0 6px 20px rgba(120, 19, 88, 0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.2px;
+}
+
+.kz-venue-map-btn:hover {
+  background: linear-gradient(135deg, #8a1565 0%, #ad1c74 100%);
+  box-shadow: 0 10px 26px rgba(120, 19, 88, 0.38);
+  transform: translateY(-2px);
+  color: #ffffff;
+}
+
+.kz-venue-map-btn:active {
+  transform: translateY(0);
+}
+
+.kz-venue-btn-arrow {
+  display: inline-block;
+  transition: transform 0.25s ease;
+}
+
+.kz-venue-map-btn:hover .kz-venue-btn-arrow {
+  transform: translate(2px, -2px);
+}
+
+/* ====================================================
+   RESPONSIVE DESIGN:
+   "in responsive this image show first and after show content"
+   ==================================================== */
+
+/* Medium Screens / Laptops (Below 1200px) */
+@media (max-width: 1199px) {
+  .kz-venue-grid {
+    gap: 32px;
+  }
+
+  .kz-venue-feature-text {
+    font-size: 0.8rem;
+  }
+}
+
+/* Tablets & Mobile (Below 992px):
+   - Grid becomes single column
+   - Image displays FIRST
+   - Content displays AFTER
+   ==================================================== */
+@media (max-width: 991px) {
+  .kz-venue-section {
+    padding: 35px 0 60px 0;
+  }
+
+  .kz-venue-header {
+    margin-bottom: 24px;
+  }
+
+  .kz-venue-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  /* Image Column: Displays FIRST on responsive */
+  .kz-venue-image-col {
+    order: 1; /* Explicitly FIRST */
+    justify-content: center;
+    align-items: center;
+    padding: 0 12px;
+  }
+
+  .kz-venue-shape-img {
+    max-width: 540px;
+    object-position: center;
+  }
+
+  /* Content Column: Displays AFTER image on responsive */
+  .kz-venue-content-col {
+    order: 2; /* Explicitly AFTER */
+    padding: 10px 16px 24px 16px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .kz-venue-location-header {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .kz-venue-description {
+    text-align: center;
+    max-width: 560px;
+    margin: 0 auto 26px auto;
+  }
+
+  .kz-venue-features-row {
+    width: 100%;
+    max-width: 580px;
+  }
+
+  .kz-venue-btn-wrapper {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Mobile Phones (Below 640px) */
+@media (max-width: 640px) {
+  .kz-venue-section {
+    padding: 28px 0 45px 0;
+  }
+
+  .kz-venue-container {
+    padding: 0 16px;
+  }
+
+  .kz-venue-header {
+    margin-bottom: 20px;
+  }
+
+  .kz-venue-eyebrow-line {
+    width: 30px;
+  }
+
+  .kz-venue-eyebrow-text {
+    font-size: 0.78rem;
+    letter-spacing: 1.6px;
+  }
+
+  .kz-venue-image-col {
+    padding: 0 6px;
+  }
+
+  .kz-venue-content-col {
+    padding: 10px 8px 20px 8px;
+  }
+
+  .kz-venue-location-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .kz-venue-loc-icon-box {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    font-size: 20px;
+  }
+
+  /* 4 Features wrap into 2x2 grid for mobile devices */
+  .kz-venue-features-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 10px;
+    padding: 4px 0;
+    margin-bottom: 24px;
+  }
+
+  .kz-venue-feature-divider {
+    display: none; /* Hide dividers in 2x2 grid */
+  }
+
+  .kz-venue-feature-item {
+    padding: 4px;
+  }
+
+  .kz-venue-feature-icon-box {
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
+  }
+
+  .kz-venue-feature-text {
+    font-size: 0.78rem;
+  }
+
+  .kz-venue-map-btn {
+    width: 100%;
+    max-width: 270px;
+    padding: 12px 22px;
+    font-size: 0.94rem;
+  }
+}

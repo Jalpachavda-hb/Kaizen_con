@@ -8,50 +8,22 @@ const ASSISTANT_PRESETS = [
   {
     id: 'day2',
     label: 'What should I attend on Day 2?',
-    userText: 'What should I attend on Day 2?',
-    aiText:
-      "For Day 2, based on your clinical profile, I recommend: 09:00 — 'AI Triage in Emergency Surgery' (Main Auditorium), 11:30 — 'Surgeon Training in the Age of AI' (Hall C), and 14:00 — 'ML Models for Surgical Complications' (Hall A).",
-    sessions: [
-      { time: 'Day 2 · 09:00', title: 'AI Triage in Emergency Surgery', venue: 'Main Auditorium' },
-      { time: 'Day 2 · 11:30', title: 'Surgeon Training in the Age of AI', venue: 'Hall C' },
-      { time: 'Day 2 · 14:00', title: 'ML Models for Surgical Complications', venue: 'Hall A' },
-    ],
+    userText: 'What should I attend on Day 2 of KAIZENCON 2027?',
   },
   {
     id: 'ai-surgery',
     label: 'Who is discussing AI in surgery?',
-    userText: 'Who is discussing AI in surgery?',
-    aiText:
-      "Multiple world-class faculty are presenting clinical applications of AI: Dr. Sofia Laurent presents ML complication models, Dr. Maya Chen demonstrates intraoperative imaging, and Dr. Arjun Mehta covers autonomous surgical robotics.",
-    sessions: [
-      { time: 'Day 1 · 09:00', title: 'The AI-Native Operating Theatre', venue: 'Main Auditorium · Dr. Laurent' },
-      { time: 'Day 2 · 11:30', title: 'Computer Vision in Tissue Boundary Detection', venue: 'Hall B · Dr. Chen' },
-      { time: 'Day 3 · 14:00', title: 'Robotics & Autonomous Trajectories', venue: 'Hall A · Dr. Mehta' },
-    ],
+    userText: 'Who are the faculty discussing AI and ML applications in surgery?',
   },
   {
     id: 'robotic-colorectal',
     label: 'Show robotic colorectal sessions',
-    userText: 'Show robotic colorectal sessions',
-    aiText:
-      "Here are the top-rated colorectal robotic surgery tracks: 10-Year Clinical Evidence (Day 1 · Hall A), Robotic Total Mesorectal Excision Masterclass (Day 2 · Hall B), and Anastomotic Leak Prevention Workshop (Day 3 · Lab 1).",
-    sessions: [
-      { time: 'Day 1 · 10:30', title: 'Robotic Colorectal Resection: 10-Year Data', venue: 'Hall A' },
-      { time: 'Day 2 · 15:00', title: 'Robotic TME in Narrow Pelvis', venue: 'Hall B' },
-      { time: 'Day 3 · 09:30', title: 'Complication Mitigation in Robotic Resections', venue: 'Workshop Lab 1' },
-    ],
+    userText: 'Show robotic colorectal surgery sessions and masterclasses.',
   },
   {
     id: 'robotics-vs-lap',
     label: 'Which sessions compare robotics and laparoscopy?',
-    userText: 'Which sessions compare robotics and laparoscopy?',
-    aiText:
-      "We have dedicated head-to-head tracks comparing clinical outcomes, complication rates, and ergonomic health. Don't miss Dr. Daniel Okafor's 10-year comparative analysis on Day 1 followed by the live consensus panel on Day 2.",
-    sessions: [
-      { time: 'Day 1 · 11:30', title: 'Robotics vs Laparoscopy: A 10-Year Analysis', venue: 'Hall A · Dr. Okafor' },
-      { time: 'Day 2 · 14:00', title: 'Ergonomic Longevity & Conversion Rates', venue: 'Hall B' },
-      { time: 'Day 3 · 11:00', title: 'Grand Debate: Cost vs Clinical Benefit', venue: 'Main Auditorium' },
-    ],
+    userText: 'Which sessions compare robotics and laparoscopy clinical outcomes?',
   },
 ];
 
@@ -200,51 +172,24 @@ export default function AiExperiencePage() {
   const [knowledgeResult, setKnowledgeResult] = useState(null);
   const [showFlowModal, setShowFlowModal] = useState(false);
 
-  // Handle Preset Click in Assistant
-  const handleAssistantPresetClick = (preset) => {
-    setActiveAssistantPreset(preset.id);
-    setIsAssistantTyping(true);
+  // Handle Live API query execution for Assistant
+  const executeAssistantQuery = async (userQuery, presetId = '') => {
+    if (!userQuery || !userQuery.trim() || isAssistantTyping) return;
 
-    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    setChatMessages((prev) => [
-      ...prev,
-      { sender: 'user', text: preset.userText, time: now },
-    ]);
-
-    setTimeout(() => {
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          sender: 'ai',
-          text: preset.aiText,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          sessions: preset.sessions,
-        },
-      ]);
-      setIsAssistantTyping(false);
-    }, 450);
-  };
-
-  // Handle Custom Question in Assistant
-  const handleChatSubmit = async (e) => {
-    e.preventDefault();
-    if (!chatInput.trim() || isAssistantTyping) return;
-
-    const userText = chatInput.trim();
+    const trimmedQuery = userQuery.trim();
     setChatInput('');
-    setActiveAssistantPreset('');
+    setActiveAssistantPreset(presetId);
     setIsAssistantTyping(true);
 
     const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     setChatMessages((prev) => [
       ...prev,
-      { sender: 'user', text: userText, time: now },
+      { sender: 'user', text: trimmedQuery, time: now },
     ]);
 
     try {
-      const data = await askKnowledgeChat(userText);
+      const data = await askKnowledgeChat(trimmedQuery);
       const reply =
         data?.answer ||
         (Array.isArray(data?.results) && (data.results[0]?.answer || data.results[0]?.text || data.results[0]?.response)) ||
@@ -284,6 +229,18 @@ export default function AiExperiencePage() {
     }
   };
 
+  // Handle Preset Click in Assistant
+  const handleAssistantPresetClick = (preset) => {
+    executeAssistantQuery(preset.userText, preset.id);
+  };
+
+  // Handle Custom Question in Assistant
+  const handleChatSubmit = (e) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+    executeAssistantQuery(chatInput, '');
+  };
+
   // Handle Live Question Submit
   const handleLiveQuestionSubmit = (e) => {
     e.preventDefault();
@@ -307,24 +264,34 @@ export default function AiExperiencePage() {
     setTimeout(() => setQaSubmittedAlert(false), 4500);
   };
 
-  // Handle Knowledge Base Query
-  const handleKnowledgeSearch = (query) => {
+  // Handle Knowledge Base Query via Live API
+  const handleKnowledgeSearch = async (query) => {
     setKnowledgeQuery(query);
     if (!query.trim()) {
       setKnowledgeResult(null);
       return;
     }
 
-    // Mock search result generator
-    setKnowledgeResult({
-      query,
-      summary: `Indexed from 4 verified scientific sessions: Robotic platforms demonstrate reduced open conversion (4.2% vs 9.8%) and superior visualization in pelvic dissection. Long-term oncological equivalence remains consistent across all multi-centre trials.`,
-      sessions: [
-        'Robotics vs Laparoscopy: A 10-Year Analysis (Day 1 · Hall A)',
-        'ML Models for Complication Prediction (Day 2 · Hall A)',
-      ],
-      updated: '10 mins ago',
-    });
+    try {
+      const data = await askKnowledgeChat(query);
+      const answer =
+        data?.answer ||
+        (Array.isArray(data?.results) && (data.results[0]?.answer || data.results[0]?.text)) ||
+        "Indexed relevant insights from conference scientific corpus.";
+
+      const sessionList = Array.isArray(data?.sessions)
+        ? data.sessions.map((s) => (typeof s === 'string' ? s : `${s.title} (${s.venue || ''})`))
+        : [];
+
+      setKnowledgeResult({
+        query,
+        summary: answer,
+        sessions: sessionList.length > 0 ? sessionList : ['Sessions detailed in Programme'],
+        updated: 'Just now',
+      });
+    } catch (err) {
+      console.error('Knowledge search failed:', err);
+    }
   };
 
   // Smooth scroll helper
@@ -556,10 +523,7 @@ export default function AiExperiencePage() {
                 </div>
                 <div>
                   <h3 className="kz-chat-bot-title">KAIZENCON AI</h3>
-                  <div className="kz-chat-bot-status">
-                    <span className="kz-status-online-dot" />
-                    <span>Conference Assistant · Online</span>
-                  </div>
+                 
                 </div>
               </div>
               <span className="kz-chat-demo-badge">AI Experience Demo</span>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import { AdminPageContainer } from "../../components/common/AdminPageContainer";
+import { TablePagination } from "../../components/common/TablePagination";
 import { useToast } from "../../context/ToastContext";
 import {
   getEmailAgentContacts,
@@ -116,6 +117,19 @@ export default function SendToEmailPage() {
 
     return true;
   });
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter, typeFilter]);
+
+  const paginatedContacts = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredContacts.slice(startIndex, startIndex + pageSize);
+  }, [filteredContacts, currentPage, pageSize]);
 
   // Bulk selection handlers
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -895,7 +909,7 @@ export default function SendToEmailPage() {
                   </td>
                 </tr>
               ) : (
-                filteredContacts.map((contact) => {
+                paginatedContacts.map((contact) => {
                   const isSelected = selectedIds.includes(contact.id);
                   const isEligible = contact.status === "eligible" && !contact.unsubscribed;
 
@@ -1061,6 +1075,19 @@ export default function SendToEmailPage() {
               )}
             </tbody>
           </table>
+
+          {/* Pagination Controls Bar */}
+          <TablePagination
+            currentPage={currentPage}
+            totalItems={filteredContacts.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+            itemName="recipients"
+          />
         </div>
       </AdminPageContainer>
 

@@ -72,6 +72,17 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.kz-footer-meta-link {
+  cursor: pointer;
+}
+
+.kz-footer-meta-link:hover .kz-footer-meta-primary {
+  color: #d8246e;
+  transition: color 0.2s ease;
 }
 
 .kz-footer-meta-icon {

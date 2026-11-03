@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import { AdminPageContainer } from "../../components/common/AdminPageContainer";
+import { TablePagination } from "../../components/common/TablePagination";
 
 interface GroupItem {
   id: number;
@@ -85,6 +86,19 @@ export default function GroupsPage() {
       g.description.toLowerCase().includes(search.toLowerCase()) ||
       g.code.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
+  const paginatedGroups = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredGroups.slice(startIndex, startIndex + pageSize);
+  }, [filteredGroups, currentPage, pageSize]);
 
   const handleOpenAddModal = () => {
     setEditingGroup(null);
@@ -209,7 +223,7 @@ export default function GroupsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {filteredGroups.map((group) => (
+                {paginatedGroups.map((group) => (
                   <tr
                     key={group.id}
                     className="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors"
@@ -285,6 +299,19 @@ export default function GroupsPage() {
                 ))}
               </tbody>
             </table>
+
+            {/* Pagination Controls Bar */}
+            <TablePagination
+              currentPage={currentPage}
+              totalItems={filteredGroups.length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              }}
+              itemName="groups"
+            />
           </div>
         )}
       </AdminPageContainer>

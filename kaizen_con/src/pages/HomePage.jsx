@@ -1,6 +1,6 @@
 import React from 'react';
 import Hero from '../components/Home/Hero';
-import WelcomeMessage from '../components/Home/WelcomeMessage';
+import PresidentWelcome from '../components/Home/PresidentWelcome';
 import StatsSection from '../components/Home/StatsSection';
 import IdeaSection from '../components/Home/IdeaSection';
 import TracksSection from '../components/Home/TracksSection';
@@ -9,6 +9,7 @@ import AiConAssisten from '../components/Home/AiConAssisten';
 import Liveinteligenc from '../components/Home/Liveinteligenc';
 import SpeakersSection from '../components/Home/SpeakersSection';
 import AppDownloadSection from '../components/Home/AppDownloadSection';
+import ConferenceVenue from '../components/Home/ConferenceVenue';
 
 
 export default function HomePage() {
@@ -17,8 +18,8 @@ export default function HomePage() {
       {/* Hero Section */}
       <Hero />
 
-      {/* Welcome Message Section */}
-      <WelcomeMessage />
+      {/* President Welcome Message Section */}
+      <PresidentWelcome />
 
       {/* Conference Key Stats & Highlights */}
       <StatsSection />
@@ -43,6 +44,9 @@ export default function HomePage() {
 
       {/* Download Our App Section */}
       <AppDownloadSection />
+
+      {/* Conference Venue Section */}
+      <ConferenceVenue />
 
     </main>
   );

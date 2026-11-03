@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import { AdminPageContainer } from "../../components/common/AdminPageContainer";
+import { TablePagination } from "../../components/common/TablePagination";
 import Swal from "sweetalert2";
 import {
   getSpeakers,
@@ -156,6 +157,19 @@ export default function SpeakersPage() {
       return matchesSearch && matchesRole && matchesStatus && matchesSpeciality;
     });
   }, [speakers, search, roleFilter, statusFilter, specialityFilter]);
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, roleFilter, statusFilter, specialityFilter]);
+
+  const paginatedSpeakers = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredSpeakers.slice(startIndex, startIndex + pageSize);
+  }, [filteredSpeakers, currentPage, pageSize]);
 
   // Summary Metrics
   const metrics = useMemo(() => {
@@ -603,7 +617,7 @@ export default function SpeakersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-gray-900">
-                {filteredSpeakers.map((speaker) => {
+                {paginatedSpeakers.map((speaker) => {
                   const imageUrl = getFullImageUrl(speaker.profile_image_url);
                   const initials = `${speaker.first_name?.[0] || ""}${speaker.last_name?.[0] || ""}`.toUpperCase();
                   const roleNum = speaker.role ?? 1;
@@ -780,6 +794,19 @@ export default function SpeakersPage() {
                 })}
               </tbody>
             </table>
+
+            {/* Pagination Controls Bar */}
+            <TablePagination
+              currentPage={currentPage}
+              totalItems={filteredSpeakers.length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              }}
+              itemName="faculty"
+            />
           </div>
         )}
       </AdminPageContainer>

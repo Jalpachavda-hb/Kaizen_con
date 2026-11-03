@@ -1,18 +1,16 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
 import { AdminPageContainer } from "../../components/common/AdminPageContainer";
+import { TablePagination } from "../../components/common/TablePagination";
 import { useToast } from "../../context/ToastContext";
 import {
   getCampaigns,
-  getEmailAgentContacts,
-  getContactById,
   approveCampaign,
   startCampaign,
   stopCampaign,
   pauseCampaign,
   resumeCampaign,
-  getCampaignLogs,
   deleteCampaign,
 } from "../../api/ApiPath";
 import Swal from "sweetalert2";
@@ -84,41 +82,9 @@ export default function CampaignsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
-  // Contacts Cache (for logs lookup)
-  const [availableContacts, setAvailableContacts] = useState<ContactOption[]>([]);
-
   // View Details Modal State
   const [selectedCampaign, setSelectedCampaign] = useState<CampaignItem | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-
-  // View Logs Modal State
-  const [isLogsModalOpen, setIsLogsModalOpen] = useState<boolean>(false);
-  const [logsCampaign, setLogsCampaign] = useState<CampaignItem | null>(null);
-  const [logs, setLogs] = useState<any[]>([]);
-  const [loadingLogs, setLoadingLogs] = useState<boolean>(false);
-  const [logsError, setLogsError] = useState<string | null>(null);
-  const [logSearch, setLogSearch] = useState<string>("");
-  const [contactsMap, setContactsMap] = useState<Record<string, ContactOption>>({});
-
-  // Fetch available contacts dictionary
-  const fetchContacts = useCallback(async () => {
-    try {
-      const data = await getEmailAgentContacts(0, 100);
-      if (Array.isArray(data)) {
-        setAvailableContacts(data);
-        const map: Record<string, ContactOption> = {};
-        data.forEach((c: any) => {
-          if (c && c.id) {
-            map[c.id] = c;
-            map[c.id.toLowerCase().trim()] = c;
-          }
-        });
-        setContactsMap((prev) => ({ ...prev, ...map }));
-      }
-    } catch (err) {
-      console.error("Failed to load contacts:", err);
-    }
-  }, []);
 
   // Fetch campaigns from API
   const fetchCampaigns = useCallback(async () => {
@@ -141,8 +107,7 @@ export default function CampaignsPage() {
 
   useEffect(() => {
     fetchCampaigns();
-    fetchContacts();
-  }, [fetchCampaigns, fetchContacts]);
+  }, [fetchCampaigns]);
 
   // API Call: Approve Campaign
   const handleApprove = async (c: CampaignItem) => {
@@ -437,117 +402,9 @@ export default function CampaignsPage() {
     }
   };
 
-  // API Call: View Campaign Logs
-  const handleViewLogs = async (c: CampaignItem) => {
-    setLogsCampaign(c);
-    setIsLogsModalOpen(true);
-    setLoadingLogs(true);
-    setLogsError(null);
-    setLogSearch("");
-
-    try {
-      // 1. Fetch logs for this campaign
-      const res = await getCampaignLogs(c.id);
-      const logsList = Array.isArray(res) ? res : [];
-      setLogs(logsList);
-
-      // 2. Resolve contact details for each log entry
-      const contactIdsToFetch = logsList
-        .map((log: any) => (log.contact_id || log.recipient_id || "").trim())
-        .filter((cid: string) => cid && !contactsMap[cid] && !contactsMap[cid.toLowerCase()]);
-
-      if (contactIdsToFetch.length > 0 || availableContacts.length === 0) {
-        // Fetch full contacts list if empty or if there are unresolved contacts
-        try {
-          const contactsData = await getEmailAgentContacts(0, 100);
-          if (Array.isArray(contactsData)) {
-            setAvailableContacts(contactsData);
-            const map: Record<string, ContactOption> = {};
-            contactsData.forEach((ct: any) => {
-              if (ct && ct.id) {
-                map[ct.id] = ct;
-                map[ct.id.toLowerCase().trim()] = ct;
-              }
-            });
-            setContactsMap((prev) => ({ ...prev, ...map }));
-          }
-        } catch (contactErr) {
-          console.warn("Could not batch load contacts:", contactErr);
-        }
-
-        // For any contact still missing, fetch individually via getContactById
-        const uniqueMissing = Array.from(new Set(contactIdsToFetch));
-        for (const cid of uniqueMissing) {
-          try {
-            const contactDetail = await getContactById(cid);
-            if (contactDetail && contactDetail.id) {
-              setContactsMap((prev) => ({
-                ...prev,
-                [contactDetail.id]: contactDetail,
-                [contactDetail.id.toLowerCase().trim()]: contactDetail,
-              }));
-            }
-          } catch (e) {
-            console.warn(`Could not resolve contact ID ${cid}:`, e);
-          }
-        }
-      }
-    } catch (err: any) {
-      console.error("Failed to load campaign logs:", err);
-      setLogsError(err?.message || "Failed to fetch logs for this campaign.");
-    } finally {
-      setLoadingLogs(false);
-    }
-  };
-
-  // Refresh Logs inside modal
-  const handleRefreshLogs = async () => {
-    if (!logsCampaign) return;
-    setLoadingLogs(true);
-    setLogsError(null);
-    try {
-      const res = await getCampaignLogs(logsCampaign.id);
-      const logsList = Array.isArray(res) ? res : [];
-      setLogs(logsList);
-
-      // Resolve any missing contacts
-      const contactIdsToFetch = logsList
-        .map((log: any) => (log.contact_id || log.recipient_id || "").trim())
-        .filter((cid: string) => cid && !contactsMap[cid] && !contactsMap[cid.toLowerCase()]);
-
-      if (contactIdsToFetch.length > 0) {
-        const uniqueMissing = Array.from(new Set(contactIdsToFetch));
-        for (const cid of uniqueMissing) {
-          try {
-            const contactDetail = await getContactById(cid);
-            if (contactDetail && contactDetail.id) {
-              setContactsMap((prev) => ({
-                ...prev,
-                [contactDetail.id]: contactDetail,
-                [contactDetail.id.toLowerCase().trim()]: contactDetail,
-              }));
-            }
-          } catch (e) {
-            console.warn(`Could not resolve contact ID ${cid}:`, e);
-          }
-        }
-      }
-      info("Logs refreshed");
-    } catch (err: any) {
-      setLogsError(err?.message || "Failed to refresh logs.");
-    } finally {
-      setLoadingLogs(false);
-    }
-  };
-
-  // Copy Logs to Clipboard
-  const handleCopyLogs = () => {
-    try {
-      navigator.clipboard.writeText(JSON.stringify(logs, null, 2));
-      info("Logs copied to clipboard");
-    } catch {
-      info("Failed to copy logs");
-    }
+  // Navigate to dedicated Campaign Logs page
+  const handleViewLogs = (c: CampaignItem) => {
+    navigate(`/campaigns/${c.id}/logs`);
   };
 
   // Helper formatting
@@ -602,37 +459,6 @@ export default function CampaignsPage() {
     );
   };
 
-  // Log Message Status Badge
-  const renderLogStatusBadge = (status?: string, error?: any) => {
-    const s = (status || (error ? "failed" : "sent")).toLowerCase();
-    let badgeClass =
-      "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700";
-    let dotClass = "bg-gray-400";
-
-    if (s === "sent" || s === "success" || s === "delivered") {
-      badgeClass =
-        "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800";
-      dotClass = "bg-emerald-500";
-    } else if (s === "failed" || s === "error" || s === "bounced" || !!error) {
-      badgeClass =
-        "bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-900";
-      dotClass = "bg-rose-500";
-    } else if (s === "pending" || s === "queued" || s === "processing") {
-      badgeClass =
-        "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800";
-      dotClass = "bg-amber-500 animate-pulse";
-    }
-
-    return (
-      <span
-        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider border ${badgeClass}`}
-      >
-        <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />
-        {status || (error ? "Failed" : "Sent")}
-      </span>
-    );
-  };
-
   // Dynamic filter lists
   const availableStatuses = Array.from(
     new Set(campaigns.map((c) => (c.status || "Unknown").toLowerCase()))
@@ -656,6 +482,19 @@ export default function CampaignsPage() {
     return true;
   });
 
+  // Campaigns Pagination
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter]);
+
+  const paginatedCampaigns = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredCampaigns.slice(startIndex, startIndex + pageSize);
+  }, [filteredCampaigns, currentPage, pageSize]);
+
   // KPI Metrics
   const totalCampaigns = campaigns.length;
   const runningCount = campaigns.filter(
@@ -668,33 +507,6 @@ export default function CampaignsPage() {
     const s = (c.status || "").toLowerCase();
     return s === "paused" || s === "stopped";
   }).length;
-
-  // Filter logs inside Logs Modal
-  const filteredLogs = logs.filter((log: any) => {
-    if (!logSearch.trim()) return true;
-    const q = logSearch.toLowerCase().trim();
-    const contactId = (log.contact_id || log.recipient_id || "").trim();
-    const contact = contactId
-      ? contactsMap[contactId] ||
-      contactsMap[contactId.toLowerCase()] ||
-      availableContacts.find((c) => c.id === contactId || c.id?.toLowerCase() === contactId.toLowerCase())
-      : null;
-    const name = (contact?.name || log.name || "").toLowerCase();
-    const email = (contact?.email || log.email || "").toLowerCase();
-    const subject = (log.subject || "").toLowerCase();
-    const status = (log.message_status || log.status || "").toLowerCase();
-    const cid = (contactId || "").toLowerCase();
-    const str = typeof log === "string" ? log : JSON.stringify(log);
-
-    return (
-      name.includes(q) ||
-      email.includes(q) ||
-      subject.includes(q) ||
-      status.includes(q) ||
-      cid.includes(q) ||
-      str.toLowerCase().includes(q)
-    );
-  });
 
   return (
     <>
@@ -924,7 +736,7 @@ export default function CampaignsPage() {
                   </td>
                 </tr>
               ) : (
-                filteredCampaigns.map((c) => {
+                paginatedCampaigns.map((c) => {
                   const regUrl = c.configuration?.registration_url;
                   const sendingDelay = c.configuration?.sending_delay_seconds;
                   const maxSends = c.configuration?.max_sends_per_day;
@@ -1240,6 +1052,19 @@ export default function CampaignsPage() {
               )}
             </tbody>
           </table>
+
+          {/* Pagination Controls Bar */}
+          <TablePagination
+            currentPage={currentPage}
+            totalItems={filteredCampaigns.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+            itemName="campaigns"
+          />
         </div>
       </AdminPageContainer>
 
@@ -1653,330 +1478,6 @@ export default function CampaignsPage() {
                 type="button"
                 onClick={() => setIsDetailsModalOpen(false)}
                 className="px-5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-750 border border-gray-300 dark:border-gray-700 rounded-xl shadow-2xs transition-colors cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* VIEW LOGS MODAL */}
-      {isLogsModalOpen && logsCampaign && (
-        <div className="fixed inset-0 z-99999 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-5xl xl:max-w-6xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-6 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
-              <div className="flex items-center gap-3">
-                <span className="p-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                  </svg>
-                </span>
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-base font-bold text-gray-900 dark:text-white">
-                      Campaign Logs
-                    </h3>
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
-                      {logsCampaign.name}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[11px] font-mono text-gray-400 truncate max-w-xs">
-                      Campaign ID: {logsCampaign.id}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleCopyId(logsCampaign.id)}
-                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                      title="Copy Campaign UUID"
-                    >
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Header Right Actions */}
-              <div className="flex items-center gap-2">
-                {/* Refresh Logs Button */}
-                <button
-                  type="button"
-                  onClick={handleRefreshLogs}
-                  disabled={loadingLogs}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition cursor-pointer disabled:opacity-60"
-                  title="Refresh Logs from API"
-                >
-                  <svg
-                    className={`w-3.5 h-3.5 text-gray-500 dark:text-gray-400 ${loadingLogs ? "animate-spin" : ""
-                      }`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
-                  </svg>
-                  <span>Refresh</span>
-                </button>
-
-                {/* Copy JSON Button */}
-                <button
-                  type="button"
-                  onClick={handleCopyLogs}
-                  disabled={logs.length === 0}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 transition cursor-pointer disabled:opacity-40"
-                  title="Copy All Logs JSON"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                  </svg>
-                  <span>Copy</span>
-                </button>
-
-                {/* Close modal */}
-                <button
-                  type="button"
-                  onClick={() => setIsLogsModalOpen(false)}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer ml-1"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Sub-toolbar: Search & View Toggle */}
-            <div className="flex items-center justify-between gap-3 py-3 border-b border-gray-100 dark:border-gray-800 shrink-0 flex-wrap">
-              <div className="relative flex-1 min-w-[240px]">
-                <svg
-                  className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-                <input
-                  type="text"
-                  value={logSearch}
-                  onChange={(e) => setLogSearch(e.target.value)}
-                  placeholder="Filter logs by recipient name, email, contact ID, status, or subject..."
-                  className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-hidden focus:ring-1 focus:ring-[#AA2D7B]"
-                />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-400">
-                  {filteredLogs.length} of {logs.length} entries
-                </span>
-              </div>
-            </div>
-
-            {/* Modal Body / Logs Display */}
-            <div className="flex-1 overflow-y-auto py-3 min-h-[300px]">
-              {loadingLogs ? (
-                <div className="h-full flex flex-col items-center justify-center py-16 space-y-3">
-                  <svg className="w-7 h-7 animate-spin text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
-                    <path d="M12 2a10 10 0 0 1 10 10" />
-                  </svg>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Fetching campaign logs and recipient contacts...
-                  </p>
-                </div>
-              ) : logsError ? (
-                <div className="p-4 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/20 text-rose-800 dark:text-rose-300 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="12" y1="8" x2="12" y2="12" />
-                      <line x1="12" y1="16" x2="12.01" y2="16" />
-                    </svg>
-                    <span>{logsError}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleRefreshLogs}
-                    className="px-3 py-1 rounded-md bg-rose-600 text-white font-medium text-xs hover:bg-rose-700 transition"
-                  >
-                    Retry
-                  </button>
-                </div>
-              ) : logs.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center py-16 text-center space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-600 flex items-center justify-center">
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                      <path d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                    </svg>
-                  </div>
-                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                    No Logs Recorded Yet
-                  </p>
-                  <p className="text-xs text-gray-400 max-w-sm">
-                    Events and dispatch status updates will automatically appear here once the campaign begins sending emails.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handleRefreshLogs}
-                    className="mt-1 px-3 py-1.5 text-xs font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 rounded-lg transition cursor-pointer"
-                  >
-                    Check for New Logs
-                  </button>
-                </div>
-              ) : (
-                /* Structured Table Format */
-                <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-left text-xs">
-                    <thead className="bg-gray-50 dark:bg-gray-800/60 text-gray-600 dark:text-gray-400 uppercase tracking-wider font-semibold text-[11px]">
-                      <tr>
-                        <th className="px-4 py-3">Recipient Name</th>
-                        <th className="px-4 py-3">Email Address</th>
-                        <th className="px-4 py-3">Subject & Info</th>
-                        <th className="px-4 py-3 text-center">Status</th>
-                        <th className="px-4 py-3">Sent Time</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800/60">
-                      {filteredLogs.length === 0 ? (
-                        <tr>
-                          <td colSpan={5} className="py-12 text-center text-xs text-gray-400">
-                            No logs match your search "{logSearch}".
-                          </td>
-                        </tr>
-                      ) : (
-                        filteredLogs.map((log: any, idx: number) => {
-                          const contactId = (log.contact_id || log.recipient_id || "").trim();
-                          const contact = contactId
-                            ? contactsMap[contactId] ||
-                            contactsMap[contactId.toLowerCase()] ||
-                            availableContacts.find(
-                              (c) => c.id === contactId || c.id?.toLowerCase() === contactId.toLowerCase()
-                            )
-                            : null;
-                          const contactName = contact?.name || log.name || (contactId ? `Contact (${contactId.slice(0, 8)}...)` : "Unknown Recipient");
-                          const contactEmail = contact?.email || log.email || log.recipient || log.contact_email || "—";
-                          const initial = (contactName.trim().charAt(0) || "U").toUpperCase();
-                          const logTime = log.created_at || log.timestamp || log.time || log.date;
-
-                          return (
-                            <React.Fragment key={log.id || idx}>
-                              <tr className="hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition">
-                                {/* Recipient Name & Contact ID */}
-                                <td className="px-4 py-3">
-                                  <div className="flex items-center gap-2.5">
-                                    <div className="w-8 h-8 rounded-full bg-linear-to-tr from-[#AA2D7B] to-purple-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
-                                      {initial}
-                                    </div>
-                                    <div className="min-w-0">
-                                      <p className="font-semibold text-gray-900 dark:text-white truncate">
-                                        {contactName}
-                                      </p>
-                                      {contactId && (
-                                        <div className="flex items-center gap-1 mt-0.5">
-                                          <span className="text-[10px] font-mono text-gray-400 truncate max-w-[130px]" title={contactId}>
-                                            ID: {contactId.slice(0, 8)}...{contactId.slice(-4)}
-                                          </span>
-                                          <button
-                                            type="button"
-                                            onClick={() => handleCopyId(contactId)}
-                                            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                                            title="Copy Contact UUID"
-                                          >
-                                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                                            </svg>
-                                          </button>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                </td>
-
-                                {/* Email Address */}
-                                <td className="px-4 py-3">
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="font-mono text-xs text-gray-700 dark:text-gray-300">
-                                      {contactEmail}
-                                    </span>
-                                    {contactEmail !== "—" && (
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          navigator.clipboard.writeText(contactEmail);
-                                          info("Email copied to clipboard");
-                                        }}
-                                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                                        title="Copy Email"
-                                      >
-                                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                                        </svg>
-                                      </button>
-                                    )}
-                                  </div>
-                                </td>
-
-                                {/* Subject & Meta Info */}
-                                <td className="px-4 py-3 max-w-xs">
-                                  <div>
-                                    <p className="font-medium text-gray-900 dark:text-white truncate" title={log.subject || log.message}>
-                                      {log.subject || log.message || "—"}
-                                    </p>
-                                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                                      {log.template_version && (
-                                        <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 font-mono">
-                                          tpl: {log.template_version}
-                                        </span>
-                                      )}
-                                      {log.direction && (
-                                        <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-mono capitalize">
-                                          {log.direction}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-                                </td>
-
-                                {/* Status */}
-                                <td className="px-4 py-3 text-center">
-                                  {renderLogStatusBadge(log.message_status || log.status, log.error_details || log.error)}
-                                </td>
-
-                                {/* Sent Time */}
-                                <td className="px-4 py-3 whitespace-nowrap">
-                                  <span className="font-mono text-[11px] text-gray-600 dark:text-gray-400">
-                                    {formatDate(logTime)}
-                                  </span>
-                                </td>
-                              </tr>
-                            </React.Fragment>
-                          );
-                        })
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-
-            {/* Modal Footer */}
-            <div className="flex items-center justify-end pt-4 border-t border-gray-100 dark:border-gray-800 shrink-0">
-              <button
-                type="button"
-                onClick={() => setIsLogsModalOpen(false)}
-                className="px-4 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition cursor-pointer"
               >
                 Close
               </button>

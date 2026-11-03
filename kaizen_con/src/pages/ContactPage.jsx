@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaHandshake } from 'react-icons/fa6';
 import connectBg from '../assets/home/connect_bg.jpg';
+import ConferenceVenue from '../components/Home/ConferenceVenue';
 import './ContactPage.css';
 
 export default function ContactPage() {
@@ -540,6 +541,9 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+
+      {/* CONFERENCE VENUE SECTION */}
+      <ConferenceVenue />
 
       {/* 4. FAQ SECTION */}
       <section className="kz-contact-faq-section">

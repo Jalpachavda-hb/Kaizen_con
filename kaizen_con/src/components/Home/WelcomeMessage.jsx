@@ -1,6 +1,6 @@
 import React from 'react';
 import './WelcomeMessage.css';
-import doctorImg from '../../assets/drsanjivharibhakti_clean.jpg';
+import doctorImg from '../../assets/drsanjiv_welcome.jpg';
 
 export default function WelcomeMessage() {
   return (
@@ -29,15 +29,15 @@ export default function WelcomeMessage() {
                 className="kz-welcome-photo"
                 loading="eager"
               />
+            </div>
 
-              {/* Dark plum info badge pinned to bottom of photo with zero gap */}
-              <div className="kz-welcome-badge">
-                <div className="kz-welcome-badge-body">
-                  <h3 className="kz-welcome-badge-name">Dr. Sanjiv Haribhakti</h3>
-                  <div className="kz-welcome-badge-sub">
-                    <p className="kz-welcome-badge-role">Congress President,</p>
-                    <p className="kz-welcome-badge-role">KAIZENCON 2027</p>
-                  </div>
+            {/* Dark plum info badge pinned to bottom of photo with zero gap */}
+            <div className="kz-welcome-badge">
+              <div className="kz-welcome-badge-body">
+                <h3 className="kz-welcome-badge-name">Dr. Sanjiv Haribhakti</h3>
+                <div className="kz-welcome-badge-sub">
+                  <p className="kz-welcome-badge-role">Congress President,</p>
+                  <p className="kz-welcome-badge-role">KAIZENCON 2027</p>
                 </div>
               </div>
             </div>

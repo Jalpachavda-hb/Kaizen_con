@@ -1,22 +1,21 @@
 /* ====================================================
-   KAIZENCON 2027 - ELEGANT PROFESSIONAL SPEAKER CARD
-   - Single visible light shadow
-   - Clean, balanced, lightweight typography (not heavy or dark)
-   - Generous internal padding and spacing
-   - Clean avatar monogram and country badge
-   - Subtle specialty tags and clear topic hierarchy
+   KAIZENCON 2027 - ELEGANT FACULTY CARD COMPONENT
+   Pixel-accurate recreation matching design:
+   - Pure white card, rounded corners (20px), subtle border
+   - Purple-ringed avatar, vertical divider, purple bold name
+   - "SESSION TOPIC" with left purple vertical accent bar and arrow
+   - Outline calendar icon with real session count
+   - Real bio paragraph
    ==================================================== */
 
-.kz-speaker-card-v2 {
+.kz-faculty-card {
   position: relative;
   background: #FFFFFF;
   border: 1px solid #ECE7EF;
   border-radius: 20px;
-  /* Generous internal spacing */
-  padding: 28px 26px 24px 26px;
+  padding: 26px 26px 24px 26px;
   box-sizing: border-box;
-  /* Single visible light shadow */
-  box-shadow: 0 4px 20px rgba(45, 26, 51, 0.05);
+  box-shadow: 0 4px 18px rgba(45, 26, 51, 0.04);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -28,260 +27,217 @@
   text-align: left;
 }
 
-.kz-speaker-card-v2:hover {
+.kz-faculty-card:hover {
   transform: translateY(-4px);
   border-color: #D6A8C4;
-  box-shadow: 0 10px 30px rgba(45, 26, 51, 0.09);
-}
-
-.kz-speaker-card-v2.is-highlighted {
-  
-  box-shadow: 0 6px 24px rgba(182, 52, 115, 0.07);
+  box-shadow: 0 10px 28px rgba(45, 26, 51, 0.08);
 }
 
 /* ----------------------------------------------------
-   1. TOP ROW: AVATAR & COUNTRY BADGE
+   1. TOP ROW: AVATAR & VERTICAL DIVIDER & IDENTITY
    ---------------------------------------------------- */
-.kz-card-top-row {
+.kz-faculty-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 18px;
+  width: 100%;
 }
 
-.kz-card-avatar-wrap {
+.kz-faculty-avatar-ring {
+  width: 64px;
+  height: 64px;
+  min-width: 64px;
+  border-radius: 50%;
+  border: 2.5px solid #701A75;
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 2px;
+  box-sizing: border-box;
+  background: #FFFFFF;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
 }
 
-.kz-card-avatar-disc {
-  width: 50px;
-  height: 50px;
+.kz-faculty-card:hover .kz-faculty-avatar-ring {
+  transform: scale(1.03);
+}
+
+.kz-faculty-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.kz-faculty-avatar-fallback {
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   background: #42264C;
   color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.15rem;
-  font-weight: 650;
+  font-size: 1.2rem;
+  font-weight: 700;
   letter-spacing: 0.02em;
   user-select: none;
-  transition: transform 0.2s ease;
 }
 
-.kz-speaker-card-v2:hover .kz-card-avatar-disc {
-  transform: scale(1.03);
+/* Vertical divider between Avatar and Name */
+.kz-faculty-vertical-divider {
+  width: 1px;
+  height: 48px;
+  background-color: #E2E8F0;
+  margin: 0 18px;
+  flex-shrink: 0;
 }
 
-.kz-card-avatar-img {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  object-fit: cover;
+/* Identity text block */
+.kz-faculty-identity {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  flex: 1;
 }
 
-/* Country Badge */
-.kz-card-country-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  background-color: #FAF7FA;
-  border: 1px solid #ECE3EC;
-  border-radius: 999px;
-}
-
-.kz-card-flag {
-  font-size: 0.95rem;
-  line-height: 1;
-}
-
-.kz-card-country-name {
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: #5A4762;
-}
-
-/* ----------------------------------------------------
-   2. SPEAKER IDENTITY: NAME, ROLE, INSTITUTION
-   ---------------------------------------------------- */
-.kz-card-identity {
-  margin-bottom: 16px;
-}
-
-.kz-card-name {
-  font-size: 1.25rem;
+.kz-faculty-name {
+  font-size: 1.35rem;
   font-weight: 700;
-  color: #2A1731;
-  margin: 0 0 5px 0;
-  line-height: 1.26;
+  color: #551466;
+  margin: 0 0 3px 0;
+  line-height: 1.22;
   letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   transition: color 0.2s ease;
 }
 
-.kz-speaker-card-v2:hover .kz-card-name {
-  color: #B63473;
+.kz-faculty-card:hover .kz-faculty-name {
+  color: #701A75;
 }
 
-.kz-card-role {
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: #63486B;
-  margin: 0 0 4px 0;
-  line-height: 1.38;
-}
-
-.kz-card-institute {
-  font-size: 0.82rem;
-  font-weight: 400;
-  color: #7F7185;
+.kz-faculty-role {
+  font-size: 0.94rem;
+  font-weight: 450;
+  color: #4B5563;
   margin: 0;
-  line-height: 1.4;
-}
-
-/* ----------------------------------------------------
-   3. SPECIALTY TAG PILLS
-   ---------------------------------------------------- */
-.kz-card-tags-row {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  flex-wrap: wrap;
-  margin-bottom: 18px;
-}
-
-.kz-card-specialty-pill {
-  display: inline-block;
-  background-color: #FAF6FB;
-  border: 1px solid #EAE0EB;
-  color: #583A61;
-  font-size: 0.74rem;
-  font-weight: 500;
-  padding: 4px 11px;
-  border-radius: 999px;
+  line-height: 1.35;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.kz-card-soft-divider {
+/* Horizontal Subtle Divider */
+.kz-faculty-divider {
   width: 100%;
   height: 1px;
-  background-color: #F0E8F2;
-  margin-bottom: 16px;
+  background-color: #F1EDF4;
+  margin: 18px 0;
+  flex-shrink: 0;
 }
 
 /* ----------------------------------------------------
-   4. "SPEAKING ON" TOPIC BLOCK
+   2. SESSION TOPIC BLOCK
    ---------------------------------------------------- */
-.kz-card-topic-block {
-  margin-bottom: 16px;
-}
-
-.kz-card-topic-label {
-  display: block;
-  font-size: 0.69rem;
-  font-weight: 650;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #B63473;
-  margin-bottom: 6px;
-}
-
-.kz-card-topic-row {
+.kz-faculty-topic-section {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 14px;
 }
 
-.kz-card-mic-icon-disc {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: #FDF2F8;
-  border: 1px solid rgba(182, 52, 115, 0.16);
-  color: #B63473;
+.kz-faculty-topic-content {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+/* Vertical Purple Accent Bar on Left of Topic */
+.kz-faculty-topic-bar {
+  width: 3.5px;
+  min-height: 38px;
+  background-color: #701A75;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.kz-faculty-topic-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.kz-faculty-topic-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #701A75;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 3px;
+  display: block;
+}
+
+.kz-faculty-topic-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1A0D22;
+  line-height: 1.3;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Right Arrow */
+.kz-faculty-arrow-wrap {
+  color: #1A0D22;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: transform 0.2s ease, color 0.2s ease;
 }
 
-.kz-card-topic-title {
-  font-size: 0.92rem;
-  font-weight: 650;
-  color: #2F1836;
-  line-height: 1.36;
-  margin: 0;
-  flex: 1;
-}
-
-.kz-card-topic-arrow {
-  color: #B63473;
-  display: flex;
-  align-items: center;
-  transition: transform 0.2s ease;
-  flex-shrink: 0;
-}
-
-.kz-speaker-card-v2:hover .kz-card-topic-arrow {
-  transform: translateX(3px);
+.kz-faculty-card:hover .kz-faculty-arrow-wrap {
+  transform: translateX(4px);
+  color: #701A75;
 }
 
 /* ----------------------------------------------------
-   5. SESSIONS & FEATURED ROW
+   3. SESSIONS COUNT ROW
    ---------------------------------------------------- */
-.kz-card-meta-bar {
+.kz-faculty-sessions-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: auto;
-  margin-bottom: 16px;
-}
-
-.kz-card-sessions-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.80rem;
+  gap: 8px;
+  color: #4B5563;
+  font-size: 0.92rem;
   font-weight: 500;
-  color: #63506B;
+  margin-bottom: 12px;
 }
 
-.kz-card-cal-icon {
-  color: #7E6E85;
+.kz-faculty-calendar-icon {
+  color: #4B5563;
+  flex-shrink: 0;
 }
 
-.kz-card-meta-separator {
-  color: #E5DAE8;
-  font-size: 0.85rem;
-}
-
-.kz-card-featured-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background-color: #FDF2F8;
-  border: 1px solid rgba(182, 52, 115, 0.20);
-  color: #B63473;
-  font-size: 0.68rem;
-  font-weight: 650;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 3px 9px;
-  border-radius: 999px;
-  margin-left: auto;
-}
-
-.kz-card-star-icon {
-  font-size: 0.72rem;
-  line-height: 1;
-}
-
-.kz-card-bio-paragraph {
-  font-size: 0.83rem;
+/* ----------------------------------------------------
+   4. BIO TEXT PARAGRAPH
+   ---------------------------------------------------- */
+.kz-faculty-bio {
+  font-size: 0.90rem;
   font-weight: 400;
-  line-height: 1.56;
-  color: #6C5A72;
+  line-height: 1.55;
+  color: #4B5563;
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -289,4 +245,3 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-

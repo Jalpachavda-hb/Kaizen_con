@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import { AdminPageContainer } from "../../components/common/AdminPageContainer";
+import { TablePagination } from "../../components/common/TablePagination";
 
 export interface Topic {
   id: number;
@@ -84,6 +85,19 @@ export default function TopicsPage() {
       t.chair.toLowerCase().includes(search.toLowerCase()) ||
       t.code.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
+  const paginatedTopics = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredTopics.slice(startIndex, startIndex + pageSize);
+  }, [filteredTopics, currentPage, pageSize]);
 
   const handleOpenAddModal = () => {
     setEditingTopic(null);
@@ -195,7 +209,7 @@ export default function TopicsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {filteredTopics.map((topic) => (
+                {paginatedTopics.map((topic) => (
                   <tr
                     key={topic.id}
                     className="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors"
@@ -258,6 +272,19 @@ export default function TopicsPage() {
                 ))}
               </tbody>
             </table>
+
+            {/* Pagination Controls Bar */}
+            <TablePagination
+              currentPage={currentPage}
+              totalItems={filteredTopics.length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              }}
+              itemName="topics"
+            />
           </div>
         )}
       </AdminPageContainer>

@@ -2,16 +2,16 @@ import { useState } from 'react';
 import './SpeakerCard.css';
 
 /**
- * Reusable SpeakerCard Component
- * Ultra-clean, professional design for medical conference:
- * - Pure white card with single visible light shadow
- * - Clean avatar monogram / profile image
- * - Flag + country pill badge
- * - Name, role, institute
- * - Row of specialty tag pills
- * - "SPEAKING ON" topic block with microphone badge and arrow
- * - Session count, divider, and FEATURED tag
- * - Bio excerpt
+ * Reusable Faculty / Speaker Card Component
+ * Pixel-accurate implementation matching KaizenCon design:
+ * - Rounded white card with soft shadow and subtle border
+ * - Circular avatar with rich purple border ring
+ * - Vertical divider line between avatar and name/role
+ * - Faculty name in bold purple and designation in neutral slate
+ * - Horizontal dividers
+ * - "SESSION TOPIC" section with vertical purple accent bar and right arrow
+ * - Outline calendar icon with real session count
+ * - Real bio text paragraph
  */
 export default function SpeakerCard({
   id,
@@ -19,15 +19,9 @@ export default function SpeakerCard({
   image,
   name,
   role,
-  institute,
-  country,
-  flag = '',
-  tags = [],
-  topic,
-  sessions = '3 sessions',
-  tag = 'FEATURED',
+  topic = 'Clinical Excellence & Surgical Innovation',
+  sessions = '1 Session',
   bio,
-  isHighlighted = false,
   onViewDetails,
   className = '',
 }) {
@@ -44,7 +38,7 @@ export default function SpeakerCard({
           .slice(0, 2)
           .join('')
           .toUpperCase()
-      : 'SC');
+      : 'FC');
 
   const handleCardClick = () => {
     if (onViewDetails) {
@@ -55,130 +49,96 @@ export default function SpeakerCard({
   return (
     <article
       data-speaker-id={id}
-      className={`kz-speaker-card-v2 ${isHighlighted ? 'is-highlighted' : ''} ${className}`}
+      className={`kz-faculty-card ${className}`}
       onClick={handleCardClick}
     >
-      {/* 1. TOP ROW: AVATAR & COUNTRY BADGE */}
-      <div className="kz-card-top-row">
-        {/* Avatar Monogram or Profile Image */}
-        <div className="kz-card-avatar-wrap">
-          <div className="kz-card-avatar-disc" aria-hidden="true">
-            {image && !imgError ? (
-              <img
-                src={image}
-                alt={name}
-                className="kz-card-avatar-img"
-                onError={() => setImgError(true)}
-              />
-            ) : (
-              <span>{displayInitials}</span>
-            )}
+      {/* 1. TOP ROW: AVATAR + VERTICAL DIVIDER + NAME & DESIGNATION */}
+      <div className="kz-faculty-header">
+        <div className="kz-faculty-avatar-ring">
+          {image && !imgError ? (
+            <img
+              src={image}
+              alt={name}
+              className="kz-faculty-avatar-img"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div className="kz-faculty-avatar-fallback">{displayInitials}</div>
+          )}
+        </div>
+
+        <div className="kz-faculty-vertical-divider" aria-hidden="true" />
+
+        <div className="kz-faculty-identity">
+          <h3 className="kz-faculty-name" title={name}>
+            {name}
+          </h3>
+          <p className="kz-faculty-role" title={role}>
+            {role}
+          </p>
+        </div>
+      </div>
+
+      {/* Horizontal Divider */}
+      <div className="kz-faculty-divider" aria-hidden="true" />
+
+      {/* 2. SESSION TOPIC ROW WITH VERTICAL ACCENT BAR & ARROW */}
+      <div className="kz-faculty-topic-section">
+        <div className="kz-faculty-topic-content">
+          <span className="kz-faculty-topic-bar" aria-hidden="true" />
+          <div className="kz-faculty-topic-text">
+            <span className="kz-faculty-topic-label">SESSION TOPIC</span>
+            <h4 className="kz-faculty-topic-title" title={topic}>
+              {topic}
+            </h4>
           </div>
         </div>
 
-        {/* Flag + Country Badge */}
-        {country && (
-          <div className="kz-card-country-badge" title={`Country: ${country}`}>
-            {flag && <span className="kz-card-flag">{flag}</span>}
-            <span className="kz-card-country-name">{country}</span>
-          </div>
-        )}
+        <span className="kz-faculty-arrow-wrap" aria-hidden="true">
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </span>
       </div>
 
-      {/* 2. SPEAKER IDENTITY: NAME, ROLE, INSTITUTION */}
-      <div className="kz-card-identity">
-        <h3 className="kz-card-name" title={name}>
-          {name}
-        </h3>
-        <p className="kz-card-role">{role}</p>
-        <p className="kz-card-institute">{institute}</p>
+      {/* Horizontal Divider */}
+      <div className="kz-faculty-divider" aria-hidden="true" />
+
+      {/* 3. SESSIONS COUNT */}
+      <div className="kz-faculty-sessions-row">
+        <svg
+          className="kz-faculty-calendar-icon"
+          width="17"
+          height="17"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
+        </svg>
+        <span>{sessions}</span>
       </div>
 
-      {/* 3. SPECIALTY TAG PILLS */}
-      {tags && tags.length > 0 && (
-        <div className="kz-card-tags-row">
-          {tags.map((tagItem, idx) => (
-            <span key={idx} className="kz-card-specialty-pill">
-              {tagItem}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Divider */}
-      <div className="kz-card-soft-divider" aria-hidden="true" />
-
-      {/* 4. "SESSION TOPIC" BLOCK */}
-      {topic && (
-        <div className="kz-card-topic-block">
-          <span className="kz-card-topic-label">SESSION TOPIC</span>
-          <div className="kz-card-topic-row">
-            <div className="kz-card-mic-icon-disc" aria-hidden="true">
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                <line x1="12" y1="19" x2="12" y2="23" />
-                <line x1="8" y1="23" x2="16" y2="23" />
-              </svg>
-            </div>
-            <h4 className="kz-card-topic-title">{topic}</h4>
-            <span className="kz-card-topic-arrow" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12" />
-                <polyline points="12 5 19 12 12 19" />
-              </svg>
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* 5. SESSIONS & FEATURED ROW */}
-      <div className="kz-card-meta-bar">
-        {sessions && (
-          <div className="kz-card-sessions-item">
-            <svg
-              className="kz-card-cal-icon"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
-            </svg>
-            <span>{sessions}</span>
-          </div>
-        )}
-
-        <span className="kz-card-meta-separator" aria-hidden="true">|</span>
-
-        {tag && (
-          <div className="kz-card-featured-tag">
-            <span className="kz-card-star-icon" aria-hidden="true">★</span>
-            <span>{tag}</span>
-          </div>
-        )}
-      </div>
-
-      {/* 6. BIO PARAGRAPH */}
+      {/* 4. BIO PARAGRAPH */}
       {bio && (
-        <p className="kz-card-bio-paragraph">
+        <p className="kz-faculty-bio" title={bio}>
           {bio}
         </p>
       )}

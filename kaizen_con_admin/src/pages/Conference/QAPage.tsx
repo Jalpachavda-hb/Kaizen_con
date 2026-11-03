@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import { AdminPageContainer } from "../../components/common/AdminPageContainer";
+import { TablePagination } from "../../components/common/TablePagination";
 import { useToast } from "../../context/ToastContext";
 import {
   QA_WS_URL,
@@ -232,6 +233,19 @@ export default function QAPage() {
       return true;
     });
   }, [questions, statusFilter, categoryFilter, search]);
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, categoryFilter, search]);
+
+  const paginatedQuestions = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredQuestions.slice(startIndex, startIndex + pageSize);
+  }, [filteredQuestions, currentPage, pageSize]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -484,7 +498,7 @@ export default function QAPage() {
                   </td>
                 </tr>
               ) : (
-                filteredQuestions.map((q) => {
+                paginatedQuestions.map((q) => {
                   const isLoading = actionLoadingId === q.id;
 
                   return (
@@ -601,6 +615,19 @@ export default function QAPage() {
               )}
             </tbody>
           </table>
+
+          {/* Pagination Controls Bar */}
+          <TablePagination
+            currentPage={currentPage}
+            totalItems={filteredQuestions.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+            itemName="questions"
+          />
         </div>
       </AdminPageContainer>
 

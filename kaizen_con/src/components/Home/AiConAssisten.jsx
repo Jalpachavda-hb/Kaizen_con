@@ -1,154 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './AiConAssisten.css';
 import { askKnowledgeChat } from '../../Apipath';
 
-// Preset conversation data matching the theme & conference intelligence
-const PRESET_CONVERSATIONS = {
-  day2: {
+// Prompt suggestion chips that trigger live API queries
+const QUICK_QUESTIONS = [
+  {
     id: 'day2',
     label: 'What should I attend on Day 2?',
-    iconType: 'calendar',
-    userText: 'What should I attend on Day 2?',
-    userTime: '10:28',
-    aiText:
-      "On Day 2, I'd recommend starting with Dr. James Carter's keynote on AI Triage in Emergency Surgery at 09:00 in the Main Auditorium. From there, Dr. Maya Chen's live demonstration of Real-time AI Imaging at 11:30 in Hall B is one of the most anticipated sessions of the conference. If surgical data science interests you, Dr. Arjun Mehta's session on Surgeon Training in the Age of AI at 11:30 in Hall C is a strong choice.",
-    aiTime: '10:29',
-    sessions: [
-      {
-        time: '09:00 – 10:00',
-        title: 'AI Triage in Emergency Surgery',
-        venue: 'Main Auditorium',
-      },
-      {
-        time: '11:30 – 12:30',
-        title: 'Real-time AI Imaging (Live Demonstration)',
-        venue: 'Hall B',
-      },
-      {
-        time: '11:30 – 12:30',
-        title: 'Surgeon Training in the Age of AI',
-        venue: 'Hall C',
-      },
-    ],
+    query: 'What sessions should I attend on Day 2 of KAIZENCON 2027?',
   },
-  aiSurgery: {
+  {
     id: 'aiSurgery',
     label: 'Who is discussing AI in surgery?',
-    iconType: 'user',
-    userText: 'Who is discussing AI in surgery?',
-    userTime: '10:32',
-    aiText:
-      "Multiple world-class faculty are presenting clinical applications of AI in surgery. Dr. James Carter explores emergency surgery triage models, Dr. Arjun Mehta demonstrates AI surgical simulation in training, and Dr. Maya Chen will present live intraoperative tissue classification.",
-    aiTime: '10:33',
-    sessions: [
-      {
-        time: 'Day 1 · 14:00 – 15:00',
-        title: 'AI in General & Colorectal Surgery',
-        venue: 'Hall A',
-      },
-      {
-        time: 'Day 2 · 09:00 – 10:00',
-        title: 'AI Triage in Emergency Surgery',
-        venue: 'Main Auditorium',
-      },
-      {
-        time: 'Day 2 · 11:30 – 12:30',
-        title: 'Surgeon Training in the Age of AI',
-        venue: 'Hall C',
-      },
-    ],
+    query: 'Who are the faculty discussing AI and machine learning in surgery?',
   },
-  robotics: {
+  {
     id: 'robotics',
     label: 'Robotics vs laparoscopy sessions',
-    iconType: 'document',
-    userText: 'Robotics vs laparoscopy sessions',
-    userTime: '11:05',
-    aiText:
-      "We have dedicated head-to-head tracks comparing clinical outcomes, complication rates, and ergonomic health. Don't miss Dr. Nkechi Okafor's 10-year comparative analysis on Day 1 followed by the hands-on robotic console comparison.",
-    aiTime: '11:06',
-    sessions: [
-      {
-        time: 'Day 1 · 11:30 – 12:30',
-        title: 'Robotics vs Laparoscopy: A 10-Year Analysis',
-        venue: 'Hall A',
-      },
-      {
-        time: 'Day 2 · 14:00 – 15:00',
-        title: 'Ergonomic Longevity in Minimally Invasive Surgery',
-        venue: 'Hall B',
-      },
-      {
-        time: 'Day 3 · 10:00 – 11:00',
-        title: 'Cost-Benefit Economics of Robotic Adoption',
-        venue: 'Main Auditorium',
-      },
-    ],
+    query: 'Which sessions compare robotic surgery and laparoscopy?',
   },
-  drMaya: {
-    id: 'drMaya',
-    label: 'Tell me about Dr. Maya Chen',
-    iconType: 'user',
-    userText: 'Tell me about Dr. Maya Chen',
-    userTime: '11:15',
-    aiText:
-      "Dr. Maya Chen is an internationally recognized leader in surgical computer vision and intraoperative imaging. She serves as Chair of Surgical Informatics and is presenting her groundbreaking work on real-time sub-millimeter tumor boundary detection.",
-    aiTime: '11:16',
-    sessions: [
-      {
-        time: 'Day 2 · 11:30 – 12:30',
-        title: 'Real-time AI Imaging (Live Demonstration)',
-        venue: 'Hall B',
-      },
-      {
-        time: 'Day 2 · 15:30 – 16:30',
-        title: 'Workshop: Training Computer Vision Models',
-        venue: 'Workshop Lab 1',
-      },
-      {
-        time: 'Day 3 · 11:00 – 12:00',
-        title: 'Grand Faculty Panel on Autonomous Surgery',
-        venue: 'Main Auditorium',
-      },
-    ],
+  {
+    id: 'faculty',
+    label: 'Key faculty and keynote speakers',
+    query: 'Tell me about the distinguished faculty, chairs, and keynote speakers at KAIZENCON 2027.',
   },
-};
+];
 
 export default function AiConAssisten() {
-  const [activePreset, setActivePreset] = useState('day2');
-  const [currentChat, setCurrentChat] = useState(PRESET_CONVERSATIONS.day2);
+  const [activePromptId, setActivePromptId] = useState('');
+  const [currentChat, setCurrentChat] = useState({
+    userText: 'Hello! How can the KAIZENCON AI Assistant help me?',
+    userTime: '10:00 AM',
+    aiText:
+      'Welcome to the KAIZENCON 2027 Intelligence Assistant! I am trained on the complete scientific programme, faculty profiles, and schedule timings. Choose any suggested question above or type your question below.',
+    aiTime: '10:00 AM',
+    sources: [],
+    sessions: [],
+  });
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const chatFeedRef = React.useRef(null);
+  const chatFeedRef = useRef(null);
 
-  // Switch preset conversation
-  const handleSelectPreset = (key) => {
-    setActivePreset(key);
-    setIsTyping(true);
-    setTimeout(() => {
-      setCurrentChat(PRESET_CONVERSATIONS[key]);
-      setIsTyping(false);
-      if (chatFeedRef.current) {
-        chatFeedRef.current.scrollTop = 0;
-      }
-    }, 240);
-  };
+  // Execute a live query against the API
+  const executeChatQuery = async (userQuery, promptId = '') => {
+    if (!userQuery || !userQuery.trim() || isTyping) return;
 
-  // Handle custom query submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!inputValue.trim() || isTyping) return;
-
-    const userQuery = inputValue.trim();
+    const trimmedQuery = userQuery.trim();
+    setActivePromptId(promptId);
     setInputValue('');
-    setActivePreset('');
     setIsTyping(true);
 
     const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     setCurrentChat({
-      userText: userQuery,
+      userText: trimmedQuery,
       userTime: now,
       aiText: '',
       aiTime: '',
@@ -157,33 +63,45 @@ export default function AiConAssisten() {
     });
 
     try {
-      const data = await askKnowledgeChat(userQuery);
+      const data = await askKnowledgeChat(trimmedQuery);
       const reply =
         data?.answer ||
-        (Array.isArray(data?.results) && (data.results[0]?.answer || data.results[0]?.text || data.results[0]?.response)) ||
+        (Array.isArray(data?.results) &&
+          (data.results[0]?.answer || data.results[0]?.text || data.results[0]?.response)) ||
         data?.result?.answer ||
-        "I couldn't find this information in the available knowledge base.";
+        "I couldn't find this information in the available knowledge base. Please try another question.";
+
       const sources = Array.isArray(data?.sources)
         ? data.sources
-        : (Array.isArray(data?.results?.[0]?.sources) ? data.results[0].sources : []);
+        : Array.isArray(data?.results?.[0]?.sources)
+        ? data.results[0].sources
+        : [];
+
       const sessions = Array.isArray(data?.sessions)
         ? data.sessions
-        : (Array.isArray(data?.results?.[0]?.sessions) ? data.results[0].sessions : []);
+        : Array.isArray(data?.results?.[0]?.sessions)
+        ? data.results[0].sessions
+        : [];
 
       setCurrentChat({
-        userText: userQuery,
+        userText: trimmedQuery,
         userTime: now,
         aiText: reply,
         aiTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        sources: sources,
-        sessions: sessions,
+        sources,
+        sessions,
       });
+
+      if (chatFeedRef.current) {
+        chatFeedRef.current.scrollTop = chatFeedRef.current.scrollHeight;
+      }
     } catch (error) {
       console.error('Error in chatbot API call:', error);
       setCurrentChat({
-        userText: userQuery,
+        userText: trimmedQuery,
         userTime: now,
-        aiText: "I'm having trouble connecting to the conference intelligence assistant right now. Please try again shortly.",
+        aiText:
+          "I'm having trouble connecting to the conference intelligence assistant right now. Please try again shortly.",
         aiTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         sources: [],
         sessions: [],
@@ -193,9 +111,16 @@ export default function AiConAssisten() {
     }
   };
 
+  // Handle custom query submission from text input
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!inputValue.trim()) return;
+    executeChatQuery(inputValue, '');
+  };
+
   return (
     <section className="kz-assistant-section" id="ai-assistant">
-      {/* Background Decorative Art - Themed */}
+      {/* Background Decorative Art */}
       <div className="kz-assistant-bg-decor" aria-hidden="true">
         <div className="kz-assistant-dot-grid" />
         <svg
@@ -226,211 +151,106 @@ export default function AiConAssisten() {
       </div>
 
       <div className="kz-assistant-container">
-        {/* ====================================================
-            HEADER: AI CONFERENCE ASSISTANT — & 2-LINE TITLE
-            ==================================================== */}
+        {/* HEADER: AI CONFERENCE ASSISTANT */}
         <div className="kz-assistant-header">
           <div className="kz-assistant-tag-wrap">
             <span className="kz-assistant-badge-title">AI CONFERENCE ASSISTANT</span>
             <span className="kz-assistant-tag-line" aria-hidden="true" />
           </div>
 
-          {/* 2-Line Headline with Theme Colors */}
           <h2 className="kz-assistant-title">
-            <span className="kz-title-line-dark">Get instant answers</span>
+            <span className="kz-title-line-dark">Get instant answers </span>
             <span className="kz-title-line-magenta">about KAIZENCON 2027</span>
           </h2>
 
-          {/* Quick Prompt Filter Buttons Row */}
+          {/* Quick Prompt Filter Buttons Row - Triggers Live API */}
           <div className="kz-assistant-pills-row" role="tablist" aria-label="Sample questions">
-            {/* Pill 1 */}
-            <button
-              type="button"
-              className={`kz-assistant-pill-btn ${activePreset === 'day2' ? 'active' : ''}`}
-              onClick={() => handleSelectPreset('day2')}
-              role="tab"
-              aria-selected={activePreset === 'day2'}
-            >
-              <svg
-                className="kz-assistant-pill-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            {QUICK_QUESTIONS.map((q) => (
+              <button
+                key={q.id}
+                type="button"
+                className={`kz-assistant-pill-btn ${activePromptId === q.id ? 'active' : ''}`}
+                onClick={() => executeChatQuery(q.query, q.id)}
+                role="tab"
+                aria-selected={activePromptId === q.id}
+                disabled={isTyping}
               >
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-              <span>What should I attend on Day 2?</span>
-            </button>
-
-            {/* Pill 2 */}
-            <button
-              type="button"
-              className={`kz-assistant-pill-btn ${activePreset === 'aiSurgery' ? 'active' : ''}`}
-              onClick={() => handleSelectPreset('aiSurgery')}
-              role="tab"
-              aria-selected={activePreset === 'aiSurgery'}
-            >
-              <svg
-                className="kz-assistant-pill-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-              <span>Who is discussing AI in surgery?</span>
-            </button>
-
-            {/* Pill 3 */}
-            <button
-              type="button"
-              className={`kz-assistant-pill-btn ${activePreset === 'robotics' ? 'active' : ''}`}
-              onClick={() => handleSelectPreset('robotics')}
-              role="tab"
-              aria-selected={activePreset === 'robotics'}
-            >
-              <svg
-                className="kz-assistant-pill-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-                <polyline points="10 9 9 9 8 9" />
-              </svg>
-              <span>Robotics vs laparoscopy sessions</span>
-            </button>
-
-            {/* Pill 4 */}
-            <button
-              type="button"
-              className={`kz-assistant-pill-btn ${activePreset === 'drMaya' ? 'active' : ''}`}
-              onClick={() => handleSelectPreset('drMaya')}
-              role="tab"
-              aria-selected={activePreset === 'drMaya'}
-            >
-              <svg
-                className="kz-assistant-pill-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-              <span>Tell me about Dr. Maya Chen</span>
-            </button>
+                <svg
+                  className="kz-assistant-pill-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="16" x2="12" y2="12" />
+                  <line x1="12" y1="8" x2="12.01" y2="8" />
+                </svg>
+                <span>{q.label}</span>
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* ====================================================
-            MAIN WORKSPACE: CHAT SIMULATOR + CONTINUOUS TIMELINE
-            ==================================================== */}
+        {/* MAIN WORKSPACE: CHAT SIMULATOR + CONTINUOUS TIMELINE */}
         <div className="kz-assistant-workspace">
           {/* LEFT COLUMN: CHAT SIMULATOR CARD */}
           <div className="kz-chat-wrapper">
             {/* Chat Top Header */}
             <div className="kz-chat-header">
               <div className="kz-chat-header-left">
-                {/* AI Sparkle Icon Avatar */}
                 <div className="kz-chat-ai-badge" aria-hidden="true">
-                  <svg
-                    width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M10 2C10 5.866 6.866 9 3 9C6.866 9 10 12.134 10 16C10 12.134 13.134 9 17 9C13.134 9 10 5.866 10 2Z" />
                     <path d="M18 15C18 16.657 16.657 18 15 18C16.657 18 18 19.343 18 21C18 19.343 19.343 18 21 18C19.343 18 18 16.657 18 15Z" />
                   </svg>
                 </div>
                 <div className="kz-chat-ai-info">
                   <span className="kz-chat-ai-name">KAI Assistant</span>
-                  <span className="kz-chat-ai-status">
-                    <span className="kz-chat-status-dot" />
-                    Conference Assistant · Online
-                  </span>
                 </div>
               </div>
 
               <div className="kz-chat-header-right">
-                {/* Audio Waveform Equalizer Animation - Light & Luminous */}
                 <div className="kz-chat-soundwaves" aria-label="AI Audio Waveform">
                   <span /><span /><span /><span /><span />
                   <span /><span /><span /><span /><span />
                   <span /><span /><span /><span /><span />
                 </div>
-                <button
-                  type="button"
-                  className="kz-chat-menu-btn"
-                  aria-label="More options"
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <circle cx="12" cy="5" r="2" />
-                    <circle cx="12" cy="12" r="2" />
-                    <circle cx="12" cy="19" r="2" />
-                  </svg>
-                </button>
               </div>
             </div>
 
             {/* Chat Conversation Feed */}
             <div className="kz-chat-feed" ref={chatFeedRef}>
               {/* User Bubble (Right) */}
-              <div className="kz-user-msg-group">
-                <div className="kz-user-bubble">
-                  <p className="kz-user-text">{currentChat.userText}</p>
-                  <div className="kz-user-meta">
-                    <span>{currentChat.userTime}</span>
-                    <svg
-                      className="kz-user-checks"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M18 6L7 17l-5-5" />
-                      <path d="M22 10l-7.5 7.5L13 16" />
-                    </svg>
+              {currentChat.userText && (
+                <div className="kz-user-msg-group">
+                  <div className="kz-user-bubble">
+                    <p className="kz-user-text">{currentChat.userText}</p>
+                    <div className="kz-user-meta">
+                      <span>{currentChat.userTime}</span>
+                      <svg
+                        className="kz-user-checks"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M18 6L7 17l-5-5" />
+                        <path d="M22 10l-7.5 7.5L13 16" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* AI Bubble (Left) */}
               <div className="kz-ai-msg-group">
                 <div className="kz-ai-avatar" aria-hidden="true">
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M10 2C10 5.866 6.866 9 3 9C6.866 9 10 12.134 10 16C10 12.134 13.134 9 17 9C13.134 9 10 5.866 10 2Z" />
                     <path d="M18 15C18 16.657 16.657 18 15 18C16.657 18 18 19.343 18 21C18 19.343 19.343 18 21 18C19.343 18 18 16.657 18 15Z" />
                   </svg>
@@ -444,6 +264,7 @@ export default function AiConAssisten() {
                   ) : (
                     <>
                       <p className="kz-ai-text">{currentChat.aiText}</p>
+
                       {currentChat.sources && currentChat.sources.length > 0 && (
                         <div className="kz-chat-sources-container">
                           <span className="kz-chat-sources-label">Sources:</span>
@@ -458,9 +279,10 @@ export default function AiConAssisten() {
                           </div>
                         </div>
                       )}
+
                       <span className="kz-ai-time">{currentChat.aiTime}</span>
 
-                      {/* 3 Recommended Session Cards - 3 Horizontal Rows */}
+                      {/* Dynamic Recommended Session Cards from Live API */}
                       {currentChat.sessions && currentChat.sessions.length > 0 && (
                         <div className="kz-session-cards-grid">
                           {currentChat.sessions.map((session, index) => (
@@ -487,37 +309,43 @@ export default function AiConAssisten() {
                                 <div className="kz-session-main">
                                   <h4 className="kz-session-title">{session.title}</h4>
                                   <div className="kz-session-meta">
-                                    <span className="kz-session-time">
-                                      <svg
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                      >
-                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                                        <line x1="16" y1="2" x2="16" y2="6" />
-                                        <line x1="8" y1="2" x2="8" y2="6" />
-                                        <line x1="3" y1="10" x2="21" y2="10" />
-                                      </svg>
-                                      <span>{session.time}</span>
-                                    </span>
-                                    <span className="kz-session-divider" aria-hidden="true">•</span>
-                                    <span className="kz-session-venue">
-                                      <svg
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                      >
-                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                                        <circle cx="12" cy="10" r="3" />
-                                      </svg>
-                                      <span>{session.venue}</span>
-                                    </span>
+                                    {session.time && (
+                                      <span className="kz-session-time">
+                                        <svg
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                        >
+                                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                          <line x1="16" y1="2" x2="16" y2="6" />
+                                          <line x1="8" y1="2" x2="8" y2="6" />
+                                          <line x1="3" y1="10" x2="21" y2="10" />
+                                        </svg>
+                                        <span>{session.time}</span>
+                                      </span>
+                                    )}
+                                    {session.venue && (
+                                      <>
+                                        <span className="kz-session-divider" aria-hidden="true">•</span>
+                                        <span className="kz-session-venue">
+                                          <svg
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          >
+                                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                            <circle cx="12" cy="10" r="3" />
+                                          </svg>
+                                          <span>{session.venue}</span>
+                                        </span>
+                                      </>
+                                    )}
                                   </div>
                                 </div>
                               </div>
@@ -549,26 +377,6 @@ export default function AiConAssisten() {
             {/* Chat Bottom Input Bar */}
             <div className="kz-chat-input-bar">
               <form className="kz-chat-input-form" onSubmit={handleSubmit}>
-                <button
-                  type="button"
-                  className="kz-chat-attach-btn"
-                  title="Attach session context"
-                  aria-label="Attach file"
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
-                  </svg>
-                </button>
-
                 <input
                   type="text"
                   className="kz-chat-text-input"
@@ -576,6 +384,7 @@ export default function AiConAssisten() {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   aria-label="Ask about sessions, faculty, topics"
+                  disabled={isTyping}
                 />
 
                 <button
@@ -583,13 +392,9 @@ export default function AiConAssisten() {
                   className="kz-chat-send-btn"
                   title="Send message"
                   aria-label="Send message"
+                  disabled={isTyping || !inputValue.trim()}
                 >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                   </svg>
                 </button>
@@ -599,7 +404,6 @@ export default function AiConAssisten() {
 
           {/* RIGHT COLUMN: CONTINUOUS UNBROKEN TIMELINE & INTELLIGENCE */}
           <div className="kz-intel-layout">
-            {/* Top AI Microchip Node */}
             <div className="kz-timeline-chip-node" aria-hidden="true" title="AI Core">
               <svg
                 width="22"
@@ -624,36 +428,45 @@ export default function AiConAssisten() {
               </svg>
             </div>
 
-            {/* ONE CONTINUOUS UNBROKEN VERTICAL LINE DIRECTLY CONNECTED */}
             <div className="kz-timeline-continuous-track" aria-hidden="true" />
 
-            {/* Header Content */}
             <div className="kz-intel-header-content">
               <span className="kz-intel-badge">POWERED BY AI</span>
 
               <h3 className="kz-intel-title">
-                <span className="kz-title-line-dark">Ask anything.</span>
+                <span className="kz-title-line-dark">Ask anything. </span>
                 <span className="kz-title-line-magenta">Get conference intelligence.</span>
               </h3>
 
               <p className="kz-intel-desc">
                 The KAIZENCON AI is trained on the complete programme — every session, faculty
-                biography, abstract, and topic. It helps you navigate, find the right
-                faculty, and make the most of three days.
+                biography, abstract, and topic. It helps you navigate, find the right faculty, and
+                make the most of three days.
               </p>
             </div>
 
-            {/* 3 Action Cards with Perfectly Centered Horizontal Dots */}
+            {/* 3 Action Cards - Trigger Live AI Assistant Queries */}
             <div className="kz-intel-cards-list">
               {/* Card 1: Session discovery */}
               <div className="kz-intel-card-wrapper">
                 <div className="kz-card-timeline-dot" aria-hidden="true" />
                 <div
                   className="kz-intel-card"
-                  onClick={() => handleSelectPreset('day2')}
+                  onClick={() =>
+                    executeChatQuery(
+                      'What are the key scientific sessions and tracks across the 3 days of KAIZENCON 2027?',
+                      'discovery'
+                    )
+                  }
                   role="button"
                   tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSelectPreset('day2')}
+                  onKeyDown={(e) =>
+                    e.key === 'Enter' &&
+                    executeChatQuery(
+                      'What are the key scientific sessions and tracks across the 3 days of KAIZENCON 2027?',
+                      'discovery'
+                    )
+                  }
                 >
                   <div className="kz-intel-card-left">
                     <div className="kz-intel-icon-box">
@@ -699,10 +512,21 @@ export default function AiConAssisten() {
                 <div className="kz-card-timeline-dot" aria-hidden="true" />
                 <div
                   className="kz-intel-card"
-                  onClick={() => handleSelectPreset('drMaya')}
+                  onClick={() =>
+                    executeChatQuery(
+                      'Who are the distinguished faculty members, their backgrounds, and what sessions are they leading?',
+                      'faculty'
+                    )
+                  }
                   role="button"
                   tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSelectPreset('drMaya')}
+                  onKeyDown={(e) =>
+                    e.key === 'Enter' &&
+                    executeChatQuery(
+                      'Who are the distinguished faculty members, their backgrounds, and what sessions are they leading?',
+                      'faculty'
+                    )
+                  }
                 >
                   <div className="kz-intel-card-left">
                     <div className="kz-intel-icon-box">
@@ -750,10 +574,21 @@ export default function AiConAssisten() {
                 <div className="kz-card-timeline-dot" aria-hidden="true" />
                 <div
                   className="kz-intel-card"
-                  onClick={() => handleSelectPreset('day2')}
+                  onClick={() =>
+                    executeChatQuery(
+                      'Recommend a comprehensive schedule itinerary for Day 2 of KAIZENCON 2027.',
+                      'day2'
+                    )
+                  }
                   role="button"
                   tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSelectPreset('day2')}
+                  onKeyDown={(e) =>
+                    e.key === 'Enter' &&
+                    executeChatQuery(
+                      'Recommend a comprehensive schedule itinerary for Day 2 of KAIZENCON 2027.',
+                      'day2'
+                    )
+                  }
                 >
                   <div className="kz-intel-card-left">
                     <div className="kz-intel-icon-box">
@@ -798,7 +633,6 @@ export default function AiConAssisten() {
               </div>
             </div>
 
-            {/* Disclaimer text */}
             <p className="kz-intel-disclaimer">
               All responses are based on approved KAIZENCON conference content and do not
               constitute clinical advice.

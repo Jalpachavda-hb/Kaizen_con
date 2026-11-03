@@ -25,6 +25,7 @@ import GroupsPage from "./pages/System/GroupsPage";
 import SendToEmailPage from "./pages/AgentSettings/SendToEmailPage";
 import CampaignsPage from "./pages/AgentSettings/CampaignsPage";
 import CreateCampaignPage from "./pages/AgentSettings/CreateCampaignPage";
+import CampaignLogsPage from "./pages/AgentSettings/CampaignLogsPage";
 import TemplatesPage from "./pages/AgentSettings/TemplatesPage";
 import PollsPage from "./pages/Conference/PollsPage";
 import QAPage from "./pages/Conference/QAPage";
@@ -67,10 +68,14 @@ export default function App() {
 
               <Route path="/campaigns" element={<CampaignsPage />} />
               <Route path="/campaigns/create" element={<CreateCampaignPage />} />
+              <Route path="/campaigns/:id/logs" element={<CampaignLogsPage />} />
+              <Route path="/campaigns/logs/:id" element={<CampaignLogsPage />} />
               <Route path="/conference/campaigns" element={<CampaignsPage />} />
               <Route path="/conference/campaigns/create" element={<CreateCampaignPage />} />
+              <Route path="/conference/campaigns/:id/logs" element={<CampaignLogsPage />} />
               <Route path="/agent-settings/campaigns" element={<CampaignsPage />} />
               <Route path="/agent-settings/campaigns/create" element={<CreateCampaignPage />} />
+              <Route path="/agent-settings/campaigns/:id/logs" element={<CampaignLogsPage />} />
 
               <Route path="/templates" element={<TemplatesPage />} />
               <Route path="/conference/templates" element={<TemplatesPage />} />

@@ -1,16 +1,8 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import SpeakerCard from '../components/Home/SpeakerCard';
-import { getSpeakers, getImageUrl } from '../Apipath';
+import { getSpeakers, getSchedules, getImageUrl } from '../Apipath';
 import './SpeakersPage.css';
-
-// Default fallback institutions if dynamic data is empty
-const DEFAULT_INSTITUTIONS = [
-  { name: 'Global Institute of Surgical Innovation', country: 'India', count: '4 faculty members' },
-  { name: 'International Centre for Robotic Surgery', country: 'France', count: '3 faculty members' },
-  { name: 'Future Health Research Institute', country: 'Nigeria', count: '2 faculty members' },
-  { name: 'Centre for Intelligent Surgery', country: 'Singapore', count: '2 faculty members' },
-];
 
 export default function SpeakersPage() {
   const [speakers, setSpeakers] = useState([]);
@@ -18,17 +10,41 @@ export default function SpeakersPage() {
   const [error, setError] = useState(null);
   const [activeModalSpeaker, setActiveModalSpeaker] = useState(null);
 
-  // Fetch dynamic speakers from API
+  // Fetch dynamic speakers and schedules from API
   const fetchSpeakersData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await getSpeakers();
 
-      // Support either { results: [...] } or direct array
-      const rawList = Array.isArray(res) ? res : (res?.results || []);
+      const [speakersRes, schedulesRes] = await Promise.allSettled([
+        getSpeakers(),
+        getSchedules(),
+      ]);
 
-      const mappedList = rawList.map((item, index) => {
+      const rawSpeakers =
+        speakersRes.status === 'fulfilled'
+          ? Array.isArray(speakersRes.value?.results)
+            ? speakersRes.value.results
+            : Array.isArray(speakersRes.value)
+            ? speakersRes.value
+            : []
+          : [];
+
+      const rawSchedules =
+        schedulesRes.status === 'fulfilled'
+          ? Array.isArray(schedulesRes.value?.results)
+            ? schedulesRes.value.results
+            : Array.isArray(schedulesRes.value)
+            ? schedulesRes.value
+            : []
+          : [];
+
+      // Filter active and non-deleted faculty
+      const activeFaculty = rawSpeakers.filter(
+        (spk) => spk.is_active !== false && !spk.is_deleted
+      );
+
+      const mappedList = activeFaculty.map((item, index) => {
         const firstName = item.first_name || '';
         const lastName = item.last_name || '';
         const fullName = `${firstName} ${lastName}`.trim() || 'Distinguished Faculty';
@@ -43,23 +59,31 @@ export default function SpeakersPage() {
             .slice(0, 2)
             .join('')
             .toUpperCase() ||
-          'SC';
+          'FC';
 
-        const role = item.designation || 'Surgeon / Specialist';
+        const role = item.designation || 'Faculty Specialist';
         const institution = item.institution || item.institute || '';
         const speciality = item.speciality || '';
-        const bio = item.bio || '';
-        const description = item.description || item.bio || '';
-        const title = item.title || item.topic || 'Clinical Excellence & Surgical Innovation';
+        const bio = item.bio || item.description || '';
         const imageUrl = item.profile_image_url ? getImageUrl(item.profile_image_url) : '';
 
-        // Format session timing
-        let sessions = '1 session';
-        if (item.start_time && item.end_time) {
-          const start = item.start_time.slice(0, 5);
-          const end = item.end_time.slice(0, 5);
-          sessions = `${start} - ${end}`;
-        }
+        // Match real schedules for this faculty
+        const speakerSchedules = rawSchedules.filter((sch) =>
+          Array.isArray(sch.speakers) &&
+          sch.speakers.some((s) => s.id === item.id || s.speaker_id === item.speaker_id)
+        );
+
+        const realTopic =
+          speakerSchedules[0]?.title ||
+          item.topic ||
+          (speciality ? `${speciality} & Clinical Advances` : 'Clinical Excellence & Surgical Innovation');
+
+        const sessionCount = speakerSchedules.length;
+        const sessionsText = sessionCount > 0
+          ? `${sessionCount} Session${sessionCount > 1 ? 's' : ''}`
+          : '1 Session';
+
+        const primarySchedule = speakerSchedules[0] || null;
 
         return {
           id: item.id || item.speaker_id || `spk-${index + 1}`,
@@ -72,24 +96,17 @@ export default function SpeakersPage() {
           institute: institution,
           institution,
           speciality,
-          tags: speciality ? [speciality] : [],
           bio,
-          description,
-          fullBio: description,
-          title,
-          topic: title,
+          topic: realTopic,
           image: imageUrl,
-          profile_image_url: imageUrl,
           initials,
-          sessions,
-          tag: item.session_status === 'scheduled' ? 'FEATURED' : 'FACULTY',
-          eventDate: item.event_date || '',
-          startTime: item.start_time || '',
-          endTime: item.end_time || '',
-          venue: item.venue && item.venue !== 'string' ? item.venue : '',
-          room: item.room && item.room !== 'string' ? item.room : '',
-          country: item.venue && item.venue !== 'string' ? item.venue : 'International',
-          isHighlighted: index === 0,
+          sessions: sessionsText,
+          schedules: speakerSchedules,
+          eventDate: primarySchedule?.event_date || item.event_date || '',
+          startTime: primarySchedule?.start_time || item.start_time || '',
+          endTime: primarySchedule?.end_time || item.end_time || '',
+          venue: primarySchedule?.venue || (item.venue && item.venue !== 'string' ? item.venue : ''),
+          room: primarySchedule?.room || (item.room && item.room !== 'string' ? item.room : ''),
         };
       });
 
@@ -105,26 +122,6 @@ export default function SpeakersPage() {
   useEffect(() => {
     fetchSpeakersData();
   }, [fetchSpeakersData]);
-
-  // Derived dynamic institutions from speakers list
-  const dynamicInstitutions = useMemo(() => {
-    if (!speakers || speakers.length === 0) return DEFAULT_INSTITUTIONS;
-    const map = new Map();
-    speakers.forEach((s) => {
-      const inst = s.institution?.trim();
-      if (inst && inst.toLowerCase() !== 'string') {
-        map.set(inst, (map.get(inst) || 0) + 1);
-      }
-    });
-
-    if (map.size === 0) return DEFAULT_INSTITUTIONS;  
-
-    return Array.from(map.entries()).map(([name, count]) => ({
-      name,
-      country: 'Partner Institution',
-      count: `${count} faculty member${count > 1 ? 's' : ''}`,
-    }));
-  }, [speakers]);
 
   return (
     <div className="kz-speakers-page-root">
@@ -144,9 +141,6 @@ export default function SpeakersPage() {
             Leading surgeons, clinicians, researchers, and technology experts
             united by a shared commitment to advancing surgical intelligence and clinical excellence.
           </p>
-
-      
-         
         </div>
       </section>
 
@@ -158,7 +152,7 @@ export default function SpeakersPage() {
           {/* Section Header */}
           <div className="kz-spk-section-header">
             <div className="kz-spk-pill-badge-wrap">
-              <span className="kz-spk-pill-badge">FEATURED FACULTY</span>
+              <span className="kz-spk-pill-badge">FACULTY</span>
             </div>
             <h2 className="kz-spk-section-title">Keynote &amp; featured faculty</h2>
           </div>
@@ -260,22 +254,14 @@ export default function SpeakersPage() {
                   image={spk.image}
                   name={spk.name}
                   role={spk.role}
-                  institute={spk.institution}
-                  country={spk.country}
-                  tags={spk.tags}
-                  topic={spk.title}
+                  topic={spk.topic}
                   sessions={spk.sessions}
-                  tag={spk.tag}
                   bio={spk.bio}
-                  isHighlighted={spk.isHighlighted}
                   onViewDetails={() => setActiveModalSpeaker(spk)}
                 />
               ))
             )}
           </div>
-
-          
-     
 
           {/* Cross-page Navigation Banner */}
           <section className="kz-spk-bottom-cta-banner" aria-label="Connect with faculty and secretariat">
@@ -293,7 +279,6 @@ export default function SpeakersPage() {
                     <polyline points="12 5 19 12 12 19" />
                   </svg>
                 </Link>
-                
               </div>
             </div>
           </section>
@@ -301,7 +286,7 @@ export default function SpeakersPage() {
       </section>
 
       {/* ----------------------------------------------------
-          6. SPEAKER DETAILS MODAL (Full dynamic speaker data)
+          6. SPEAKER DETAILS MODAL (Real dynamic faculty data)
           ---------------------------------------------------- */}
       {activeModalSpeaker && (
         <div
@@ -331,83 +316,62 @@ export default function SpeakersPage() {
             {/* Modal Header */}
             <div className="kz-spk-modal-header">
               <div
-                className="kz-card-avatar-ring"
-                style={{ width: '68px', height: '68px', flexShrink: 0 }}
+                className="kz-faculty-avatar-ring"
+                style={{ width: '70px', height: '70px', minWidth: '70px' }}
               >
-                <div
-                  className="kz-card-avatar-disc"
-                  style={{ fontSize: '1.4rem', width: '68px', height: '68px', overflow: 'hidden' }}
-                >
-                  {activeModalSpeaker.image ? (
-                    <img
-                      src={activeModalSpeaker.image}
-                      alt={activeModalSpeaker.name}
-                      style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <span>{activeModalSpeaker.initials}</span>
-                  )}
-                </div>
+                {activeModalSpeaker.image ? (
+                  <img
+                    src={activeModalSpeaker.image}
+                    alt={activeModalSpeaker.name}
+                    className="kz-faculty-avatar-img"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="kz-faculty-avatar-fallback" style={{ fontSize: '1.4rem' }}>
+                    {activeModalSpeaker.initials}
+                  </div>
+                )}
               </div>
               <div className="kz-spk-modal-title-wrap">
-                <div className="kz-spk-modal-tags">
-                  {activeModalSpeaker.speciality && (
-                    <span className="kz-card-country-badge" style={{ backgroundColor: '#FDF2F8', color: '#B63473' }}>
-                      🔬 {activeModalSpeaker.speciality}
-                    </span>
-                  )}
-                  <span className="kz-card-featured-tag">
-                    ★ {activeModalSpeaker.tag}
-                  </span>
-                </div>
                 <h3 id="modal-speaker-name" className="kz-spk-modal-name">
                   {activeModalSpeaker.name}
                 </h3>
                 <p className="kz-spk-modal-role">{activeModalSpeaker.role}</p>
-                <p className="kz-spk-modal-institute">
-                  {activeModalSpeaker.institution || activeModalSpeaker.institute}
-                </p>
+                {activeModalSpeaker.institution && (
+                  <p className="kz-spk-modal-institute">
+                    {activeModalSpeaker.institution}
+                  </p>
+                )}
               </div>
             </div>
-
-            {/* Specialty / Tags */}
-            {activeModalSpeaker.tags && activeModalSpeaker.tags.length > 0 && (
-              <div className="kz-card-tags-row" style={{ marginTop: '8px' }}>
-                {activeModalSpeaker.tags.map((t, idx) => (
-                  <span key={idx} className="kz-card-specialty-pill">
-                    {t}
-                  </span>
-                ))}
-              </div>
-            )}
 
             <div className="kz-spk-modal-divider" />
 
             {/* Title / Topic */}
-            {activeModalSpeaker.title && (
+            {activeModalSpeaker.topic && (
               <div className="kz-spk-modal-section">
-                <span className="kz-card-topic-label">SESSION TOPIC</span>
-                <h4 className="kz-spk-modal-topic">{activeModalSpeaker.title}</h4>
+                <span className="kz-faculty-topic-label">SESSION TOPIC</span>
+                <h4 className="kz-spk-modal-topic">{activeModalSpeaker.topic}</h4>
               </div>
             )}
 
             {/* Description / Bio */}
-            {(activeModalSpeaker.description || activeModalSpeaker.bio) && (
+            {activeModalSpeaker.bio && (
               <div className="kz-spk-modal-section">
-                <span className="kz-card-topic-label">FACULTY PROFILE &amp; CLINICAL FOCUS</span>
+                <span className="kz-faculty-topic-label">FACULTY PROFILE</span>
                 <p className="kz-spk-modal-bio">
-                  {activeModalSpeaker.description || activeModalSpeaker.bio}
+                  {activeModalSpeaker.bio}
                 </p>
               </div>
             )}
 
             {/* Session Info & Footer */}
             <div className="kz-spk-modal-footer">
-              <div className="kz-card-sessions-item">
+              <div className="kz-faculty-sessions-row" style={{ margin: 0 }}>
                 <svg
+                  className="kz-faculty-calendar-icon"
                   width="16"
                   height="16"
                   viewBox="0 0 24 24"

@@ -1,0 +1,504 @@
+/* ==========================================================================
+   KaizenCon 2027 Welcome Message Section
+   Wide Presentation Card with Title Outside the Box
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Section Background & Outer Container
+   -------------------------------------------------------------------------- */
+.kz-pw-section {
+  width: 100%;
+  background-color: #fbf9fb;
+  padding: 56px 24px 68px;
+  position: relative;
+  box-sizing: border-box;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.kz-pw-container {
+  max-width: 1420px;
+  margin: 0 auto;
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   2. Top Eyebrow & Title Header (Outside the Card Box)
+   -------------------------------------------------------------------------- */
+.kz-pw-header {
+  text-align: center;
+  margin-bottom: 34px;
+}
+
+.kz-pw-eyebrow-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.kz-pw-eyebrow-line {
+  display: inline-block;
+  width: 50px;
+  height: 1px;
+  background-color: #aa2d7b;
+  opacity: 0.6;
+}
+
+.kz-pw-eyebrow-text {
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #aa2d7b;
+  text-transform: uppercase;
+}
+
+.kz-pw-title {
+  font-size: clamp(30px, 3.2vw, 42px);
+  font-weight: 800;
+  color: #551d5c;
+  line-height: 1.2;
+  letter-spacing: -0.4px;
+  margin: 0 0 10px 0;
+}
+
+.kz-pw-highlight-word {
+  color: #aa2d7b;
+}
+
+.kz-pw-title-bar {
+  width: 52px;
+  height: 3.5px;
+  background-color: #aa2d7b;
+  border-radius: 2px;
+  margin: 0 auto;
+}
+
+/* --------------------------------------------------------------------------
+   3. Main Framed Presentation Card (Wide Layout)
+   -------------------------------------------------------------------------- */
+.kz-pw-card {
+  background: #ffffff;
+  border-radius: 22px;
+  border: 1px solid rgba(85, 29, 92, 0.09);
+  box-shadow: 0 12px 46px rgba(85, 29, 92, 0.05);
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+}
+
+/* --------------------------------------------------------------------------
+   4. Left Column: Doctor Portrait (Larger, Clean Grounded Photo)
+   -------------------------------------------------------------------------- */
+.kz-pw-left-col {
+  flex: 0 0 380px;
+  width: 380px;
+  max-width: 380px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  position: relative;
+  line-height: 0;
+  margin-bottom: 0;
+  box-sizing: border-box;
+  background-color: #ffffff;
+}
+
+.kz-pw-photo-wrapper {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  line-height: 0;
+  box-sizing: border-box;
+}
+
+.kz-pw-doctor-img {
+  width: 100%;
+  height: auto;
+  max-height: 580px;
+  display: block;
+  vertical-align: bottom;
+  margin-bottom: 0;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+/* --------------------------------------------------------------------------
+   5. Vertical Divider Line between Columns
+   -------------------------------------------------------------------------- */
+.kz-pw-vertical-divider {
+  width: 1px;
+  background-color: #e8dde8;
+  margin: 36px 0;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   6. Right Column: Letter Content
+   -------------------------------------------------------------------------- */
+.kz-pw-right-col {
+  flex: 1;
+  padding: 38px 48px 36px 36px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* Greeting */
+.kz-pw-greeting {
+  font-size: 25px;
+  font-weight: 800;
+  color: #551d5c;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.2px;
+  line-height: 1.25;
+}
+
+/* Highlighted Lead Event Pill Box with Calendar Icon */
+.kz-pw-event-pill {
+  background-color: #fdf4f8;
+  border: 1px solid rgba(170, 45, 123, 0.12);
+  border-radius: 12px;
+  padding: 13px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+
+.kz-pw-event-pill-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kz-pw-event-pill-text {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: #292333;
+  margin: 0;
+}
+
+.kz-pw-highlight-detail {
+  color: #aa2d7b;
+  font-weight: 700;
+}
+
+/* Body Paragraphs */
+.kz-pw-paragraphs {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin-bottom: 16px;
+}
+
+.kz-pw-para {
+  font-size: 14.5px;
+  line-height: 1.62;
+  color: #374151;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   7. Conference Highlights – Four Feature Items Strip
+   -------------------------------------------------------------------------- */
+.kz-pw-highlights-strip {
+  background-color: #fceff6;
+  border: 1px solid rgba(170, 45, 123, 0.1);
+  border-radius: 12px;
+  padding: 13px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16px 0;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.kz-pw-highlight-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  box-sizing: border-box;
+}
+
+.kz-pw-highlight-icon-box {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #aa2d7b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(85, 29, 92, 0.04);
+}
+
+.kz-pw-highlight-custom-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  display: block;
+}
+
+.kz-pw-highlight-label {
+  display: flex;
+  flex-direction: column;
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #292333;
+}
+
+.kz-pw-highlight-divider {
+  width: 1px;
+  height: 30px;
+  background-color: rgba(170, 45, 123, 0.16);
+  margin: 0 6px;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   8. Highlight Quote Banner
+   -------------------------------------------------------------------------- */
+.kz-pw-quote-banner {
+  background-color: #fceff6;
+  border-left: 4px solid #aa2d7b;
+  border-radius: 8px;
+  padding: 13px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  box-sizing: border-box;
+}
+
+.kz-pw-quote-icon-wrap {
+  color: #d85a9a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kz-pw-quote-text {
+  font-size: 15px;
+  font-style: italic;
+  font-weight: 700;
+  color: #551d5c;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   9. Doctor Signature Section
+   -------------------------------------------------------------------------- */
+.kz-pw-signature-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.kz-pw-see-you {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #292333;
+  margin: 0 0 14px 0;
+}
+
+.kz-pw-sig-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.kz-pw-sig-line {
+  width: 42px;
+  height: 3px;
+  background-color: #aa2d7b;
+  border-radius: 2px;
+  margin-bottom: 7px;
+}
+
+.kz-pw-doctor-name {
+  font-size: 19.5px;
+  font-weight: 800;
+  color: #551d5c;
+  margin: 0 0 2px 0;
+  letter-spacing: -0.2px;
+}
+
+.kz-pw-doctor-desig {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #551d5c;
+  margin: 0;
+  line-height: 1.35;
+  opacity: 0.9;
+}
+
+/* ==========================================================================
+   10. Responsive Adaptations
+   ========================================================================== */
+
+/* Medium Laptops & Tablets (992px – 1240px) */
+@media (max-width: 1240px) {
+  .kz-pw-left-col {
+    flex: 0 0 320px;
+    width: 320px;
+    max-width: 320px;
+  }
+
+  .kz-pw-right-col {
+    padding: 32px 34px 30px 24px;
+  }
+
+  .kz-pw-highlights-strip {
+    padding: 11px 16px;
+  }
+
+  .kz-pw-highlight-label {
+    font-size: 12px;
+  }
+}
+
+/* Tablet (768px – 991px) */
+@media (max-width: 991px) {
+  .kz-pw-left-col {
+    flex: 0 0 260px;
+    width: 260px;
+    max-width: 260px;
+  }
+
+  .kz-pw-right-col {
+    padding: 26px 24px 26px 20px;
+  }
+
+  .kz-pw-greeting {
+    font-size: 22px;
+  }
+
+  .kz-pw-para {
+    font-size: 14px;
+  }
+
+  .kz-pw-highlights-strip {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .kz-pw-highlight-divider {
+    display: none;
+  }
+}
+
+/* Mobile (below 768px): SINGLE COLUMN, IMAGE FIRST */
+@media (max-width: 767px) {
+  .kz-pw-section {
+    padding: 28px 14px 40px;
+  }
+
+  .kz-pw-header {
+    margin-bottom: 24px;
+  }
+
+  .kz-pw-card {
+    flex-direction: column;
+    align-items: center;
+    border-radius: 18px;
+  }
+
+  /* Full doctor portrait first, centered at top */
+  .kz-pw-left-col {
+    order: 1;
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+    padding-top: 24px;
+  }
+
+  .kz-pw-doctor-img {
+    max-width: 280px;
+    margin: 0 auto;
+  }
+
+  .kz-pw-vertical-divider {
+    display: none;
+  }
+
+  /* Content below portrait */
+  .kz-pw-right-col {
+    order: 2;
+    width: 100%;
+    padding: 20px 18px 26px;
+  }
+
+  .kz-pw-greeting {
+    font-size: 21px;
+    margin-bottom: 12px;
+  }
+
+  .kz-pw-para {
+    font-size: 14px;
+  }
+
+  .kz-pw-highlights-strip {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .kz-pw-highlight-divider {
+    display: none;
+  }
+
+  .kz-pw-quote-text {
+    font-size: 14px;
+  }
+}
+
+/* Extra Small Phones (< 480px) */
+@media (max-width: 480px) {
+  .kz-pw-title {
+    font-size: 26px;
+  }
+
+  .kz-pw-left-col {
+    max-width: 250px;
+  }
+
+  .kz-pw-doctor-img {
+    max-width: 240px;
+  }
+
+  .kz-pw-event-pill {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  .kz-pw-highlights-strip {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .kz-pw-quote-banner {
+    padding: 10px 14px;
+  }
+
+  .kz-pw-quote-text {
+    font-size: 13.5px;
+  }
+}

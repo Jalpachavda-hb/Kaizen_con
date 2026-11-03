@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FiEye, FiTarget } from 'react-icons/fi';
 import { GiStomach } from 'react-icons/gi';
 import './AboutPage.css';
+import WelcomeMessage from '../components/Home/WelcomeMessage';
 import logokaizecon from '../assets/home/logokaizecon.png';
 import connectBg from '../assets/home/connect_bg.jpg';
 import bgai from '../assets/home/bgai.png';
@@ -19,109 +20,8 @@ export default function AboutPage() {
     { value: '3 Days', label: 'Immersive Convergence', detail: '1–3 January 2027 in Ahmedabad' }
   ];
 
-  const pillars = [
-    {
-      num: '01',
-      title: 'AI-Native Clinical Architecture',
-      tag: 'REAL-TIME DATA',
-      desc: 'Moving beyond theoretical machine learning into real-time intraoperative intelligence, surgical computer vision, and structured multimodal data capture.',
-      highlights: ['Sub-second latency computer vision', 'Intraoperative tissue characterization', 'Automated procedural event logging']
-    },
-    {
-      num: '02',
-      title: 'Robotic Surgery & Precision',
-      tag: 'OPERATIVE EXCELLENCE',
-      desc: 'Highlighting multi-port and single-port robotic platforms, autonomous tissue manipulation prototypes, haptic tele-presence, and augmented visualization.',
-      highlights: ['Next-generation surgical consoles', 'Comparative outcomes vs. laparoscopy', 'Precision pelvic & GI oncologic resections']
-    },
-    {
-      num: '03',
-      title: 'Continuous Improvement (Kaizen)',
-      tag: 'CLINICAL EVOLUTION',
-      desc: 'Grounding every algorithm in verified clinical efficacy, rigorous patient safety, ethical AI governance, and verifiable surgical outcomes.',
-      highlights: ['Peer-reviewed validation cohorts', 'Ethical AI decision frameworks', 'Zero-hallucination surgical assistant models']
-    },
-    {
-      num: '04',
-      title: 'Global Mentorship & Democratization',
-      tag: 'GLOBAL REACH',
-      desc: 'Bridging the divide between premier academic centers and community healthcare institutions worldwide through AI-guided remote surgical training.',
-      highlights: ['Telesurgery & cross-border mentoring', 'Open-access surgical knowledge bases', 'Resident and fellow AI fellowship tracks']
-    }
-  ];
 
-  const comparisonData = [
-    {
-      aspect: 'Conference Structure',
-      traditional: 'Static slide presentations with isolated Q&A microphones',
-      kaizen: 'Live AI-synthesized sessions, semantic questioning & dynamic faculty dialogue'
-    },
-    {
-      aspect: 'Knowledge Retention',
-      traditional: 'Notes forgotten after departing; unindexed slide PDFs',
-      kaizen: 'Full conversational AI Knowledge Base queryable long after the event concludes'
-    },
-    {
-      aspect: 'Session Personalization',
-      traditional: 'One-size-fits-all generic auditorium schedule',
-      kaizen: 'AI-driven agenda curation tailored to your sub-specialty & clinical goals'
-    },
-    {
-      aspect: 'Surgical Focus',
-      traditional: 'Broad retrospective literature reviews',
-      kaizen: 'Live operative case dissections with real-time AI computer vision overlays'
-    }
-  ];
 
-  const leadershipPreviews = [
-    {
-      name: 'Dr. Arjun Mehta',
-      role: 'GI & Robotic Surgeon',
-      inst: 'Global Institute of Surgical Innovation',
-      country: 'India 🇮🇳',
-      badge: 'Scientific Co-Chair'
-    },
-    {
-      name: 'Dr. Sofia Laurent',
-      role: 'Surgical Oncologist & AI Researcher',
-      inst: 'International Centre for Robotic Surgery',
-      country: 'France 🇫🇷',
-      badge: 'Program Director'
-    },
-    {
-      name: 'Dr. Daniel Okafor',
-      role: 'Laparoscopic & Colorectal Surgeon',
-      inst: 'Future Health Research Institute',
-      country: 'Nigeria 🇳🇬',
-      badge: 'Clinical Trials Lead'
-    },
-    {
-      name: 'Dr. Maya Chen',
-      role: 'Computational Surgeon & Vision Specialist',
-      inst: 'Centre for Intelligent Surgery',
-      country: 'Singapore 🇸🇬',
-      badge: 'AI Technology Lead'
-    }
-  ];
-
-  const faqs = [
-    {
-      q: 'What is the core theme of KAIZENCON 2027?',
-      a: 'KAIZENCON 2027 is an international, AI-native medical technology conference dedicated to the convergence of advanced robotic surgery and artificial intelligence. Our motto is "Continuous improvement, now with intelligence," uniting surgeons, engineers, and clinical leaders.'
-    },
-    {
-      q: 'Who should attend KAIZENCON 2027?',
-      a: 'The summit is designed for gastrointestinal surgeons, oncologists, minimally invasive & robotic surgeons, biomedical engineers, medical AI researchers, hospital directors, and surgical trainees eager to master next-generation operative technology.'
-    },
-    {
-      q: 'Where and when does the conference take place?',
-      a: 'KAIZENCON 2027 takes place from 1–3 January 2027 at the International Conference Centre, Hyatt Regency, Ashram Road, Ahmedabad, India.'
-    },
-    {
-      q: 'How does KAIZENCON incorporate AI into the attendee experience?',
-      a: 'Attendees receive personalized agenda curation, an intelligent AI conference companion trained on all sessions, instant semantic Q&A clustering during keynotes, and lifetime access to the searchable KAIZENCON Knowledge Base.'
-    }
-  ];
 
   const attendeesList = [
     {
@@ -317,12 +217,17 @@ export default function AboutPage() {
       </section>
 
       {/* ====================================================
+          2. WELCOME MESSAGE SECTION (First Section After Banner)
+          ==================================================== */}
+      <WelcomeMessage />
+
+      {/* ====================================================
           3. OUR STORY: WHY KAIZENCON EXISTS
           ==================================================== */}
-      <section className="kz-story-section" id="our-story">
+      {/* <section className="kz-story-section" id="our-story">
         <div className="kz-about-container">
           <div className="kz-story-grid">
-            {/* Left Column: Why KaizenCon Exists + Kaizen Definition */}
+          
             <div className="kz-story-left-col">
               <div className="kz-story-eyebrow-wrap">
                 <span className="kz-story-badge">OUR STORY</span>
@@ -343,7 +248,7 @@ export default function AboutPage() {
                 KAIZENCON 2027 answers with a conference that thinks with you. Intelligence is woven into every layer, from the moment you register to the knowledge you carry home. It is built to augment clinicians, never replace them.
               </p>
 
-              {/* Kaizen (改善) Concept Card */}
+             
               <div className="kz-story-kaizen-card">
                 <div className="kz-kaizen-badge-visual">
                   <div className="kz-kaizen-icon-circle">
@@ -362,21 +267,20 @@ export default function AboutPage() {
               </div>
             </div>
 
-            {/* Right Column: Vision & Mission Cards */}
+          
             <div className="kz-story-right-col">
-              {/* VISION CARD */}
+              
               <div className="kz-story-card kz-vision-card">
                 <div className="kz-card-left-stripe kz-stripe-pink" aria-hidden="true" />
 
                 <div className="kz-card-inner">
-                  {/* Left Icon Badge using React Icon FiEye */}
+             
                   <div className="kz-card-icon-badge kz-badge-pink">
                     <div className="kz-badge-ring">
                       <FiEye className="kz-card-react-icon" />
                     </div>
                   </div>
 
-                  {/* Card Content */}
                   <div className="kz-card-text-block">
                     <span className="kz-card-tag kz-tag-pink">VISION</span>
                     <h3 className="kz-card-heading">A new standard for medical conferences.</h3>
@@ -387,19 +291,19 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              {/* MISSION CARD */}
+            
               <div className="kz-story-card kz-mission-card">
                 <div className="kz-card-left-stripe kz-stripe-teal" aria-hidden="true" />
 
                 <div className="kz-card-inner">
-                  {/* Left Icon Badge using React Icon FiTarget */}
+       
                   <div className="kz-card-icon-badge kz-badge-teal">
                     <div className="kz-badge-ring">
                       <FiTarget className="kz-card-react-icon" />
                     </div>
                   </div>
 
-                  {/* Card Content */}
+                
                   <div className="kz-card-text-block">
                     <span className="kz-card-tag kz-tag-teal">MISSION</span>
                     <h3 className="kz-card-heading">Augment clinical excellence with AI.</h3>
@@ -412,7 +316,7 @@ export default function AboutPage() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* ====================================================
           4. DUAL SHOWCASE: WHO SHOULD ATTEND & WHAT WE WILL EXPLORE

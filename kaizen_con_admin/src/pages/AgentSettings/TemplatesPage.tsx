@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import { AdminPageContainer } from "../../components/common/AdminPageContainer";
+import { TablePagination } from "../../components/common/TablePagination";
 import { useToast } from "../../context/ToastContext";
 import {
   getTemplates,
@@ -443,6 +444,19 @@ export default function TemplatesPage() {
       return true;
     });
   }, [templates, search, purposeFilter, statusFilter]);
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, purposeFilter, statusFilter]);
+
+  const paginatedTemplates = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredTemplates.slice(startIndex, startIndex + pageSize);
+  }, [filteredTemplates, currentPage, pageSize]);
 
   // Stats calculation
   const stats = useMemo(() => {
@@ -1135,7 +1149,7 @@ export default function TemplatesPage() {
             </div>
           ) : viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredTemplates.map((template) => {
+              {paginatedTemplates.map((template) => {
                 const purposeBadge = getPurposeBadge(template.purpose);
                 const displayTitle = formatTemplateTitle(template.name);
                 const cleanSubject = template.subject || "No subject configured";
@@ -1292,7 +1306,7 @@ export default function TemplatesPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {filteredTemplates.map((template) => {
+                  {paginatedTemplates.map((template) => {
                     const purposeBadge = getPurposeBadge(template.purpose);
                     return (
                       <tr
@@ -1382,6 +1396,23 @@ export default function TemplatesPage() {
                   })}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* Pagination Controls Bar */}
+          {filteredTemplates.length > 0 && (
+            <div className="mt-4 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
+              <TablePagination
+                currentPage={currentPage}
+                totalItems={filteredTemplates.length}
+                pageSize={pageSize}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(newSize) => {
+                  setPageSize(newSize);
+                  setCurrentPage(1);
+                }}
+                itemName="templates"
+              />
             </div>
           )}
         </div>
