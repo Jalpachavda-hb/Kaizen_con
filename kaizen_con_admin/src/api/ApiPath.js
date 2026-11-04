@@ -696,20 +696,9 @@ export const importExcelContacts = async (file) => {
 
 /**
  * Get Email Agent Campaigns API
- * Endpoint: GET http://192.168.29.201:8000/api/v1/email-agent/campaigns?offset=0&limit=100
- * Optional query parameter: ?campaign_id={uuid}
  *
- * @param {number} [offset=0]
- * @param {number} [limit=100]
- * @param {string|null} [campaignId=null]
- * @returns {Promise<any[]>} Array of campaigns
- */
-/**
- * Get Email Agent Campaigns API
- * Supports page-number based pagination via the offset parameter.
- *
- * @param {number} [offset=0] - Page number (passed into offset field)
- * @param {number} [limit=10] - Number of items per page
+ * @param {number} [offset=0] - Offset parameter (defaults to 0)
+ * @param {number} [limit=10] - Limit parameter
  * @param {string|null} [campaignId=null] - Optional Campaign UUID
  * @returns {Promise<any[]>} Array of campaigns (with .count and .total)
  */

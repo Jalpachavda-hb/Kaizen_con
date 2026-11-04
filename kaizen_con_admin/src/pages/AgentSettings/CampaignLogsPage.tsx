@@ -7,17 +7,7 @@ import { useToast } from "../../context/ToastContext";
 import {
   getCampaigns,
   getCampaignLogs,
-  getContactById,
 } from "../../api/ApiPath";
-
-export interface ContactOption {
-  id: string;
-  email: string;
-  name: string | null;
-  type?: string | null;
-  status: string;
-  unsubscribed: boolean;
-}
 
 export interface CampaignSummary {
   id: string;
@@ -61,12 +51,8 @@ export default function CampaignLogsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [viewFormat, setViewFormat] = useState<"table" | "json">("table");
 
-  // Contacts Mapping for Contact ID -> Name/Email resolution
-  const [contactsMap, setContactsMap] = useState<Record<string, ContactOption>>({});
-  const [availableContacts, setAvailableContacts] = useState<ContactOption[]>([]);
-
   // Pagination
-  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
 
   // Fetch campaign info and logs
@@ -76,53 +62,29 @@ export default function CampaignLogsPage() {
     setError(null);
 
     try {
-      // 1. Fetch Campaign info
-      try {
-        const campaignData = await getCampaigns(0, 1, id);
-        if (Array.isArray(campaignData)) {
-          const match = campaignData.find((c: any) => c.id === id || c.id?.toLowerCase() === id.toLowerCase()) || campaignData[0];
-          if (match && match.id) {
-            setCampaign(match);
-          } else {
-            setCampaign({ id, name: `Campaign ${id.slice(0, 8)}...` });
-          }
+      // 1. Fetch Campaign info and Logs in parallel for fast loading
+      const [campaignRes, logsRes] = await Promise.allSettled([
+        getCampaigns(0, 100),
+        getCampaignLogs(id),
+      ]);
+
+      if (campaignRes.status === "fulfilled" && Array.isArray(campaignRes.value)) {
+        const campaignData = campaignRes.value;
+        const match = campaignData.find((c: any) => c.id === id || c.id?.toLowerCase() === id.toLowerCase()) || campaignData[0];
+        if (match && match.id) {
+          setCampaign(match);
+        } else {
+          setCampaign({ id, name: `Campaign ${id.slice(0, 8)}...` });
         }
-      } catch (campErr) {
-        console.warn("Could not fetch campaign details:", campErr);
+      } else {
         setCampaign({ id, name: `Campaign ${id.slice(0, 8)}...` });
       }
 
-      // 2. Fetch logs for this campaign
-      const res = await getCampaignLogs(id);
-      const logsList = Array.isArray(res) ? res : [];
-      setLogs(logsList);
-
-      // 3. Resolve contact details specifically for these campaign logs
-      try {
-        const contactIdsToFetch = logsList
-          .map((log: any) => (log.contact_id || log.recipient_id || "").trim())
-          .filter(Boolean);
-
-        const uniqueMissing = Array.from(new Set(contactIdsToFetch));
-        const map: Record<string, ContactOption> = {};
-
-        await Promise.all(
-          uniqueMissing.map(async (cid: string) => {
-            try {
-              const contactDetail = await getContactById(cid);
-              if (contactDetail && contactDetail.id) {
-                map[contactDetail.id] = contactDetail;
-                map[contactDetail.id.toLowerCase().trim()] = contactDetail;
-              }
-            } catch {
-              // Ignore individual fetch failure
-            }
-          })
-        );
-        setContactsMap(map);
-        setAvailableContacts(Object.values(map));
-      } catch (contactErr) {
-        console.warn("Could not load contact details for logs:", contactErr);
+      if (logsRes.status === "fulfilled") {
+        const logsList = Array.isArray(logsRes.value) ? logsRes.value : [];
+        setLogs(logsList);
+      } else {
+        throw logsRes.reason || new Error("Failed to load logs for this campaign.");
       }
     } catch (err: any) {
       console.error("Failed to load campaign logs:", err);
@@ -154,9 +116,8 @@ export default function CampaignLogsPage() {
     const headers = ["Recipient Name", "Email Address", "Contact ID", "Status", "Subject", "Template Version", "Direction", "Sent Time", "Error Details"];
     const rows = filteredLogs.map((log) => {
       const contactId = (log.contact_id || log.recipient_id || "").trim();
-      const contact = contactId ? contactsMap[contactId] || contactsMap[contactId.toLowerCase()] : null;
-      const contactName = contact?.name || log.name || "Unknown";
-      const contactEmail = contact?.email || log.email || log.recipient || "—";
+      const contactName = log.name || log.recipient_name || log.contact_name || (contactId ? `Contact (${contactId.slice(0, 8)}...)` : "Unknown");
+      const contactEmail = log.email || log.recipient || log.contact_email || log.recipient_email || "—";
       const status = log.message_status || log.status || "—";
       const subject = log.subject || log.message || "—";
       const tpl = log.template_version || "—";
@@ -192,14 +153,8 @@ export default function CampaignLogsPage() {
   const filteredLogs = useMemo(() => {
     return logs.filter((log: any) => {
       const contactId = (log.contact_id || log.recipient_id || "").trim();
-      const contact = contactId
-        ? contactsMap[contactId] ||
-          contactsMap[contactId.toLowerCase()] ||
-          availableContacts.find((c) => c.id === contactId || c.id?.toLowerCase() === contactId.toLowerCase())
-        : null;
-
-      const name = (contact?.name || log.name || "").toLowerCase();
-      const email = (contact?.email || log.email || log.recipient || log.contact_email || "").toLowerCase();
+      const name = (log.name || log.recipient_name || log.contact_name || "").toLowerCase();
+      const email = (log.email || log.recipient || log.contact_email || log.recipient_email || "").toLowerCase();
       const subject = (log.subject || log.message || "").toLowerCase();
       const status = (log.message_status || log.status || "").toLowerCase();
       const cid = contactId.toLowerCase();
@@ -228,7 +183,7 @@ export default function CampaignLogsPage() {
 
       return true;
     });
-  }, [logs, search, statusFilter, contactsMap, availableContacts]);
+  }, [logs, search, statusFilter]);
 
   // Reset page when search or statusFilter changes
   useEffect(() => {
@@ -562,14 +517,8 @@ export default function CampaignLogsPage() {
                 ) : (
                   paginatedLogs.map((log: any, idx: number) => {
                     const contactId = (log.contact_id || log.recipient_id || "").trim();
-                    const contact = contactId
-                      ? contactsMap[contactId] ||
-                        contactsMap[contactId.toLowerCase()] ||
-                        availableContacts.find((c) => c.id === contactId || c.id?.toLowerCase() === contactId.toLowerCase())
-                      : null;
-
-                    const contactName = contact?.name || log.name || (contactId ? `Contact (${contactId.slice(0, 8)}...)` : "Unknown Recipient");
-                    const contactEmail = contact?.email || log.email || log.recipient || log.contact_email || "—";
+                    const contactName = log.name || log.recipient_name || log.contact_name || (contactId ? `Contact (${contactId.slice(0, 8)}...)` : "Unknown Recipient");
+                    const contactEmail = log.email || log.recipient || log.contact_email || log.recipient_email || "—";
                     const initial = (contactName.trim().charAt(0) || "U").toUpperCase();
                     const logTime = log.created_at || log.timestamp || log.time || log.date;
 

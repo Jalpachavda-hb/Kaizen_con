@@ -86,32 +86,16 @@ export default function CampaignsPage() {
   const [selectedCampaign, setSelectedCampaign] = useState<CampaignItem | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
-  // Campaigns Pagination State (Page-wise pagination)
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
-  const [totalCount, setTotalCount] = useState<number>(0);
-
-  // Fetch campaigns from API passing offset (page 1 -> offset 0)
-  const fetchCampaigns = useCallback(async (page?: number, limit?: number) => {
-    const targetPage = typeof page === "number" ? page : currentPage;
-    const targetLimit = typeof limit === "number" ? limit : pageSize;
-    const targetOffset = Math.max(0, targetPage - 1);
+  // Fetch campaigns from API (default offset 0)
+  const fetchCampaigns = useCallback(async () => {
     setLoading(true);
     setFetchError(null);
     try {
-      const data = await getCampaigns(targetOffset, targetLimit);
+      const data = await getCampaigns(0, 100);
       if (Array.isArray(data)) {
         setCampaigns(data);
-        const serverCount =
-          typeof (data as any).count === "number"
-            ? (data as any).count
-            : typeof (data as any).total === "number"
-            ? (data as any).total
-            : data.length;
-        setTotalCount(serverCount);
       } else {
         setCampaigns([]);
-        setTotalCount(0);
       }
     } catch (err: any) {
       console.error("Failed to load campaigns:", err);
@@ -119,11 +103,11 @@ export default function CampaignsPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, pageSize]);
+  }, []);
 
   useEffect(() => {
-    fetchCampaigns(currentPage, pageSize);
-  }, [currentPage, pageSize]);
+    fetchCampaigns();
+  }, [fetchCampaigns]);
 
   // API Call: Approve Campaign
   const handleApprove = async (c: CampaignItem) => {
@@ -498,18 +482,22 @@ export default function CampaignsPage() {
     return true;
   });
 
+  // Campaigns Pagination (client-side)
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
   // Reset to page 1 on search or filter change
   useEffect(() => {
     setCurrentPage(1);
   }, [search, statusFilter]);
 
-  // Data is fetched page-wise from the server
   const paginatedCampaigns = useMemo(() => {
-    return filteredCampaigns;
-  }, [filteredCampaigns]);
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredCampaigns.slice(startIndex, startIndex + pageSize);
+  }, [filteredCampaigns, currentPage, pageSize]);
 
   // KPI Metrics
-  const totalCampaigns = totalCount || campaigns.length;
+  const totalCampaigns = campaigns.length;
   const runningCount = campaigns.filter(
     (c) => (c.status || "").toLowerCase() === "running"
   ).length;
@@ -1069,11 +1057,9 @@ export default function CampaignsPage() {
           {/* Pagination Controls Bar */}
           <TablePagination
             currentPage={currentPage}
-            totalItems={search.trim() || statusFilter !== "All" ? filteredCampaigns.length : (totalCount || campaigns.length)}
+            totalItems={filteredCampaigns.length}
             pageSize={pageSize}
-            onPageChange={(newPage) => {
-              setCurrentPage(newPage);
-            }}
+            onPageChange={setCurrentPage}
             onPageSizeChange={(newSize) => {
               setPageSize(newSize);
               setCurrentPage(1);

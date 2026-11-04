@@ -97,34 +97,64 @@ export default function DelegatesPage() {
  
   // Filtered Delegates
   const filteredDelegates = useMemo(() => {
+    const term = search.toLowerCase().trim();
+    const tokens = term ? term.split(/\s+/).filter(Boolean) : [];
+
     return delegates.filter((d) => {
-      const fullName = `${d.salutation ? d.salutation + " " : ""}${d.first_name || ""} ${d.last_name || ""}`.toLowerCase();
-      const term = search.toLowerCase().trim();
-
-      const matchesSearch =
-        !term ||
-        fullName.includes(term) ||
-        (d.email && d.email.toLowerCase().includes(term)) ||
-        (d.phone && d.phone.includes(term)) ||
-        (d.city && d.city.toLowerCase().includes(term)) ||
-        (d.state && d.state.toLowerCase().includes(term)) ||
-        (d.registration_id && d.registration_id.toLowerCase().includes(term)) ||
-        (d.reg_category && d.reg_category.toLowerCase().includes(term)) ||
-        (d.mci_no && d.mci_no.toLowerCase().includes(term)) ||
-        (d.transaction_id && d.transaction_id.toLowerCase().includes(term)) ||
-        (d.remarks && d.remarks.toLowerCase().includes(term));
-
+      // 1. Category Filter
       const matchesCategory =
         categoryFilter === "All" ||
         (categoryFilter === "Uncategorized"
           ? !d.reg_category
           : d.reg_category?.toLowerCase() === categoryFilter.toLowerCase());
 
+      // 2. City Filter
       const matchesCity =
         cityFilter === "All" ||
         d.city?.toLowerCase().trim() === cityFilter.toLowerCase().trim();
 
-      return matchesSearch && matchesCategory && matchesCity;
+      if (!matchesCategory || !matchesCity) return false;
+
+      // 3. Search Query matching across all requested fields:
+      // Location, Contact Details, Category, Delegate Name, MCI No.
+      if (!term) return true;
+
+      // Name fields
+      const salutation = (d.salutation || "").toLowerCase();
+      const firstName = (d.first_name || "").toLowerCase();
+      const lastName = (d.last_name || "").toLowerCase();
+      const fullName = `${d.salutation ? d.salutation + " " : ""}${d.first_name || ""} ${d.last_name || ""}`.toLowerCase();
+      const nameOnly = `${d.first_name || ""} ${d.last_name || ""}`.toLowerCase();
+
+      // Category
+      const category = (d.reg_category || "Unassigned").toLowerCase();
+
+      // Contact Details (Email & Phone)
+      const email = (d.email || "").toLowerCase();
+      const phone = (d.phone || "").toLowerCase();
+      const phoneClean = (d.phone || "").replace(/[^0-9]/g, "");
+
+      // Location (City, State, Country)
+      const city = (d.city || "").toLowerCase();
+      const state = (d.state || "").toLowerCase();
+      const country = (d.country || "").toLowerCase();
+      const locationFull = `${d.city || ""} ${d.state || ""} ${d.country || ""}`.toLowerCase();
+
+      // MCI No.
+      const mci = (d.mci_no || "").toLowerCase();
+
+      // Additional identifiers
+      const regId = (d.registration_id || "").toLowerCase();
+      const txnId = (d.transaction_id || "").toLowerCase();
+      const remarks = (d.remarks || "").toLowerCase();
+      const idStr = String(d.id || "");
+
+      const searchableBlob = `${salutation} ${firstName} ${lastName} ${fullName} ${nameOnly} ${category} ${email} ${phone} ${phoneClean} ${city} ${state} ${country} ${locationFull} ${mci} ${regId} ${txnId} ${remarks} ${idStr}`;
+
+      return (
+        searchableBlob.includes(term) ||
+        tokens.every((token) => searchableBlob.includes(token))
+      );
     });
   }, [delegates, search, categoryFilter, cityFilter]);
 
@@ -316,7 +346,7 @@ export default function DelegatesPage() {
         subtitle="Manage conference registrations, faculty members, organizing committee, payment records, and delegate QR badges."
         searchValue={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search by name, email, phone, reg ID, MCI, transaction, city, remarks..."
+        searchPlaceholder="Search by name, contact, category, location, MCI no..."
         actionButton={
           <div className="flex items-center flex-wrap gap-2">
             {/* Category Filter */}
