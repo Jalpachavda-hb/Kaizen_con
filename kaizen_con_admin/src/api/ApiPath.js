@@ -1,7 +1,7 @@
 // Base API Configuration
 // export const BASE_URL = 'https://34g3qd2p-8000.inc1.devtunnels.ms';
-// export const BASE_URL = 'http://192.168.29.201:8000';
-export const BASE_URL = 'https://api.kaizencon.in';
+export const BASE_URL = 'http://192.168.29.201:8000';
+// export const BASE_URL = 'https://api.kaizencon.in';
 export const API_BASE_URL = `${BASE_URL}/api`;
 //
 // Compatibility aliases
@@ -481,7 +481,15 @@ export const deleteSchedule = deleteSession;
  * @param {number} [limit=100]
  * @returns {Promise<any[]>}
  */
-export const getEmailAgentContacts = async (offset = 0, limit = 100) => {
+/**
+ * Get Email Agent Contacts API
+ * Supports page-number based pagination via the offset parameter.
+ *
+ * @param {number} [offset=1] - Page number (passed into offset field)
+ * @param {number} [limit=10] - Number of items per page
+ * @returns {Promise<any[]>} Array of contacts (with .count and .total)
+ */
+export const getEmailAgentContacts = async (offset = 1, limit = 10) => {
   try {
     const url = `${API_ENDPOINTS.EMAIL_AGENT_CONTACTS}?offset=${encodeURIComponent(offset)}&limit=${encodeURIComponent(limit)}`;
     const response = await fetch(url, {
@@ -502,15 +510,22 @@ export const getEmailAgentContacts = async (offset = 0, limit = 100) => {
     }
 
     if (Array.isArray(data)) {
+      data.count = typeof data.count === 'number' ? data.count : data.length;
+      data.total = data.count;
       return data;
     }
 
     if (data && Array.isArray(data.value)) {
+      data.value.count = typeof data.count === 'number' ? data.count : data.value.length;
+      data.value.total = data.value.count;
       return data.value;
     }
 
     if (data && Array.isArray(data.results)) {
-      return data.results;
+      const results = [...data.results];
+      results.count = typeof data.count === 'number' ? data.count : (data.total ?? data.results.length);
+      results.total = results.count;
+      return results;
     }
 
     return [];
@@ -689,7 +704,16 @@ export const importExcelContacts = async (file) => {
  * @param {string|null} [campaignId=null]
  * @returns {Promise<any[]>} Array of campaigns
  */
-export const getCampaigns = async (offset = 0, limit = 100, campaignId = null) => {
+/**
+ * Get Email Agent Campaigns API
+ * Supports page-number based pagination via the offset parameter.
+ *
+ * @param {number} [offset=1] - Page number (passed into offset field)
+ * @param {number} [limit=10] - Number of items per page
+ * @param {string|null} [campaignId=null] - Optional Campaign UUID
+ * @returns {Promise<any[]>} Array of campaigns (with .count and .total)
+ */
+export const getCampaigns = async (offset = 1, limit = 10, campaignId = null) => {
   try {
     let url = `${API_ENDPOINTS.EMAIL_AGENT_CAMPAIGNS}?offset=${encodeURIComponent(offset)}&limit=${encodeURIComponent(limit)}`;
     if (campaignId) {
@@ -713,19 +737,31 @@ export const getCampaigns = async (offset = 0, limit = 100, campaignId = null) =
       throw error;
     }
 
+    // Direct single campaign object returned when queried by campaign_id
+    if (data && data.id && !Array.isArray(data)) {
+      const list = [data];
+      list.count = 1;
+      list.total = 1;
+      return list;
+    }
+
     if (Array.isArray(data)) {
+      data.count = typeof data.count === 'number' ? data.count : data.length;
+      data.total = data.count;
       return data;
     }
 
     if (data && Array.isArray(data.value)) {
+      data.value.count = typeof data.count === 'number' ? data.count : data.value.length;
+      data.value.total = data.value.count;
       return data.value;
     }
 
     if (data && Array.isArray(data.results)) {
-      if (typeof data.count === 'number') {
-        data.results.count = data.count;
-      }
-      return data.results;
+      const results = [...data.results];
+      results.count = typeof data.count === 'number' ? data.count : (data.total ?? data.results.length);
+      results.total = results.count;
+      return results;
     }
 
     return [];
@@ -1323,11 +1359,26 @@ export const updateTemplate = async (templateId, updateData) => {
       if (updateData.active !== undefined && updateData.active !== null) {
         body.append('active', String(updateData.active));
       }
-      if (updateData.html_file instanceof File || updateData.html_file instanceof Blob) {
-        body.append('html_file', updateData.html_file, 'template.html');
-      } else if (typeof updateData.html_body === 'string' && updateData.html_body.trim()) {
-        const blob = new Blob([updateData.html_body], { type: 'text/html' });
-        body.append('html_file', blob, 'template.html');
+
+      // Universal file attachment: Send across both docx_file and html_file
+      // (FastAPI backend expects docx_file)
+      const primaryDocx = updateData.docx_file || updateData.file || updateData.doc_file;
+      if (primaryDocx instanceof File || primaryDocx instanceof Blob) {
+        const fileName = primaryDocx.name || 'template.docx';
+        body.append('docx_file', primaryDocx, fileName);
+        body.append('html_file', primaryDocx, fileName);
+      } else if (updateData.html_file instanceof File || updateData.html_file instanceof Blob) {
+        const fileName = updateData.html_file.name || 'template.html';
+        body.append('docx_file', updateData.html_file, fileName.endsWith('.docx') ? fileName : 'template.docx');
+        body.append('html_file', updateData.html_file, fileName);
+      }
+
+      if (typeof updateData.html_body === 'string' && updateData.html_body.trim()) {
+        body.append('html_body', updateData.html_body);
+        if (!body.has('html_file')) {
+          const blob = new Blob([updateData.html_body], { type: 'text/html' });
+          body.append('html_file', blob, 'template.html');
+        }
       }
     }
 

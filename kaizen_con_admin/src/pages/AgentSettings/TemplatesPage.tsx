@@ -10,6 +10,7 @@ import {
   deleteTemplate,
 } from "../../api/ApiPath";
 import Swal from "sweetalert2";
+import { convertHtmlToDocxBlob, isDocxFile, isHtmlFile } from "../../utils/htmlToDocx";
 import logoUrl from "../../assets/images/logokaizecon.png";
 
 export interface TemplateItem {
@@ -24,305 +25,12 @@ export interface TemplateItem {
   updated_at?: string;
 }
 
-// Live dynamic templates dataset from http://192.168.29.201:8000/api/v1/email-agent/templates
-const DYNAMIC_TEMPLATES_DATA: TemplateItem[] = [
-  {
-    id: "f76f0e6f-32d1-4064-87ee-6c0833cc0369",
-    name: "followup",
-    purpose: "followup",
-    subject: "A Gentle Reminder: Join Us at KAIZENCON 2027",
-    html_body: `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KAIZENCON 2027 | Follow-Up Invitation</title>
-</head>
-<body style="margin:0;padding:0;background-color:#F6F7FB;font-family:Arial,Helvetica,sans-serif;color:#49304F;">
-  <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
-    Following up on our invitation to KAIZENCON 2027 — Robotics &amp; AI: Shaping the Future of GI Surgery.
-  </div>
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F6F7FB;margin:0;padding:24px 10px;">
-    <tr>
-      <td align="center">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:1000px;background-color:#FFFFFF;border:1px solid #E7DDE9;">
-          <tr>
-            <td align="center" style="padding:28px 28px 18px;background-color:#FFFFFF;">
-              <img src="cid:kaizencon_logo" width="100" alt="KAIZENCON 2027 — Robotics &amp; AI" style="display:block;width:25%;max-width:500px;height:auto;border:0;outline:none;text-decoration:none;">
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:0 28px;">
-              <div style="height:5px;background-color:#A92E83;font-size:0;line-height:0;">&nbsp;</div>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:28px 34px 10px;">
-              <p style="margin:0 0 8px;font-size:12px;line-height:18px;letter-spacing:2px;text-transform:uppercase;color:#A92E83;font-weight:bold;">Follow-Up Invitation</p>
-              <h1 style="margin:0;color:#51345B;font-size:28px;line-height:35px;font-weight:700;">We Hope to Welcome You to KAIZENCON 2027</h1>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:8px 34px 0;font-size:15px;line-height:25px;color:#51465A;">
-              <p style="margin:0 0 16px;">Dear <strong>{{name}}</strong>,</p>
-              <p style="margin:0 0 16px;">We are writing to follow up on our invitation to <strong>{{hospital_name}}</strong> to participate in <strong>KAIZENCON 2027 — “Robotics &amp; AI: Shaping the Future of GI Surgery.”</strong></p>
-              <p style="margin:0 0 16px;">As we prepare for this exciting gathering, we would be delighted to have your institution join us in exploring the latest advances in robotic surgery, artificial intelligence, and innovative gastrointestinal surgical techniques.</p>
-              <p style="margin:0 0 16px;">The conference will offer opportunities to exchange clinical insights, engage with leading experts, and discuss how emerging technologies can help shape the future of surgical care.</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:4px 34px 18px;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FBF6FA;border-left:4px solid #A92E83;">
-                <tr>
-                  <td style="padding:18px 20px;">
-                    <p style="margin:0 0 9px;font-size:13px;line-height:18px;color:#A92E83;font-weight:bold;letter-spacing:1px;text-transform:uppercase;">Conference Details</p>
-                    <p style="margin:0 0 7px;font-size:15px;line-height:23px;color:#51345B;"><strong>Date:</strong> 1–3 January 2027</p>
-                    <p style="margin:0 0 7px;font-size:15px;line-height:23px;color:#51345B;"><strong>Venue:</strong> Hyatt Regency, Ashram Road</p>
-                    <p style="margin:0;font-size:15px;line-height:23px;color:#51345B;"><strong>Location:</strong> Ahmedabad, Gujarat, India</p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:0 34px 10px;font-size:15px;line-height:25px;color:#51465A;">
-              <p style="margin:0 0 12px;"><strong>Key conference highlights include:</strong></p>
-              <ul style="margin:0 0 18px;padding-left:22px;">
-                <li style="padding:0 0 7px;">Practical AI and generative AI applications for surgeons</li>
-                <li style="padding:0 0 7px;">Robotics vs. laparoscopy CME discussions and expert debates</li>
-                <li style="padding:0 0 7px;">Emerging surgical technologies, training, and responsible AI</li>
-                <li style="padding:0;">Live robotic surgery and telesurgery sessions</li>
-              </ul>
-              <p style="margin:0 0 16px;">We would appreciate hearing whether your institution may be interested in participating.</p>
-              <p style="margin:0 0 20px;">Please reply to this email or contact us at <a href="mailto:{{contact_email}}" style="color:#A92E83;text-decoration:underline;font-weight:bold;">{{contact_email}}</a>.</p>
-            </td>
-          </tr>
-          <tr>
-            <td align="center" style="padding:6px 34px 30px;">
-              <a href="{{registration_url}}" style="display:inline-block;background-color:#A92E83;color:#FFFFFF;text-decoration:none;font-size:15px;line-height:20px;font-weight:bold;padding:14px 26px;border:1px solid #A92E83;">Express Your Interest</a>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:22px 34px;background-color:#51345B;color:#FFFFFF;">
-              <p style="margin:0 0 5px;font-size:15px;line-height:22px;font-weight:bold;color:#FFFFFF;">Warm regards,</p>
-              <p style="margin:0 0 3px;font-size:15px;line-height:22px;color:#FFFFFF;">{{sender_name}}</p>
-              <p style="margin:0 0 12px;font-size:13px;line-height:20px;color:#EADFEA;">{{sender_title}} | KAIZENCON 2027 Organising Team</p>
-              <p style="margin:0;font-size:12px;line-height:19px;color:#EADFEA;">Robotics &amp; AI: Shaping the Future of GI Surgery<br>Evidence • Technique • Intelligence</p>
-            </td>
-          </tr>
-        </table>
-        <p style="max-width:600px;margin:14px auto 0;font-size:11px;line-height:17px;color:#817587;text-align:center;">You are receiving this invitation in connection with professional healthcare and conference participation.</p>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`,
-    active: true,
-    version: 1,
-    created_at: "2026-10-21T13:08:43.022016Z",
-    updated_at: "2026-10-21T13:08:43.022016Z",
-  },
-  {
-    id: "b2f74abc-79b4-4f7e-8a23-edb64bef1eb4",
-    name: "invitation ",
-    purpose: "initial",
-    subject: "Official Invitation | KAIZENCON 2027",
-    html_body: `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KAIZENCON 2027 | Official Invitation</title>
-</head>
-<body style="margin:0;padding:0;background-color:#F6F7FB;font-family:Arial,Helvetica,sans-serif;color:#49304F;">
-  <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
-    Invitation to KAIZENCON 2027 — Robotics &amp; AI: Shaping the Future of GI Surgery.
-  </div>
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F6F7FB;margin:0;padding:24px 10px;">
-    <tr>
-      <td align="center">
-        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:1000px;background-color:#FFFFFF;border:1px solid #E7DDE9;">
-          <tr>
-            <td align="center" style="padding:28px 28px 18px;background-color:#FFFFFF;">
-              <img src="cid:kaizencon_logo" width="100" alt="KAIZENCON 2027 — Robotics &amp; AI" style="display:block;width:25%;max-width:500px;height:auto;border:0;outline:none;text-decoration:none;">
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:0 28px;">
-              <div style="height:5px;background-color:#A92E83;font-size:0;line-height:0;">&nbsp;</div>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:28px 34px 10px;">
-              <p style="margin:0 0 8px;font-size:12px;line-height:18px;letter-spacing:2px;text-transform:uppercase;color:#A92E83;font-weight:bold;">Official Invitation</p>
-              <h1 style="margin:0;color:#51345B;font-size:28px;line-height:35px;font-weight:700;">Advancing the Future of GI Surgery Together</h1>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:8px 34px 0;font-size:15px;line-height:25px;color:#51465A;">
-              <p style="margin:0 0 16px;">Dear <strong>{{ name }}</strong>,</p>
-              <p style="margin:0 0 16px;">On behalf of <strong>KAIZENCON 2027</strong>, we are pleased to invite <strong>{{hospital_name}}</strong> to participate in our upcoming conference, <strong>“Robotics &amp; AI: Shaping the Future of GI Surgery.”</strong></p>
-              <p style="margin:0 0 16px;">The meeting will bring together surgeons, healthcare leaders, researchers, and technology innovators to explore how artificial intelligence, robotics, and evidence-based techniques are transforming gastrointestinal surgery.</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:4px 34px 18px;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FBF6FA;border-left:4px solid #A92E83;">
-                <tr>
-                  <td style="padding:18px 20px;">
-                    <p style="margin:0 0 9px;font-size:13px;line-height:18px;color:#A92E83;font-weight:bold;letter-spacing:1px;text-transform:uppercase;">Conference Details</p>
-                    <p style="margin:0 0 7px;font-size:15px;line-height:23px;color:#51345B;"><strong>Date:</strong> 1–3 January 2027</p>
-                    <p style="margin:0 0 7px;font-size:15px;line-height:23px;color:#51345B;"><strong>Venue:</strong> Hyatt Regency, Ashram Road</p>
-                    <p style="margin:0;font-size:15px;line-height:23px;color:#51345B;"><strong>Location:</strong> Ahmedabad, Gujarat, India</p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:0 34px 10px;font-size:15px;line-height:25px;color:#51465A;">
-              <p style="margin:0 0 12px;"><strong>Conference highlights include:</strong></p>
-              <ul style="margin:0 0 18px;padding-left:22px;">
-                <li style="padding:0 0 7px;">Practical AI and generative AI applications for surgeons</li>
-                <li style="padding:0 0 7px;">Robotics vs. laparoscopy CME discussions and expert debates</li>
-                <li style="padding:0 0 7px;">Emerging surgical technologies, training, and responsible AI</li>
-                <li style="padding:0;">Live robotic surgery and telesurgery sessions</li>
-              </ul>
-              <p style="margin:0 0 16px;">We would be honoured to have your institution join us in sharing knowledge and clinical collaboration.</p>
-              <p style="margin:0 0 20px;">Please reply to this email or contact us at <a href="mailto:{{contact_email}}" style="color:#A92E83;text-decoration:underline;font-weight:bold;">{{contact_email}}</a>.</p>
-            </td>
-          </tr>
-          <tr>
-            <td align="center" style="padding:6px 34px 30px;">
-              <a href="{{registration_url}}" style="display:inline-block;background-color:#A92E83;color:#FFFFFF;text-decoration:none;font-size:15px;line-height:20px;font-weight:bold;padding:14px 26px;border:1px solid #A92E83;">Confirm Your Interest</a>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:22px 34px;background-color:#51345B;color:#FFFFFF;">
-              <p style="margin:0 0 5px;font-size:15px;line-height:22px;font-weight:bold;color:#FFFFFF;">Warm regards,</p>
-              <p style="margin:0 0 3px;font-size:15px;line-height:22px;color:#FFFFFF;">{{sender_name}}</p>
-              <p style="margin:0 0 12px;font-size:13px;line-height:20px;color:#EADFEA;">{{sender_title}} | KAIZENCON 2027 Organising Team</p>
-              <p style="margin:0;font-size:12px;line-height:19px;color:#EADFEA;">Robotics &amp; AI: Shaping the Future of GI Surgery<br>Evidence • Technique • Intelligence</p>
-            </td>
-          </tr>
-        </table>
-        <p style="max-width:600px;margin:14px auto 0;font-size:11px;line-height:17px;color:#817587;text-align:center;">You are receiving this invitation in connection with professional healthcare and conference participation.</p>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`,
-    active: true,
-    version: 1,
-    created_at: "2026-10-21T13:04:56.185459Z",
-    updated_at: "2026-10-21T13:04:56.185459Z",
-  },
-  {
-    id: "cc7071f4-74d9-45b0-b29e-a3056abe1f6b",
-    name: "registration",
-    purpose: "registration",
-    subject: "You're In! Join Us for KAIZENCON 2027",
-    html_body: `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KAIZENCON 2027 | Registration Confirmation</title>
-</head>
-<body style="margin:0;padding:0;background-color:#F6F7FB;font-family:Arial,Helvetica,sans-serif;color:#49304F;">
-  <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
-    Your registration for KAIZENCON 2027 — Robotics &amp; AI: Shaping the Future of GI Surgery.
-  </div>
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F6F7FB;margin:0;padding:24px 10px;">
-    <tr>
-      <td align="center">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:1000px;background-color:#FFFFFF;border:1px solid #E7DDE9;">
-          <tr>
-            <td align="center" style="padding:28px 28px 18px;background-color:#FFFFFF;">
-              <img src="cid:kaizencon_logo" width="100" alt="KAIZENCON 2027 — Robotics &amp; AI" style="display:block;width:25%;max-width:500px;height:auto;border:0;outline:none;text-decoration:none;">
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:0 28px;">
-              <div style="height:5px;background-color:#A92E83;font-size:0;line-height:0;">&nbsp;</div>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:28px 34px 10px;">
-              <p style="margin:0 0 8px;font-size:12px;line-height:18px;letter-spacing:2px;text-transform:uppercase;color:#A92E83;font-weight:bold;">Registration Confirmation</p>
-              <h1 style="margin:0;color:#51345B;font-size:28px;line-height:35px;font-weight:700;">You're Registered for KAIZENCON 2027!</h1>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:8px 34px 0;font-size:15px;line-height:25px;color:#51465A;">
-              <p style="margin:0 0 16px;">Dear <strong>{{name}}</strong>,</p>
-              <p style="margin:0 0 16px;">Thank you for registering for <strong>KAIZENCON 2027</strong>, themed <strong>“Robotics &amp; AI: Shaping the Future of GI Surgery.”</strong></p>
-              <p style="margin:0 0 16px;">We are pleased to confirm your registration and look forward to welcoming you to this exciting gathering of surgeons, healthcare leaders, researchers, and technology innovators.</p>
-              <p style="margin:0 0 16px;">Your participation will contribute to meaningful discussions, knowledge sharing, and collaboration on the evolving role of artificial intelligence and robotics in gastrointestinal surgery.</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:4px 34px 18px;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FBF6FA;border-left:4px solid #A92E83;">
-                <tr>
-                  <td style="padding:18px 20px;">
-                    <p style="margin:0 0 9px;font-size:13px;line-height:18px;color:#A92E83;font-weight:bold;letter-spacing:1px;text-transform:uppercase;">Conference Details</p>
-                    <p style="margin:0 0 7px;font-size:15px;line-height:23px;color:#51345B;"><strong>Conference:</strong> KAIZENCON 2027</p>
-                    <p style="margin:0 0 7px;font-size:15px;line-height:23px;color:#51345B;"><strong>Theme:</strong> Robotics &amp; AI: Shaping the Future of GI Surgery</p>
-                    <p style="margin:0 0 7px;font-size:15px;line-height:23px;color:#51345B;"><strong>Date:</strong> 1–3 January 2027</p>
-                    <p style="margin:0 0 7px;font-size:15px;line-height:23px;color:#51345B;"><strong>Venue:</strong> Hyatt Regency, Ashram Road</p>
-                    <p style="margin:0;font-size:15px;line-height:23px;color:#51345B;"><strong>Location:</strong> Ahmedabad, Gujarat, India</p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:0 34px 10px;font-size:15px;line-height:25px;color:#51465A;">
-              <p style="margin:0 0 12px;"><strong>Here's what you can look forward to:</strong></p>
-              <ul style="margin:0 0 18px;padding-left:22px;">
-                <li style="padding:0 0 7px;">Practical AI and generative AI applications for surgeons</li>
-                <li style="padding:0 0 7px;">Robotics vs. laparoscopy CME discussions and expert debates</li>
-                <li style="padding:0 0 7px;">Emerging surgical technologies, training, and responsible AI</li>
-                <li style="padding:0;">Live robotic surgery and telesurgery sessions</li>
-              </ul>
-              <p style="margin:0 0 16px;">We recommend keeping these conference details handy as you plan your visit.</p>
-              <p style="margin:0 0 20px;">If you have any questions, contact us at <a href="mailto:{{contact_email}}" style="color:#A92E83;text-decoration:underline;font-weight:bold;">{{contact_email}}</a>.</p>
-            </td>
-          </tr>
-          <tr>
-            <td align="center" style="padding:6px 34px 30px;">
-              <a href="{{conference_url}}" style="display:inline-block;background-color:#A92E83;color:#FFFFFF;text-decoration:none;font-size:15px;line-height:20px;font-weight:bold;padding:14px 26px;border:1px solid #A92E83;">Visit Conference Website</a>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:22px 34px;background-color:#51345B;color:#FFFFFF;">
-              <p style="margin:0 0 5px;font-size:15px;line-height:22px;font-weight:bold;color:#FFFFFF;">Warm regards,</p>
-              <p style="margin:0 0 3px;font-size:15px;line-height:22px;color:#FFFFFF;">{{sender_name}}</p>
-              <p style="margin:0 0 12px;font-size:13px;line-height:20px;color:#EADFEA;">{{sender_title}} | KAIZENCON 2027 Organising Team</p>
-              <p style="margin:0;font-size:12px;line-height:19px;color:#EADFEA;">Robotics &amp; AI: Shaping the Future of GI Surgery<br>Evidence • Technique • Intelligence</p>
-            </td>
-          </tr>
-        </table>
-        <p style="max-width:600px;margin:14px auto 0;font-size:11px;line-height:17px;color:#817587;text-align:center;">This email confirms your registration for KAIZENCON 2027. Please retain it for your records.</p>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`,
-    active: true,
-    version: 1,
-    created_at: "2026-10-21T13:10:40.155321Z",
-    updated_at: "2026-10-21T13:10:40.155321Z",
-  },
-];
-
 export default function TemplatesPage() {
   const { info, success, error: toastError } = useToast();
 
   // State
-  const [templates, setTemplates] = useState<TemplateItem[]>(DYNAMIC_TEMPLATES_DATA);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [templates, setTemplates] = useState<TemplateItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [, setFetchError] = useState<string | null>(null);
 
   // Filters
@@ -393,6 +101,7 @@ export default function TemplatesPage() {
     html_body: "",
   });
   const [editFile, setEditFile] = useState<File | null>(null);
+  const [editFileNotice, setEditFileNotice] = useState<string | null>(null);
   const [editSubmitting, setEditSubmitting] = useState(false);
 
   // Fetch dynamic templates from API: http://192.168.29.201:8000/api/v1/email-agent/templates
@@ -409,11 +118,8 @@ export default function TemplatesPage() {
       }
     } catch (err: any) {
       console.warn("Live API fetch notice:", err);
-      // Fallback seamlessly to the dynamic template data
-      setTemplates((prev) => (prev.length > 0 ? prev : DYNAMIC_TEMPLATES_DATA));
-      setFetchError(
-        `Note: ${err?.message || "Failed to fetch"}. If http://192.168.29.201:8000 is on a private network, displaying active database templates.`
-      );
+      setTemplates([]);
+      setFetchError(err?.message || "Failed to fetch templates from server.");
     } finally {
       setLoading(false);
     }
@@ -548,6 +254,38 @@ export default function TemplatesPage() {
     setPreviewTab("rendered");
   };
 
+  // Select file in Edit Modal
+  const handleSelectEditFile = (file: File | null) => {
+    if (!file) {
+      setEditFile(null);
+      setEditFileNotice(null);
+      return;
+    }
+
+    if (isHtmlFile(file)) {
+      setEditFile(file);
+      setEditFileNotice(`Loading HTML from ${file.name}...`);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const text = String(event.target?.result || "");
+        setEditFormData((prev) => ({ ...prev, html_body: text }));
+        setEditFileNotice(`Loaded HTML from ${file.name}`);
+      };
+      reader.onerror = () => {
+        toastError("Failed to read HTML file.");
+        setEditFileNotice(null);
+      };
+      reader.readAsText(file);
+    } else if (isDocxFile(file)) {
+      setEditFile(file);
+      setEditFileNotice(`Word document attached: ${file.name}`);
+    } else {
+      toastError("Please choose a valid .docx, .doc, .html, or .htm file.");
+      setEditFile(null);
+      setEditFileNotice(null);
+    }
+  };
+
   // Open Edit Modal
   const handleOpenEdit = (template: TemplateItem) => {
     setEditingTemplate(template);
@@ -558,6 +296,7 @@ export default function TemplatesPage() {
       html_body: template.html_body || "",
     });
     setEditFile(null);
+    setEditFileNotice(null);
     setIsEditModalOpen(true);
   };
 
@@ -577,25 +316,28 @@ export default function TemplatesPage() {
         subject: editFormData.subject.trim(),
         active: editFormData.active,
       };
-      if (editFile) payload.html_file = editFile;
-      else if (editFormData.html_body) payload.html_body = editFormData.html_body;
+
+      // Check whether user attached a direct Word document or edited the HTML/uploaded .html
+      if (editFile && isDocxFile(editFile)) {
+        payload.docx_file = editFile;
+      } else if (editFormData.html_body && editFormData.html_body.trim()) {
+        try {
+          const docxBlob = await convertHtmlToDocxBlob(editFormData.html_body.trim());
+          payload.docx_file = docxBlob;
+        } catch (convErr) {
+          console.warn("Notice: could not convert HTML to docx blob, fallback to html_file:", convErr);
+        }
+        payload.html_body = editFormData.html_body;
+        if (editFile) payload.html_file = editFile;
+      } else if (editFile) {
+        payload.docx_file = editFile;
+        payload.html_file = editFile;
+      }
 
       await updateTemplate(editingTemplate.id, payload);
 
-      setTemplates((prev) =>
-        prev.map((t) =>
-          t.id === editingTemplate.id
-            ? {
-              ...t,
-              name: editFormData.name,
-              subject: editFormData.subject,
-              active: editFormData.active,
-              html_body: editFormData.html_body || t.html_body,
-              updated_at: new Date().toISOString(),
-            }
-            : t
-        )
-      );
+      // Re-fetch templates from live backend to sync version and parsed HTML
+      await fetchTemplates();
 
       const isDark = document.documentElement.classList.contains("dark");
       await Swal.fire({
@@ -607,22 +349,11 @@ export default function TemplatesPage() {
         color: isDark ? "#F9FAFB" : "#111827",
       });
       setIsEditModalOpen(false);
-    } catch {
-      setTemplates((prev) =>
-        prev.map((t) =>
-          t.id === editingTemplate.id
-            ? {
-              ...t,
-              name: editFormData.name,
-              subject: editFormData.subject,
-              active: editFormData.active,
-              html_body: editFormData.html_body || t.html_body,
-            }
-            : t
-        )
-      );
-      setIsEditModalOpen(false);
-      info("Template updated.");
+      setEditFile(null);
+      setEditFileNotice(null);
+    } catch (err: any) {
+      console.error("Error saving template:", err);
+      toastError(err?.message || "Failed to update template");
     } finally {
       setEditSubmitting(false);
     }
@@ -2106,21 +1837,21 @@ export default function TemplatesPage() {
                 />
                 <div>
                   <span className="text-[11px] text-gray-500 block mb-1">
-                    Or upload a replacement .html file:
+                    Or upload a replacement file (.html or .docx):
                   </span>
                   <input
                     type="file"
-                    accept=".html,.htm"
+                    accept=".html,.htm,.docx,.doc"
                     onChange={(e) => {
                       if (e.target.files && e.target.files[0]) {
-                        setEditFile(e.target.files[0]);
+                        handleSelectEditFile(e.target.files[0]);
                       }
                     }}
-                    className="text-xs text-gray-500 file:mr-3 file:py-1 file:px-2.5 file:rounded-xl file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-gray-800 file:text-gray-700 dark:file:text-gray-300"
+                    className="text-xs text-gray-500 file:mr-3 file:py-1 file:px-2.5 file:rounded-xl file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-gray-800 file:text-gray-700 dark:file:text-gray-300 cursor-pointer"
                   />
-                  {editFile && (
-                    <span className="text-xs text-emerald-600 block mt-1">
-                      File queued: {editFile.name}
+                  {editFileNotice && (
+                    <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium block mt-1">
+                      ✓ {editFileNotice}
                     </span>
                   )}
                 </div>

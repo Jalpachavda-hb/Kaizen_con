@@ -7,7 +7,6 @@ import { useToast } from "../../context/ToastContext";
 import {
   getCampaigns,
   getCampaignLogs,
-  getEmailAgentContacts,
   getContactById,
 } from "../../api/ApiPath";
 
@@ -79,10 +78,10 @@ export default function CampaignLogsPage() {
     try {
       // 1. Fetch Campaign info
       try {
-        const campaignData = await getCampaigns(0, 100);
+        const campaignData = await getCampaigns(1, 1, id);
         if (Array.isArray(campaignData)) {
-          const match = campaignData.find((c: any) => c.id === id || c.id?.toLowerCase() === id.toLowerCase());
-          if (match) {
+          const match = campaignData.find((c: any) => c.id === id || c.id?.toLowerCase() === id.toLowerCase()) || campaignData[0];
+          if (match && match.id) {
             setCampaign(match);
           } else {
             setCampaign({ id, name: `Campaign ${id.slice(0, 8)}...` });
@@ -98,43 +97,32 @@ export default function CampaignLogsPage() {
       const logsList = Array.isArray(res) ? res : [];
       setLogs(logsList);
 
-      // 3. Resolve contact details for logs
+      // 3. Resolve contact details specifically for these campaign logs
       try {
-        const contactsData = await getEmailAgentContacts(0, 100);
-        if (Array.isArray(contactsData)) {
-          setAvailableContacts(contactsData);
-          const map: Record<string, ContactOption> = {};
-          contactsData.forEach((ct: any) => {
-            if (ct && ct.id) {
-              map[ct.id] = ct;
-              map[ct.id.toLowerCase().trim()] = ct;
-            }
-          });
-          setContactsMap(map);
+        const contactIdsToFetch = logsList
+          .map((log: any) => (log.contact_id || log.recipient_id || "").trim())
+          .filter(Boolean);
 
-          // Resolve remaining missing contacts individually
-          const contactIdsToFetch = logsList
-            .map((log: any) => (log.contact_id || log.recipient_id || "").trim())
-            .filter((cid: string) => cid && !map[cid] && !map[cid.toLowerCase()]);
+        const uniqueMissing = Array.from(new Set(contactIdsToFetch));
+        const map: Record<string, ContactOption> = {};
 
-          const uniqueMissing = Array.from(new Set(contactIdsToFetch));
-          for (const cid of uniqueMissing) {
+        await Promise.all(
+          uniqueMissing.map(async (cid: string) => {
             try {
               const contactDetail = await getContactById(cid);
               if (contactDetail && contactDetail.id) {
-                setContactsMap((prev) => ({
-                  ...prev,
-                  [contactDetail.id]: contactDetail,
-                  [contactDetail.id.toLowerCase().trim()]: contactDetail,
-                }));
+                map[contactDetail.id] = contactDetail;
+                map[contactDetail.id.toLowerCase().trim()] = contactDetail;
               }
             } catch {
-              // Ignore single contact fetch failures
+              // Ignore individual fetch failure
             }
-          }
-        }
+          })
+        );
+        setContactsMap(map);
+        setAvailableContacts(Object.values(map));
       } catch (contactErr) {
-        console.warn("Could not batch load contacts:", contactErr);
+        console.warn("Could not load contact details for logs:", contactErr);
       }
     } catch (err: any) {
       console.error("Failed to load campaign logs:", err);

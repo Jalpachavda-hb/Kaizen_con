@@ -86,16 +86,31 @@ export default function CampaignsPage() {
   const [selectedCampaign, setSelectedCampaign] = useState<CampaignItem | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
-  // Fetch campaigns from API
-  const fetchCampaigns = useCallback(async () => {
+  // Campaigns Pagination State (Page-wise pagination)
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [totalCount, setTotalCount] = useState<number>(0);
+
+  // Fetch campaigns from API passing page number into offset field
+  const fetchCampaigns = useCallback(async (page?: number, limit?: number) => {
+    const targetPage = typeof page === "number" ? page : currentPage;
+    const targetLimit = typeof limit === "number" ? limit : pageSize;
     setLoading(true);
     setFetchError(null);
     try {
-      const data = await getCampaigns(0, 100);
+      const data = await getCampaigns(targetPage, targetLimit);
       if (Array.isArray(data)) {
         setCampaigns(data);
+        const serverCount =
+          typeof (data as any).count === "number"
+            ? (data as any).count
+            : typeof (data as any).total === "number"
+            ? (data as any).total
+            : data.length;
+        setTotalCount(serverCount);
       } else {
         setCampaigns([]);
+        setTotalCount(0);
       }
     } catch (err: any) {
       console.error("Failed to load campaigns:", err);
@@ -103,11 +118,11 @@ export default function CampaignsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentPage, pageSize]);
 
   useEffect(() => {
-    fetchCampaigns();
-  }, [fetchCampaigns]);
+    fetchCampaigns(currentPage, pageSize);
+  }, [currentPage, pageSize]);
 
   // API Call: Approve Campaign
   const handleApprove = async (c: CampaignItem) => {
@@ -482,21 +497,18 @@ export default function CampaignsPage() {
     return true;
   });
 
-  // Campaigns Pagination
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
-
+  // Reset to page 1 on search or filter change
   useEffect(() => {
     setCurrentPage(1);
   }, [search, statusFilter]);
 
+  // Data is fetched page-wise from the server
   const paginatedCampaigns = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredCampaigns.slice(startIndex, startIndex + pageSize);
-  }, [filteredCampaigns, currentPage, pageSize]);
+    return filteredCampaigns;
+  }, [filteredCampaigns]);
 
   // KPI Metrics
-  const totalCampaigns = campaigns.length;
+  const totalCampaigns = totalCount || campaigns.length;
   const runningCount = campaigns.filter(
     (c) => (c.status || "").toLowerCase() === "running"
   ).length;
@@ -526,7 +538,7 @@ export default function CampaignsPage() {
             {/* Live Refresh button */}
             <button
               type="button"
-              onClick={fetchCampaigns}
+              onClick={() => fetchCampaigns()}
               disabled={loading}
               className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/60 rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-60"
               title="Refresh campaigns from API"
@@ -670,7 +682,7 @@ export default function CampaignsPage() {
             </div>
             <button
               type="button"
-              onClick={fetchCampaigns}
+              onClick={() => fetchCampaigns()}
               className="px-3 py-1 rounded-md bg-rose-600 text-white font-medium text-xs hover:bg-rose-700 transition cursor-pointer"
             >
               Retry
@@ -1056,9 +1068,11 @@ export default function CampaignsPage() {
           {/* Pagination Controls Bar */}
           <TablePagination
             currentPage={currentPage}
-            totalItems={filteredCampaigns.length}
+            totalItems={search.trim() || statusFilter !== "All" ? filteredCampaigns.length : (totalCount || campaigns.length)}
             pageSize={pageSize}
-            onPageChange={setCurrentPage}
+            onPageChange={(newPage) => {
+              setCurrentPage(newPage);
+            }}
             onPageSizeChange={(newSize) => {
               setPageSize(newSize);
               setCurrentPage(1);

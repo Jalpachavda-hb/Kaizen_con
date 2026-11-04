@@ -218,7 +218,8 @@
 }
 
 .kz-btn-primary:hover {
-  background: #5E2669;
+  background: #5E2669; 
+  color: #FFFFFF;
   border-color: #5E2669;
   transform: translateY(-2px);
   box-shadow: 0 6px 24px rgba(74, 30, 82, 0.38);

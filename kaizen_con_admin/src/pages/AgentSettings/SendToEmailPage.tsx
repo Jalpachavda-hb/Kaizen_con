@@ -52,16 +52,31 @@ export default function SendToEmailPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
-  // Fetch contacts from dynamic API
-  const fetchContacts = useCallback(async () => {
+  // Contacts Pagination State (Page-wise pagination)
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [totalCount, setTotalCount] = useState<number>(0);
+
+  // Fetch contacts from dynamic API passing page number into offset field
+  const fetchContacts = useCallback(async (page?: number, limit?: number) => {
+    const targetPage = typeof page === "number" ? page : currentPage;
+    const targetLimit = typeof limit === "number" ? limit : pageSize;
     setLoading(true);
     setFetchError(null);
     try {
-      const data = await getEmailAgentContacts(0, 100);
+      const data = await getEmailAgentContacts(targetPage, targetLimit);
       if (Array.isArray(data)) {
         setContacts(data);
+        const serverCount =
+          typeof (data as any).count === "number"
+            ? (data as any).count
+            : typeof (data as any).total === "number"
+            ? (data as any).total
+            : data.length;
+        setTotalCount(serverCount);
       } else {
         setContacts([]);
+        setTotalCount(0);
       }
     } catch (err: any) {
       console.error("Failed to load contacts:", err);
@@ -69,11 +84,11 @@ export default function SendToEmailPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentPage, pageSize]);
 
   useEffect(() => {
-    fetchContacts();
-  }, [fetchContacts]);
+    fetchContacts(currentPage, pageSize);
+  }, [currentPage, pageSize]);
 
   // Dynamically extract unique contact types
   const availableTypes = useMemo(() => {
@@ -118,18 +133,15 @@ export default function SendToEmailPage() {
     return true;
   });
 
-  // Pagination
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
-
+  // Reset page to 1 on search or filter change
   useEffect(() => {
     setCurrentPage(1);
   }, [search, statusFilter, typeFilter]);
 
+  // Data is fetched page-wise from the server
   const paginatedContacts = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredContacts.slice(startIndex, startIndex + pageSize);
-  }, [filteredContacts, currentPage, pageSize]);
+    return filteredContacts;
+  }, [filteredContacts]);
 
   // Bulk selection handlers
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -571,7 +583,7 @@ export default function SendToEmailPage() {
   };
 
   // KPI Metrics
-  const totalContacts = contacts.length;
+  const totalContacts = totalCount || contacts.length;
   const eligibleCount = contacts.filter((c) => c.status === "eligible" && !c.unsubscribed).length;
   const unsubscribedCount = contacts.filter((c) => c.unsubscribed || c.status !== "eligible").length;
 
@@ -636,7 +648,7 @@ export default function SendToEmailPage() {
             {/* Refresh Live API */}
             <button
               type="button"
-              onClick={fetchContacts}
+              onClick={() => fetchContacts()}
               disabled={loading}
               className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/60 rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-60"
               title="Refresh contacts from API"
@@ -855,7 +867,7 @@ export default function SendToEmailPage() {
             </div>
             <button
               type="button"
-              onClick={fetchContacts}
+              onClick={() => fetchContacts()}
               className="px-3 py-1 rounded-md bg-rose-600 text-white font-medium text-xs hover:bg-rose-700 transition"
             >
               Retry
@@ -1079,9 +1091,11 @@ export default function SendToEmailPage() {
           {/* Pagination Controls Bar */}
           <TablePagination
             currentPage={currentPage}
-            totalItems={filteredContacts.length}
+            totalItems={search.trim() || statusFilter !== "All" || typeFilter !== "All" ? filteredContacts.length : (totalCount || contacts.length)}
             pageSize={pageSize}
-            onPageChange={setCurrentPage}
+            onPageChange={(newPage) => {
+              setCurrentPage(newPage);
+            }}
             onPageSizeChange={(newSize) => {
               setPageSize(newSize);
               setCurrentPage(1);
