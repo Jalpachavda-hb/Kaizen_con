@@ -66,7 +66,7 @@ export default function CampaignLogsPage() {
   const [availableContacts, setAvailableContacts] = useState<ContactOption[]>([]);
 
   // Pagination
-  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
 
   // Fetch campaign info and logs
@@ -78,7 +78,7 @@ export default function CampaignLogsPage() {
     try {
       // 1. Fetch Campaign info
       try {
-        const campaignData = await getCampaigns(1, 1, id);
+        const campaignData = await getCampaigns(0, 1, id);
         if (Array.isArray(campaignData)) {
           const match = campaignData.find((c: any) => c.id === id || c.id?.toLowerCase() === id.toLowerCase()) || campaignData[0];
           if (match && match.id) {

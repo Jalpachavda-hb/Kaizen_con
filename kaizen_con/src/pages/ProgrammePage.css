@@ -1325,8 +1325,7 @@
 }
 
 /* Title & Description */
-.kz-card-title {
-  margin: 0 0 8px 0;
+.kz-card-title { 
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--kz-text-dark);
@@ -1335,7 +1334,7 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 2.7em;
+ 
 }
 
 .kz-card-description {

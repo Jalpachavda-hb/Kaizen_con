@@ -485,7 +485,7 @@ export const deleteSchedule = deleteSession;
  * Get Email Agent Contacts API
  * Supports page-number based pagination via the offset parameter.
  *
- * @param {number} [offset=1] - Page number (passed into offset field)
+ * @param {number} [offset=0] - Page number (passed into offset field)
  * @param {number} [limit=10] - Number of items per page
  * @returns {Promise<any[]>} Array of contacts (with .count and .total)
  */
@@ -708,12 +708,12 @@ export const importExcelContacts = async (file) => {
  * Get Email Agent Campaigns API
  * Supports page-number based pagination via the offset parameter.
  *
- * @param {number} [offset=1] - Page number (passed into offset field)
+ * @param {number} [offset=0] - Page number (passed into offset field)
  * @param {number} [limit=10] - Number of items per page
  * @param {string|null} [campaignId=null] - Optional Campaign UUID
  * @returns {Promise<any[]>} Array of campaigns (with .count and .total)
  */
-export const getCampaigns = async (offset = 1, limit = 10, campaignId = null) => {
+export const getCampaigns = async (offset = 0, limit = 10, campaignId = null) => {
   try {
     let url = `${API_ENDPOINTS.EMAIL_AGENT_CAMPAIGNS}?offset=${encodeURIComponent(offset)}&limit=${encodeURIComponent(limit)}`;
     if (campaignId) {

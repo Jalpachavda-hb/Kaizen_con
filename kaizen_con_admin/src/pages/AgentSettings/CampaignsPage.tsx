@@ -91,14 +91,15 @@ export default function CampaignsPage() {
   const [pageSize, setPageSize] = useState<number>(10);
   const [totalCount, setTotalCount] = useState<number>(0);
 
-  // Fetch campaigns from API passing page number into offset field
+  // Fetch campaigns from API passing offset (page 1 -> offset 0)
   const fetchCampaigns = useCallback(async (page?: number, limit?: number) => {
     const targetPage = typeof page === "number" ? page : currentPage;
     const targetLimit = typeof limit === "number" ? limit : pageSize;
+    const targetOffset = Math.max(0, targetPage - 1);
     setLoading(true);
     setFetchError(null);
     try {
-      const data = await getCampaigns(targetPage, targetLimit);
+      const data = await getCampaigns(targetOffset, targetLimit);
       if (Array.isArray(data)) {
         setCampaigns(data);
         const serverCount =
