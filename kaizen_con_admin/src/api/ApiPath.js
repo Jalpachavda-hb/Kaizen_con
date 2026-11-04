@@ -19,9 +19,13 @@ export const API_ENDPOINTS = {
   EMAIL_AGENT_CAMPAIGNS: `${BASE_URL}/api/v1/email-agent/campaigns`,
   EMAIL_AGENT_TEMPLATES: `${BASE_URL}/api/v1/email-agent/templates`,
   POLLS_ADMIN: `${BASE_URL}/polling/api/admin/polls`,
+  BROCHURE_UPLOAD: `${API_BASE_URL}/brochure/upload`,
+  BROCHURE_DOWNLOAD: `${API_BASE_URL}/brochure/download`,
+  BROCHURE_DELETE: `${API_BASE_URL}/brochure/delete`,
 
 
 };
+
 
 /**
  * Admin Login API
@@ -1167,12 +1171,17 @@ export const deleteCampaign = async (campaignId) => {
  * Endpoint: GET {BASE_URL}/api/v1/email-agent/campaigns/{campaign_id}/logs
  *
  * @param {string} campaignId - The UUID of the campaign
- * @returns {Promise<any[]>} Array of log objects
+ * @returns {Promise<any>} Log page object with logs and metrics
  */
-export const getCampaignLogs = async (campaignId) => {
+export const getCampaignLogs = async (campaignId, offset = 0, limit = 10) => {
   try {
     if (!campaignId) throw new Error('Campaign ID is required to fetch logs');
-    const url = `${API_ENDPOINTS.EMAIL_AGENT_CAMPAIGNS}/${encodeURIComponent(campaignId)}/logs`;
+    const queryParams = new URLSearchParams();
+    if (offset !== undefined && offset !== null) queryParams.append('offset', String(offset));
+    if (limit !== undefined && limit !== null) queryParams.append('limit', String(limit));
+    const queryString = queryParams.toString();
+    const url = `${API_ENDPOINTS.EMAIL_AGENT_CAMPAIGNS}/${encodeURIComponent(campaignId)}/logs${queryString ? `?${queryString}` : ''}`;
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -1199,19 +1208,68 @@ export const getCampaignLogs = async (campaignId) => {
       throw error;
     }
 
-    if (Array.isArray(data)) {
-      return data;
+    if (data && Array.isArray(data.results) && data.results.length > 0 && typeof data.results[0] === 'object' && data.results[0] !== null) {
+      const pageData = data.results[0];
+      return {
+        campaign_id: pageData.campaign_id || campaignId,
+        total_recipients: Number(pageData.total_recipients ?? 0),
+        sent_count: Number(pageData.sent_count ?? 0),
+        pending_count: Number(pageData.pending_count ?? 0),
+        received_count: Number(pageData.received_count ?? 0),
+        first_sent_at: pageData.first_sent_at ?? null,
+        last_sent_at: pageData.last_sent_at ?? null,
+        count: Number(pageData.count ?? pageData.total_recipients ?? (pageData.logs ? pageData.logs.length : 0)),
+        offset: Number(pageData.offset ?? offset),
+        limit: Number(pageData.limit ?? limit),
+        logs: Array.isArray(pageData.logs) ? pageData.logs : [],
+      };
     }
 
     if (data && Array.isArray(data.logs)) {
-      return data.logs;
+      return {
+        campaign_id: data.campaign_id || campaignId,
+        total_recipients: Number(data.total_recipients ?? data.logs.length),
+        sent_count: Number(data.sent_count ?? 0),
+        pending_count: Number(data.pending_count ?? 0),
+        received_count: Number(data.received_count ?? 0),
+        first_sent_at: data.first_sent_at ?? null,
+        last_sent_at: data.last_sent_at ?? null,
+        count: Number(data.count ?? data.total_recipients ?? data.logs.length),
+        offset: Number(data.offset ?? offset),
+        limit: Number(data.limit ?? limit),
+        logs: data.logs,
+      };
     }
 
-    if (data && Array.isArray(data.results)) {
-      return data.results;
+    if (Array.isArray(data)) {
+      return {
+        campaign_id: campaignId,
+        total_recipients: data.length,
+        sent_count: data.filter((l) => (l.message_status || l.status || '').toLowerCase().includes('sent')).length,
+        pending_count: data.filter((l) => (l.message_status || l.status || '').toLowerCase().includes('pend')).length,
+        received_count: 0,
+        first_sent_at: null,
+        last_sent_at: null,
+        count: data.length,
+        offset,
+        limit,
+        logs: data,
+      };
     }
 
-    return [];
+    return {
+      campaign_id: campaignId,
+      total_recipients: 0,
+      sent_count: 0,
+      pending_count: 0,
+      received_count: 0,
+      first_sent_at: null,
+      last_sent_at: null,
+      count: 0,
+      offset,
+      limit,
+      logs: [],
+    };
   } catch (error) {
     console.error('Error in getCampaignLogs API:', error);
     throw error;
@@ -1792,6 +1850,248 @@ export const rejectQuestionApi = async (sessionId, questionId) => {
   return await response.json();
 };
 
+/**
+ * Format bytes to readable string (e.g. 2.45 MB)
+ */
+export const formatFileSize = (bytes) => {
+  if (!bytes || bytes <= 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return (bytes / Math.pow(1024, i)).toFixed(2) + " " + units[i];
+};
+
+/**
+ * Extract filename from Content-Disposition header
+ */
+export const extractFilenameFromDisposition = (disposition, fallback = "Kaizencon_2027_Brochure.pdf") => {
+  if (!disposition) return fallback;
+  const starMatch = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+  if (starMatch && starMatch[1]) {
+    try {
+      return decodeURIComponent(starMatch[1].trim());
+    } catch {
+      return starMatch[1].trim();
+    }
+  }
+  const match = disposition.match(/filename=["']?([^"';]+)["']?/i);
+  if (match && match[1]) {
+    return match[1].trim();
+  }
+  return fallback;
+};
+
+/**
+ * Upload Brochure API
+ * Endpoint: POST /api/brochure/upload
+ * Content-Type: multipart/form-data
+ * Field: file (PDF, max 25 MB)
+ *
+ * @param {File|Blob} file - PDF file to upload
+ * @param {Function} [onProgress] - Optional upload progress callback (percent: number)
+ * @returns {Promise<any>}
+ */
+export const uploadBrochure = async (file, onProgress) => {
+  if (!file) {
+    throw new Error("Please select a PDF file to upload.");
+  }
+
+  const isPdf = file.type === "application/pdf" || (file.name && file.name.toLowerCase().endsWith(".pdf"));
+  if (!isPdf) {
+    const error = new Error("Only PDF files are supported.");
+    error.status = 415;
+    throw error;
+  }
+
+  const MAX_SIZE = 25 * 1024 * 1024;
+  if (file.size > MAX_SIZE) {
+    const error = new Error("Maximum file size is 25 MB.");
+    error.status = 413;
+    throw error;
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  if (typeof onProgress === "function") {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", API_ENDPOINTS.BROCHURE_UPLOAD);
+      xhr.setRequestHeader("Accept", "application/json");
+
+      const token = localStorage.getItem("ignito_auth_token");
+      if (token) {
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+      }
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          onProgress(percent);
+        }
+      };
+
+      xhr.onload = () => {
+        let data = null;
+        try {
+          data = JSON.parse(xhr.responseText);
+        } catch {
+          data = xhr.responseText;
+        }
+
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve(data);
+        } else {
+          let msg = "Failed to upload brochure.";
+          if (xhr.status === 400) msg = "The uploaded file is not a valid PDF.";
+          else if (xhr.status === 409) msg = "A brochure already exists.";
+          else if (xhr.status === 413) msg = "Maximum file size is 25 MB.";
+          else if (xhr.status === 415) msg = "Only PDF files are supported.";
+          else if (xhr.status === 422) {
+            if (data && data.detail) {
+              msg = typeof data.detail === "string" ? data.detail : (data.detail[0] && data.detail[0].msg ? data.detail[0].msg : JSON.stringify(data.detail));
+            } else {
+              msg = "Validation error occurred during upload.";
+            }
+          } else if (data && data.detail) {
+            msg = typeof data.detail === "string" ? data.detail : (data.detail[0] && data.detail[0].msg ? data.detail[0].msg : msg);
+          } else if (data && data.message) {
+            msg = data.message;
+          }
+
+          const error = new Error(msg);
+          error.status = xhr.status;
+          error.data = data;
+          reject(error);
+        }
+      };
+
+      xhr.onerror = () => {
+        const error = new Error("Network error during brochure upload. Please check your connection.");
+        error.status = 0;
+        reject(error);
+      };
+
+      xhr.send(formData);
+    });
+  }
+
+  const headers = { Accept: "application/json" };
+  const token = localStorage.getItem("ignito_auth_token");
+  if (token) {
+    headers["Authorization"] = "Bearer " + token;
+  }
+
+  const response = await fetch(API_ENDPOINTS.BROCHURE_UPLOAD, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    let msg = "Failed to upload brochure.";
+    if (response.status === 400) msg = "The uploaded file is not a valid PDF.";
+    else if (response.status === 409) msg = "A brochure already exists.";
+    else if (response.status === 413) msg = "Maximum file size is 25 MB.";
+    else if (response.status === 415) msg = "Only PDF files are supported.";
+    else if (response.status === 422) {
+      if (data && data.detail) {
+        msg = typeof data.detail === "string" ? data.detail : (data.detail[0] && data.detail[0].msg ? data.detail[0].msg : JSON.stringify(data.detail));
+      } else {
+        msg = "Validation error occurred during upload.";
+      }
+    } else if (data && data.detail) {
+      msg = typeof data.detail === "string" ? data.detail : (data.detail[0] && data.detail[0].msg ? data.detail[0].msg : msg);
+    } else if (data && data.message) {
+      msg = data.message;
+    }
+
+    const error = new Error(msg);
+    error.status = response.status;
+    error.data = data;
+    throw error;
+  }
+
+  return data;
+};
+
+/**
+ * Download / Fetch Current Brochure Blob API
+ * Endpoint: GET /api/brochure/download
+ *
+ * @returns {Promise<{ blob: Blob, filename: string, size: number, url: string } | null>}
+ */
+export const downloadBrochure = async () => {
+  const headers = {};
+  const token = localStorage.getItem("ignito_auth_token");
+  if (token) {
+    headers["Authorization"] = "Bearer " + token;
+  }
+
+  const response = await fetch(API_ENDPOINTS.BROCHURE_DOWNLOAD, {
+    method: "GET",
+    headers,
+  });
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    const msg = errorData && (errorData.detail || errorData.message) ? (errorData.detail || errorData.message) : "Failed to fetch brochure (HTTP " + response.status + ")";
+    const error = new Error(msg);
+    error.status = response.status;
+    error.data = errorData;
+    throw error;
+  }
+
+  const disposition = response.headers.get("content-disposition");
+  const filename = extractFilenameFromDisposition(disposition, "Kaizencon_2027_Brochure.pdf");
+  const blob = await response.blob();
+  const size = blob.size || Number(response.headers.get("content-length")) || 0;
+  const url = URL.createObjectURL(blob);
+
+  return {
+    blob,
+    filename,
+    size,
+    url,
+  };
+};
+
+/**
+ * Delete Current Brochure API
+ * Endpoint: DELETE /api/brochure/delete
+ *
+ * @returns {Promise<any>}
+ */
+export const deleteBrochure = async () => {
+  const headers = { Accept: "application/json" };
+  const token = localStorage.getItem("ignito_auth_token");
+  if (token) {
+    headers["Authorization"] = "Bearer " + token;
+  }
+
+  const response = await fetch(API_ENDPOINTS.BROCHURE_DELETE, {
+    method: "DELETE",
+    headers,
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const msg = data && (data.detail || data.message) ? (data.detail || data.message) : "Failed to delete brochure.";
+    const error = new Error(msg);
+    error.status = response.status;
+    error.data = data;
+    throw error;
+  }
+
+  return data;
+};
+
 export default {
   BASE_URL,
   API_BASE_URL,
@@ -1837,4 +2137,9 @@ export default {
   downloadPollQrCode,
   approveQuestionApi,
   rejectQuestionApi,
+  formatFileSize,
+  extractFilenameFromDisposition,
+  uploadBrochure,
+  downloadBrochure,
+  deleteBrochure,
 };

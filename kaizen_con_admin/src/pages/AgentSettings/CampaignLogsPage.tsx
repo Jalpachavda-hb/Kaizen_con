@@ -54,18 +54,39 @@ export default function CampaignLogsPage() {
   // Pagination
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
+  const [totalCount, setTotalCount] = useState<number>(0);
 
-  // Fetch campaign info and logs
-  const fetchLogsData = useCallback(async () => {
+  // Server-provided KPI Execution Metrics
+  const [metrics, setMetrics] = useState<{
+    total_recipients: number;
+    sent_count: number;
+    pending_count: number;
+    received_count: number;
+    first_sent_at?: string | null;
+    last_sent_at?: string | null;
+  }>({
+    total_recipients: 0,
+    sent_count: 0,
+    pending_count: 0,
+    received_count: 0,
+    first_sent_at: null,
+    last_sent_at: null,
+  });
+
+  // Fetch campaign info and logs with server pagination
+  const fetchLogsData = useCallback(async (page = currentPage, size = pageSize) => {
     if (!id) return;
     setLoading(true);
     setError(null);
 
     try {
-      // 1. Fetch Campaign info and Logs in parallel for fast loading
+      const offset = Math.max(0, (page - 1) * size);
+      const limit = size;
+
+      // Fetch Campaign info and Logs concurrently
       const [campaignRes, logsRes] = await Promise.allSettled([
         getCampaigns(0, 100),
-        getCampaignLogs(id),
+        getCampaignLogs(id, offset, limit),
       ]);
 
       if (campaignRes.status === "fulfilled" && Array.isArray(campaignRes.value)) {
@@ -80,11 +101,21 @@ export default function CampaignLogsPage() {
         setCampaign({ id, name: `Campaign ${id.slice(0, 8)}...` });
       }
 
-      if (logsRes.status === "fulfilled") {
-        const logsList = Array.isArray(logsRes.value) ? logsRes.value : [];
+      if (logsRes.status === "fulfilled" && logsRes.value) {
+        const data: any = logsRes.value;
+        const logsList = Array.isArray(data.logs) ? data.logs : [];
         setLogs(logsList);
+        setTotalCount(Number(data.count ?? data.total_recipients ?? logsList.length));
+        setMetrics({
+          total_recipients: Number(data.total_recipients ?? 0),
+          sent_count: Number(data.sent_count ?? 0),
+          pending_count: Number(data.pending_count ?? 0),
+          received_count: Number(data.received_count ?? 0),
+          first_sent_at: data.first_sent_at ?? null,
+          last_sent_at: data.last_sent_at ?? null,
+        });
       } else {
-        throw logsRes.reason || new Error("Failed to load logs for this campaign.");
+        throw logsRes.status === "rejected" ? logsRes.reason : new Error("Failed to load logs for this campaign.");
       }
     } catch (err: any) {
       console.error("Failed to load campaign logs:", err);
@@ -92,11 +123,11 @@ export default function CampaignLogsPage() {
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, currentPage, pageSize]);
 
   useEffect(() => {
-    fetchLogsData();
-  }, [fetchLogsData]);
+    fetchLogsData(currentPage, pageSize);
+  }, [id, currentPage, pageSize, fetchLogsData]);
 
   // Copy helpers
   const handleCopyText = (text: string, label: string) => {
@@ -166,6 +197,7 @@ export default function CampaignLogsPage() {
         if (statusFilter === "Blocked" && !status.includes("block")) return false;
         if (statusFilter === "Failed" && (!status.includes("fail") && !status.includes("err"))) return false;
         if (statusFilter === "Pending" && !status.includes("pend")) return false;
+        if (statusFilter === "Received" && !status.includes("receive")) return false;
       }
 
       // Search Query
@@ -190,31 +222,6 @@ export default function CampaignLogsPage() {
     setCurrentPage(1);
   }, [search, statusFilter]);
 
-  // Paginated Logs
-  const paginatedLogs = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredLogs.slice(startIndex, startIndex + pageSize);
-  }, [filteredLogs, currentPage, pageSize]);
-
-  // KPI Metrics
-  const stats = useMemo(() => {
-    const total = logs.length;
-    let sent = 0;
-    let blocked = 0;
-    let failed = 0;
-    let pending = 0;
-
-    logs.forEach((log) => {
-      const st = (log.message_status || log.status || "").toLowerCase();
-      if (st.includes("sent")) sent++;
-      else if (st.includes("block")) blocked++;
-      else if (st.includes("fail") || st.includes("err")) failed++;
-      else if (st.includes("pend")) pending++;
-    });
-
-    return { total, sent, blocked, failed, pending };
-  }, [logs]);
-
   // Helper: Status badge renderer
   const renderLogStatusBadge = (status?: string, errorMsg?: any) => {
     const s = (status || "unknown").toLowerCase();
@@ -226,6 +233,10 @@ export default function CampaignLogsPage() {
       badgeStyle = "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800";
       dotStyle = "bg-emerald-500 animate-pulse";
       label = "SENT";
+    } else if (s.includes("receive")) {
+      badgeStyle = "bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800";
+      dotStyle = "bg-purple-500";
+      label = "RECEIVED";
     } else if (s.includes("block")) {
       badgeStyle = "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800";
       dotStyle = "bg-rose-500";
@@ -283,7 +294,7 @@ export default function CampaignLogsPage() {
 
             <button
               type="button"
-              onClick={fetchLogsData}
+              onClick={() => fetchLogsData(currentPage, pageSize)}
               disabled={loading}
               className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
               title="Refresh logs from API"
@@ -348,7 +359,7 @@ export default function CampaignLogsPage() {
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 pt-1 font-mono">
+              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 pt-1 font-mono flex-wrap">
                 <span>Campaign ID: {id}</span>
                 <button
                   type="button"
@@ -361,26 +372,32 @@ export default function CampaignLogsPage() {
                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                   </svg>
                 </button>
+                {metrics.first_sent_at && (
+                  <span className="text-[11px] text-gray-400">• First Sent: <strong className="text-gray-600 dark:text-gray-300 font-sans">{formatDate(metrics.first_sent_at)}</strong></span>
+                )}
+                {metrics.last_sent_at && (
+                  <span className="text-[11px] text-gray-400">• Last Sent: <strong className="text-gray-600 dark:text-gray-300 font-sans">{formatDate(metrics.last_sent_at)}</strong></span>
+                )}
               </div>
             </div>
 
-            {/* KPI Counts */}
+            {/* KPI Counts: total_recipients, sent_count, pending_count, received_count */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center shrink-0">
-              <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900/60 rounded-xl border border-gray-100 dark:border-gray-800">
-                <span className="text-[10px] uppercase font-bold text-gray-400">Total Logs</span>
-                <p className="text-base font-extrabold text-gray-800 dark:text-gray-200">{stats.total}</p>
+              <div className="px-4 py-2.5 bg-gray-50 dark:bg-gray-900/60 rounded-xl border border-gray-100 dark:border-gray-800">
+                <span className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400">Total Recipients</span>
+                <p className="text-base font-extrabold text-gray-800 dark:text-gray-200">{metrics.total_recipients}</p>
               </div>
-              <div className="px-4 py-2 bg-emerald-50/60 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900/40">
+              <div className="px-4 py-2.5 bg-emerald-50/60 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900/40">
                 <span className="text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400">Sent</span>
-                <p className="text-base font-extrabold text-emerald-700 dark:text-emerald-300">{stats.sent}</p>
+                <p className="text-base font-extrabold text-emerald-700 dark:text-emerald-300">{metrics.sent_count}</p>
               </div>
-              <div className="px-4 py-2 bg-rose-50/60 dark:bg-rose-950/30 rounded-xl border border-rose-100 dark:border-rose-900/40">
-                <span className="text-[10px] uppercase font-bold text-rose-600 dark:text-rose-400">Blocked</span>
-                <p className="text-base font-extrabold text-rose-700 dark:text-rose-300">{stats.blocked}</p>
+              <div className="px-4 py-2.5 bg-blue-50/60 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900/40">
+                <span className="text-[10px] uppercase font-bold text-blue-600 dark:text-blue-400">Pending</span>
+                <p className="text-base font-extrabold text-blue-700 dark:text-blue-300">{metrics.pending_count}</p>
               </div>
-              <div className="px-4 py-2 bg-amber-50/60 dark:bg-amber-950/30 rounded-xl border border-amber-100 dark:border-amber-900/40">
-                <span className="text-[10px] uppercase font-bold text-amber-600 dark:text-amber-400">Failed</span>
-                <p className="text-base font-extrabold text-amber-700 dark:text-amber-300">{stats.failed}</p>
+              <div className="px-4 py-2.5 bg-purple-50/60 dark:bg-purple-950/30 rounded-xl border border-purple-100 dark:border-purple-900/40">
+                <span className="text-[10px] uppercase font-bold text-purple-600 dark:text-purple-400">Received</span>
+                <p className="text-base font-extrabold text-purple-700 dark:text-purple-300">{metrics.received_count}</p>
               </div>
             </div>
           </div>
@@ -420,7 +437,7 @@ export default function CampaignLogsPage() {
 
           {/* Status Filter Buttons */}
           <div className="flex items-center gap-1.5 flex-wrap">
-            {["All", "Sent", "Blocked", "Failed", "Pending"].map((st) => {
+            {["All", "Sent", "Pending", "Received", "Failed", "Blocked"].map((st) => {
               const active = statusFilter === st;
               return (
                 <button
@@ -472,7 +489,7 @@ export default function CampaignLogsPage() {
             <span>{error}</span>
             <button
               type="button"
-              onClick={fetchLogsData}
+              onClick={() => fetchLogsData(currentPage, pageSize)}
               className="px-3 py-1 rounded-md bg-rose-600 text-white font-medium text-xs hover:bg-rose-700"
             >
               Retry
@@ -515,7 +532,7 @@ export default function CampaignLogsPage() {
                     </td>
                   </tr>
                 ) : (
-                  paginatedLogs.map((log: any, idx: number) => {
+                  filteredLogs.map((log: any, idx: number) => {
                     const contactId = (log.contact_id || log.recipient_id || "").trim();
                     const contactName = log.name || log.recipient_name || log.contact_name || (contactId ? `Contact (${contactId.slice(0, 8)}...)` : "Unknown Recipient");
                     const contactEmail = log.email || log.recipient || log.contact_email || log.recipient_email || "—";
@@ -620,9 +637,11 @@ export default function CampaignLogsPage() {
             {/* Logs Pagination Bar */}
             <TablePagination
               currentPage={currentPage}
-              totalItems={filteredLogs.length}
+              totalItems={totalCount}
               pageSize={pageSize}
-              onPageChange={setCurrentPage}
+              onPageChange={(newPage) => {
+                setCurrentPage(newPage);
+              }}
               onPageSizeChange={(newSize) => {
                 setPageSize(newSize);
                 setCurrentPage(1);

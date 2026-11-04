@@ -13,6 +13,7 @@ import {
   PollsIcon,
   QAIcon,
   ShieldCheckIcon,
+  WebsiteSettingsIcon,
 } from "../icons/conferenceIcons";
 
 import logoUrl from "../assets/images/logokaizecon.png";
@@ -110,6 +111,17 @@ const conferenceNavSections: NavSection[] = [
         path: "/qa",
         aliases: ["/conference/qa", "/conference/qna"],
         icon: <QAIcon className="w-5 h-5" />,
+      },
+    ],
+  },
+  {
+    title: "Website & Portal",
+    items: [
+      {
+        name: "Website Settings",
+        path: "/website-settings",
+        aliases: ["/settings/website", "/website"],
+        icon: <WebsiteSettingsIcon className="w-5 h-5" />,
       },
     ],
   },

@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
   SCHEDULES: `${API_BASE_URL}/schedules`,
   KNOWLEDGE_CHAT: `${API_BASE_URL}/knowledge/chat`,
   EMAIL_AGENT_CONTACTS: `${BASE_URL}/api/v1/email-agent/contacts`,
+  BROCHURE_DOWNLOAD: `${API_BASE_URL}/brochure/download`,
 };
 /**
  * Helper to get the full image URL from relative media paths
@@ -310,6 +311,78 @@ export const importExcelContacts = async (file) => {
   }
 };
 
+/**
+ * Extract filename from Content-Disposition header
+ */
+export const extractFilenameFromDisposition = (disposition, fallback = 'Kaizencon_2027_Brochure.pdf') => {
+  if (!disposition) return fallback;
+  const starMatch = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+  if (starMatch && starMatch[1]) {
+    try {
+      return decodeURIComponent(starMatch[1].trim());
+    } catch {
+      return starMatch[1].trim();
+    }
+  }
+  const match = disposition.match(/filename=["']?([^"';]+)["']?/i);
+  if (match && match[1]) {
+    return match[1].trim();
+  }
+  return fallback;
+};
+
+/**
+ * Download Brochure API
+ * Endpoint: GET /api/brochure/download
+ * Fetches the binary PDF, creates a blob, and triggers browser file download.
+ *
+ * @returns {Promise<{ filename: string, size: number }>}
+ */
+export const downloadBrochure = async () => {
+  try {
+    const response = await fetch(API_ENDPOINTS.BROCHURE_DOWNLOAD, {
+      method: 'GET',
+    });
+
+    if (response.status === 404) {
+      const err = new Error('The conference brochure is currently being updated. Please check back shortly.');
+      err.status = 404;
+      throw err;
+    }
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => null);
+      const msg = errData?.detail || errData?.message || `Failed to download brochure (HTTP ${response.status})`;
+      const err = new Error(msg);
+      err.status = response.status;
+      throw err;
+    }
+
+    const disposition = response.headers.get('content-disposition');
+    const filename = extractFilenameFromDisposition(disposition, 'Kaizencon_2027_Brochure.pdf');
+    const blob = await response.blob();
+    const size = blob.size || Number(response.headers.get('content-length')) || 0;
+
+    // Trigger browser file download
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = objectUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setTimeout(() => {
+      URL.revokeObjectURL(objectUrl);
+    }, 1500);
+
+    return { filename, size };
+  } catch (error) {
+    console.error('Error downloading brochure:', error);
+    throw error;
+  }
+};
+
 export default {
   BASE_URL,
   API_BASE_URL,
@@ -321,4 +394,6 @@ export default {
   getEmailAgentContacts,
   stopContact,
   importExcelContacts,
+  downloadBrochure,
+  extractFilenameFromDisposition,
 };

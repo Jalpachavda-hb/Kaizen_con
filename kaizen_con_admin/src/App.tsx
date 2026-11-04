@@ -31,6 +31,7 @@ import PollsPage from "./pages/Conference/PollsPage";
 import QAPage from "./pages/Conference/QAPage";
 import PrivacyPolicyPage from "./pages/Legal/PrivacyPolicyPage";
 import StandalonePrivacyPolicy from "./pages/Legal/StandalonePrivacyPolicy";
+import WebsiteSettingsPage from "./pages/WebsiteSettings/WebsiteSettingsPage";
 
 export default function App() {
   return (
@@ -100,6 +101,11 @@ export default function App() {
 
               {/* Profile */}
               <Route path="/profile" element={<UserProfiles />} />
+
+              {/* Website Settings */}
+              <Route path="/website-settings" element={<WebsiteSettingsPage />} />
+              <Route path="/settings/website" element={<WebsiteSettingsPage />} />
+              <Route path="/website" element={<WebsiteSettingsPage />} />
 
               {/* Legal & Compliance */}
               <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />

@@ -1,37 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './Hero.css';
-
-const calculateTimeLeft = () => {
-  // Target: 1 January 2027 00:00:00 local time
-  const targetDate = new Date(2027, 0, 1, 0, 0, 0);
-  const now = new Date();
-  const diff = targetDate.getTime() - now.getTime();
-
-  if (diff <= 0) {
-    return { days: 0, hours: 0, minutes: 0, seconds: 0, isPast: true };
-  }
-
-  return {
-    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-    hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
-    minutes: Math.floor((diff / (1000 * 60)) % 60),
-    seconds: Math.floor((diff / 1000) % 60),
-    isPast: false
-  };
-};
+import { downloadBrochure } from '../../services/brochureService';
 
 export default function Hero() {
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState(null);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 1000);
+  const handleDownloadBrochure = async () => {
+    if (isDownloading) return;
 
-    return () => clearInterval(timer);
-  }, []);
+    setIsDownloading(true);
+    setDownloadError(null);
 
-  const brochureUrl = `${import.meta.env.BASE_URL}Kaizencon_2027_Brochure.pdf`;
+    try {
+      await downloadBrochure();
+    } catch (err) {
+      console.error('Download error:', err);
+      const msg =
+        err.status === 404
+          ? 'The conference brochure is currently being updated. Please check back shortly.'
+          : err.message || 'Failed to download brochure. Please try again.';
+      setDownloadError(msg);
+
+      setTimeout(() => {
+        setDownloadError(null);
+      }, 6000);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <section className="kz-hero-section" id="home" aria-label="KaizenCon 2027 Hero">
@@ -80,69 +77,65 @@ export default function Hero() {
             The Future of Surgery, Technology &amp; Intelligent Healthcare. Three days. 150+ expert faculty. One shared vision: augmenting clinical excellence with AI.
           </p>
 
-          {/* 4. Action Buttons & Floating Countdown Card */}
+          {/* 4. Action Buttons */}
           <div className="kz-hero-actions">
-            <a
-              href={brochureUrl}
-              download="Kaizencon_2027_Brochure.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={handleDownloadBrochure}
+              disabled={isDownloading}
               className="kz-btn kz-btn-primary"
               aria-label="Download Brochure"
             >
-              <span>Download Brochure</span>
-              <svg className="kz-btn-arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </a>
+              {isDownloading ? (
+                <>
+                  <svg
+                    className="kz-btn-spinner"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeDasharray="36" strokeLinecap="round" />
+                  </svg>
+                  <span>Downloading...</span>
+                </>
+              ) : (
+                <>
+                  <span>Download Brochure</span>
+                  <svg className="kz-btn-arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </>
+              )}
+            </button>
 
-            {/* Premium Floating Countdown Card */}
-            <div className="kz-hero-countdown-card" aria-label="KaizenCon 2027 Countdown">
-              <div className="kz-countdown-icon-box">
-                <svg
-                  className="kz-countdown-cal-icon"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <rect x="3" y="4" width="18" height="18" rx="3" ry="3" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                  <circle cx="8" cy="14" r="1.2" fill="currentColor" />
-                  <circle cx="12" cy="14" r="1.2" fill="currentColor" />
-                  <circle cx="16" cy="14" r="1.2" fill="currentColor" />
-                  <circle cx="8" cy="18" r="1.2" fill="currentColor" />
-                  <circle cx="12" cy="18" r="1.2" fill="currentColor" />
+            {downloadError && (
+              <div
+                className="kz-hero-download-error"
+                role="alert"
+                style={{
+                  marginTop: '12px',
+                  fontSize: '0.85rem',
+                  color: '#AA2D7B',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  padding: '7px 14px',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(170, 45, 123, 0.3)',
+                  boxShadow: '0 2px 10px rgba(0, 0, 0, 0.06)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  maxWidth: '100%',
+                }}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
                 </svg>
-                <span className="kz-countdown-pulse-dot" aria-hidden="true" />
+                <span>{downloadError}</span>
               </div>
-
-              <div className="kz-countdown-content">
-                <div className="kz-countdown-headline">
-                  <span className="kz-countdown-days-val">{timeLeft.days}</span>
-                  <div className="kz-countdown-title-stack">
-                    <span className="kz-countdown-label">DAYS TO GO</span>
-                    <span className="kz-countdown-meta">
-                      {timeLeft.isPast ? (
-                        'Conference Started'
-                      ) : (
-                        <>
-                          Starts 1 Jan 2027 •{' '}
-                          <span className="kz-countdown-ticker">
-                            {String(timeLeft.hours).padStart(2, '0')}h {String(timeLeft.minutes).padStart(2, '0')}m {String(timeLeft.seconds).padStart(2, '0')}s
-                          </span>
-                        </>
-                      )}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
