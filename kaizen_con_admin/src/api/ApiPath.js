@@ -1,7 +1,7 @@
 // Base API Configuration
 // export const BASE_URL = 'https://34g3qd2p-8000.inc1.devtunnels.ms';
-export const BASE_URL = 'http://192.168.29.201:8000';
-// export const BASE_URL = 'https://api.kaizencon.in';
+// export const BASE_URL = 'http://192.168.29.201:8000';
+export const BASE_URL = 'https://api.kaizencon.in';
 export const API_BASE_URL = `${BASE_URL}/api`;
 //
 // Compatibility aliases
