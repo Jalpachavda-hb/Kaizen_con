@@ -30,6 +30,7 @@ import CampaignLogsPage from "./pages/AgentSettings/CampaignLogsPage";
 import TemplatesPage from "./pages/AgentSettings/TemplatesPage";
 import PollsPage from "./pages/Conference/PollsPage";
 import QAPage from "./pages/Conference/QAPage";
+import KaiPage from "./pages/Conference/KaiPage";
 import PrivacyPolicyPage from "./pages/Legal/PrivacyPolicyPage";
 import StandalonePrivacyPolicy from "./pages/Legal/StandalonePrivacyPolicy";
 import WebsiteSettingsPage from "./pages/WebsiteSettings/WebsiteSettingsPage";
@@ -94,6 +95,12 @@ export default function App() {
               <Route path="/qa" element={<QAPage />} />
               <Route path="/conference/qa" element={<QAPage />} />
               <Route path="/conference/qna" element={<QAPage />} />
+
+              {/* KAi Knowledge AI Management */}
+              <Route path="/kai" element={<KaiPage />} />
+              <Route path="/conference/kai" element={<KaiPage />} />
+              <Route path="/knowledge" element={<KaiPage />} />
+              <Route path="/kai-sync" element={<KaiPage />} />
 
               {/* System */}
               <Route path="/users" element={<UsersPage />} />

@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
   KNOWLEDGE_CHAT: `${API_BASE_URL}/knowledge/chat`,
   EMAIL_AGENT_CONTACTS: `${BASE_URL}/api/v1/email-agent/contacts`,
   BROCHURE_DOWNLOAD: `${API_BASE_URL}/brochure/download`,
+  KNOWLEDGE_SYNC_DB: `${API_BASE_URL}/knowledge/sync-db`,
 };
 /**
  * Helper to get the full image URL from relative media paths
@@ -383,6 +384,35 @@ export const downloadBrochure = async () => {
   }
 };
 
+/**
+ * Synchronize database with KAi Knowledge Base
+ * Endpoint: POST /api/knowledge/sync-db
+ *
+ * @returns {Promise<{ code: number, message: string, results: Array<{ speakers: number, schedule: number, delegates: number }> }>}
+ */
+export const syncKnowledgeDb = async () => {
+  try {
+    const response = await fetch(API_ENDPOINTS.KNOWLEDGE_SYNC_DB, {
+      method: 'POST',
+      headers: {
+        'Accept': '*/*',
+      },
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const errorMsg = data?.detail || data?.message || `Sync database failed with status ${response.status}`;
+      throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in syncKnowledgeDb API:', error);
+    throw error;
+  }
+};
+
 export default {
   BASE_URL,
   API_BASE_URL,
@@ -396,4 +426,5 @@ export default {
   importExcelContacts,
   downloadBrochure,
   extractFilenameFromDisposition,
+  syncKnowledgeDb,
 };

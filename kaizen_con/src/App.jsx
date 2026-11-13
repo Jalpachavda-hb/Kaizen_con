@@ -35,6 +35,7 @@ function App() {
           <Route path="/speaker" element={<SpeakersPage />} />
           <Route path="/ai-experience" element={<AiExperiencePage />} />
           <Route path="/ai" element={<AiExperiencePage />} />
+          <Route path="/kai" element={<AiExperiencePage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/contact-us" element={<ContactPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />

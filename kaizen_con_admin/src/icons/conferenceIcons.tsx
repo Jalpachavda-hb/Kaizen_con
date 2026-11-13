@@ -395,6 +395,44 @@ export const DocumentArrowDownIcon: React.FC<IconProps> = ({ className = "w-5 h-
   </svg>
 );
 
+// KAi - Knowledge AI Sparkles Icon
+export const KaiIcon: React.FC<IconProps> = ({ className = "w-5 h-5" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z" />
+    <path d="M5 3v4" />
+    <path d="M3 5h4" />
+    <path d="M19 17v4" />
+    <path d="M17 19h4" />
+  </svg>
+);
+
+// Database Sync Icon
+export const DatabaseSyncIcon: React.FC<IconProps> = ({ className = "w-5 h-5" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <ellipse cx="12" cy="5" rx="9" ry="3" />
+    <path d="M3 5v6c0 1.66 4.03 3 9 3 2.1 0 4.03-.25 5.56-.68" />
+    <path d="M3 11v6c0 1.66 4.03 3 9 3 1.15 0 2.25-.07 3.25-.2" />
+    <path d="M21.5 14v4h-4" />
+    <path d="M21.5 18a4 4 0 0 1-6.5 2.5" />
+  </svg>
+);
+
 
 
 

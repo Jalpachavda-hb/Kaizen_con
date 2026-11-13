@@ -469,6 +469,251 @@
   cursor: not-allowed;
 }
 
+/* Microphone Voice Input Button */
+.kz-floating-mic-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #FAF4F8;
+  border: 1.5px solid rgba(184, 56, 122, 0.28);
+  color: #B8387A;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  outline: none;
+  padding: 0;
+  position: relative;
+}
+
+.kz-floating-mic-btn:hover:not(:disabled) {
+  background: #f7e8f1;
+  border-color: #d8246e;
+  color: #d8246e;
+  transform: scale(1.08);
+  box-shadow: 0 2px 8px rgba(184, 56, 122, 0.2);
+}
+
+.kz-floating-mic-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.kz-floating-mic-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Listening state - active pulsing animation */
+.kz-floating-mic-btn.kz-mic-listening {
+  background: linear-gradient(135deg, #d8246e 0%, #b8165b 100%);
+  color: #ffffff;
+  border-color: #d8246e;
+  box-shadow: 0 0 0 0 rgba(216, 36, 110, 0.6);
+  animation: kzMicPulseRing 1.5s infinite;
+}
+
+.kz-floating-mic-btn.kz-mic-listening .kz-mic-icon {
+  animation: kzMicScalePulse 1.2s infinite ease-in-out;
+}
+
+/* Processing state */
+.kz-floating-mic-btn.kz-mic-processing {
+  background: #fdf2f7;
+  color: #b8165b;
+  border-color: #d8246e;
+  animation: kzMicPulseRing 1.2s infinite;
+}
+
+/* Error state */
+.kz-floating-mic-btn.kz-mic-error {
+  border-color: #e11d48;
+  color: #e11d48;
+  background: #fff1f2;
+}
+
+@keyframes kzMicPulseRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(216, 36, 110, 0.65);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(216, 36, 110, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(216, 36, 110, 0);
+  }
+}
+
+@keyframes kzMicScalePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+/* Voice Status Indicator Bar */
+.kz-voice-status-bar {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  font-weight: 500;
+  border-top: 1px solid #f0e6ee;
+  animation: kzFadeIn 0.2s ease;
+  flex-shrink: 0;
+}
+
+.kz-voice-listening {
+  background: #FFF5F9;
+  border-left: 3px solid #d8246e;
+  color: #9d1b54;
+}
+
+.kz-voice-processing {
+  background: #F8F5FF;
+  border-left: 3px solid #7c3aed;
+  color: #5b21b6;
+  gap: 8px;
+}
+
+.kz-voice-error-bar {
+  background: #FEF2F2;
+  border-left: 3px solid #ef4444;
+  color: #991b1b;
+  gap: 10px;
+}
+
+.kz-voice-status-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kz-voice-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e11d48;
+  box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.7);
+  animation: kzVoiceDotPulse 1.2s infinite;
+}
+
+@keyframes kzVoiceDotPulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.7);
+  }
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 6px rgba(225, 29, 72, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(225, 29, 72, 0);
+  }
+}
+
+.kz-voice-status-label {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.kz-voice-eq-bars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.5px;
+  height: 12px;
+}
+
+.kz-voice-eq-bars span {
+  width: 2.5px;
+  height: 100%;
+  background: #d8246e;
+  border-radius: 2px;
+  animation: kzVoiceEq 0.8s ease-in-out infinite alternate;
+}
+
+.kz-voice-eq-bars span:nth-child(1) { animation-delay: 0.1s; height: 50%; }
+.kz-voice-eq-bars span:nth-child(2) { animation-delay: 0.3s; height: 100%; }
+.kz-voice-eq-bars span:nth-child(3) { animation-delay: 0.15s; height: 35%; }
+.kz-voice-eq-bars span:nth-child(4) { animation-delay: 0.4s; height: 75%; }
+
+@keyframes kzVoiceEq {
+  0% { transform: scaleY(0.3); }
+  100% { transform: scaleY(1); }
+}
+
+.kz-voice-done-btn {
+  background: #d8246e;
+  color: #ffffff;
+  border: none;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.kz-voice-done-btn:hover {
+  background: #b8165b;
+  transform: scale(1.04);
+}
+
+.kz-voice-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(124, 58, 237, 0.2);
+  border-top-color: #7c3aed;
+  border-radius: 50%;
+  animation: kzSpin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes kzSpin {
+  to { transform: rotate(360deg); }
+}
+
+.kz-voice-error-text {
+  flex: 1;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.kz-voice-error-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kz-voice-retry-btn {
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.kz-voice-retry-btn:hover {
+  background: #dc2626;
+}
+
+.kz-voice-dismiss-btn {
+  background: transparent;
+  border: none;
+  color: #991b1b;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
 /* ----------------------------------------------------
    3. RESPONSIVE DESIGN
    ---------------------------------------------------- */
@@ -579,6 +824,11 @@
     width: 36px;
     height: 36px;
   }
+
+  .kz-floating-mic-btn {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 @media (max-width: 380px) {
@@ -606,6 +856,16 @@
     left: 8px;
     bottom: 84px;
     height: calc(100dvh - 98px);
+  }
+
+  .kz-floating-send-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .kz-floating-mic-btn {
+    width: 34px;
+    height: 34px;
   }
 }
 

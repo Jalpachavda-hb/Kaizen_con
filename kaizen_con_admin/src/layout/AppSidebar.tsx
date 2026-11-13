@@ -13,6 +13,7 @@ import {
   WhatsAppIcon,
   PollsIcon,
   QAIcon,
+  KaiIcon,
   ShieldCheckIcon,
   WebsiteSettingsIcon,
 } from "../icons/conferenceIcons";
@@ -118,6 +119,12 @@ const conferenceNavSections: NavSection[] = [
         path: "/qa",
         aliases: ["/conference/qa", "/conference/qna"],
         icon: <QAIcon className="w-5 h-5" />,
+      },
+      {
+        name: "KAi",
+        path: "/kai",
+        aliases: ["/conference/kai", "/knowledge", "/kai-sync"],
+        icon: <KaiIcon className="w-5 h-5" />,
       },
     ],
   },

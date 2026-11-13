@@ -1,8 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Mic } from 'lucide-react';
 import './FloatingChatbot.css';
 import chatbotImg from '../../assets/home/chatbot.png';
 import { askKnowledgeChat } from '../../Apipath';
+import useVoiceToText from '../../hooks/useVoiceToText';
 
 export default function FloatingChatbot() {
   const navigate = useNavigate();
@@ -19,6 +21,20 @@ export default function FloatingChatbot() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
 
+  // Hook for voice-to-text recognition
+  const {
+    isSpeechSupported,
+    voiceState,
+    voiceError,
+    toggleListening,
+    abortListening,
+    stopListening,
+    clearError,
+  } = useVoiceToText({
+    lang: 'en-IN',
+    onTranscriptChange: (text) => setInputMsg(text),
+  });
+
   // Auto scroll to bottom of chat
   useEffect(() => {
     if (isOpen) {
@@ -26,9 +42,21 @@ export default function FloatingChatbot() {
     }
   }, [messages, isOpen, isTyping]);
 
+  // Cleanly abort / release microphone when chat modal is closed
+  useEffect(() => {
+    if (!isOpen) {
+      abortListening();
+    }
+  }, [isOpen, abortListening]);
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!inputMsg.trim() || isTyping) return;
+
+    // If microphone is active when sending, stop recording session
+    if (voiceState === 'listening') {
+      stopListening();
+    }
 
     const userText = inputMsg.trim();
     const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -248,6 +276,57 @@ export default function FloatingChatbot() {
             </button>
           </div>
 
+          {/* Voice Status Indicator Bar (Listening / Processing / Error) */}
+          {voiceState === 'listening' && (
+            <div className="kz-voice-status-bar kz-voice-listening" role="status" aria-live="polite">
+              <div className="kz-voice-status-left">
+                <span className="kz-voice-pulse-dot" />
+                <span className="kz-voice-status-label">Listening... Speak now</span>
+                <div className="kz-voice-eq-bars" aria-hidden="true">
+                  <span /><span /><span /><span />
+                </div>
+              </div>
+              <button
+                type="button"
+                className="kz-voice-done-btn"
+                onClick={stopListening}
+                title="Finish speaking"
+              >
+                Done
+              </button>
+            </div>
+          )}
+
+          {voiceState === 'processing' && (
+            <div className="kz-voice-status-bar kz-voice-processing" role="status" aria-live="polite">
+              <span className="kz-voice-spinner" />
+              <span className="kz-voice-status-label">Processing speech...</span>
+            </div>
+          )}
+
+          {voiceState === 'error' && voiceError && (
+            <div className="kz-voice-status-bar kz-voice-error-bar" role="alert">
+              <span className="kz-voice-error-text">{voiceError}</span>
+              <div className="kz-voice-error-actions">
+                <button
+                  type="button"
+                  className="kz-voice-retry-btn"
+                  onClick={() => toggleListening(inputMsg)}
+                >
+                  Retry
+                </button>
+                <button
+                  type="button"
+                  className="kz-voice-dismiss-btn"
+                  onClick={clearError}
+                  aria-label="Dismiss error"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Chat Input Bar */}
           <form className="kz-floating-modal-footer" onSubmit={handleSendMessage}>
             <input
@@ -258,10 +337,36 @@ export default function FloatingChatbot() {
               className="kz-floating-input"
               autoFocus
             />
+
+            {/* Microphone Voice Input Button */}
+            <button
+              type="button"
+              className={`kz-floating-mic-btn kz-mic-${voiceState}`}
+              onClick={() => toggleListening(inputMsg)}
+              disabled={isTyping}
+              title={
+                !isSpeechSupported
+                  ? 'Voice recognition is not supported in this browser (Chrome / Edge recommended)'
+                  : voiceState === 'listening'
+                  ? 'Stop recording (Listening...)'
+                  : voiceState === 'processing'
+                  ? 'Processing speech...'
+                  : 'Speak to KAI'
+              }
+              aria-label={
+                voiceState === 'listening'
+                  ? 'Stop recording voice'
+                  : 'Speak to KAI with voice'
+              }
+            >
+              <Mic className="kz-mic-icon" size={18} />
+            </button>
+
+            {/* Send Button */}
             <button
               type="submit"
               className="kz-floating-send-btn"
-              disabled={!inputMsg.trim()}
+              disabled={!inputMsg.trim() || isTyping}
               aria-label="Send message"
             >
               <svg viewBox="0 0 24 24" fill="currentColor">
