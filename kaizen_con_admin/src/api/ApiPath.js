@@ -1653,6 +1653,57 @@ export const getAdminPolls = async () => {
 };
 
 /**
+ * Delete Poll API
+ * Endpoint: DELETE /polling/api/admin/polls/{poll_id}
+ * Header: x-admin-api-key
+ * @param {number|string} pollId - Poll ID to delete
+ * @returns {Promise<any>}
+ */
+export const deletePoll = async (pollId) => {
+  try {
+    const id = Number(pollId);
+    if (!id || isNaN(id)) {
+      throw new Error(`Invalid poll ID: ${pollId}`);
+    }
+
+    const adminApiKey =
+      (typeof import.meta !== 'undefined' && import.meta.env && (import.meta.env.VITE_POLL_KEY || import.meta.env.POLL_KEY)) ||
+      '5IZNL1TLAMwzGOeHZudBXjsFkkWU5yuY3_VzJxeBXu1rv6EWWFLelJeujiIxKvEY';
+
+    const headers = {
+      'accept': 'application/json',
+    };
+    if (adminApiKey) {
+      headers['x-admin-api-key'] = adminApiKey;
+    }
+
+    const response = await fetch(`${BASE_URL}/polling/api/admin/polls/${id}`, {
+      method: 'DELETE',
+      headers,
+    });
+
+    if (!response.ok) {
+      let errorMessage = `Failed to delete poll: ${response.status} ${response.statusText}`;
+      try {
+        const errorData = await response.json();
+        if (errorData.detail) {
+          errorMessage = typeof errorData.detail === 'string' ? errorData.detail : JSON.stringify(errorData.detail);
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+      } catch (_) {}
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json().catch(() => ({ success: true }));
+    return data;
+  } catch (error) {
+    console.error('Error in deletePoll API:', error);
+    throw error;
+  }
+};
+
+/**
  * Vote in Poll API
  * Endpoint: POST http://192.168.29.201:8000/polling/api/polls/{poll_id}/vote
  * Body: { option_id: number }
@@ -1848,6 +1899,140 @@ export const rejectQuestionApi = async (sessionId, questionId) => {
     throw new Error(`Failed to reject question: ${response.status}`);
   }
   return await response.json();
+};
+
+/**
+ * Get WebSocket URL for Live Q&A session
+ * @param {string} [sessionId]
+ * @returns {string}
+ */
+export const getQaWsUrl = (sessionId = QA_DEFAULT_SESSION_ID) => {
+  const sid = sessionId || QA_DEFAULT_SESSION_ID;
+  const wsBase = (BASE_URL || 'https://api.kaizencon.in').replace(/^http(s?):/, 'ws$1:');
+  return `${wsBase}/api/sessions/${sid}/ws?role=moderator`;
+};
+
+/**
+ * Get All Live Sessions API
+ * Endpoint: GET /api/sessions
+ * @returns {Promise<any[]>}
+ */
+export const getLiveSessions = async () => {
+  try {
+    const response = await fetch(API_ENDPOINTS.SESSIONS, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const errorMsg = data?.detail || data?.message || `Request failed with status ${response.status}`;
+      throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+    }
+
+    if (Array.isArray(data)) {
+      return data;
+    }
+    if (data && Array.isArray(data.results)) {
+      return data.results;
+    }
+    return data || [];
+  } catch (error) {
+    console.error('Error in getLiveSessions API:', error);
+    throw error;
+  }
+};
+
+/**
+ * Create Live Session API
+ * Endpoint: POST /api/sessions
+ * @param {Object} sessionData - { title, speaker_name, category?, venue?, start_time?, end_time? }
+ * @returns {Promise<any>}
+ */
+export const createLiveSession = async (sessionData) => {
+  try {
+    const response = await fetch(API_ENDPOINTS.SESSIONS, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(sessionData),
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const errorMsg = data?.detail || data?.message || `Request failed with status ${response.status}`;
+      throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in createLiveSession API:', error);
+    throw error;
+  }
+};
+
+/**
+ * Start Live Session API
+ * Endpoint: POST /api/sessions/{session_id}/start
+ * @param {string} sessionId
+ * @returns {Promise<any>}
+ */
+export const startLiveSession = async (sessionId) => {
+  try {
+    const response = await fetch(`${API_ENDPOINTS.SESSIONS}/${sessionId}/start`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const errorMsg = data?.detail || data?.message || `Request failed with status ${response.status}`;
+      throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in startLiveSession API:', error);
+    throw error;
+  }
+};
+
+/**
+ * End Live Session API
+ * Endpoint: POST /api/sessions/{session_id}/end
+ * @param {string} sessionId
+ * @returns {Promise<any>}
+ */
+export const endLiveSession = async (sessionId) => {
+  try {
+    const response = await fetch(`${API_ENDPOINTS.SESSIONS}/${sessionId}/end`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const errorMsg = data?.detail || data?.message || `Request failed with status ${response.status}`;
+      throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in endLiveSession API:', error);
+    throw error;
+  }
 };
 
 /**
@@ -2129,6 +2314,7 @@ export default {
   previewTemplate,
   createPoll,
   getAdminPolls,
+  deletePoll,
   votePoll,
   getPollById,
   getLivePoll,
@@ -2137,6 +2323,11 @@ export default {
   downloadPollQrCode,
   approveQuestionApi,
   rejectQuestionApi,
+  getQaWsUrl,
+  getLiveSessions,
+  createLiveSession,
+  startLiveSession,
+  endLiveSession,
   formatFileSize,
   extractFilenameFromDisposition,
   uploadBrochure,

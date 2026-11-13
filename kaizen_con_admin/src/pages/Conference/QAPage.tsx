@@ -53,12 +53,12 @@ export default function QAPage() {
   // Fetch available sessions for dropdown switcher
   useEffect(() => {
     getLiveSessions()
-      .then((data) => {
+      .then((data: any) => {
         if (Array.isArray(data)) {
           setAvailableSessions(data);
         }
       })
-      .catch((err) => console.warn("Could not load sessions list in QAPage:", err));
+      .catch((err: any) => console.warn("Could not load sessions list in QAPage:", err));
   }, []);
 
   // Live WebSocket & State
