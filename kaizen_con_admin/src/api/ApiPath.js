@@ -22,8 +22,10 @@ export const API_ENDPOINTS = {
   BROCHURE_UPLOAD: `${API_BASE_URL}/brochure/upload`,
   BROCHURE_DOWNLOAD: `${API_BASE_URL}/brochure/download`,
   BROCHURE_DELETE: `${API_BASE_URL}/brochure/delete`,
-
-
+  KNOWLEDGE_CHAT: `${API_BASE_URL}/knowledge/chat`,
+  KNOWLEDGE_SYNC_DB: `${API_BASE_URL}/knowledge/sync-db`,
+  KNOWLEDGE_DOCUMENTS: `${API_BASE_URL}/knowledge/documents`,
+  KNOWLEDGE_DOCUMENT_UPLOAD: `${API_BASE_URL}/knowledge/documents/upload`,
 };
 
 
@@ -2277,6 +2279,150 @@ export const deleteBrochure = async () => {
   return data;
 };
 
+/**
+ * Synchronize database with KAi Knowledge Base
+ * Endpoint: POST /api/knowledge/sync-db
+ *
+ * @returns {Promise<any>}
+ */
+export const syncKnowledgeDb = async () => {
+  try {
+    const headers = { Accept: 'application/json' };
+    const token = localStorage.getItem('ignito_auth_token');
+    if (token) {
+      headers['Authorization'] = 'Bearer ' + token;
+    }
+
+    const response = await fetch(API_ENDPOINTS.KNOWLEDGE_SYNC_DB, {
+      method: 'POST',
+      headers,
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const errorMsg = data?.detail || data?.message || `Sync database failed with status ${response.status}`;
+      throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in syncKnowledgeDb API:', error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch knowledge documents from API
+ * Endpoint: GET /api/knowledge/documents
+ *
+ * @returns {Promise<any>}
+ */
+export const getKnowledgeDocuments = async () => {
+  try {
+    const headers = { Accept: 'application/json' };
+    const token = localStorage.getItem('ignito_auth_token');
+    if (token) {
+      headers['Authorization'] = 'Bearer ' + token;
+    }
+
+    const response = await fetch(API_ENDPOINTS.KNOWLEDGE_DOCUMENTS, {
+      method: 'GET',
+      headers,
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const errorMsg = data?.detail || data?.message || `Failed to fetch documents with status ${response.status}`;
+      throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in getKnowledgeDocuments API:', error);
+    throw error;
+  }
+};
+
+/**
+ * Upload knowledge document to KAi knowledge base
+ * Endpoint: POST /api/knowledge/documents/upload
+ * Content-Type: multipart/form-data
+ * Field: file
+ *
+ * @param {File|Blob} file
+ * @returns {Promise<any>}
+ */
+export const uploadKnowledgeDocument = async (file) => {
+  try {
+    if (!file) {
+      throw new Error('Please select a file to upload.');
+    }
+
+    const headers = { Accept: 'application/json' };
+    const token = localStorage.getItem('ignito_auth_token');
+    if (token) {
+      headers['Authorization'] = 'Bearer ' + token;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(API_ENDPOINTS.KNOWLEDGE_DOCUMENT_UPLOAD, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const errorMsg = data?.detail || data?.message || `Upload failed with status ${response.status}`;
+      throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in uploadKnowledgeDocument API:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a knowledge document
+ * Endpoint: DELETE /api/knowledge/documents/{document_id}
+ *
+ * @param {string|number} documentId
+ * @returns {Promise<any>}
+ */
+export const deleteKnowledgeDocument = async (documentId) => {
+  try {
+    const headers = { Accept: 'application/json' };
+    const token = localStorage.getItem('ignito_auth_token');
+    if (token) {
+      headers['Authorization'] = 'Bearer ' + token;
+    }
+
+    const response = await fetch(`${API_ENDPOINTS.KNOWLEDGE_DOCUMENTS}/${documentId}`, {
+      method: 'DELETE',
+      headers,
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const errorMsg = data?.detail || data?.message || `Failed to delete document with status ${response.status}`;
+      throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in deleteKnowledgeDocument API:', error);
+    throw error;
+  }
+};
+
 export default {
   BASE_URL,
   API_BASE_URL,
@@ -2333,4 +2479,8 @@ export default {
   uploadBrochure,
   downloadBrochure,
   deleteBrochure,
+  syncKnowledgeDb,
+  getKnowledgeDocuments,
+  uploadKnowledgeDocument,
+  deleteKnowledgeDocument,
 };
