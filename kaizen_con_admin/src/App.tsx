@@ -17,6 +17,7 @@ import { InstantTooltipProvider } from "./components/common/InstantTooltip";
 // Kaizen Con Conference & System Pages
 import Home from "./pages/Dashboard/Home";
 import SpeakersPage from "./pages/Conference/SpeakersPage";
+import SchedulesPage from "./pages/Conference/SchedulesPage";
 import SessionsPage from "./pages/Conference/SessionsPage";
 import TopicsPage from "./pages/Conference/TopicsPage";
 import DelegatesPage from "./pages/Conference/DelegatesPage";
@@ -52,6 +53,9 @@ export default function App() {
               <Route path="/conference/faculty" element={<SpeakersPage />} />
               <Route path="/speakers" element={<SpeakersPage />} />
               <Route path="/conference/speakers" element={<SpeakersPage />} />
+
+              <Route path="/schedules" element={<SchedulesPage />} />
+              <Route path="/conference/schedules" element={<SchedulesPage />} />
 
               <Route path="/sessions" element={<SessionsPage />} />
               <Route path="/conference/sessions" element={<SessionsPage />} />

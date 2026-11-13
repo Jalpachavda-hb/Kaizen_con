@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import { AdminPageContainer } from "../../components/common/AdminPageContainer";
 import { useToast } from "../../context/ToastContext";
-import { createPoll, votePoll, getPolls, getPollQrCodeUrl, downloadPollQrCode, BASE_URL } from "../../api/ApiPath";
+import { createPoll, deletePoll, votePoll, getPolls, getPollQrCodeUrl, downloadPollQrCode, BASE_URL } from "../../api/ApiPath";
 import Swal from "sweetalert2";
 
 export interface PollOption {
@@ -411,7 +411,7 @@ export default function PollsPage() {
     }
   };
 
-  // Delete Poll with SweetAlert2
+  // Delete Poll with SweetAlert2 & API
   const handleDeletePoll = async (p: PollItem) => {
     const result = await Swal.fire({
       title: "Delete Poll?",
@@ -429,8 +429,36 @@ export default function PollsPage() {
     });
 
     if (result.isConfirmed) {
-      setPolls((prev) => prev.filter((item) => item.id !== p.id));
-      success("Poll deleted successfully.");
+      // Check if it's a numeric ID (API poll) or local fallback
+      const numericId = Number(p.id);
+      const isApiPoll = !isNaN(numericId) && numericId > 0;
+
+      if (isApiPoll) {
+        // Show loading indicator
+        Swal.fire({
+          title: "Deleting Poll...",
+          text: "Please wait while the poll is removed.",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
+
+        try {
+          await deletePoll(numericId);
+          setPolls((prev) => prev.filter((item) => item.id !== p.id));
+          Swal.close();
+          success("Poll deleted successfully.");
+          await fetchPolls();
+        } catch (error: any) {
+          Swal.close();
+          console.error("Failed to delete poll via API:", error);
+          toastError(error?.message || "Failed to delete poll from server.");
+        }
+      } else {
+        setPolls((prev) => prev.filter((item) => item.id !== p.id));
+        success("Poll deleted successfully.");
+      }
     }
   };
 

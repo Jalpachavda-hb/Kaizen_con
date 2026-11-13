@@ -1,31 +1,30 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { useNavigate } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
 import { AdminPageContainer } from "../../components/common/AdminPageContainer";
 import { TablePagination } from "../../components/common/TablePagination";
 import {
-  getSessions,
-  getSessionById,
-  createSession,
-  deleteSession,
+  getLiveSessions,
+  createLiveSession,
+  startLiveSession,
+  endLiveSession,
   getSpeakers,
 } from "../../api/ApiPath";
 import { useToast } from "../../context/ToastContext";
 import Swal from "sweetalert2";
-import { MultiSelectSpeakers } from "../../components/common/MultiSelectSpeakers";
 
-export interface SessionItem {
-  id: number;
-  speaker_id: number | null;
-  speaker_ids?: number[];
-  category: string;
+export interface LiveSession {
+  id: string;
   title: string;
-  description: string;
-  event_date: string;
-  start_time: string;
-  end_time: string;
-  venue: string;
-  room: string;
-  speaker_name?: string;
+  speaker_name: string;
+  venue?: string | null;
+  start_time?: string | null;
+  end_time?: string | null;
+  category?: string | null;
+  join_code: string;
+  status: "draft" | "live" | "ended" | string;
+  created_by?: string | null;
+  created_at: string;
 }
 
 export interface SpeakerOption {
@@ -37,43 +36,67 @@ export interface SpeakerOption {
 }
 
 export default function SessionsPage() {
-  const { success, error: toastError } = useToast();
+  const navigate = useNavigate();
+  const { success, error: toastError, info } = useToast();
 
-  // Sessions and Speakers state
-  const [sessions, setSessions] = useState<SessionItem[]>([]);
+  // Sessions State
+  const [sessions, setSessions] = useState<LiveSession[]>([]);
   const [speakers, setSpeakers] = useState<SpeakerOption[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [apiError, setApiError] = useState<string | null>(null);
 
   // Filters & Search
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("All"); // All | live | draft | ended
   const [categoryFilter, setCategoryFilter] = useState<string>("All");
-  const [dateFilter, setDateFilter] = useState<string>("All");
 
-  // Create / Edit Session Modal State
+  // Create Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingSession, setEditingSession] = useState<SessionItem | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   // Form Fields
   const [title, setTitle] = useState("");
-  const [selectedSpeakerIds, setSelectedSpeakerIds] = useState<number[]>([]);
-  const [category, setCategory] = useState("Cardiology");
-  const [eventDate, setEventDate] = useState("2027-01-01");
-  const [startTime, setStartTime] = useState("09:00:00");
-  const [endTime, setEndTime] = useState("10:00:00");
-  const [venue, setVenue] = useState("RK Hospital Conference Hall");
-  const [room, setRoom] = useState("Hall A");
-  const [description, setDescription] = useState("");
+  const [speakerName, setSpeakerName] = useState("");
+  const [category, setCategory] = useState("");
+  const [venue, setVenue] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
 
-  // Session Details (Get by ID) Modal State
-  const [selectedSession, setSelectedSession] = useState<SessionItem | null>(null);
+  // Details Modal State
+  const [selectedSession, setSelectedSession] = useState<LiveSession | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
+  // Action Loading & Copy Feedback
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Fetch Speakers list to map speaker_id -> speaker details
+  // Pagination
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
+  // Fetch Live Sessions from GET /api/sessions
+  const fetchSessionsData = useCallback(async (quiet = false) => {
+    if (!quiet) setLoading(true);
+    setApiError(null);
+
+    try {
+      const data: any = await getLiveSessions();
+      if (Array.isArray(data)) {
+        setSessions(data as LiveSession[]);
+      } else {
+        setSessions([]);
+      }
+    } catch (err: any) {
+      console.error("Could not fetch sessions from /api/sessions:", err);
+      const message = err?.message || "Failed to load sessions from server.";
+      setApiError(message);
+    } finally {
+      if (!quiet) setLoading(false);
+    }
+  }, []);
+
+  // Fetch Faculty Speakers for quick selection in modal
   const fetchSpeakersData = useCallback(async () => {
     try {
       const res: any = await getSpeakers();
@@ -81,29 +104,7 @@ export default function SessionsPage() {
         setSpeakers(res.results);
       }
     } catch (err) {
-      console.warn("Could not load speakers list for sessions:", err);
-    }
-  }, []);
-
-  // Fetch all sessions from http://192.168.29.201:8000/api/schedules
-  const fetchSessionsData = useCallback(async (quiet = false) => {
-    if (!quiet) setLoading(true);
-    setApiError(null);
-
-    try {
-      const data: any = await getSessions();
-
-      if (Array.isArray(data)) {
-        setSessions(data as SessionItem[]);
-      } else {
-        setSessions([]);
-      }
-    } catch (err: any) {
-      console.warn("Could not fetch sessions from live schedules API:", err);
-      const message = err?.message || "Live schedules API not reachable.";
-      setApiError(message);
-    } finally {
-      if (!quiet) setLoading(false);
+      console.warn("Could not load faculty list for session auto-fill:", err);
     }
   }, []);
 
@@ -112,132 +113,64 @@ export default function SessionsPage() {
     fetchSpeakersData();
   }, [fetchSessionsData, fetchSpeakersData]);
 
-  // Helper to find speaker by ID
-  const getSpeakerInfo = useCallback(
-    (spId: number | null) => {
-      if (!spId) return null;
-      return speakers.find((s) => s.id === spId) || null;
-    },
-    [speakers]
-  );
-
-  // Helper to get formatted speaker display string
-  const getSpeakerDisplayName = useCallback(
-    (session: SessionItem) => {
-      if (session.speaker_name) return session.speaker_name;
-      const ids: number[] = Array.isArray((session as any).speaker_ids) && (session as any).speaker_ids.length > 0
-        ? (session as any).speaker_ids
-        : session.speaker_id
-        ? [session.speaker_id]
-        : [];
-
-      if (ids.length === 0) {
-        return session.category?.toLowerCase() === "break" ? "Break / Refreshments" : "General Session";
-      }
-
-      const names = ids
-        .map((id) => {
-          const sp = getSpeakerInfo(id);
-          return sp ? `Dr. ${sp.first_name} ${sp.last_name}` : `Speaker #${id}`;
-        })
-        .filter(Boolean);
-
-      return names.length > 0 ? names.join(", ") : "General Session";
-    },
-    [getSpeakerInfo]
-  );
-
-  // View session details by ID
-  const handleViewSessionById = async (session: SessionItem) => {
-    setSelectedSession(session);
-    setIsDetailsModalOpen(true);
-    setIsLoadingDetails(true);
-
-    try {
-      // Query GET /api/schedules?id={id}
-      const freshData: any = await getSessionById(session.id);
-      if (freshData && freshData.id) {
-        setSelectedSession(freshData as SessionItem);
-      }
-    } catch (err) {
-      console.log("Details lookup note:", err);
-    } finally {
-      setIsLoadingDetails(false);
-    }
-  };
-
-
-  // Open Add Modal
+  // Open Create Session Modal
   const handleOpenAddModal = () => {
-    setEditingSession(null);
     setTitle("");
-    setSelectedSpeakerIds([]);
-    setCategory("Cardiology");
-    setEventDate("2027-01-01");
-    setStartTime("09:00:00");
-    setEndTime("10:00:00");
-    setVenue("RK Hospital Conference Hall");
-    setRoom("Hall A");
-    setDescription("");
+    setSpeakerName("");
+    setCategory("");
+    setVenue("");
+    setStartTime("");
+    setEndTime("");
     setFormError(null);
     setIsModalOpen(true);
   };
 
-  // Open Edit Modal
-  const handleOpenEditModal = (session: SessionItem) => {
-    setEditingSession(session);
-    setTitle(session.title || "");
-    const initialSpeakerIds: number[] = Array.isArray((session as any).speaker_ids) && (session as any).speaker_ids.length > 0
-      ? (session as any).speaker_ids
-      : session.speaker_id
-      ? [session.speaker_id]
-      : [];
-    setSelectedSpeakerIds(initialSpeakerIds);
-    setCategory(session.category || "Cardiology");
-    setEventDate(session.event_date || "2027-01-01");
-    setStartTime(session.start_time || "09:00:00");
-    setEndTime(session.end_time || "10:00:00");
-    setVenue(session.venue || "RK Hospital Conference Hall");
-    setRoom(session.room || "Hall A");
-    setDescription(session.description || "");
-    setFormError(null);
-    setIsModalOpen(true);
-  };
-
-  // Create or Update Session Submit Handler (POST /api/schedules)
-  const handleSaveSessionSubmit = async (e: React.FormEvent) => {
+  // Submit Create Session (POST /api/sessions)
+  const handleCreateSessionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
 
     const titleTrimmed = title.trim();
-    if (!titleTrimmed) {
-      setFormError("Session title is required.");
+    const speakerTrimmed = speakerName.trim();
+
+    if (!titleTrimmed || titleTrimmed.length < 3) {
+      setFormError("Session title is required (minimum 3 characters).");
+      return;
+    }
+    if (!speakerTrimmed || speakerTrimmed.length < 2) {
+      setFormError("Speaker name is required (minimum 2 characters).");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const payload = {
-        id: editingSession ? editingSession.id : null,
-        speaker_ids: selectedSpeakerIds,
-        category,
+      const payload: any = {
         title: titleTrimmed,
-        description: description.trim(),
-        event_date: eventDate,
-        start_time: startTime.length === 5 ? `${startTime}:00` : startTime,
-        end_time: endTime.length === 5 ? `${endTime}:00` : endTime,
-        venue,
-        room,
+        speaker_name: speakerTrimmed,
       };
 
-      await createSession(payload);
+      if (category.trim()) payload.category = category.trim();
+      if (venue.trim()) payload.venue = venue.trim();
+      if (startTime.trim()) payload.start_time = startTime.trim();
+      if (endTime.trim()) payload.end_time = endTime.trim();
 
-      success(editingSession ? "Session schedule updated successfully!" : "Session schedule created successfully!");
+      const created: any = await createLiveSession(payload);
+
       setIsModalOpen(false);
-      fetchSessionsData(true);
+      await fetchSessionsData(true);
+
+      const joinCode = created?.join_code || "";
+      Swal.fire({
+        title: "Session Created!",
+        html: `Session <strong>"${titleTrimmed}"</strong> has been created in draft status.<br/><br/>` +
+              (joinCode ? `Join Code: <span class="px-2.5 py-1 font-mono font-bold text-sm bg-purple-100 text-purple-800 rounded-md">${joinCode}</span>` : ""),
+        icon: "success",
+        confirmButtonColor: "#AA2D7B",
+        confirmButtonText: "Done",
+      });
     } catch (err: any) {
-      console.error("Failed to save session schedule:", err);
-      const msg = err?.message || "Failed to save session schedule.";
+      console.error("Failed to create session:", err);
+      const msg = err?.message || "Failed to create session.";
       setFormError(msg);
       toastError(msg);
     } finally {
@@ -245,16 +178,17 @@ export default function SessionsPage() {
     }
   };
 
-  // Delete Session Handler with SweetAlert2 confirmation
-  const handleDeleteSession = async (session: SessionItem) => {
+  // Start Session Handler (POST /api/sessions/{session_id}/start)
+  const handleStartSession = async (session: LiveSession) => {
     const result = await Swal.fire({
-      title: "Are you sure?",
-      text: `Do you want to remove session: "${session.title}"?`,
-      icon: "warning",
+      title: "Start Live Session?",
+      html: `Do you want to start session <strong>"${session.title}"</strong>?<br/><br/>` +
+            `This will transition the session to <span class="text-emerald-600 font-semibold uppercase">LIVE</span>. Delegates will be able to join using code <strong>${session.join_code}</strong>.`,
+      icon: "question",
       showCancelButton: true,
-      confirmButtonColor: "#AA2D7B",
+      confirmButtonColor: "#059669",
       cancelButtonColor: "#6B7280",
-      confirmButtonText: "Yes, delete it",
+      confirmButtonText: "Yes, Start Session",
       cancelButtonText: "Cancel",
       reverseButtons: true,
       customClass: {
@@ -263,57 +197,119 @@ export default function SessionsPage() {
       },
     });
 
-    if (!result.isConfirmed) {
-      return;
-    }
+    if (!result.isConfirmed) return;
 
     try {
-      await deleteSession(session.id);
-      await Swal.fire({
-        title: "Deleted!",
-        text: `Session "${session.title}" has been deleted.`,
-        icon: "success",
-        confirmButtonColor: "#AA2D7B",
-        timer: 1800,
-        showConfirmButton: false,
-      });
-      setSessions((prev) => prev.filter((s) => s.id !== session.id));
+      setActionLoadingId(session.id);
+      const updated = await startLiveSession(session.id);
+
+      setSessions((prev) =>
+        prev.map((s) => (s.id === session.id ? { ...s, ...updated, status: "live" } : s))
+      );
       if (selectedSession?.id === session.id) {
-        setIsDetailsModalOpen(false);
+        setSelectedSession((prev) => (prev ? { ...prev, ...updated, status: "live" } : null));
       }
+
+      success(`Session "${session.title}" is now LIVE!`);
     } catch (err: any) {
+      console.error("Error starting session:", err);
       Swal.fire({
-        title: "Error!",
-        text: err?.message || "Failed to delete session schedule.",
+        title: "Error Starting Session",
+        text: err?.message || "Could not start session. Please try again.",
         icon: "error",
         confirmButtonColor: "#AA2D7B",
       });
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
-  // Format time (e.g. 09:00:00 -> 09:00 AM)
-  const formatTime = (timeStr?: string) => {
-    if (!timeStr) return "";
+  // End Session Handler (POST /api/sessions/{session_id}/end)
+  const handleEndSession = async (session: LiveSession) => {
+    const result = await Swal.fire({
+      title: "End Session?",
+      html: `Are you sure you want to end session <strong>"${session.title}"</strong>?<br/>This will close live delegate participation.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DC2626",
+      cancelButtonColor: "#6B7280",
+      confirmButtonText: "Yes, End Session",
+      cancelButtonText: "Cancel",
+      reverseButtons: true,
+      customClass: {
+        popup: "rounded-2xl dark:bg-gray-900 dark:text-white",
+        title: "text-gray-900 dark:text-white font-bold text-base",
+      },
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
-      const [h, m] = timeStr.split(":");
-      const hours = parseInt(h, 10);
-      if (isNaN(hours)) return timeStr;
-      const ampm = hours >= 12 ? "PM" : "AM";
-      const formattedHours = hours % 12 || 12;
-      return `${formattedHours.toString().padStart(2, "0")}:${m} ${ampm}`;
-    } catch {
-      return timeStr;
+      setActionLoadingId(session.id);
+      const updated = await endLiveSession(session.id);
+
+      setSessions((prev) =>
+        prev.map((s) => (s.id === session.id ? { ...s, ...updated, status: "ended" } : s))
+      );
+      if (selectedSession?.id === session.id) {
+        setSelectedSession((prev) => (prev ? { ...prev, ...updated, status: "ended" } : null));
+      }
+
+      info(`Session "${session.title}" ended.`);
+    } catch (err: any) {
+      console.error("Error ending session:", err);
+      toastError(err?.message || "Could not end session.");
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
-  // Unique Categories and Dates for filters
-  const uniqueCategories = useMemo(() => {
-    const set = new Set(sessions.map((s) => s.category).filter(Boolean));
-    return Array.from(set).sort();
-  }, [sessions]);
+  // Copy Join Code to clipboard
+  const handleCopyJoinCode = (code: string, id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!code) return;
 
-  const uniqueDates = useMemo(() => {
-    const set = new Set(sessions.map((s) => s.event_date).filter(Boolean));
+    navigator.clipboard.writeText(code).then(() => {
+      setCopiedId(id);
+      info(`Join code "${code}" copied to clipboard!`);
+      setTimeout(() => setCopiedId(null), 2500);
+    }).catch(() => {
+      toastError("Failed to copy code.");
+    });
+  };
+
+  // Navigate to Q&A Moderation for this session
+  const handleOpenQAPage = (sessionId: string) => {
+    navigate(`/conference/qa?session_id=${encodeURIComponent(sessionId)}`);
+  };
+
+  // View Details Modal
+  const handleViewDetails = (session: LiveSession) => {
+    setSelectedSession(session);
+    setIsDetailsModalOpen(true);
+  };
+
+  // Format date-time
+  const formatDateTime = (dateStr?: string | null) => {
+    if (!dateStr) return "-";
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return dateStr;
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  // Unique Categories for filter
+  const uniqueCategories = useMemo(() => {
+    const set = new Set(sessions.map((s) => s.category).filter(Boolean) as string[]);
     return Array.from(set).sort();
   }, [sessions]);
 
@@ -321,31 +317,32 @@ export default function SessionsPage() {
   const filteredSessions = useMemo(() => {
     const term = search.toLowerCase().trim();
     return sessions.filter((s) => {
-      const spName = getSpeakerDisplayName(s).toLowerCase();
       const matchesSearch =
         !term ||
         (s.title && s.title.toLowerCase().includes(term)) ||
+        (s.speaker_name && s.speaker_name.toLowerCase().includes(term)) ||
+        (s.join_code && s.join_code.toLowerCase().includes(term)) ||
         (s.category && s.category.toLowerCase().includes(term)) ||
-        (s.room && s.room.toLowerCase().includes(term)) ||
         (s.venue && s.venue.toLowerCase().includes(term)) ||
-        String(s.id).includes(term) ||
-        spName.includes(term);
+        (s.id && s.id.toLowerCase().includes(term));
 
-      const matchesCategory = categoryFilter === "All" || s.category === categoryFilter;
-      const matchesDate = dateFilter === "All" || s.event_date === dateFilter;
+      const matchesStatus =
+        statusFilter === "All" ||
+        (s.status || "draft").toLowerCase() === statusFilter.toLowerCase();
 
-      return matchesSearch && matchesCategory && matchesDate;
+      const matchesCategory =
+        categoryFilter === "All" || s.category === categoryFilter;
+
+      return matchesSearch && matchesStatus && matchesCategory;
     });
-  }, [sessions, search, categoryFilter, dateFilter, getSpeakerDisplayName]);
+  }, [sessions, search, statusFilter, categoryFilter]);
 
-  // Pagination
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
-
+  // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, categoryFilter, dateFilter]);
+  }, [search, statusFilter, categoryFilter]);
 
+  // Paginated Sessions
   const paginatedSessions = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
     return filteredSessions.slice(startIndex, startIndex + pageSize);
@@ -354,63 +351,62 @@ export default function SessionsPage() {
   // Statistics
   const stats = useMemo(() => {
     const total = sessions.length;
-    const keynotes = sessions.filter((s) => s.speaker_id !== null).length;
-    const categoriesCount = new Set(sessions.map((s) => s.category).filter(Boolean)).size;
-    const daysCount = new Set(sessions.map((s) => s.event_date).filter(Boolean)).size;
-    return { total, keynotes, categoriesCount, daysCount };
+    const live = sessions.filter((s) => (s.status || "").toLowerCase() === "live").length;
+    const draft = sessions.filter((s) => (s.status || "draft").toLowerCase() === "draft").length;
+    const ended = sessions.filter((s) => (s.status || "").toLowerCase() === "ended").length;
+    return { total, live, draft, ended };
   }, [sessions]);
 
   return (
     <>
       <PageMeta
-        title="Conference Sessions | Kaizen Con 2027"
-        description="Schedule and Track Conference Sessions, Halls, and Keynote Lectures"
+        title="Interactive Sessions | Kaizen Con 2027"
+        description="Manage Live Conference Sessions, Join Codes, Stage Status, and Delegate Q&A"
       />
 
       <AdminPageContainer
         title="Sessions"
-        subtitle="Manage conference schedules, hall allocations, and keynote speaking slots."
+        subtitle="Manage live interactive sessions, stage join codes, broadcast status, and delegate Q&A."
         searchValue={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search by title, speaker, room, venue, or category..."
+        searchPlaceholder="Search by title, speaker, join code, or category..."
         actionButton={
           <div className="flex flex-wrap items-center gap-2">
-            {/* Filter by Category */}
+            {/* Status Filter */}
             <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
               className="px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-[#AA2D7B]"
             >
-              <option value="All">All Categories ({sessions.length})</option>
-              {uniqueCategories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
+              <option value="All">All Statuses ({sessions.length})</option>
+              <option value="live">Live Now ({stats.live})</option>
+              <option value="draft">Draft ({stats.draft})</option>
+              <option value="ended">Ended ({stats.ended})</option>
             </select>
 
-            {/* Filter by Date */}
-            <select
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-[#AA2D7B]"
-            >
-              <option value="All">All Dates</option>
-              {uniqueDates.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
+            {/* Category Filter */}
+            {uniqueCategories.length > 0 && (
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-[#AA2D7B]"
+              >
+                <option value="All">All Categories</option>
+                {uniqueCategories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            )}
 
-
-            {/* Refresh Live API */}
+            {/* Refresh Button */}
             <button
               type="button"
               onClick={() => fetchSessionsData()}
               disabled={loading}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:text-[#AA2D7B] transition-colors"
-              title="Refresh sessions from server"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:text-[#AA2D7B] transition-colors cursor-pointer"
+              data-tooltip="Refresh Sessions"
             >
               <svg
                 className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#AA2D7B]" : ""}`}
@@ -427,18 +423,18 @@ export default function SessionsPage() {
             <button
               type="button"
               onClick={handleOpenAddModal}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-white bg-[#AA2D7B] hover:bg-[#D85A9A] rounded-lg shadow-xs transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-white bg-[#AA2D7B] hover:bg-[#8D2566] rounded-lg shadow-xs transition-colors cursor-pointer"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
-              <span>Schedule Session</span>
+              <span>Create Session</span>
             </button>
           </div>
         }
       >
-        {/* Error Notification if any */}
+        {/* Error Notification */}
         {apiError && (
           <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-lg text-amber-800 dark:text-amber-300 text-xs flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -448,504 +444,623 @@ export default function SessionsPage() {
               <span>{apiError}</span>
             </div>
             <button
+              type="button"
               onClick={() => fetchSessionsData()}
-              className="px-2 py-1 bg-amber-200 dark:bg-amber-800 hover:bg-amber-300 rounded font-semibold text-[11px] transition-colors"
+              className="text-[#AA2D7B] font-semibold hover:underline"
             >
               Retry
             </button>
           </div>
         )}
 
+        {/* Stats Metrics Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+          <div className="p-3.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs">
+            <div className="text-[11px] font-medium text-gray-500 dark:text-gray-400">Total Sessions</div>
+            <div className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</div>
+          </div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-          <div className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700/60 shadow-2xs">
-            <div className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Total Sessions</div>
-            <div className="text-xl font-black text-gray-900 dark:text-white mt-1">{stats.total}</div>
+          <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/50 dark:bg-emerald-950/20 shadow-xs">
+            <div className="flex items-center justify-between text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
+              <span>Live Now</span>
+              {stats.live > 0 && (
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+              )}
+            </div>
+            <div className="mt-1 text-2xl font-bold text-emerald-700 dark:text-emerald-300">{stats.live}</div>
           </div>
-          <div className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700/60 shadow-2xs">
-            <div className="text-[11px] font-medium text-[#AA2D7B] uppercase tracking-wider">Speaker Sessions</div>
-            <div className="text-xl font-black text-[#AA2D7B] mt-1">{stats.keynotes}</div>
+
+          <div className="p-3.5 rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-950/20 shadow-xs">
+            <div className="text-[11px] font-medium text-amber-700 dark:text-amber-400">Draft / Upcoming</div>
+            <div className="mt-1 text-2xl font-bold text-amber-700 dark:text-amber-300">{stats.draft}</div>
           </div>
-          <div className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700/60 shadow-2xs">
-            <div className="text-[11px] font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wider">Tracks / Specialties</div>
-            <div className="text-xl font-black text-purple-600 dark:text-purple-400 mt-1">{stats.categoriesCount}</div>
-          </div>
-          <div className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700/60 shadow-2xs">
-            <div className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Event Days</div>
-            <div className="text-xl font-black text-gray-700 dark:text-gray-300 mt-1">{stats.daysCount}</div>
+
+          <div className="p-3.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40 shadow-xs">
+            <div className="text-[11px] font-medium text-gray-500 dark:text-gray-400">Ended Sessions</div>
+            <div className="mt-1 text-2xl font-bold text-gray-700 dark:text-gray-300">{stats.ended}</div>
           </div>
         </div>
 
-        {/* Sessions Table */}
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-16 text-gray-400 text-xs">
-            <svg className="w-8 h-8 text-[#AA2D7B] animate-spin mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            <span>Loading sessions from schedules API...</span>
-          </div>
-        ) : filteredSessions.length === 0 ? (
-          <div className="text-center py-16 bg-white dark:bg-gray-800/40 rounded-xl border border-gray-200 dark:border-gray-800 p-8">
-            <div className="w-12 h-12 rounded-full bg-pink-100 dark:bg-pink-950/60 text-[#AA2D7B] flex items-center justify-center mx-auto mb-3">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
+        {/* Sessions Table Container */}
+        <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs">
+          {loading ? (
+            <div className="p-12 text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-3 border-[#AA2D7B] border-t-transparent"></div>
+              <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">Loading interactive sessions...</p>
             </div>
-            <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">No sessions match your search</h3>
-            <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
-              Try adjusting your search criteria or schedule a new session using the button above.
-            </p>
-            <button
-              onClick={() => {
-                setSearch("");
-                setCategoryFilter("All");
-                setDateFilter("All");
-              }}
-              className="mt-3 px-3 py-1.5 text-xs text-[#AA2D7B] hover:underline font-semibold"
-            >
-              Reset Filters
-            </button>
-          </div>
-        ) : (
-          <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-800 text-gray-500 font-semibold uppercase tracking-wider text-[11px] bg-gray-50/80 dark:bg-gray-800/60">
-                  <th className="py-3 px-4">Session Details</th>
-                  <th className="py-3 px-4">Speaker</th>
-                  <th className="py-3 px-4">Schedule & Venue</th>
-                  <th className="py-3 px-4">Category</th>
-                  <th className="py-3 px-4 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-800/70">
-                {paginatedSessions.map((session) => {
-                  const speaker = getSpeakerInfo(session.speaker_id);
-                  const isBreak = session.category?.toLowerCase() === "break" || !session.speaker_id;
+          ) : paginatedSessions.length === 0 ? (
+            <div className="p-12 text-center">
+              <div className="w-12 h-12 mx-auto rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 className="mt-3 text-sm font-semibold text-gray-900 dark:text-white">No sessions found</h3>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {search || statusFilter !== "All" || categoryFilter !== "All"
+                  ? "Try adjusting your search query or filter options."
+                  : "Get started by creating your first interactive session."}
+              </p>
+              {search || statusFilter !== "All" || categoryFilter !== "All" ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch("");
+                    setStatusFilter("All");
+                    setCategoryFilter("All");
+                  }}
+                  className="mt-3 px-3 py-1.5 text-xs text-[#AA2D7B] hover:underline"
+                >
+                  Clear all filters
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleOpenAddModal}
+                  className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-[#AA2D7B] hover:bg-[#8D2566] rounded-lg transition-colors cursor-pointer"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  Create First Session
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-gray-50/75 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  <tr>
+                    <th scope="col" className="px-4 py-3">Session Title</th>
+                    <th scope="col" className="px-4 py-3">Speaker</th>
+                    <th scope="col" className="px-4 py-3">Join Code</th>
+                    <th scope="col" className="px-4 py-3">Status</th>
+                    <th scope="col" className="px-4 py-3">Timing / Venue</th>
+                    <th scope="col" className="px-4 py-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {paginatedSessions.map((session) => {
+                    const isLive = (session.status || "").toLowerCase() === "live";
+                    const isDraft = (session.status || "draft").toLowerCase() === "draft";
+                    const isEnded = (session.status || "").toLowerCase() === "ended";
 
-                  return (
-                    <tr
-                      key={session.id}
-                      className="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors"
-                    >
-                      {/* Session Title & Description */}
-                      <td className="py-3.5 px-4 max-w-sm">
-                        <div
-                          className="font-bold text-gray-900 dark:text-gray-100 line-clamp-1 hover:text-[#AA2D7B] cursor-pointer"
-                          onClick={() => handleViewSessionById(session)}
-                        >
-                          {session.title}
-                        </div>
-                        {session.description && (
-                          <div className="text-[11px] text-gray-500 line-clamp-1 mt-0.5">
-                            {session.description}
+                    return (
+                      <tr
+                        key={session.id}
+                        className="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors cursor-pointer"
+                        onClick={() => handleViewDetails(session)}
+                      >
+                        {/* Title & Category */}
+                        <td className="px-4 py-3.5 max-w-xs">
+                          <div className="font-semibold text-gray-900 dark:text-white truncate">
+                            {session.title || "Untitled Session"}
                           </div>
-                        )}
-                        <span className="font-mono text-[10px] text-gray-400 mt-0.5 block">
-                          ID: #{session.id}
-                        </span>
-                      </td>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            {session.category ? (
+                              <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300">
+                                {session.category}
+                              </span>
+                            ) : null}
+                            <span className="text-[10px] text-gray-400 dark:text-gray-500 font-mono truncate" title={session.id}>
+                              ID: {session.id.slice(0, 8)}...
+                            </span>
+                          </div>
+                        </td>
 
-                      {/* Speaker Name */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className={`w-7 h-7 rounded-full text-white flex items-center justify-center font-bold text-[10px] uppercase shrink-0 ${
-                              isBreak
-                                ? "bg-amber-500"
-                                : "bg-gradient-to-tr from-[#55355E] to-[#AA2D7B]"
-                            }`}
-                          >
-                            {isBreak ? "☕" : (speaker?.first_name || "S").charAt(0)}
-                          </div>
-                          <div>
-                            <div className="font-semibold text-gray-800 dark:text-gray-200">
-                              {getSpeakerDisplayName(session)}
+                        {/* Speaker Name */}
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#AA2D7B]/20 to-[#4A154B]/20 text-[#AA2D7B] flex items-center justify-center font-bold text-xs">
+                              {session.speaker_name ? session.speaker_name.charAt(0).toUpperCase() : "S"}
                             </div>
-                            {speaker && (
-                              <div className="text-[10px] text-gray-400 truncate max-w-[150px]">
-                                {speaker.speciality || speaker.designation}
+                            <div>
+                              <div className="font-medium text-gray-800 dark:text-gray-200">
+                                {session.speaker_name || "Unassigned"}
                               </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Join Code */}
+                        <td className="px-4 py-3.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          <div className="inline-flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md border border-gray-200 dark:border-gray-700">
+                            <span className="font-mono font-bold text-xs text-[#AA2D7B] tracking-wider">
+                              {session.join_code || "—"}
+                            </span>
+                            {session.join_code && (
+                              <button
+                                type="button"
+                                onClick={(e) => handleCopyJoinCode(session.join_code, session.id, e)}
+                                className="p-0.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                                data-tooltip="Copy Join Code"
+                              >
+                                {copiedId === session.id ? (
+                                  <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                                  </svg>
+                                ) : (
+                                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" strokeWidth="2" />
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" strokeWidth="2" />
+                                  </svg>
+                                )}
+                              </button>
                             )}
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Time & Venue */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <div className="font-semibold text-gray-800 dark:text-gray-200">
-                          {formatTime(session.start_time)} - {formatTime(session.end_time)}
-                        </div>
-                        <div className="text-[11px] text-[#AA2D7B] font-medium flex items-center gap-1 mt-0.5">
-                          <span>{session.room || "Hall A"}</span>
-                          <span>•</span>
-                          <span className="text-gray-500">{session.event_date}</span>
-                        </div>
-                      </td>
+                        {/* Status */}
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          {isLive ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800">
+                              <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                              </span>
+                              LIVE
+                            </span>
+                          ) : isDraft ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800">
+                              Draft
+                            </span>
+                          ) : isEnded ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-600 border border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700">
+                              Ended
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-600">
+                              {session.status}
+                            </span>
+                          )}
+                        </td>
 
-                      {/* Category */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span
-                          className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                            isBreak
-                              ? "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-300"
-                              : "bg-[#faedf5] text-[#55355E] dark:bg-[#55355E]/40 dark:text-[#f5d8e9] border border-[#AA2D7B]/20"
-                          }`}
-                        >
-                          {session.category}
-                        </span>
-                      </td>
+                        {/* Timing / Venue */}
+                        <td className="px-4 py-3.5 whitespace-nowrap text-gray-600 dark:text-gray-400">
+                          {session.venue && (
+                            <div className="font-medium text-gray-800 dark:text-gray-200">{session.venue}</div>
+                          )}
+                          <div className="text-[11px] text-gray-400 dark:text-gray-500">
+                            {session.start_time ? `${session.start_time} - ${session.end_time || ""}` : formatDateTime(session.created_at)}
+                          </div>
+                        </td>
 
-                      {/* Actions */}
-                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                        <div className="inline-flex items-center gap-1.5 justify-center">
-                          <button
-                            type="button"
-                            onClick={() => handleViewSessionById(session)}
-                            className="p-1.5 text-xs font-semibold text-[#AA2D7B] dark:text-[#D85A9A] bg-[#faedf5]/70 hover:bg-[#faedf5] dark:bg-pink-950/40 dark:hover:bg-pink-900/50 rounded-lg border border-[#AA2D7B]/20 dark:border-[#AA2D7B]/40 transition-colors cursor-pointer inline-flex items-center justify-center"
-                            data-tooltip="View Details"
-                          >
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                              <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                              <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEditModal(session)}
-                            className="p-1.5 text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg border border-blue-200 dark:border-blue-800 transition-colors cursor-pointer inline-flex items-center justify-center"
-                            data-tooltip="Edit Session"
-                          >
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                              <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteSession(session)}
-                            className="p-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg border border-rose-200 dark:border-rose-800 transition-colors cursor-pointer inline-flex items-center justify-center"
-                            data-tooltip="Delete Session"
-                          >
-                            <svg className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                              <line x1="10" y1="11" x2="10" y2="17" />
-                              <line x1="14" y1="11" x2="14" y2="17" />
-                            </svg>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        {/* Actions */}
+                        <td className="px-4 py-3.5 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          <div className="inline-flex items-center gap-1.5 justify-center">
+                            {/* Start Session (Draft only) */}
+                            {isDraft && (
+                              <button
+                                type="button"
+                                onClick={() => handleStartSession(session)}
+                                disabled={actionLoadingId === session.id}
+                                className="p-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg border border-emerald-200 dark:border-emerald-800 transition-colors disabled:opacity-50 cursor-pointer inline-flex items-center justify-center"
+                                data-tooltip="Start Session"
+                              >
+                                {actionLoadingId === session.id ? (
+                                  <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                                    <path d="M12 2a10 10 0 0 1 10 10" />
+                                  </svg>
+                                ) : (
+                                  <svg className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" fill="currentColor">
+                                    <polygon points="5 3 19 12 5 21 5 3" />
+                                  </svg>
+                                )}
+                              </button>
+                            )}
 
-            {/* Pagination Controls Bar */}
-            <TablePagination
-              currentPage={currentPage}
-              totalItems={filteredSessions.length}
-              pageSize={pageSize}
-              onPageChange={setCurrentPage}
-              onPageSizeChange={(newSize) => {
-                setPageSize(newSize);
-                setCurrentPage(1);
-              }}
-              itemName="sessions"
-            />
-          </div>
-        )}
+                            {/* End Session (Live only) */}
+                            {isLive && (
+                              <button
+                                type="button"
+                                onClick={() => handleEndSession(session)}
+                                disabled={actionLoadingId === session.id}
+                                className="p-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg border border-rose-200 dark:border-rose-800 transition-colors disabled:opacity-50 cursor-pointer inline-flex items-center justify-center"
+                                data-tooltip="End Session"
+                              >
+                                {actionLoadingId === session.id ? (
+                                  <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                                    <path d="M12 2a10 10 0 0 1 10 10" />
+                                  </svg>
+                                ) : (
+                                  <svg className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" viewBox="0 0 24 24" fill="currentColor">
+                                    <rect x="6" y="6" width="12" height="12" rx="1.5" />
+                                  </svg>
+                                )}
+                              </button>
+                            )}
+
+                            {/* Moderate Live Q&A */}
+                            <button
+                              type="button"
+                              onClick={() => handleOpenQAPage(session.id)}
+                              className="p-1.5 text-xs font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-lg border border-purple-200 dark:border-purple-800 transition-colors cursor-pointer inline-flex items-center justify-center"
+                              data-tooltip="Moderate Live Q&A"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                              </svg>
+                            </button>
+
+                            {/* View Details */}
+                            <button
+                              type="button"
+                              onClick={() => handleViewDetails(session)}
+                              className="p-1.5 text-xs font-semibold text-[#AA2D7B] dark:text-[#D85A9A] bg-[#faedf5]/70 hover:bg-[#faedf5] dark:bg-pink-950/40 dark:hover:bg-pink-900/50 rounded-lg border border-[#AA2D7B]/20 dark:border-[#AA2D7B]/40 transition-colors cursor-pointer inline-flex items-center justify-center"
+                              data-tooltip="View Details"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Table Pagination */}
+          {!loading && filteredSessions.length > 0 && (
+            <div className="border-t border-gray-200 dark:border-gray-800">
+              <TablePagination
+                currentPage={currentPage}
+                pageSize={pageSize}
+                totalItems={filteredSessions.length}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(newSize) => {
+                  setPageSize(newSize);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+          )}
+        </div>
       </AdminPageContainer>
 
-      {/* CREATE / EDIT SESSION SCHEDULE MODAL (POST /api/schedules) */}
+      {/* ========================================================================= */}
+      {/* Create Session Modal                                                      */}
+      {/* ========================================================================= */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 md:p-8 bg-black/60 backdrop-blur-xs animate-fadeIn overflow-y-auto">
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl w-full sm:max-w-xl md:max-w-3xl lg:max-w-5xl xl:max-w-6xl h-[92vh] sm:h-[88vh] md:h-[86vh] max-h-[920px] min-h-[580px] flex flex-col overflow-hidden animate-scaleIn my-auto transition-all">
-            <div className="flex items-center justify-between px-6 sm:px-8 py-4 sm:py-5 border-b border-gray-200 dark:border-gray-800 bg-[#faedf5]/70 dark:bg-gray-800/90 shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#AA2D7B]/10 text-[#AA2D7B] flex items-center justify-center shrink-0">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <span>{editingSession ? "Edit Session Schedule" : "Schedule New Session"}</span>
-                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#AA2D7B]/10 text-[#AA2D7B]">
-                      POST /api/schedules
-                    </span>
-                  </h3>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    Configure session timings, hall assignment, and single or multiple presenters
-                  </p>
-                </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-gray-900 shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden transform transition-all animate-fadeIn">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold text-gray-900 dark:text-white">Create New Session</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Creates an interactive session with an auto-generated stage join code.
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="w-9 h-9 rounded-xl text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-lg transition-colors cursor-pointer"
+                className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
               >
-                ✕
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
 
-            <form onSubmit={handleSaveSessionSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden text-xs sm:text-sm">
-              <div className="p-6 sm:p-8 space-y-5 sm:space-y-6 overflow-y-auto flex-1">
-                {formError && (
-                  <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 text-rose-800 dark:text-rose-300 text-xs sm:text-sm">
-                    {formError}
-                  </div>
-                )}
+            <form onSubmit={handleCreateSessionSubmit} className="p-6 space-y-4">
+              {formError && (
+                <div className="p-3 text-xs rounded-lg bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200 dark:border-rose-900">
+                  {formError}
+                </div>
+              )}
 
-                {/* Section 1: Title */}
+              {/* Title Field */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  Session Title <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. Modern Innovations in Minimally Invasive Surgery"
+                  required
+                  className="w-full px-3 py-2 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#AA2D7B]"
+                />
+              </div>
+
+              {/* Speaker Name Field (with auto-suggest from faculty) */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    Speaker Name <span className="text-rose-500">*</span>
+                  </label>
+                  {speakers.length > 0 && (
+                    <span className="text-[10px] text-gray-400">or pick from faculty</span>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <input
+                    type="text"
+                    value={speakerName}
+                    onChange={(e) => setSpeakerName(e.target.value)}
+                    placeholder="e.g. Dr. Nirva Padaliya"
+                    required
+                    className="w-full px-3 py-2 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#AA2D7B]"
+                  />
+                  {speakers.length > 0 && (
+                    <select
+                      onChange={(e) => {
+                        if (e.target.value) setSpeakerName(e.target.value);
+                      }}
+                      value=""
+                      className="w-full px-2.5 py-1.5 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 rounded-lg"
+                    >
+                      <option value="">Quick select from registered Faculty...</option>
+                      {speakers.map((sp) => (
+                        <option key={sp.id} value={`Dr. ${sp.first_name} ${sp.last_name}`}>
+                          Dr. {sp.first_name} {sp.last_name} {sp.speciality ? `(${sp.speciality})` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              </div>
+
+              {/* Category & Venue (Optional) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                    Session Title *
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Category / Track
                   </label>
                   <input
                     type="text"
-                    required
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g. Preventive Cardiology in Modern Practice"
-                    className="w-full px-4 py-3 text-xs sm:text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-[#AA2D7B] focus:ring-2 focus:ring-[#AA2D7B]/20 transition-all shadow-2xs"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    placeholder="e.g. Cardiology, Surgery"
+                    className="w-full px-3 py-2 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#AA2D7B]"
                   />
                 </div>
-
-                {/* Section 2: Presenter & Category in 2 columns on tablet/laptop */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
-                  <div>
-                    <MultiSelectSpeakers
-                      speakers={speakers}
-                      selectedIds={selectedSpeakerIds}
-                      onChange={setSelectedSpeakerIds}
-                      placeholder="None / Break Session (Select presenters...)"
-                      label="Presenter / Speaker(s)"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                      Category / Track *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      placeholder="e.g. Cardiology, Neurology, Break"
-                      className="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-[#AA2D7B] focus:ring-2 focus:ring-[#AA2D7B]/20 transition-all shadow-2xs min-h-[42px]"
-                    />
-                  </div>
-                </div>
-
-                {/* Section 3: Date & Times in 3 columns */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
-                  <div>
-                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                      Event Date *
-                    </label>
-                    <input
-                      type="date"
-                      required
-                      value={eventDate}
-                      onChange={(e) => setEventDate(e.target.value)}
-                      className="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-[#AA2D7B] focus:ring-2 focus:ring-[#AA2D7B]/20 transition-all shadow-2xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                      Start Time *
-                    </label>
-                    <input
-                      type="time"
-                      step="1"
-                      required
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-[#AA2D7B] focus:ring-2 focus:ring-[#AA2D7B]/20 transition-all shadow-2xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                      End Time *
-                    </label>
-                    <input
-                      type="time"
-                      step="1"
-                      required
-                      value={endTime}
-                      onChange={(e) => setEndTime(e.target.value)}
-                      className="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-[#AA2D7B] focus:ring-2 focus:ring-[#AA2D7B]/20 transition-all shadow-2xs"
-                    />
-                  </div>
-                </div>
-
-                {/* Section 4: Venue & Room in 2 columns */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
-                  <div>
-                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                      Venue
-                    </label>
-                    <input
-                      type="text"
-                      value={venue}
-                      onChange={(e) => setVenue(e.target.value)}
-                      placeholder="e.g. RK Hospital Conference Hall"
-                      className="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-[#AA2D7B] focus:ring-2 focus:ring-[#AA2D7B]/20 transition-all shadow-2xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                      Room / Hall
-                    </label>
-                    <input
-                      type="text"
-                      value={room}
-                      onChange={(e) => setRoom(e.target.value)}
-                      placeholder="e.g. Hall A, Main Auditorium"
-                      className="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-[#AA2D7B] focus:ring-2 focus:ring-[#AA2D7B]/20 transition-all shadow-2xs"
-                    />
-                  </div>
-                </div>
-
-                {/* Section 5: Description with more height */}
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                    Description & Agenda Notes
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Venue / Hall
                   </label>
-                  <textarea
-                    rows={4}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Provide details, key topics, presentation outline, or instructions for attendees..."
-                    className="w-full px-4 py-3 text-xs sm:text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-[#AA2D7B] focus:ring-2 focus:ring-[#AA2D7B]/20 transition-all shadow-2xs resize-y"
+                  <input
+                    type="text"
+                    value={venue}
+                    onChange={(e) => setVenue(e.target.value)}
+                    placeholder="e.g. Auditorium Hall A"
+                    className="w-full px-3 py-2 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#AA2D7B]"
                   />
                 </div>
               </div>
 
-              {/* Actions Footer */}
-              <div className="flex flex-wrap items-center justify-between gap-3 px-6 sm:px-8 py-4 border-t border-gray-200 dark:border-gray-800 shrink-0 bg-gray-50/90 dark:bg-gray-900/90">
-                <div className="text-xs text-gray-500 hidden sm:flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <span>Payload passes only <code className="px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-800 font-mono text-[11px] text-[#AA2D7B]">speaker_ids: [...]</code></span>
+              {/* Timing (Optional) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Start Time
+                  </label>
+                  <input
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    className="w-full px-3 py-2 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#AA2D7B]"
+                  />
                 </div>
-                <div className="flex items-center gap-3 ml-auto">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    disabled={isSubmitting}
-                    className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="px-7 py-2.5 rounded-xl bg-[#AA2D7B] hover:bg-[#D85A9A] text-white font-semibold text-xs sm:text-sm shadow-xs transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer"
-                  >
-                    {isSubmitting ? "Saving..." : editingSession ? "Update Schedule" : "Schedule Session"}
-                  </button>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    End Time
+                  </label>
+                  <input
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    className="w-full px-3 py-2 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#AA2D7B]"
+                  />
                 </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="pt-3 border-t border-gray-200 dark:border-gray-800 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  disabled={isSubmitting}
+                  className="px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#AA2D7B] hover:bg-[#8D2566] rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span className="w-3.5 h-3.5 animate-spin border-2 border-white border-t-transparent rounded-full"></span>
+                      <span>Creating...</span>
+                    </>
+                  ) : (
+                    <span>Create Session</span>
+                  )}
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* VIEW SESSION BY ID MODAL */}
+      {/* ========================================================================= */}
+      {/* Session Details Modal                                                     */}
+      {/* ========================================================================= */}
       {isDetailsModalOpen && selectedSession && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 md:p-8 bg-black/60 backdrop-blur-xs animate-fadeIn overflow-y-auto">
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl w-full max-w-xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl h-auto min-h-[460px] md:min-h-[520px] max-h-[92vh] lg:max-h-[88vh] flex flex-col overflow-hidden animate-scaleIn my-auto transition-all">
-            <div className="flex items-center justify-between px-6 sm:px-8 py-4 sm:py-5 border-b border-gray-200 dark:border-gray-800 bg-[#55355E] text-white shrink-0">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-gray-900 shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden transform transition-all animate-fadeIn">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
               <div>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-pink-200">
-                  Session #{selectedSession.id} Details (GET /api/schedules?id={selectedSession.id})
+                <span className="text-[11px] font-mono text-gray-400 dark:text-gray-500 uppercase tracking-wide">
+                  Session Details
                 </span>
-                <h3 className="text-base sm:text-lg font-bold text-white mt-0.5 line-clamp-1">
+                <h3 className="text-base font-bold text-gray-900 dark:text-white mt-0.5">
                   {selectedSession.title}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsDetailsModalOpen(false)}
-                className="w-7 h-7 rounded-lg text-white/80 hover:text-white hover:bg-white/10 flex items-center justify-center text-sm transition-colors cursor-pointer"
+                className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
               >
-                ✕
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
 
-            <div className="p-4 sm:p-6 space-y-3.5 text-xs overflow-y-auto flex-1 min-h-0">
-              {isLoadingDetails && (
-                <div className="flex items-center gap-2 p-2 bg-pink-50 dark:bg-gray-800 rounded-lg text-xs text-[#AA2D7B]">
-                  <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            {/* Body */}
+            <div className="p-6 space-y-4">
+              {/* Join Code Highlight Card */}
+              <div className="p-4 rounded-xl bg-gradient-to-r from-purple-50 via-pink-50 to-purple-50 dark:from-purple-950/40 dark:via-pink-950/20 dark:to-purple-950/40 border border-purple-200 dark:border-purple-800 flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] uppercase font-bold text-purple-700 dark:text-purple-300 tracking-wider">
+                    Stage Join Code
+                  </div>
+                  <div className="text-2xl font-mono font-extrabold text-[#AA2D7B] tracking-widest mt-0.5">
+                    {selectedSession.join_code}
+                  </div>
+                  <div className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
+                    Delegates enter this code in the attendee app to join live Q&A.
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleCopyJoinCode(selectedSession.join_code, selectedSession.id)}
+                  className="px-3 py-1.5 text-xs font-semibold text-white bg-[#AA2D7B] hover:bg-[#8D2566] rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" strokeWidth="2" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" strokeWidth="2" />
                   </svg>
-                  <span>Loading fresh schedule details from API...</span>
-                </div>
-              )}
+                  <span>{copiedId === selectedSession.id ? "Copied!" : "Copy Code"}</span>
+                </button>
+              </div>
 
-              {/* 2-Column Info Grid */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700">
-                  <span className="text-[10px] text-gray-400 uppercase font-semibold">Presenter / Speaker</span>
-                  <div className="font-bold text-gray-900 dark:text-gray-100 text-sm mt-0.5">
-                    {getSpeakerDisplayName(selectedSession)}
+              {/* Details Key-Value Grid */}
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
+                  <div className="text-gray-400 text-[10px] uppercase font-medium">Status</div>
+                  <div className="mt-1 font-semibold text-gray-900 dark:text-white capitalize">
+                    {selectedSession.status || "draft"}
                   </div>
                 </div>
 
-                <div className="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700">
-                  <span className="text-[10px] text-gray-400 uppercase font-semibold">Category / Specialty</span>
-                  <div className="font-bold text-[#AA2D7B] text-sm mt-0.5">
-                    {selectedSession.category}
+                <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
+                  <div className="text-gray-400 text-[10px] uppercase font-medium">Speaker</div>
+                  <div className="mt-1 font-semibold text-gray-900 dark:text-white truncate">
+                    {selectedSession.speaker_name || "Unassigned"}
                   </div>
                 </div>
 
-                <div className="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700">
-                  <span className="text-[10px] text-gray-400 uppercase font-semibold">Event Date & Time</span>
-                  <div className="font-semibold text-gray-800 dark:text-gray-200 text-xs mt-0.5">
-                    {selectedSession.event_date} • {formatTime(selectedSession.start_time)} - {formatTime(selectedSession.end_time)}
+                <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
+                  <div className="text-gray-400 text-[10px] uppercase font-medium">Category / Track</div>
+                  <div className="mt-1 font-semibold text-gray-900 dark:text-white">
+                    {selectedSession.category || "General"}
                   </div>
                 </div>
 
-                <div className="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700">
-                  <span className="text-[10px] text-gray-400 uppercase font-semibold">Venue & Hall</span>
-                  <div className="font-medium text-gray-700 dark:text-gray-300 text-xs mt-0.5">
-                    {selectedSession.room} — {selectedSession.venue}
+                <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
+                  <div className="text-gray-400 text-[10px] uppercase font-medium">Venue / Hall</div>
+                  <div className="mt-1 font-semibold text-gray-900 dark:text-white">
+                    {selectedSession.venue || "Auditorium"}
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 col-span-2">
+                  <div className="text-gray-400 text-[10px] uppercase font-medium">Created Timestamp</div>
+                  <div className="mt-1 font-medium text-gray-700 dark:text-gray-300">
+                    {formatDateTime(selectedSession.created_at)}
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 col-span-2">
+                  <div className="text-gray-400 text-[10px] uppercase font-medium">Session UUID</div>
+                  <div className="mt-1 font-mono text-[11px] text-gray-600 dark:text-gray-400 break-all select-all">
+                    {selectedSession.id}
                   </div>
                 </div>
               </div>
 
-              {/* Description */}
-              {selectedSession.description && (
-                <div className="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700">
-                  <span className="text-[10px] text-gray-400 uppercase font-semibold">Description</span>
-                  <p className="text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">
-                    {selectedSession.description}
-                  </p>
+              {/* Actions Footer */}
+              <div className="pt-3 border-t border-gray-200 dark:border-gray-800 flex flex-wrap items-center justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleOpenQAPage(selectedSession.id)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-purple-600 hover:bg-purple-700 text-white transition-colors cursor-pointer"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  <span>Moderate Live Q&A</span>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  {(selectedSession.status || "draft").toLowerCase() === "draft" && (
+                    <button
+                      type="button"
+                      onClick={() => handleStartSession(selectedSession)}
+                      disabled={actionLoadingId === selectedSession.id}
+                      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer"
+                    >
+                      Start Session
+                    </button>
+                  )}
+
+                  {(selectedSession.status || "").toLowerCase() === "live" && (
+                    <button
+                      type="button"
+                      onClick={() => handleEndSession(selectedSession)}
+                      disabled={actionLoadingId === selectedSession.id}
+                      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-rose-600 hover:bg-rose-700 text-white transition-colors cursor-pointer"
+                    >
+                      End Session
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => setIsDetailsModalOpen(false)}
+                    className="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
+                  >
+                    Close
+                  </button>
                 </div>
-              )}
-
-              {/* Controls */}
-              <div className="flex items-center justify-between px-5 py-3 sm:px-6 sm:py-3.5 border-t border-gray-200 dark:border-gray-800 shrink-0 bg-gray-50/80 dark:bg-gray-900/80">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsDetailsModalOpen(false);
-                    handleOpenEditModal(selectedSession);
-                  }}
-                  className="px-3.5 py-1.5 rounded-lg bg-[#55355E] hover:bg-[#6c4377] text-white font-semibold transition-colors cursor-pointer text-xs"
-                >
-                  Edit Schedule
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setIsDetailsModalOpen(false)}
-                  className="px-4 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium cursor-pointer text-xs"
-                >
-                  Close
-                </button>
               </div>
             </div>
           </div>

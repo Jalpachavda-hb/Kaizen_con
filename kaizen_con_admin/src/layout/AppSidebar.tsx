@@ -4,6 +4,7 @@ import { useSidebar } from "../context/SidebarContext";
 import {
   DashboardIcon,
   SpeakersIcon,
+  SchedulesIcon,
   SessionsIcon,
   DelegatesIcon,
   SendEmailIcon,
@@ -52,6 +53,12 @@ const conferenceNavSections: NavSection[] = [
         path: "/faculty",
         aliases: ["/conference/faculty"],
         icon: <SpeakersIcon className="w-5 h-5" />,
+      },
+      {
+        name: "Schedules",
+        path: "/schedules",
+        aliases: ["/conference/schedules"],
+        icon: <SchedulesIcon className="w-5 h-5" />,
       },
       {
         name: "Sessions",

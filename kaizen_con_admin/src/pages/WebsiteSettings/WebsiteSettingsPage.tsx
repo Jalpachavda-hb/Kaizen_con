@@ -628,20 +628,8 @@ export default function WebsiteSettingsPage() {
                     </button>
                   </div>
                 </div>
-              )}
-
-              {/* Information / API Specifications Card */}
-              <div className="p-4 rounded-xl bg-gray-50/80 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 text-xs text-gray-600 dark:text-gray-400 space-y-2">
-                <h5 className="font-bold text-gray-900 dark:text-white uppercase tracking-wider text-[11px]">
-                  Brochure Guidelines
-                </h5>
-                <ul className="list-disc pl-4 space-y-1 text-[11px] leading-relaxed">
-                  <li><strong>Target Endpoint:</strong> <code>POST /api/brochure/upload</code> (multipart/form-data)</li>
-                  <li><strong>Download Endpoint:</strong> <code>GET /api/brochure/download</code></li>
-                  <li><strong>Deletion Endpoint:</strong> <code>DELETE /api/brochure/delete</code></li>
-                  <li><strong>Public Integration:</strong> The Hero Section on the website serves the live brochure directly from the backend.</li>
-                </ul>
-              </div>
+              )}       
+            
 
             </div>
 

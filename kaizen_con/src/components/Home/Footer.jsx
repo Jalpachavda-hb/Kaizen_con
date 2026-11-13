@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { FaFacebookF, FaInstagram } from 'react-icons/fa6';
 import './Footer.css';
 import logoImg from '../../assets/home/logokaizecon.png';
 
@@ -140,7 +141,7 @@ export default function Footer() {
                   <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                 </svg>
               </span>
-              <a href="mailto:hello@kaizencon.demo" className="kz-footer-contact-link">
+              <a href="mailto:kaizencon2027@gmail.com" className="kz-footer-contact-link">
               kaizencon2027@gmail.com
               </a>
             </li>
@@ -152,13 +153,10 @@ export default function Footer() {
                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
                 </svg>
               </span>
-              <a href="tel:+917912345678" className="kz-footer-contact-link">
+              <a href="tel:+919016340044" className="kz-footer-contact-link">
                 +91 90163 40044
               </a>
             </li>
-
-          
-           
 
             {/* Website */}
             <li className="kz-footer-contact-item">
@@ -174,6 +172,33 @@ export default function Footer() {
               </a>
             </li>
           </ul>
+
+          {/* Social Media Connect */}
+          <div className="kz-footer-social-wrap">
+            <span className="kz-footer-social-label">Connect With Us</span>
+            <div className="kz-footer-social-icons">
+              <a
+                href="https://www.facebook.com/KaizenCon2027"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="kz-footer-social-btn kz-footer-social-fb"
+                aria-label="Connect with KaizenCon 2027 on Facebook"
+                title="Facebook"
+              >
+                <FaFacebookF />
+              </a>
+              <a
+                href="https://www.instagram.com/kaizencon_2027"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="kz-footer-social-btn kz-footer-social-ig"
+                aria-label="Connect with KaizenCon 2027 on Instagram"
+                title="Instagram"
+              >
+                <FaInstagram />
+              </a>
+            </div>
+          </div>
         </div>
       </div>
 

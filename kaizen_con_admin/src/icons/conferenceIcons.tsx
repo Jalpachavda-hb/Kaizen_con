@@ -38,8 +38,8 @@ export const SpeakersIcon: React.FC<IconProps> = ({ className = "w-5 h-5" }) => 
   </svg>
 );
 
-// Conference - Sessions Icon (Calendar with clock / schedule)
-export const SessionsIcon: React.FC<IconProps> = ({ className = "w-5 h-5" }) => (
+// Conference - Schedules Icon (Calendar with clock / timetable)
+export const SchedulesIcon: React.FC<IconProps> = ({ className = "w-5 h-5" }) => (
   <svg
     className={className}
     viewBox="0 0 24 24"
@@ -59,6 +59,21 @@ export const SessionsIcon: React.FC<IconProps> = ({ className = "w-5 h-5" }) => 
     <path d="M8 18h.01" />
     <path d="M12 18h.01" />
     <path d="M16 18h.01" />
+  </svg>
+);
+
+// Conference - Sessions Icon (Live stage / presentation / broadcast)
+export const SessionsIcon: React.FC<IconProps> = ({ className = "w-5 h-5" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
   </svg>
 );
 

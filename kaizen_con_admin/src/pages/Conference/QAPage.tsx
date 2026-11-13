@@ -1,13 +1,15 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useSearchParams } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
 import { AdminPageContainer } from "../../components/common/AdminPageContainer";
 import { TablePagination } from "../../components/common/TablePagination";
 import { useToast } from "../../context/ToastContext";
 import {
-  QA_WS_URL,
   QA_DEFAULT_SESSION_ID,
   approveQuestionApi,
   rejectQuestionApi,
+  getLiveSessions,
+  getQaWsUrl,
 } from "../../api/ApiPath";
 
 export interface LiveQuestionItem {
@@ -33,6 +35,31 @@ export interface LiveSessionInfo {
 
 export default function QAPage() {
   const { success, error: toastError, info } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Selected Session ID from URL or default
+  const paramSessionId = searchParams.get("session_id") || QA_DEFAULT_SESSION_ID;
+  const [activeSessionId, setActiveSessionId] = useState<string>(paramSessionId);
+  const [availableSessions, setAvailableSessions] = useState<LiveSessionInfo[]>([]);
+
+  // Sync state if URL search param changes
+  useEffect(() => {
+    const urlSid = searchParams.get("session_id");
+    if (urlSid && urlSid !== activeSessionId) {
+      setActiveSessionId(urlSid);
+    }
+  }, [searchParams]);
+
+  // Fetch available sessions for dropdown switcher
+  useEffect(() => {
+    getLiveSessions()
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setAvailableSessions(data);
+        }
+      })
+      .catch((err) => console.warn("Could not load sessions list in QAPage:", err));
+  }, []);
 
   // Live WebSocket & State
   const [questions, setQuestions] = useState<LiveQuestionItem[]>([]);
@@ -57,15 +84,21 @@ export default function QAPage() {
 
   // Connect to WebSocket
   const connectWebSocket = useCallback(() => {
-    if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
-      return;
+    if (wsRef.current) {
+      try {
+        wsRef.current.close();
+      } catch (e) {
+        // ignore
+      }
+      wsRef.current = null;
     }
 
     setConnectionStatus("connecting");
     setErrorMessage(null);
 
     try {
-      const ws = new WebSocket(QA_WS_URL);
+      const wsUrl = getQaWsUrl(activeSessionId);
+      const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = () => {
@@ -118,13 +151,51 @@ export default function QAPage() {
             }
           }
 
-          // 5. Question vote count updated live
-          else if (data.type === "question.voted") {
+          // 5. Question vote count updated live (voted or unvoted)
+          else if (
+            data.type === "question.voted" ||
+            data.type === "question.unvoted" ||
+            data.type === "question.vote" ||
+            data.type === "question.unvote"
+          ) {
             const votedQ: LiveQuestionItem = data.question;
-            if (votedQ && votedQ.id) {
+            const targetId = votedQ?.id || data.question_id || data.id;
+            if (targetId) {
               setQuestions((prev) =>
-                prev.map((q) => (q.id === votedQ.id ? { ...q, vote_count: votedQ.vote_count } : q))
+                prev.map((q) => {
+                  if (q.id === targetId) {
+                    return {
+                      ...q,
+                      ...(votedQ || {}),
+                      vote_count:
+                        typeof votedQ?.vote_count === "number"
+                          ? votedQ.vote_count
+                          : typeof data.vote_count === "number"
+                          ? data.vote_count
+                          : (q.vote_count ?? 0),
+                    };
+                  }
+                  return q;
+                })
               );
+            }
+          }
+
+          // 6. Question updated live
+          else if (data.type === "question.updated" || data.type === "question.edit") {
+            const updatedQ: LiveQuestionItem = data.question;
+            if (updatedQ && updatedQ.id) {
+              setQuestions((prev) =>
+                prev.map((q) => (q.id === updatedQ.id ? { ...q, ...updatedQ } : q))
+              );
+            }
+          }
+
+          // 7. Question deleted live
+          else if (data.type === "question.deleted" || data.type === "question.remove") {
+            const deletedId = data.question?.id || data.question_id || data.id;
+            if (deletedId) {
+              setQuestions((prev) => prev.filter((q) => q.id !== deletedId));
             }
           }
 
@@ -151,7 +222,7 @@ export default function QAPage() {
       setConnectionStatus("disconnected");
       setErrorMessage(err?.message || "Failed to establish WebSocket connection.");
     }
-  }, [info]);
+  }, [info, activeSessionId]);
 
   // Connect on Mount & Disconnect on Unmount
   useEffect(() => {
@@ -171,7 +242,7 @@ export default function QAPage() {
   const handleApprove = async (questionId: string) => {
     try {
       setActionLoadingId(questionId);
-      const targetSession = sessionInfo?.id || QA_DEFAULT_SESSION_ID;
+      const targetSession = activeSessionId || sessionInfo?.id || QA_DEFAULT_SESSION_ID;
       await approveQuestionApi(targetSession, questionId);
 
       // Optimistic update
@@ -191,7 +262,7 @@ export default function QAPage() {
   const handleReject = async (questionId: string) => {
     try {
       setActionLoadingId(questionId);
-      const targetSession = sessionInfo?.id || QA_DEFAULT_SESSION_ID;
+      const targetSession = activeSessionId || sessionInfo?.id || QA_DEFAULT_SESSION_ID;
       await rejectQuestionApi(targetSession, questionId);
 
       // Optimistic update
@@ -293,35 +364,28 @@ export default function QAPage() {
         title="Live Conference Q&A Moderation"
         subtitle="Real-time WebSocket connection to KAIZENCON Session Stream. Review, approve, and project live audience inquiries."
         actionButton={
-          <div className="flex items-center gap-2">
-            {/* WebSocket Status Indicator */}
-            <div
-              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold ${
-                connectionStatus === "connected"
-                  ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
-                  : connectionStatus === "connecting"
-                  ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
-                  : "bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800"
-              }`}
-            >
-              <span
-                className={`w-2.5 h-2.5 rounded-full ${
-                  connectionStatus === "connected"
-                    ? "bg-emerald-500 animate-pulse"
-                    : connectionStatus === "connecting"
-                    ? "bg-amber-500 animate-ping"
-                    : "bg-red-500"
-                }`}
-              />
-              <span>
-                {connectionStatus === "connected"
-                  ? "WebSocket Live"
-                  : connectionStatus === "connecting"
-                  ? "Connecting WS..."
-                  : "Disconnected"}
-              </span>
-            </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Session Switcher Dropdown */}
+            {availableSessions.length > 0 && (
+              <select
+                value={activeSessionId}
+                onChange={(e) => {
+                  const newId = e.target.value;
+                  setActiveSessionId(newId);
+                  setSearchParams({ session_id: newId });
+                }}
+                className="max-w-[200px] sm:max-w-xs truncate px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-[#AA2D7B] font-medium"
+                title="Select active session to moderate"
+              >
+                {availableSessions.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.title} ({s.status || "draft"}) {s.join_code ? `[${s.join_code}]` : ""}
+                  </option>
+                ))}
+              </select>
+            )}
 
+          
             {/* Reconnect button if disconnected */}
             {connectionStatus === "disconnected" && (
               <button
