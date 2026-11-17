@@ -31,6 +31,7 @@ import TemplatesPage from "./pages/AgentSettings/TemplatesPage";
 import PollsPage from "./pages/Conference/PollsPage";
 import QAPage from "./pages/Conference/QAPage";
 import KaiPage from "./pages/Conference/KaiPage";
+import LiveTranscriptPage from "./pages/Conference/LiveTranscriptPage";
 import PrivacyPolicyPage from "./pages/Legal/PrivacyPolicyPage";
 import StandalonePrivacyPolicy from "./pages/Legal/StandalonePrivacyPolicy";
 import WebsiteSettingsPage from "./pages/WebsiteSettings/WebsiteSettingsPage";
@@ -122,6 +123,11 @@ export default function App() {
               <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
               <Route path="/system/privacy-policy" element={<PrivacyPolicyPage />} />
             </Route>
+
+            {/* Standalone Protected Full-Width Views (Without Sidebar) */}
+            <Route path="/kai/live-transcript" element={<LiveTranscriptPage />} />
+            <Route path="/live-transcript" element={<LiveTranscriptPage />} />
+            <Route path="/conference/live-transcript" element={<LiveTranscriptPage />} />
           </Route>
 
           {/* Public Standalone Legal Routes */}

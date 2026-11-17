@@ -433,6 +433,96 @@ export const DatabaseSyncIcon: React.FC<IconProps> = ({ className = "w-5 h-5" })
   </svg>
 );
 
+// Microphone Icon (Live Recording)
+export const MicrophoneIcon: React.FC<IconProps> = ({ className = "w-5 h-5" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+    <line x1="12" x2="12" y1="19" y2="22" />
+  </svg>
+);
+
+// Waveform Icon
+export const WaveformIcon: React.FC<IconProps> = ({ className = "w-5 h-5" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M3 10v4" />
+    <path d="M6 7v10" />
+    <path d="M9 4v16" />
+    <path d="M12 2v20" />
+    <path d="M15 6v12" />
+    <path d="M18 8v8" />
+    <path d="M21 11v2" />
+  </svg>
+);
+
+// Audio Speaker Icon
+export const AudioSpeakerIcon: React.FC<IconProps> = ({ className = "w-5 h-5" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+    <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+  </svg>
+);
+
+// Play Icon
+export const PlayIcon: React.FC<IconProps> = ({ className = "w-5 h-5" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+  >
+    <polygon points="5 3 19 12 5 21 5 3" />
+  </svg>
+);
+
+// Pause Icon
+export const PauseIcon: React.FC<IconProps> = ({ className = "w-5 h-5" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+  >
+    <rect x="6" y="4" width="4" height="16" />
+    <rect x="14" y="4" width="4" height="16" />
+  </svg>
+);
+
+// Stop Icon
+export const StopIcon: React.FC<IconProps> = ({ className = "w-5 h-5" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+  >
+    <rect x="5" y="5" width="14" height="14" rx="2" />
+  </svg>
+);
+
+
 
 
 

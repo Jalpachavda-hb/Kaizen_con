@@ -26,6 +26,7 @@ export const API_ENDPOINTS = {
   KNOWLEDGE_SYNC_DB: `${API_BASE_URL}/knowledge/sync-db`,
   KNOWLEDGE_DOCUMENTS: `${API_BASE_URL}/knowledge/documents`,
   KNOWLEDGE_DOCUMENT_UPLOAD: `${API_BASE_URL}/knowledge/documents/upload`,
+  CLINICAL_SUMMARY: `${API_BASE_URL}/clinical/summary`,
 };
 
 
@@ -2423,6 +2424,41 @@ export const deleteKnowledgeDocument = async (documentId) => {
   }
 };
 
+/**
+ * Generate Clinical Summary from transcript text
+ * Endpoint: POST /api/clinical/summary
+ * @param {string} transcript - Full transcript text
+ * @returns {Promise<any>}
+ */
+export const generateClinicalSummary = async (transcript) => {
+  try {
+    const response = await fetch(API_ENDPOINTS.CLINICAL_SUMMARY, {
+      method: "POST",
+      headers: {
+        "Accept": "*/*",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ transcript }),
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const errMsg =
+        data?.detail ||
+        data?.error_message ||
+        data?.message ||
+        "Failed to generate clinical summary";
+      throw new Error(typeof errMsg === "string" ? errMsg : JSON.stringify(errMsg));
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error in generateClinicalSummary API:", error);
+    throw error;
+  }
+};
+
 export default {
   BASE_URL,
   API_BASE_URL,
@@ -2483,4 +2519,5 @@ export default {
   getKnowledgeDocuments,
   uploadKnowledgeDocument,
   deleteKnowledgeDocument,
+  generateClinicalSummary,
 };

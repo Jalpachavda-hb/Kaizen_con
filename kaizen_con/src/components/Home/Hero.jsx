@@ -81,11 +81,24 @@ export default function Hero() {
 
             {/* 4. Action Buttons */}
             <div className="kz-hero-actions">
+              <a
+                href="https://rxregistrations.com/kaizencon2027/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="kz-btn kz-btn-primary"
+                aria-label="Register Now for KaizenCon 2027"
+              >
+                <span>Register Now</span>
+                <svg className="kz-btn-arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </a>
+
               <button
                 type="button"
                 onClick={handleDownloadBrochure}
                 disabled={isDownloading}
-                className="kz-btn kz-btn-primary"
+                className="kz-btn kz-btn-secondary"
                 aria-label="Download Brochure"
               >
                 {isDownloading ? (
@@ -104,8 +117,19 @@ export default function Hero() {
                 ) : (
                   <>
                     <span>Download Brochure</span>
-                    <svg className="kz-btn-arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    <svg
+                      className="kz-btn-download-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
                     </svg>
                   </>
                 )}

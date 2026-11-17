@@ -275,6 +275,17 @@
   transform: translateX(4px);
 }
 
+.kz-btn-download-icon {
+  width: 17px;
+  height: 17px;
+  transition: transform 0.22s ease;
+  flex-shrink: 0;
+}
+
+.kz-btn:hover .kz-btn-download-icon {
+  transform: translateY(2px);
+}
+
 /* ----------------------------------------------------
    5. LUXURY FLOATING COUNTDOWN CARD (UP & DOWN ANIMATION)
    ---------------------------------------------------- */

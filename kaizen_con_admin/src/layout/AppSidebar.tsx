@@ -14,6 +14,7 @@ import {
   PollsIcon,
   QAIcon,
   KaiIcon,
+  MicrophoneIcon,
   ShieldCheckIcon,
   WebsiteSettingsIcon,
 } from "../icons/conferenceIcons";
@@ -27,6 +28,7 @@ export interface NavItem {
   icon: React.ReactNode;
   badge?: string | number;
   disabled?: boolean;
+  target?: string;
 }
 
 export interface NavSection {
@@ -125,6 +127,13 @@ const conferenceNavSections: NavSection[] = [
         path: "/kai",
         aliases: ["/conference/kai", "/knowledge", "/kai-sync"],
         icon: <KaiIcon className="w-5 h-5" />,
+      },
+      {
+        name: "Live Transcript",
+        path: "/kai/live-transcript",
+        aliases: ["/live-transcript", "/conference/live-transcript"],
+        icon: <MicrophoneIcon className="w-5 h-5 text-indigo-500" />,
+        target: "_blank",
       },
     ],
   },
@@ -279,6 +288,8 @@ const AppSidebar: React.FC = () => {
                       <li key={item.name}>
                         <Link
                           to={item.path}
+                          target={item.target}
+                          rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
                           onClick={() => isMobileOpen && toggleMobileSidebar()}
                           className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                             active
