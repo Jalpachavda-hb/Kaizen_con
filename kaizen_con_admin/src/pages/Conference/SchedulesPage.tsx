@@ -15,8 +15,20 @@ import { MultiSelectSpeakers } from "../../components/common/MultiSelectSpeakers
 
 export interface SessionItem {
   id: number;
-  speaker_id: number | null;
+  speaker_id?: number | string | null;
   speaker_ids?: number[];
+  speakers?: Array<{
+    id: number;
+    speaker_id?: string;
+    first_name?: string;
+    last_name?: string;
+    name?: string;
+    designation?: string;
+    speciality?: string;
+    institution?: string;
+    profile_image_url?: string;
+    [key: string]: any;
+  }>;
   category: string;
   title: string;
   description: string;
@@ -26,15 +38,75 @@ export interface SessionItem {
   venue: string;
   room: string;
   speaker_name?: string;
+  [key: string]: any;
 }
 
 export interface SpeakerOption {
   id: number;
+  speaker_id?: string;
   first_name: string;
   last_name: string;
   speciality?: string;
   designation?: string;
+  institution?: string;
+  profile_image_url?: string;
 }
+
+// Format full speaker name cleanly without duplicate "Dr."
+export const formatSpeakerName = (sp: { first_name?: string; last_name?: string; name?: string }): string => {
+  if (sp.name) {
+    const trimmed = sp.name.trim();
+    return /^dr\.?\s+/i.test(trimmed) ? trimmed : `Dr. ${trimmed}`;
+  }
+  const full = `${sp.first_name || ""} ${sp.last_name || ""}`.trim();
+  if (!full) return "";
+  return /^dr\.?\s+/i.test(full) ? full : `Dr. ${full}`;
+};
+
+// Robust helper to extract speaker IDs from any session format (speakers: [...], speaker_ids: [...], speaker_id: ...)
+export const getSessionSpeakerIds = (session: any): number[] => {
+  if (!session) return [];
+
+  // 1. From session.speakers array (objects or IDs)
+  if (Array.isArray(session.speakers) && session.speakers.length > 0) {
+    const ids: number[] = [];
+    session.speakers.forEach((sp: any) => {
+      if (typeof sp === "number") {
+        ids.push(sp);
+      } else if (typeof sp === "string" && !isNaN(Number(sp))) {
+        ids.push(Number(sp));
+      } else if (sp && typeof sp === "object") {
+        if (sp.id !== undefined && sp.id !== null) {
+          const num = Number(sp.id);
+          if (!isNaN(num)) ids.push(num);
+        } else if (sp.speaker_id !== undefined && sp.speaker_id !== null && !isNaN(Number(sp.speaker_id))) {
+          ids.push(Number(sp.speaker_id));
+        }
+      }
+    });
+    if (ids.length > 0) return Array.from(new Set(ids));
+  }
+
+  // 2. From session.speaker_ids array
+  if (Array.isArray(session.speaker_ids) && session.speaker_ids.length > 0) {
+    const ids = session.speaker_ids.map(Number).filter((n: number) => !isNaN(n));
+    if (ids.length > 0) return Array.from(new Set(ids));
+  }
+
+  // 3. From session.speaker_id
+  if (session.speaker_id !== undefined && session.speaker_id !== null && session.speaker_id !== "") {
+    const num = Number(session.speaker_id);
+    if (!isNaN(num) && num > 0) return [num];
+  }
+
+  // 4. From single session.speaker object
+  if (session.speaker && typeof session.speaker === "object" && session.speaker.id) {
+    const num = Number(session.speaker.id);
+    if (!isNaN(num)) return [num];
+  }
+
+  return [];
+};
 
 export default function SchedulesPage() {
   const { success, error: toastError } = useToast();
@@ -78,7 +150,25 @@ export default function SchedulesPage() {
     try {
       const res: any = await getSpeakers();
       if (res && Array.isArray(res.results)) {
-        setSpeakers(res.results);
+        setSpeakers((prev) => {
+          const map = new Map<number, SpeakerOption>();
+          prev.forEach((s) => map.set(Number(s.id), s));
+          res.results.forEach((s: any) => {
+            if (s && s.id !== undefined) {
+              map.set(Number(s.id), {
+                id: Number(s.id),
+                speaker_id: s.speaker_id,
+                first_name: s.first_name || "",
+                last_name: s.last_name || "",
+                speciality: s.speciality,
+                designation: s.designation,
+                institution: s.institution,
+                profile_image_url: s.profile_image_url,
+              });
+            }
+          });
+          return Array.from(map.values());
+        });
       }
     } catch (err) {
       console.warn("Could not load speakers list for sessions:", err);
@@ -95,6 +185,40 @@ export default function SchedulesPage() {
 
       if (Array.isArray(data)) {
         setSessions(data as SessionItem[]);
+
+        // Extract and merge any embedded speaker objects from live sessions
+        const embeddedSpeakers: SpeakerOption[] = [];
+        data.forEach((sess: any) => {
+          if (Array.isArray(sess.speakers)) {
+            sess.speakers.forEach((sp: any) => {
+              if (sp && sp.id !== undefined) {
+                embeddedSpeakers.push({
+                  id: Number(sp.id),
+                  speaker_id: sp.speaker_id,
+                  first_name: sp.first_name || sp.name || "",
+                  last_name: sp.last_name || "",
+                  speciality: sp.speciality,
+                  designation: sp.designation,
+                  institution: sp.institution,
+                  profile_image_url: sp.profile_image_url,
+                });
+              }
+            });
+          }
+        });
+
+        if (embeddedSpeakers.length > 0) {
+          setSpeakers((prev) => {
+            const map = new Map<number, SpeakerOption>();
+            prev.forEach((s) => map.set(Number(s.id), s));
+            embeddedSpeakers.forEach((s) => {
+              if (!map.has(s.id)) {
+                map.set(s.id, s);
+              }
+            });
+            return Array.from(map.values());
+          });
+        }
       } else {
         setSessions([]);
       }
@@ -114,35 +238,83 @@ export default function SchedulesPage() {
 
   // Helper to find speaker by ID
   const getSpeakerInfo = useCallback(
-    (spId: number | null) => {
-      if (!spId) return null;
-      return speakers.find((s) => s.id === spId) || null;
+    (spId: number | string | null | undefined) => {
+      if (!spId && spId !== 0) return null;
+      const numId = Number(spId);
+      return (
+        speakers.find(
+          (s) =>
+            Number(s.id) === numId ||
+            s.speaker_id === spId ||
+            String(s.id) === String(spId)
+        ) || null
+      );
     },
     [speakers]
   );
 
   // Helper to get formatted speaker display string
   const getSpeakerDisplayName = useCallback(
-    (session: SessionItem) => {
-      if (session.speaker_name) return session.speaker_name;
-      const ids: number[] = Array.isArray((session as any).speaker_ids) && (session as any).speaker_ids.length > 0
-        ? (session as any).speaker_ids
-        : session.speaker_id
-        ? [session.speaker_id]
-        : [];
+    (session: any): string => {
+      if (!session) return "General Session";
 
-      if (ids.length === 0) {
-        return session.category?.toLowerCase() === "break" ? "Break / Refreshments" : "General Session";
+      // 1. If explicit speaker_name is present
+      if (typeof session.speaker_name === "string" && session.speaker_name.trim()) {
+        return session.speaker_name.trim();
       }
 
-      const names = ids
-        .map((id) => {
-          const sp = getSpeakerInfo(id);
-          return sp ? `Dr. ${sp.first_name} ${sp.last_name}` : `Speaker #${id}`;
-        })
-        .filter(Boolean);
+      // 2. If session.speakers is an array of objects
+      if (Array.isArray(session.speakers) && session.speakers.length > 0) {
+        const names = session.speakers
+          .map((sp: any) => {
+            if (!sp) return null;
+            if (typeof sp === "string" && isNaN(Number(sp))) return sp;
+            if (typeof sp === "object") {
+              const formatted = formatSpeakerName(sp);
+              if (formatted) return formatted;
+              if (sp.id) {
+                const matched = getSpeakerInfo(sp.id);
+                if (matched) return formatSpeakerName(matched);
+                return `Speaker #${sp.id}`;
+              }
+            } else if (typeof sp === "number") {
+              const matched = getSpeakerInfo(sp);
+              if (matched) return formatSpeakerName(matched);
+              return `Speaker #${sp}`;
+            }
+            return null;
+          })
+          .filter(Boolean);
 
-      return names.length > 0 ? names.join(", ") : "General Session";
+        if (names.length > 0) {
+          return names.join(", ");
+        }
+      }
+
+      // 3. Fallback to session speaker IDs lookup
+      const ids = getSessionSpeakerIds(session);
+      if (ids.length > 0) {
+        const names = ids
+          .map((id) => {
+            const sp = getSpeakerInfo(id);
+            return sp ? formatSpeakerName(sp) : `Speaker #${id}`;
+          })
+          .filter(Boolean);
+
+        if (names.length > 0) {
+          return names.join(", ");
+        }
+      }
+
+      // 4. Single speaker object
+      if (session.speaker && typeof session.speaker === "object") {
+        const formatted = formatSpeakerName(session.speaker);
+        if (formatted) return formatted;
+      }
+
+      return session.category?.toLowerCase() === "break"
+        ? "Break / Refreshments"
+        : "General Session";
     },
     [getSpeakerInfo]
   );
@@ -158,6 +330,29 @@ export default function SchedulesPage() {
       const freshData: any = await getSessionById(session.id);
       if (freshData && freshData.id) {
         setSelectedSession(freshData as SessionItem);
+
+        // Also merge any fresh embedded speakers
+        if (Array.isArray(freshData.speakers) && freshData.speakers.length > 0) {
+          setSpeakers((prev) => {
+            const map = new Map<number, SpeakerOption>();
+            prev.forEach((s) => map.set(Number(s.id), s));
+            freshData.speakers.forEach((sp: any) => {
+              if (sp && sp.id !== undefined && !map.has(Number(sp.id))) {
+                map.set(Number(sp.id), {
+                  id: Number(sp.id),
+                  speaker_id: sp.speaker_id,
+                  first_name: sp.first_name || sp.name || "",
+                  last_name: sp.last_name || "",
+                  speciality: sp.speciality,
+                  designation: sp.designation,
+                  institution: sp.institution,
+                  profile_image_url: sp.profile_image_url,
+                });
+              }
+            });
+            return Array.from(map.values());
+          });
+        }
       }
     } catch (err) {
       console.log("Details lookup note:", err);
@@ -187,12 +382,34 @@ export default function SchedulesPage() {
   const handleOpenEditModal = (session: SessionItem) => {
     setEditingSession(session);
     setTitle(session.title || "");
-    const initialSpeakerIds: number[] = Array.isArray((session as any).speaker_ids) && (session as any).speaker_ids.length > 0
-      ? (session as any).speaker_ids
-      : session.speaker_id
-      ? [session.speaker_id]
-      : [];
+
+    // Extract speaker IDs
+    const initialSpeakerIds = getSessionSpeakerIds(session);
     setSelectedSpeakerIds(initialSpeakerIds);
+
+    // Merge any embedded speakers from session into speakers state
+    if (Array.isArray(session.speakers) && session.speakers.length > 0) {
+      setSpeakers((prev) => {
+        const map = new Map<number, SpeakerOption>();
+        prev.forEach((s) => map.set(Number(s.id), s));
+        session.speakers!.forEach((sp: any) => {
+          if (sp && sp.id !== undefined && !map.has(Number(sp.id))) {
+            map.set(Number(sp.id), {
+              id: Number(sp.id),
+              speaker_id: sp.speaker_id,
+              first_name: sp.first_name || sp.name || "",
+              last_name: sp.last_name || "",
+              speciality: sp.speciality,
+              designation: sp.designation,
+              institution: sp.institution,
+              profile_image_url: sp.profile_image_url,
+            });
+          }
+        });
+        return Array.from(map.values());
+      });
+    }
+
     setCategory(session.category || "Cardiology");
     setEventDate(session.event_date || "2027-01-01");
     setStartTime(session.start_time || "09:00:00");
@@ -354,7 +571,7 @@ export default function SchedulesPage() {
   // Statistics
   const stats = useMemo(() => {
     const total = sessions.length;
-    const keynotes = sessions.filter((s) => s.speaker_id !== null).length;
+    const keynotes = sessions.filter((s) => getSessionSpeakerIds(s).length > 0).length;
     const categoriesCount = new Set(sessions.map((s) => s.category).filter(Boolean)).size;
     const daysCount = new Set(sessions.map((s) => s.event_date).filter(Boolean)).size;
     return { total, keynotes, categoriesCount, daysCount };
@@ -368,7 +585,7 @@ export default function SchedulesPage() {
       />
 
       <AdminPageContainer
-        title="Sessions"
+        title="scheduled "
         subtitle="Manage conference schedules, hall allocations, and keynote speaking slots."
         searchValue={search}
         onSearchChange={setSearch}
@@ -521,8 +738,17 @@ export default function SchedulesPage() {
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800/70">
                 {paginatedSessions.map((session) => {
-                  const speaker = getSpeakerInfo(session.speaker_id);
-                  const isBreak = session.category?.toLowerCase() === "break" || !session.speaker_id;
+                  const isBreak = session.category?.toLowerCase() === "break";
+                  const speakerIds = getSessionSpeakerIds(session);
+                  const primarySpeaker =
+                    (Array.isArray(session.speakers) && session.speakers[0]) ||
+                    (speakerIds.length > 0 ? getSpeakerInfo(speakerIds[0]) : null);
+                  const displayName = getSpeakerDisplayName(session);
+                  const avatarInitial = (
+                    primarySpeaker?.first_name?.replace(/^dr\.?\s+/i, "") ||
+                    displayName?.replace(/^dr\.?\s+/i, "") ||
+                    "S"
+                  ).charAt(0).toUpperCase();
 
                   return (
                     <tr
@@ -557,16 +783,21 @@ export default function SchedulesPage() {
                                 : "bg-gradient-to-tr from-[#55355E] to-[#AA2D7B]"
                             }`}
                           >
-                            {isBreak ? "☕" : (speaker?.first_name || "S").charAt(0)}
+                            {isBreak ? "☕" : avatarInitial}
                           </div>
                           <div>
                             <div className="font-semibold text-gray-800 dark:text-gray-200">
-                              {getSpeakerDisplayName(session)}
+                              {displayName}
                             </div>
-                            {speaker && (
-                              <div className="text-[10px] text-gray-400 truncate max-w-[150px]">
-                                {speaker.speciality || speaker.designation}
+                            {!isBreak && primarySpeaker && (primarySpeaker.speciality || primarySpeaker.designation) && (
+                              <div className="text-[10px] text-gray-400 truncate max-w-[180px]">
+                                {primarySpeaker.speciality || primarySpeaker.designation}
                               </div>
+                            )}
+                            {!isBreak && speakerIds.length > 1 && (
+                              <span className="inline-block mt-0.5 text-[9px] font-bold px-1.5 py-0.2 rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300">
+                                {speakerIds.length} Presenters
+                              </span>
                             )}
                           </div>
                         </div>
@@ -892,6 +1123,18 @@ export default function SchedulesPage() {
                   <div className="font-bold text-gray-900 dark:text-gray-100 text-sm mt-0.5">
                     {getSpeakerDisplayName(selectedSession)}
                   </div>
+                  {Array.isArray(selectedSession.speakers) && selectedSession.speakers.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {selectedSession.speakers.map((sp: any, idx: number) => (
+                        <span
+                          key={sp.id || idx}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#faedf5] text-[#AA2D7B] dark:bg-[#55355E]/40 dark:text-[#f0c3df] border border-[#AA2D7B]/20"
+                        >
+                          {formatSpeakerName(sp)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700">

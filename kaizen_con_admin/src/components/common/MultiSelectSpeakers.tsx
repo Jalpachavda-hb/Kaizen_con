@@ -18,6 +18,16 @@ interface MultiSelectSpeakersProps {
   label?: string;
 }
 
+export const formatSpeakerFullName = (sp: { first_name?: string; last_name?: string; name?: string }): string => {
+  if (sp.name) {
+    const trimmed = sp.name.trim();
+    return /^dr\.?\s+/i.test(trimmed) ? trimmed : `Dr. ${trimmed}`;
+  }
+  const full = `${sp.first_name || ""} ${sp.last_name || ""}`.trim();
+  if (!full) return "Unknown Speaker";
+  return /^dr\.?\s+/i.test(full) ? full : `Dr. ${full}`;
+};
+
 export const MultiSelectSpeakers: React.FC<MultiSelectSpeakersProps> = ({
   speakers,
   selectedIds,
@@ -64,25 +74,37 @@ export const MultiSelectSpeakers: React.FC<MultiSelectSpeakersProps> = ({
 
   // Selected speaker objects
   const selectedSpeakers = useMemo(() => {
-    return speakers.filter((s) => selectedIds.includes(s.id));
+    return selectedIds.map((id) => {
+      const numId = Number(id);
+      const found = speakers.find((s) => Number(s.id) === numId);
+      if (found) return found;
+      return {
+        id: numId,
+        first_name: "Speaker",
+        last_name: `#${numId}`,
+      };
+    });
   }, [speakers, selectedIds]);
 
   const toggleSpeaker = (id: number) => {
-    if (selectedIds.includes(id)) {
-      onChange(selectedIds.filter((item) => item !== id));
+    const numId = Number(id);
+    const numericList = selectedIds.map(Number);
+    if (numericList.includes(numId)) {
+      onChange(numericList.filter((item) => item !== numId));
     } else {
-      onChange([...selectedIds, id]);
+      onChange([...numericList, numId]);
     }
   };
 
   const removeSpeaker = (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    onChange(selectedIds.filter((item) => item !== id));
+    const numId = Number(id);
+    onChange(selectedIds.map(Number).filter((item) => item !== numId));
   };
 
   const handleSelectAll = (e: React.MouseEvent) => {
     e.preventDefault();
-    onChange(speakers.map((s) => s.id));
+    onChange(speakers.map((s) => Number(s.id)));
   };
 
   const handleClearAll = (e: React.MouseEvent) => {
@@ -126,7 +148,7 @@ export const MultiSelectSpeakers: React.FC<MultiSelectSpeakersProps> = ({
                 className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-[#faedf5] text-[#AA2D7B] dark:bg-[#55355E]/40 dark:text-[#f0c3df] border border-[#AA2D7B]/20 animate-fadeIn"
               >
                 <span>
-                  Dr. {sp.first_name} {sp.last_name}
+                  {formatSpeakerFullName(sp)}
                 </span>
                 <button
                   type="button"
@@ -248,7 +270,7 @@ export const MultiSelectSpeakers: React.FC<MultiSelectSpeakersProps> = ({
               </div>
             ) : (
               filteredSpeakers.map((sp) => {
-                const isSelected = selectedIds.includes(sp.id);
+                const isSelected = selectedIds.map(Number).includes(Number(sp.id));
                 return (
                   <div
                     key={sp.id}
@@ -271,7 +293,7 @@ export const MultiSelectSpeakers: React.FC<MultiSelectSpeakersProps> = ({
                       {/* Doctor Details */}
                       <div className="min-w-0 flex-1">
                         <div className="font-bold truncate">
-                          Dr. {sp.first_name} {sp.last_name}
+                          {formatSpeakerFullName(sp)}
                         </div>
                         <div className="text-[10px] text-gray-500 dark:text-gray-400 truncate">
                           {sp.speciality && (
