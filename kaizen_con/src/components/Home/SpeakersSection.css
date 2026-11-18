@@ -128,7 +128,7 @@
    ---------------------------------------------------- */
 .kz-featured-speakers-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 30px;
   width: 100%;
   box-sizing: border-box;
@@ -158,22 +158,26 @@
 
 @media (max-width: 1080px) {
   .kz-featured-speakers-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px;
   }
 }
 
 @media (max-width: 768px) {
   .kz-featured-speakers-section {
-    padding: 60px 0 75px 0;
+    padding: 48px 0 60px 0;
+  }
+
+  .kz-featured-speakers-container {
+    padding: 0 16px;
   }
 
   .kz-speakers-top-bar {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 16px;
-    margin-bottom: 32px;
+    gap: 14px;
+    margin-bottom: 28px;
   }
 
   .kz-speakers-header-left {
@@ -183,32 +187,57 @@
   }
 
   .kz-speakers-pill-tag {
-    margin: 0 auto 12px auto;
+    margin: 0 auto 10px auto;
   }
 
   .kz-speakers-main-title {
     text-align: center;
     width: 100%;
+    font-size: clamp(1.75rem, 6.2vw, 2.15rem);
+    line-height: 1.2;
+  }
+
+  .kz-speakers-title-magenta {
+    margin-left: 6px;
   }
 
   .kz-speakers-title-underline {
     margin: 8px auto 0 auto;
+    width: 48px;
   }
 
   .kz-speakers-all-link {
     align-self: center;
-    margin: 8px auto 0 auto;
+    margin: 4px auto 0 auto;
+    font-size: 0.88rem;
+    padding: 7px 16px;
+  }
+
+  .kz-featured-speakers-grid {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 440px;
+    margin: 0 auto;
+    gap: 18px;
+    width: 100%;
   }
 }
 
-@media (max-width: 620px) {
-  .kz-featured-speakers-grid {
-    grid-template-columns: 1fr;
-    max-width: 420px;
-    margin: 0 auto;
+@media (max-width: 420px) {
+  .kz-featured-speakers-section {
+    padding: 36px 0 46px 0;
+  }
+
+  .kz-featured-speakers-container {
+    padding: 0 12px;
   }
 
   .kz-speakers-main-title {
-    font-size: 1.95rem;
+    font-size: clamp(1.55rem, 5.8vw, 1.85rem);
+  }
+
+  .kz-featured-speakers-grid {
+    gap: 14px;
+    max-width: 100%;
+    width: 100%;
   }
 }

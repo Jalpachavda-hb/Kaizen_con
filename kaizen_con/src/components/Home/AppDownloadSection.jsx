@@ -35,7 +35,7 @@ export default function AppDownloadSection() {
 
               <div className="kz-app-buttons-group">
                 <a
-                  href="https://play.google.com"
+                  href="https://play.google.com/store/apps/details?id=com.kaizen.con2027"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="kz-app-store-btn"

@@ -241,6 +241,30 @@
   transform: translateY(-2px);
 }
 
+/* Register AI Course Button: Outlined Accent on Pure White */
+.kz-btn-ai-course {
+  background: #FFFFFF;
+  color: #AA2D7B;
+  border: 2px solid #AA2D7B;
+  padding: 13px 26px;
+  box-shadow: 0 2px 12px rgba(170, 45, 123, 0.12);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kz-btn-ai-course:hover {
+  background: linear-gradient(135deg, #AA2D7B 0%, #852260 100%);
+  color: #FFFFFF;
+  border-color: #AA2D7B;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(170, 45, 123, 0.3);
+}
+
+.kz-btn-ai-course:hover .kz-btn-arrow {
+  transform: translateX(3px);
+}
+
 .kz-btn-arrow {
   width: 17px;
   height: 17px;

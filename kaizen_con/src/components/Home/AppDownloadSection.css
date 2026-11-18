@@ -339,7 +339,7 @@
    ==================================================== */
 @media screen and (max-width: 767px) {
   .kz-app-download-section {
-    padding: 24px 0 50px 0;
+    padding: 24px 0 45px 0;
   }
 
   .kz-app-download-container {
@@ -352,81 +352,155 @@
 
   .kz-app-bg-pattern-left,
   .kz-app-bg-pattern-right {
-    width: 320px;
+    width: 260px;
+    max-width: 70vw;
     opacity: 0.10;
   }
 
   .kz-app-content-row {
-    padding: 32px 16px 0 16px;
+    padding: 30px 16px 0 16px;
+  }
+
+  .kz-app-text-col {
+    padding: 0 0 20px 0;
   }
 
   .kz-app-subtext {
     font-size: 0.9rem;
     line-height: 1.5;
-    margin-bottom: 20px;
+    margin: 0 auto 20px auto;
+    max-width: 420px;
   }
 
   .kz-app-buttons-group {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
     gap: 12px;
+    width: 100%;
+  }
+
+  .kz-app-store-btn {
+    flex: 0 1 auto;
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
   }
 
   .kz-app-badge-img {
-    height: 40px;
+    height: clamp(36px, 9.5vw, 42px);
+    width: auto;
+    max-width: 100%;
+  }
+
+  .kz-app-visuals-col {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
   }
 
   .kz-app-visuals-stage {
     justify-content: center;
     align-items: flex-end;
-    gap: 14px;
+    gap: clamp(10px, 3vw, 16px);
     width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
   }
 
   .kz-app-mockup-img {
-    height: clamp(190px, 48vw, 240px);
+    height: clamp(175px, 46vw, 225px);
   }
 
   .kz-app-mascot-img {
-    height: clamp(85px, 22vw, 110px);
+    height: clamp(80px, 22vw, 105px);
   }
 }
 
 /* Matching Speakers Title breakpoint at <= 600px */
 @media screen and (max-width: 600px) {
   .kz-app-heading {
-    font-size: 1.95rem;
+    font-size: clamp(1.55rem, 5.8vw, 1.85rem);
+    line-height: 1.2;
+    margin-bottom: 12px;
   }
 }
 
-/* Extra Small Phones (< 420px) */
+/* Extra Small Phones (< 420px, e.g. 376px, 360px, 320px) */
 @media screen and (max-width: 420px) {
+  .kz-app-download-section {
+    padding: 20px 0 40px 0;
+  }
+
+  .kz-app-download-container {
+    padding: 0 12px;
+  }
+
+  .kz-app-banner-card {
+    border-radius: 18px;
+  }
+
+  .kz-app-bg-pattern-left,
+  .kz-app-bg-pattern-right {
+    width: 200px;
+    max-width: 60vw;
+    opacity: 0.08;
+  }
+
   .kz-app-content-row {
-    padding: 28px 12px 0 12px;
+    padding: 26px 12px 0 12px;
+  }
+
+  .kz-app-text-col {
+    padding: 0 0 16px 0;
+  }
+
+  .kz-app-heading {
+    font-size: clamp(1.4rem, 5.5vw, 1.65rem);
+    line-height: 1.2;
+    margin-bottom: 10px;
   }
 
   .kz-app-subtext {
     font-size: 0.85rem;
+    line-height: 1.45;
+    margin: 0 auto 16px auto;
+    max-width: 310px;
   }
 
+  /* Keep Google Play and App Store side by side */
   .kz-app-buttons-group {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: nowrap;
     width: 100%;
+    justify-content: center;
     align-items: center;
+    gap: 8px;
+  }
+
+  .kz-app-store-btn {
+    flex: 0 1 auto;
   }
 
   .kz-app-badge-img {
-    height: 42px;
+    height: clamp(32px, 9.2vw, 38px);
+    width: auto;
+    max-width: 138px;
   }
 
   .kz-app-visuals-stage {
-    gap: 10px;
+    gap: 8px;
+    max-width: 320px;
   }
 
   .kz-app-mockup-img {
-    height: 185px;
+    height: clamp(160px, 44vw, 190px);
   }
 
   .kz-app-mascot-img {
-    height: 82px;
+    height: clamp(72px, 20vw, 88px);
   }
 }

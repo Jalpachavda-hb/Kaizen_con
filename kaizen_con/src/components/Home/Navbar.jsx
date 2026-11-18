@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../Global.css';
+import { downloadBrochure } from '../../services/brochureService';
 import logoImg from '../../assets/home/logokaizecon.png';
 import navbarLeftImg from '../../assets/home/navbarleft_bg.png';
 import navbarRightImg from '../../assets/home/navbarright.png';
@@ -51,6 +52,38 @@ export default function Navbar() {
 
   const [activeItem, setActiveItem] = useState(() => getActiveItem(location.pathname, location.hash));
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState(null);
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
+
+  const handleDownloadBrochure = async () => {
+    if (isDownloading) return;
+
+    setIsDownloading(true);
+    setDownloadError(null);
+    setDownloadSuccess(false);
+
+    try {
+      await downloadBrochure();
+      setDownloadSuccess(true);
+      setTimeout(() => {
+        setDownloadSuccess(false);
+      }, 4000);
+    } catch (err) {
+      console.error('Download error:', err);
+      const msg =
+        err.status === 404
+          ? 'The conference brochure is currently being updated. Please check back shortly.'
+          : err.message || 'Failed to download brochure. Please try again.';
+      setDownloadError(msg);
+
+      setTimeout(() => {
+        setDownloadError(null);
+      }, 5000);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   // Sync active nav item with current route and hash
   useEffect(() => {
@@ -268,6 +301,52 @@ export default function Navbar() {
                 </a>
               </li>
             ))}
+
+            {/* Download Brochure Action Button (Placed right after Contact menu) */}
+            <li className="kaizen-nav-item kaizen-nav-item-brochure">
+              <button
+                type="button"
+                onClick={handleDownloadBrochure}
+                disabled={isDownloading}
+                className={`kaizen-nav-brochure-btn ${isDownloading ? 'is-loading' : ''}`}
+                aria-label="Download Conference Brochure"
+                title="Download KaizenCon 2027 Brochure"
+              >
+                {isDownloading ? (
+                  <>
+                    <svg
+                      className="kaizen-nav-brochure-spinner"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                    >
+                      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeDasharray="36" strokeLinecap="round" />
+                    </svg>
+                    <span>Downloading...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="kaizen-nav-brochure-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    <span className="kaizen-nav-brochure-text-full">Download Brochure</span>
+                    <span className="kaizen-nav-brochure-text-short">Brochure</span>
+                  </>
+                )}
+              </button>
+            </li>
           </ul>
 
           {/* Mobile Hamburger Toggle Button */}
@@ -341,6 +420,37 @@ export default function Navbar() {
                 </a>
               </li>
             ))}
+
+            {/* Download Brochure in Mobile Drawer (Placed right after Contact menu) */}
+            <li className="kaizen-drawer-item kaizen-drawer-brochure-item">
+              <button
+                type="button"
+                className={`kaizen-drawer-brochure-btn ${isDownloading ? 'is-loading' : ''}`}
+                onClick={handleDownloadBrochure}
+                disabled={isDownloading}
+                aria-label="Download Conference Brochure"
+              >
+                <span className="kaizen-drawer-brochure-left">
+                  <span className="kaizen-drawer-brochure-icon">
+                    {isDownloading ? (
+                      <svg className="kaizen-nav-brochure-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeDasharray="36" strokeLinecap="round">
+                        <circle cx="12" cy="12" r="9" />
+                      </svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                      </svg>
+                    )}
+                  </span>
+                  <span className="kaizen-drawer-brochure-title">
+                    {isDownloading ? 'Downloading Brochure...' : 'Download Brochure'}
+                  </span>
+                </span>
+                <span className="kaizen-drawer-brochure-badge">PDF</span>
+              </button>
+            </li>
           </ul>
 
           {/* Conference Details Card in Drawer */}
@@ -376,6 +486,35 @@ export default function Navbar() {
           </div>
         </div>
       </aside>
+
+      {/* Floating Toast Notification for Brochure Download */}
+      {downloadError && (
+        <div className="kaizen-nav-toast kaizen-nav-toast-error" role="alert">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span>{downloadError}</span>
+          <button
+            type="button"
+            onClick={() => setDownloadError(null)}
+            className="kaizen-nav-toast-close"
+            aria-label="Close notification"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+
+      {downloadSuccess && (
+        <div className="kaizen-nav-toast kaizen-nav-toast-success" role="status">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          <span>Brochure download started!</span>
+        </div>
+      )}
     </header>
   );
 }

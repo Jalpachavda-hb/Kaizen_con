@@ -1,36 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './Hero.css';
-import { downloadBrochure } from '../../services/brochureService';
 import CountdownCard from './CountdownCard';
 
 export default function Hero() {
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [downloadError, setDownloadError] = useState(null);
-
-  const handleDownloadBrochure = async () => {
-    if (isDownloading) return;
-
-    setIsDownloading(true);
-    setDownloadError(null);
-
-    try {
-      await downloadBrochure();
-    } catch (err) {
-      console.error('Download error:', err);
-      const msg =
-        err.status === 404
-          ? 'The conference brochure is currently being updated. Please check back shortly.'
-          : err.message || 'Failed to download brochure. Please try again.';
-      setDownloadError(msg);
-
-      setTimeout(() => {
-        setDownloadError(null);
-      }, 6000);
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
   return (
     <>
       <section className="kz-hero-section" id="home" aria-label="KaizenCon 2027 Hero">
@@ -94,74 +66,18 @@ export default function Hero() {
                 </svg>
               </a>
 
-              <button
-                type="button"
-                onClick={handleDownloadBrochure}
-                disabled={isDownloading}
-                className="kz-btn kz-btn-secondary"
-                aria-label="Download Brochure"
+              <a
+                href="https://rxregistrations.com/kaizencon2027/aicourse.php"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="kz-btn kz-btn-ai-course"
+                aria-label="Register for AI Course"
               >
-                {isDownloading ? (
-                  <>
-                    <svg
-                      className="kz-btn-spinner"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      aria-hidden="true"
-                    >
-                      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeDasharray="36" strokeLinecap="round" />
-                    </svg>
-                    <span>Downloading...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Download Brochure</span>
-                    <svg
-                      className="kz-btn-download-icon"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="7 10 12 15 17 10" />
-                      <line x1="12" y1="15" x2="12" y2="3" />
-                    </svg>
-                  </>
-                )}
-              </button>
-
-              {downloadError && (
-                <div
-                  className="kz-hero-download-error"
-                  role="alert"
-                  style={{
-                    marginTop: '12px',
-                    fontSize: '0.85rem',
-                    color: '#AA2D7B',
-                    background: 'rgba(255, 255, 255, 0.95)',
-                    padding: '7px 14px',
-                    borderRadius: '10px',
-                    border: '1px solid rgba(170, 45, 123, 0.3)',
-                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.06)',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    maxWidth: '100%',
-                  }}
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                  </svg>
-                  <span>{downloadError}</span>
-                </div>
-              )}
+                <span>Register AI Course</span>
+                <svg className="kz-btn-arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </a>
             </div>
           </div>
         </div>

@@ -267,12 +267,12 @@
 .kaizen-nav-menu {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
   list-style: none;
   margin: 0;
   padding: 0;
   margin-left: auto;
-  margin-right: 120px;
+  margin-right: 48px;
   margin-top: 38px; /* Aligns neatly in lower tier beneath topbar ribbon */
   position: relative;
   z-index: 4;
@@ -322,6 +322,143 @@
 .kaizen-nav-link:hover::after,
 .kaizen-nav-link.active::after {
   width: 100%;
+}
+
+/* ====================================================
+   DESKTOP DOWNLOAD BROCHURE BUTTON (Placed after Contact Us)
+   ==================================================== */
+.kaizen-nav-item-brochure {
+  display: flex;
+  align-items: center;
+  margin-left: 4px;
+}
+
+.kaizen-nav-brochure-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #AA2D7B 0%, #73437B 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(170, 45, 123, 0.22);
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  outline: none;
+}
+
+.kaizen-nav-brochure-btn:hover {
+  background: linear-gradient(135deg, #BD348A 0%, #854E8E 100%);
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 14px rgba(170, 45, 123, 0.35);
+  color: #FFFFFF;
+}
+
+.kaizen-nav-brochure-btn:active {
+  transform: translateY(0);
+}
+
+.kaizen-nav-brochure-btn:disabled,
+.kaizen-nav-brochure-btn.is-loading {
+  opacity: 0.8;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.kaizen-nav-brochure-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  transition: transform 0.22s ease;
+}
+
+.kaizen-nav-brochure-btn:hover .kaizen-nav-brochure-icon {
+  transform: translateY(1.5px);
+}
+
+.kaizen-nav-brochure-spinner {
+  width: 15px;
+  height: 15px;
+  animation: kzSpinBrochure 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+.kaizen-nav-brochure-text-full {
+  display: inline;
+}
+
+.kaizen-nav-brochure-text-short {
+  display: none;
+}
+
+@keyframes kzSpinBrochure {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ====================================================
+   NAVBAR TOAST NOTIFICATIONS (BROCHURE DOWNLOAD FEEDBACK)
+   ==================================================== */
+.kaizen-nav-toast {
+  position: fixed;
+  top: 96px;
+  right: 24px;
+  z-index: 10000;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 18px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.16);
+  animation: kzToastSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  max-width: 90vw;
+}
+
+.kaizen-nav-toast-error {
+  background: #FFF1F2;
+  color: #BE123C;
+  border: 1px solid #FECDD3;
+}
+
+.kaizen-nav-toast-success {
+  background: #F0FDF4;
+  color: #15803D;
+  border: 1px solid #BBF7D0;
+}
+
+.kaizen-nav-toast-close {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: inherit;
+  cursor: pointer;
+  padding: 0 0 0 6px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.kaizen-nav-toast-close:hover {
+  opacity: 1;
+}
+
+@keyframes kzToastSlide {
+  from {
+    transform: translateY(-16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* ====================================================
@@ -525,6 +662,96 @@
   opacity: 1;
 }
 
+/* ====================================================
+   MOBILE DRAWER DOWNLOAD BROCHURE BUTTON
+   ==================================================== */
+.kaizen-drawer-brochure-item {
+  margin-top: 10px;
+  margin-bottom: 6px;
+  width: 100%;
+}
+
+.kaizen-drawer-brochure-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: linear-gradient(135deg, #FAF2F8 0%, #F5ECF7 100%);
+  border: 1.5px solid rgba(170, 45, 123, 0.25);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #AA2D7B;
+  font-size: 0.96rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(170, 45, 123, 0.08);
+}
+
+.kaizen-drawer-brochure-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kaizen-drawer-brochure-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(170, 45, 123, 0.12);
+  color: #AA2D7B;
+  flex-shrink: 0;
+  transition: all 0.22s ease;
+}
+
+.kaizen-drawer-brochure-title {
+  font-weight: 600;
+}
+
+.kaizen-drawer-brochure-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #AA2D7B;
+  color: #FFFFFF;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+  transition: all 0.22s ease;
+}
+
+.kaizen-drawer-brochure-btn:hover,
+.kaizen-drawer-brochure-btn:active {
+  background: linear-gradient(135deg, #AA2D7B 0%, #73437B 100%);
+  color: #FFFFFF;
+  border-color: #AA2D7B;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(170, 45, 123, 0.25);
+}
+
+.kaizen-drawer-brochure-btn:hover .kaizen-drawer-brochure-icon,
+.kaizen-drawer-brochure-btn:active .kaizen-drawer-brochure-icon {
+  background: rgba(255, 255, 255, 0.24);
+  color: #FFFFFF;
+}
+
+.kaizen-drawer-brochure-btn:hover .kaizen-drawer-brochure-badge,
+.kaizen-drawer-brochure-btn:active .kaizen-drawer-brochure-badge {
+  background: #FFFFFF;
+  color: #AA2D7B;
+}
+
+.kaizen-drawer-brochure-btn:disabled,
+.kaizen-drawer-brochure-btn.is-loading {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
 /* DRAWER CONFERENCE DETAILS CARD */
 .kaizen-drawer-info-card {
   background: linear-gradient(145deg, #fbf7fb 0%, #f4e9f3 100%);
@@ -610,11 +837,15 @@
   }
   .kaizen-nav-menu {
     margin-top: 33px;
-    margin-right: 36px;
-    gap: 18px;
+    margin-right: 28px;
+    gap: 16px;
   }
   .kaizen-nav-link {
     font-size: 0.92rem;
+  }
+  .kaizen-nav-brochure-btn {
+    padding: 7px 16px;
+    font-size: 0.85rem;
   }
 }
 
@@ -655,11 +886,21 @@
   }
   .kaizen-nav-menu {
     margin-top: 31px;
-    margin-right: 20px;
-    gap: 14px;
+    margin-right: 18px;
+    gap: 12px;
   }
   .kaizen-nav-link {
     font-size: 0.86rem;
+  }
+  .kaizen-nav-brochure-text-full {
+    display: none;
+  }
+  .kaizen-nav-brochure-text-short {
+    display: inline;
+  }
+  .kaizen-nav-brochure-btn {
+    padding: 6px 14px;
+    font-size: 0.82rem;
   }
 }
 
@@ -700,11 +941,22 @@
   }
   .kaizen-nav-menu {
     margin-top: 30px;
-    margin-right: 14px;
-    gap: 11px;
+    margin-right: 12px;
+    gap: 9px;
   }
   .kaizen-nav-link {
     font-size: 0.82rem;
+  }
+  .kaizen-nav-brochure-text-full {
+    display: none;
+  }
+  .kaizen-nav-brochure-text-short {
+    display: inline;
+  }
+  .kaizen-nav-brochure-btn {
+    padding: 5px 12px;
+    font-size: 0.78rem;
+    gap: 5px;
   }
 }
 
