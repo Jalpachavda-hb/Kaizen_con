@@ -213,15 +213,18 @@ export const askKnowledgeChat = async (question) => {
 
 /**
  * Get Email Agent Contacts API
- * Endpoint: GET {BASE_URL}/api/v1/email-agent/contacts?offset=0&limit=100
+ * Supports page-number based pagination via pag_number and limit.
  *
- * @param {number} [offset=0]
+ * @param {number} [page=1]
  * @param {number} [limit=100]
  * @returns {Promise<any[]>}
  */
-export const getEmailAgentContacts = async (offset = 0, limit = 100) => {
+export const getEmailAgentContacts = async (page = 1, limit = 100) => {
   try {
-    const url = `${API_ENDPOINTS.EMAIL_AGENT_CONTACTS}?offset=${encodeURIComponent(offset)}&limit=${encodeURIComponent(limit)}`;
+    const pageNum = Math.max(1, Number(page) || 1);
+    const limitNum = Math.max(1, Math.min(500, Number(limit) || 100));
+
+    const url = `${API_ENDPOINTS.EMAIL_AGENT_CONTACTS}?pag_number=${encodeURIComponent(pageNum)}&limit=${encodeURIComponent(limitNum)}&offset=${encodeURIComponent(pageNum)}`;
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -236,10 +239,49 @@ export const getEmailAgentContacts = async (offset = 0, limit = 100) => {
       throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
     }
 
-    if (Array.isArray(data)) return data;
-    if (data && Array.isArray(data.value)) return data.value;
-    if (data && Array.isArray(data.results)) return data.results;
-    return [];
+    let items = [];
+    let totalCount = 0;
+
+    if (Array.isArray(data)) {
+      items = [...data];
+      totalCount = typeof data.total_email_count === 'number'
+        ? data.total_email_count
+        : typeof data.count === 'number'
+        ? data.count
+        : typeof data.total === 'number'
+        ? data.total
+        : data.length;
+    } else if (data && typeof data === 'object') {
+      totalCount =
+        typeof data.total_email_count === 'number'
+          ? data.total_email_count
+          : typeof data.total_count === 'number'
+          ? data.total_count
+          : typeof data.count === 'number'
+          ? data.count
+          : typeof data.total === 'number'
+          ? data.total
+          : 0;
+
+      if (Array.isArray(data.results)) {
+        items = [...data.results];
+      } else if (Array.isArray(data.value)) {
+        items = [...data.value];
+      } else if (Array.isArray(data.data)) {
+        items = [...data.data];
+      } else if (Array.isArray(data.contacts)) {
+        items = [...data.contacts];
+      }
+
+      if (!totalCount) {
+        totalCount = items.length;
+      }
+    }
+
+    items.count = totalCount;
+    items.total = totalCount;
+    items.total_email_count = totalCount;
+    return items;
   } catch (error) {
     console.error('Error in getEmailAgentContacts API:', error);
     throw error;

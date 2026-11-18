@@ -490,15 +490,19 @@ export const deleteSchedule = deleteSession;
  */
 /**
  * Get Email Agent Contacts API
- * Supports page-number based pagination via the offset parameter.
+ * Supports page-number based pagination via pag_number and limit.
  *
- * @param {number} [offset=0] - Page number (passed into offset field)
- * @param {number} [limit=10] - Number of items per page
- * @returns {Promise<any[]>} Array of contacts (with .count and .total)
+ * @param {number} [page=1] - Page number (minimum: 1)
+ * @param {number} [limit=10] - Number of items per page (maximum: 500)
+ * @returns {Promise<any[]>} Array of contacts (with attached .total, .count, and .total_email_count)
  */
-export const getEmailAgentContacts = async (offset = 1, limit = 10) => {
+export const getEmailAgentContacts = async (page = 1, limit = 10) => {
   try {
-    const url = `${API_ENDPOINTS.EMAIL_AGENT_CONTACTS}?offset=${encodeURIComponent(offset)}&limit=${encodeURIComponent(limit)}`;
+    const pageNum = Math.max(1, Number(page) || 1);
+    const limitNum = Math.max(1, Math.min(500, Number(limit) || 10));
+
+    // Send pag_number as primary, along with offset for compatibility
+    const url = `${API_ENDPOINTS.EMAIL_AGENT_CONTACTS}?pag_number=${encodeURIComponent(pageNum)}&limit=${encodeURIComponent(limitNum)}&offset=${encodeURIComponent(pageNum)}`;
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -516,26 +520,52 @@ export const getEmailAgentContacts = async (offset = 1, limit = 10) => {
       throw error;
     }
 
+    let items = [];
+    let totalCount = 0;
+
     if (Array.isArray(data)) {
-      data.count = typeof data.count === 'number' ? data.count : data.length;
-      data.total = data.count;
-      return data;
+      items = [...data];
+      totalCount = typeof data.total_email_count === 'number'
+        ? data.total_email_count
+        : typeof data.count === 'number'
+        ? data.count
+        : typeof data.total === 'number'
+        ? data.total
+        : data.length;
+    } else if (data && typeof data === 'object') {
+      totalCount =
+        typeof data.total_email_count === 'number'
+          ? data.total_email_count
+          : typeof data.total_count === 'number'
+          ? data.total_count
+          : typeof data.count === 'number'
+          ? data.count
+          : typeof data.total === 'number'
+          ? data.total
+          : 0;
+
+      if (Array.isArray(data.results)) {
+        items = [...data.results];
+      } else if (Array.isArray(data.value)) {
+        items = [...data.value];
+      } else if (Array.isArray(data.data)) {
+        items = [...data.data];
+      } else if (Array.isArray(data.contacts)) {
+        items = [...data.contacts];
+      }
+
+      if (!totalCount) {
+        totalCount = items.length;
+      }
     }
 
-    if (data && Array.isArray(data.value)) {
-      data.value.count = typeof data.count === 'number' ? data.count : data.value.length;
-      data.value.total = data.value.count;
-      return data.value;
-    }
+    items.count = totalCount;
+    items.total = totalCount;
+    items.total_email_count = totalCount;
+    items.currentPage = pageNum;
+    items.pageSize = limitNum;
 
-    if (data && Array.isArray(data.results)) {
-      const results = [...data.results];
-      results.count = typeof data.count === 'number' ? data.count : (data.total ?? data.results.length);
-      results.total = results.count;
-      return results;
-    }
-
-    return [];
+    return items;
   } catch (error) {
     console.error('Error in getEmailAgentContacts API:', error);
     throw error;
@@ -1709,19 +1739,29 @@ export const deletePoll = async (pollId) => {
 /**
  * Vote in Poll API
  * Endpoint: POST http://192.168.29.201:8000/polling/api/polls/{poll_id}/vote
- * Body: { option_id: number }
+ * Body: { option_id: number, delegate_id: number }
  */
-export const votePoll = async (pollId, optionId) => {
+export const votePoll = async (pollId, optionId, delegateId = null) => {
   try {
+    const payload = {
+      option_id: Number(optionId),
+    };
+    if (delegateId) {
+      payload.delegate_id = Number(delegateId);
+    } else {
+      const stored = typeof localStorage !== 'undefined'
+        ? (localStorage.getItem('ignito_delegate_id') || localStorage.getItem('delegate_id'))
+        : null;
+      payload.delegate_id = stored ? Number(stored) : 99;
+    }
+
     const response = await fetch(`${BASE_URL}/polling/api/polls/${pollId}/vote`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'accept': 'application/json',
       },
-      body: JSON.stringify({
-        option_id: Number(optionId),
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
@@ -1742,6 +1782,20 @@ export const votePoll = async (pollId, optionId) => {
     console.error('Error in votePoll API:', error);
     throw error;
   }
+};
+
+/**
+ * Get WebSocket URL for Live Polling
+ * @param {string} [sessionId]
+ * @returns {string}
+ */
+export const getPollsWsUrl = (sessionId = QA_DEFAULT_SESSION_ID) => {
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_POLL_WS_URL) {
+    return import.meta.env.VITE_POLL_WS_URL;
+  }
+  const sid = sessionId || QA_DEFAULT_SESSION_ID;
+  const wsBase = (BASE_URL || 'http://192.168.29.201:8000').replace(/^http(s?):/, 'ws$1:');
+  return `${wsBase}/api/sessions/${sid}/ws?role=moderator`;
 };
 
 /**
@@ -2503,6 +2557,7 @@ export default {
   getPolls,
   getPollQrCodeUrl,
   downloadPollQrCode,
+  getPollsWsUrl,
   approveQuestionApi,
   rejectQuestionApi,
   getQaWsUrl,

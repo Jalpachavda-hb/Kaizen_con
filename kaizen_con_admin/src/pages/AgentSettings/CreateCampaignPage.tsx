@@ -126,7 +126,7 @@ export default function CreateCampaignPage() {
 
       try {
         const [contactsRes, templatesRes] = await Promise.allSettled([
-          getEmailAgentContacts(0, 100),
+          getEmailAgentContacts(1, 500),
           getTemplates(),
         ]);
 

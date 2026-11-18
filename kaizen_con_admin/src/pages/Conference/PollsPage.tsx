@@ -1,8 +1,17 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import { AdminPageContainer } from "../../components/common/AdminPageContainer";
 import { useToast } from "../../context/ToastContext";
-import { createPoll, deletePoll, votePoll, getPolls, getPollQrCodeUrl, downloadPollQrCode, BASE_URL } from "../../api/ApiPath";
+import {
+  createPoll,
+  deletePoll,
+  votePoll,
+  getPolls,
+  getPollQrCodeUrl,
+  downloadPollQrCode,
+  getPollsWsUrl,
+  BASE_URL,
+} from "../../api/ApiPath";
 import Swal from "sweetalert2";
 
 export interface PollOption {
@@ -75,6 +84,12 @@ export default function PollsPage() {
 
   // Currently Selected Poll for Live Results on this page
   const [currentPollId, setCurrentPollId] = useState<string | null>(null);
+
+  // WebSocket Live Interaction State
+  const [connectionStatus, setConnectionStatus] = useState<"connected" | "connecting" | "disconnected">("connecting");
+  const [recentUpdatedPollId, setRecentUpdatedPollId] = useState<string | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimeoutRef = useRef<any>(null);
 
   // Cast Vote / Test Poll Modal
   const [votingPoll, setVotingPoll] = useState<PollItem | null>(null);
@@ -233,6 +248,115 @@ export default function PollsPage() {
     },
     [success, toastError]
   );
+
+  // Connect WebSocket for Live Real-Time Polling Interactions
+  const connectWebSocket = useCallback(() => {
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+
+    if (wsRef.current) {
+      try {
+        wsRef.current.onclose = null;
+        wsRef.current.close();
+      } catch (e) {
+        // ignore
+      }
+      wsRef.current = null;
+    }
+
+    setConnectionStatus("connecting");
+
+    try {
+      const wsUrl = getPollsWsUrl();
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        setConnectionStatus("connected");
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+
+          // 1. Live Poll Vote or Poll Update Event
+          if (
+            data.type === "poll.vote" ||
+            data.type === "poll_vote" ||
+            data.type === "poll.updated" ||
+            data.type === "poll_update" ||
+            data.type === "vote"
+          ) {
+            const targetPollId = String(data.poll_id || data.poll?.id || "");
+            if (targetPollId) {
+              setRecentUpdatedPollId(targetPollId);
+              setTimeout(() => setRecentUpdatedPollId(null), 3500);
+              syncPollResults(targetPollId, true);
+              info(`⚡ Live Vote: Interaction registered on Poll #${targetPollId}!`);
+            } else {
+              fetchPolls();
+            }
+          }
+          // 2. Poll created or deleted live
+          else if (data.type === "poll.created" || data.type === "poll.deleted") {
+            fetchPolls();
+          }
+          // 3. Fallback: if data contains a poll object or poll_id directly
+          else if (data.poll && data.poll.id) {
+            const targetId = String(data.poll.id);
+            setRecentUpdatedPollId(targetId);
+            setTimeout(() => setRecentUpdatedPollId(null), 3500);
+            syncPollResults(targetId, true);
+          } else if (data.poll_id) {
+            const targetId = String(data.poll_id);
+            setRecentUpdatedPollId(targetId);
+            setTimeout(() => setRecentUpdatedPollId(null), 3500);
+            syncPollResults(targetId, true);
+          }
+        } catch (err) {
+          // ignore non-json messages
+        }
+      };
+
+      ws.onerror = () => {
+        setConnectionStatus("disconnected");
+      };
+
+      ws.onclose = () => {
+        setConnectionStatus("disconnected");
+        // Auto-reconnect after 4s
+        reconnectTimeoutRef.current = setTimeout(() => {
+          connectWebSocket();
+        }, 4000);
+      };
+    } catch (err: any) {
+      setConnectionStatus("disconnected");
+      reconnectTimeoutRef.current = setTimeout(() => {
+        connectWebSocket();
+      }, 5000);
+    }
+  }, [syncPollResults, fetchPolls, info]);
+
+  // Connect WebSocket on Mount & Disconnect on Unmount
+  useEffect(() => {
+    connectWebSocket();
+
+    return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      if (wsRef.current) {
+        try {
+          wsRef.current.onclose = null;
+          wsRef.current.close();
+        } catch (e) {
+          // ignore
+        }
+      }
+    };
+  }, [connectWebSocket]);
 
   // Auto-sync interval when Presenter, Live Results modal, or Current Poll showcase is active
   useEffect(() => {
@@ -525,6 +649,25 @@ export default function PollsPage() {
 
       if (!isNaN(numericPollId) && !isNaN(numericOptionId)) {
         await votePoll(numericPollId, numericOptionId);
+
+        // Broadcast over WebSocket if open so all screens/moderators receive live interaction
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          try {
+            wsRef.current.send(
+              JSON.stringify({
+                type: "poll.vote",
+                poll_id: numericPollId,
+                option_id: numericOptionId,
+              })
+            );
+          } catch (e) {
+            // ignore
+          }
+        }
+
+        setRecentUpdatedPollId(String(numericPollId));
+        setTimeout(() => setRecentUpdatedPollId(null), 3500);
+
         success("Vote recorded successfully via API!");
         await syncPollResults(numericPollId, true);
         await fetchPolls();
@@ -680,12 +823,50 @@ export default function PollsPage() {
       {/* Main Container with AdminPageContainer */}
       <AdminPageContainer
         title="Live Interactive Polls"
-        subtitle="Manage live audience questions, instant voting, and projector stage screen for plenary sessions."
+        subtitle="Real-time WebSocket interaction & audience voting stream. Project live polling results for plenary sessions."
         searchPlaceholder="Search polls by question, session, speaker or options..."
         searchValue={search}
         onSearchChange={setSearch}
         actionButton={
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+            {/* WebSocket Connection Status Pill */}
+            {connectionStatus === "connected" && (
+              <div
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs font-semibold text-emerald-700 dark:text-emerald-300 shadow-2xs"
+                title="Connected to WebSocket for instant live voting interactions"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span className="hidden sm:inline">Live WS Connected</span>
+                <span className="sm:hidden">Live WS</span>
+              </div>
+            )}
+            {connectionStatus === "connecting" && (
+              <div
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs font-semibold text-amber-700 dark:text-amber-300"
+                title="Connecting to WebSocket live stream..."
+              >
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                <span className="hidden sm:inline">Connecting WS...</span>
+                <span className="sm:hidden">Connecting</span>
+              </div>
+            )}
+            {connectionStatus === "disconnected" && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-600 dark:text-gray-300">
+                <span className="w-2 h-2 rounded-full bg-gray-400"></span>
+                <span>WS Offline</span>
+                <button
+                  type="button"
+                  onClick={connectWebSocket}
+                  className="ml-1 text-[#AA2D7B] hover:underline font-bold cursor-pointer"
+                >
+                  Reconnect
+                </button>
+              </div>
+            )}
+
             <button
               onClick={() => fetchPolls(true)}
               disabled={isRefreshing}
@@ -818,13 +999,30 @@ export default function PollsPage() {
 
         {/* CURRENT ACTIVE POLL LIVE RESULTS SHOWCASE */}
         {!isLoading && currentPoll && (
-          <div className="mb-8 rounded-2xl border-2 border-[#AA2D7B]/30 dark:border-[#AA2D7B]/40 bg-gradient-to-br from-purple-500/5 via-pink-500/5 to-transparent p-5 sm:p-6 shadow-xs relative overflow-hidden">
+          <div
+            className={`mb-8 rounded-2xl border-2 bg-gradient-to-br from-purple-500/5 via-pink-500/5 to-transparent p-5 sm:p-6 shadow-xs relative overflow-hidden transition-all duration-300 ${
+              recentUpdatedPollId === currentPoll.id
+                ? "border-emerald-500 ring-4 ring-emerald-500/20 shadow-lg"
+                : "border-[#AA2D7B]/30 dark:border-[#AA2D7B]/40"
+            }`}
+          >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-gray-100 dark:border-gray-800">
-              <div className="flex items-center gap-2.5">
+              <div className="flex flex-wrap items-center gap-2.5">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                   CURRENT LIVE POLL RESULTS
                 </span>
+                {connectionStatus === "connected" && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Live Interaction Active
+                  </span>
+                )}
+                {recentUpdatedPollId === currentPoll.id && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-200 border border-amber-300 dark:border-amber-700 animate-bounce">
+                    ⚡ Live Vote Received!
+                  </span>
+                )}
                 <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
                   ID #{currentPoll.id} • {currentPoll.sessionTitle}
                 </span>
@@ -1029,12 +1227,15 @@ export default function PollsPage() {
               });
 
               const isSelected = poll.id === currentPollId;
+              const isLiveUpdated = recentUpdatedPollId === poll.id;
 
               return (
                 <div
                   key={poll.id}
-                  className={`flex flex-col justify-between bg-white dark:bg-gray-900/90 border rounded-2xl p-5 shadow-xs transition-all duration-200 ${
-                    isSelected
+                  className={`flex flex-col justify-between bg-white dark:bg-gray-900/90 border rounded-2xl p-5 shadow-xs transition-all duration-300 ${
+                    isLiveUpdated
+                      ? "border-emerald-500 ring-4 ring-emerald-500/30 shadow-lg scale-[1.01]"
+                      : isSelected
                       ? "border-[#AA2D7B] ring-2 ring-[#AA2D7B]/20 shadow-md"
                       : "border-gray-200 dark:border-gray-800 hover:border-[#AA2D7B]/40"
                   }`}
@@ -1043,6 +1244,12 @@ export default function PollsPage() {
                   <div>
                     <div className="flex items-start justify-between gap-3 mb-2.5">
                       <div className="flex flex-wrap items-center gap-2">
+                        {/* Live Interaction Pulse Badge */}
+                        {isLiveUpdated && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-700 animate-bounce">
+                            ⚡ Live Vote Received!
+                          </span>
+                        )}
                         {/* Currently Selected Indicator */}
                         {isSelected && (
                           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 dark:bg-purple-950/70 text-[#AA2D7B] dark:text-purple-300 border border-purple-200 dark:border-purple-800">
@@ -1388,63 +1595,21 @@ export default function PollsPage() {
                   />
                 </div>
 
-                {/* Session Track & Speaker */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                      Conference Session / Title
-                    </label>
-                    <input
-                      type="text"
-                      value={sessionTitle}
-                      onChange={(e) => setSessionTitle(e.target.value)}
-                      placeholder="e.g. Keynote Robotics"
-                      className="w-full text-xs bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-1.5 sm:py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#AA2D7B]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                      Moderator / Speaker Name
-                    </label>
-                    <input
-                      type="text"
-                      value={speakerName}
-                      onChange={(e) => setSpeakerName(e.target.value)}
-                      placeholder="e.g. Dr. Maya Lin"
-                      className="w-full text-xs bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-1.5 sm:py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#AA2D7B]"
-                    />
-                  </div>
-                </div>
-
-                {/* Track Code & Status */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                      Track Code / Tag
-                    </label>
-                    <input
-                      type="text"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      placeholder="e.g. SURG-AI, CLINICAL, BCI"
-                      className="w-full text-xs bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-1.5 sm:py-2 text-gray-900 dark:text-white focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                      Initial Status
-                    </label>
-                    <select
-                      value={pollStatus}
-                      onChange={(e) => setPollStatus(e.target.value as any)}
-                      className="w-full text-xs bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-1.5 sm:py-2 text-gray-900 dark:text-white focus:outline-none"
-                    >
-                      <option value="active">Active (Live Voting Now)</option>
-                      <option value="draft">Draft (Hidden)</option>
-                      <option value="scheduled">Scheduled</option>
-                      <option value="closed">Closed</option>
-                    </select>
-                  </div>
+                {/* Initial Status */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                    Initial Status
+                  </label>
+                  <select
+                    value={pollStatus}
+                    onChange={(e) => setPollStatus(e.target.value as any)}
+                    className="w-full text-xs bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#AA2D7B]"
+                  >
+                    <option value="active">Active (Live Voting Now)</option>
+                    <option value="draft">Draft (Hidden)</option>
+                    <option value="scheduled">Scheduled</option>
+                    <option value="closed">Closed</option>
+                  </select>
                 </div>
 
                 {/* Options Dynamic List */}
@@ -1805,11 +1970,22 @@ export default function PollsPage() {
             className="flex items-center justify-between px-6 sm:px-8 py-4 sm:py-5 border-b backdrop-blur-md shadow-xs transition-colors"
             style={{ backgroundColor: "#FFFFFF", borderColor: "#EADDE7" }}
           >
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
                 LIVE STAGE POLL
               </span>
+              {connectionStatus === "connected" && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  WS Live Stream Active
+                </span>
+              )}
+              {recentUpdatedPollId === presenterPoll.id && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300 animate-bounce">
+                  ⚡ Live Vote Received!
+                </span>
+              )}
               <span className="text-xs font-mono text-[#7B6282] hidden sm:inline font-semibold">
                 {presenterPoll.sessionTitle}
               </span>

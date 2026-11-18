@@ -49,7 +49,7 @@ export default function SpeakersPage() {
 
   // Filters & Search
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState<string>("All"); // All | 1 | 2 | 3
+  
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [specialityFilter, setSpecialityFilter] = useState<string>("All");
 
@@ -143,9 +143,7 @@ export default function SpeakersPage() {
         (s.institution && s.institution.toLowerCase().includes(term)) ||
         (s.bio && s.bio.toLowerCase().includes(term));
 
-      const matchesRole =
-        roleFilter === "All" ||
-        String(s.role ?? 1) === roleFilter;
+    
 
       const matchesStatus =
         statusFilter === "All" ||
@@ -154,9 +152,9 @@ export default function SpeakersPage() {
       const matchesSpeciality =
         specialityFilter === "All" || s.speciality === specialityFilter;
 
-      return matchesSearch && matchesRole && matchesStatus && matchesSpeciality;
+      return matchesSearch  && matchesStatus && matchesSpeciality;
     });
-  }, [speakers, search, roleFilter, statusFilter, specialityFilter]);
+  }, [speakers, search, statusFilter, specialityFilter]);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -164,7 +162,7 @@ export default function SpeakersPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, roleFilter, statusFilter, specialityFilter]);
+  }, [search,  statusFilter, specialityFilter]);
 
   const paginatedSpeakers = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
@@ -401,52 +399,7 @@ export default function SpeakersPage() {
     }
   };
 
-  // Export to CSV
-  const exportToCSV = () => {
-    const headers = [
-      "ID",
-      "Speaker UUID",
-      "First Name",
-      "Last Name",
-      "Role",
-      "Email",
-      "Phone",
-      "Designation",
-      "Speciality",
-      "Institution",
-      "Session Status",
-      "Active",
-      "Created At",
-    ];
 
-    const rows = filteredSpeakers.map((s) => [
-      s.id,
-      `"${s.speaker_id || ""}"`,
-      `"${s.first_name || ""}"`,
-      `"${s.last_name || ""}"`,
-      `"${getRoleLabel(s.role)}"`,
-      `"${s.email || ""}"`,
-      `"${s.phone || ""}"`,
-      `"${s.designation || ""}"`,
-      `"${s.speciality || ""}"`,
-      `"${s.institution || ""}"`,
-      `"${s.session_status || ""}"`,
-      s.is_active ? "Yes" : "No",
-      `"${s.created_at || ""}"`,
-    ]);
-
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `kaizen_speakers_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   return (
     <>
@@ -464,16 +417,7 @@ export default function SpeakersPage() {
         actionButton={
           <div className="flex items-center flex-wrap gap-2">
             {/* Role Filter (1 = Speaker, 2 = Chief Guest, 3 = Moderator) */}
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              className="px-2.5 py-1.5 text-xs font-medium border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:border-[#AA2D7B]"
-            >
-              <option value="All">All Roles</option>
-              <option value="1">Speakers (Role 1)</option>
-              <option value="2">Chief Guests (Role 2)</option>
-              <option value="3">Moderators (Role 3)</option>
-            </select>
+           
 
             {/* Status Filter */}
             <select
@@ -502,17 +446,8 @@ export default function SpeakersPage() {
               ))}
             </select>
 
-            {/* Export CSV */}
-            <button
-              onClick={exportToCSV}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg shadow-2xs transition-colors cursor-pointer"
-              title="Export to CSV"
-            >
-              <svg className="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Export CSV
-            </button>
+        
+           
 
           
             

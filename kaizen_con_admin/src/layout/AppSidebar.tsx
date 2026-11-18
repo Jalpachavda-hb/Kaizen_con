@@ -10,7 +10,6 @@ import {
   SendEmailIcon,
   CampaignsIcon,
   TemplatesIcon,
-  WhatsAppIcon,
   PollsIcon,
   QAIcon,
   KaiIcon,
@@ -98,13 +97,7 @@ const conferenceNavSections: NavSection[] = [
         aliases: ["/conference/templates", "/agent-settings/templates"],
         icon: <TemplatesIcon className="w-5 h-5" />,
       },
-      {
-        name: "WhatsApp",
-        path: "#",
-        icon: <WhatsAppIcon className="w-5 h-5 text-[#25D366]" />,
-        badge: "Coming Soon",
-        disabled: true,
-      },
+      
     ],
   },
   {

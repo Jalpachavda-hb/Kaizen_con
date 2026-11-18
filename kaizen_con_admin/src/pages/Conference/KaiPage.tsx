@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Link } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
 import { AdminPageContainer } from "../../components/common/AdminPageContainer";
 import { useToast } from "../../context/ToastContext";
@@ -14,8 +13,6 @@ import {
   CloudUploadIcon,
   TrashCanIcon,
   PdfFileIcon,
-  MicrophoneIcon,
-  WaveformIcon,
 } from "../../icons/conferenceIcons";
 
 interface SyncResults {
@@ -190,21 +187,6 @@ export default function KaiPage() {
         }
         actionButton={
           <div className="flex items-center gap-2">
-            {/* Live Transcript Button */}
-            <Link
-              to="/kai/live-transcript"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-xs transition-colors cursor-pointer"
-              title="Open Live Audio Transcript & Speaker Diarization in new tab"
-            >
-              <MicrophoneIcon className="w-3.5 h-3.5" />
-              <span>Live Transcript</span>
-              <svg className="w-3 h-3 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </Link>
-
             {/* Sync DB Button */}
             <button
               type="button"
@@ -230,38 +212,6 @@ export default function KaiPage() {
         }
       >
         <div className="p-5 md:p-6 space-y-6">
-          {/* FEATURE BANNER: LIVE AUDIO TRANSCRIPT */}
-          <div className="rounded-xl p-4 bg-gradient-to-r from-indigo-900/90 via-purple-900/90 to-indigo-800/90 text-white shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-indigo-500/20">
-            <div className="flex items-start sm:items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-xs flex items-center justify-center text-indigo-300 flex-shrink-0">
-                <WaveformIcon className="w-6 h-6" />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold flex items-center gap-2">
-                  <span>Live Speech-to-Text &amp; Speaker Diarization</span>
-                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
-                    ElevenLabs Scribe
-                  </span>
-                </h4>
-                <p className="text-xs text-indigo-200/80 mt-0.5">
-                  Record conference microphones live or upload audio files to generate real-time transcripts identifying which speaker speaks each line.
-                </p>
-              </div>
-            </div>
-            <Link
-              to="/kai/live-transcript"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold bg-white text-indigo-900 hover:bg-indigo-50 rounded-lg shadow-sm transition-all flex-shrink-0 cursor-pointer"
-            >
-              <MicrophoneIcon className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Launch Live Transcript</span>
-              <svg className="w-3.5 h-3.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </Link>
-          </div>
-
           {/* SECTION: DOCUMENT UPLOAD & LIST */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left: Upload Document Card */}

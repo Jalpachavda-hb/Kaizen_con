@@ -431,7 +431,7 @@ export default function Home() {
                       )}
                       <div className="min-w-0 flex-1">
                         <div className="font-bold text-xs text-gray-900 dark:text-white truncate">
-                          Dr. {sp.first_name} {sp.last_name}
+                         {sp.first_name} {sp.last_name}
                         </div>
                         <div className="text-[10px] text-gray-500 truncate">
                           {sp.designation} • {sp.institution}

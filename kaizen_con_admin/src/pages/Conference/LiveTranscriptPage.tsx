@@ -27,6 +27,48 @@ import {
 type InputTab = "record" | "upload" | "url";
 type ViewTab = "formatted" | "plain";
 
+/**
+ * Encode raw single-channel 32-bit Float PCM samples into a valid 16-bit PCM WAV Blob
+ */
+function encodeWAV(samples: Float32Array, sampleRate: number): Blob {
+  const buffer = new ArrayBuffer(44 + samples.length * 2);
+  const view = new DataView(buffer);
+
+  const writeString = (offset: number, str: string) => {
+    for (let i = 0; i < str.length; i++) {
+      view.setUint8(offset + i, str.charCodeAt(i));
+    }
+  };
+
+  // RIFF header
+  writeString(0, "RIFF");
+  view.setUint32(4, 36 + samples.length * 2, true);
+  writeString(8, "WAVE");
+
+  // fmt subchunk
+  writeString(12, "fmt ");
+  view.setUint32(16, 16, true); // SubChunk1Size (16 for PCM)
+  view.setUint16(20, 1, true); // AudioFormat (1 for PCM)
+  view.setUint16(22, 1, true); // NumChannels (1 mono)
+  view.setUint32(24, sampleRate, true); // SampleRate
+  view.setUint32(28, sampleRate * 2, true); // ByteRate (SampleRate * 1 * 16/8)
+  view.setUint16(32, 2, true); // BlockAlign (1 * 16/8)
+  view.setUint16(34, 16, true); // BitsPerSample
+
+  // data subchunk
+  writeString(36, "data");
+  view.setUint32(40, samples.length * 2, true);
+
+  // Write clamped 16-bit PCM samples
+  let offset = 44;
+  for (let i = 0; i < samples.length; i++, offset += 2) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+  }
+
+  return new Blob([buffer], { type: "audio/wav" });
+}
+
 export default function LiveTranscriptPage() {
   const { success, error: toastError, info } = useToast();
 
@@ -51,7 +93,7 @@ export default function LiveTranscriptPage() {
   // Transcript Turns (Single Speaker)
   const [turns, setTurns] = useState<DiarizedTurn[]>([]);
 
-  // ElevenLabs Batch STT State (for File Upload / Audio URL)
+  // ElevenLabs STT State (for File Upload / Audio URL)
   const [isTranscribing, setIsTranscribing] = useState<boolean>(false);
   const [transcriptionResult, setTranscriptionResult] =
     useState<TranscriptionResponse | null>(null);
@@ -76,12 +118,18 @@ export default function LiveTranscriptPage() {
   const recognitionRef = useRef<any>(null);
   const isRecordingRef = useRef<boolean>(false);
   const recordingTimerRef = useRef<any>(null);
+  const liveChunkTimerRef = useRef<any>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const animFrameRef = useRef<number | null>(null);
+  const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
   const recordingSecondsRef = useRef<number>(0);
   const lastTurnEndRef = useRef<number>(0);
+  const hasReceivedSpeechResultsRef = useRef<boolean>(false);
+
+  // PCM Buffers for ElevenLabs Real-Time WAV Streaming
+  const pcmBufferRef = useRef<Float32Array[]>([]);
+  const totalPcmSamplesRef = useRef<number>(0);
+  const allSessionSamplesRef = useRef<Float32Array[]>([]);
 
   // Keep refs synchronized
   useEffect(() => {
@@ -110,22 +158,28 @@ export default function LiveTranscriptPage() {
     const endTime = Math.max(startTime + 1, currentSecs);
     lastTurnEndRef.current = endTime;
 
-    setTurns((prev) => [
-      ...prev,
-      {
-        id: `turn_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-        speakerId: "speaker_0",
-        speakerName: "Speaker",
-        startTime,
-        endTime,
-        text: cleanText,
-        words: [],
-        audioEvents: [],
-      },
-    ]);
+    setTurns((prev) => {
+      // Avoid duplicate consecutive turns
+      if (prev.length > 0 && prev[prev.length - 1].text === cleanText) {
+        return prev;
+      }
+      return [
+        ...prev,
+        {
+          id: `turn_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          speakerId: "speaker_0",
+          speakerName: "Speaker",
+          startTime,
+          endTime,
+          text: cleanText,
+          words: [],
+          audioEvents: [],
+        },
+      ];
+    });
   }, []);
 
-  // Clean up AudioContext & Recognition on unmount
+  // Clean up AudioContext & Speech Recognition on unmount
   useEffect(() => {
     return () => {
       isRecordingRef.current = false;
@@ -139,82 +193,53 @@ export default function LiveTranscriptPage() {
       if (recordingTimerRef.current) {
         clearInterval(recordingTimerRef.current);
       }
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current);
+      if (liveChunkTimerRef.current) {
+        clearInterval(liveChunkTimerRef.current);
+      }
+      if (scriptProcessorRef.current) {
+        try {
+          scriptProcessorRef.current.disconnect();
+        } catch {
+          // ignore
+        }
       }
       if (mediaStreamRef.current) {
         mediaStreamRef.current.getTracks().forEach((t) => t.stop());
       }
       if (audioContextRef.current) {
-        audioContextRef.current.close().catch(() => {});
+        audioContextRef.current.close().catch(() => { });
       }
     };
   }, []);
 
   /**
-   * Start Live Microphone & Real-time Speech-to-Text Recognition
-   * Streaming word-by-word onto the screen as the speaker speaks.
+   * Helper to start/restart Web Speech API recognition safely
    */
-  const startRecording = async () => {
+  const startWebSpeech = useCallback(() => {
+    if (!isRecordingRef.current) return;
     const SpeechRecognitionAPI =
       (window as any).SpeechRecognition ||
       (window as any).webkitSpeechRecognition;
 
-    if (!SpeechRecognitionAPI) {
-      toastError(
-        "Live speech recognition is not supported in this browser. Please open in Google Chrome or Microsoft Edge."
-      );
-      return;
-    }
+    if (!SpeechRecognitionAPI) return;
 
     try {
-      // 1. Request microphone permissions and initialize AudioContext visualizer
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      });
-      mediaStreamRef.current = stream;
-
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      const audioCtx = new AudioCtx();
-      audioContextRef.current = audioCtx;
-      if (audioCtx.state === "suspended") {
-        await audioCtx.resume();
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch {
+          // ignore
+        }
       }
 
-      const source = audioCtx.createMediaStreamSource(stream);
-      const analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 256;
-      analyserRef.current = analyser;
-      source.connect(analyser);
-
-      // Volume visualizer loop
-      const dataArray = new Uint8Array(analyser.frequencyBinCount);
-      const updateVolume = () => {
-        if (!analyserRef.current) return;
-        analyserRef.current.getByteFrequencyData(dataArray);
-        let sum = 0;
-        for (let i = 0; i < dataArray.length; i++) {
-          sum += dataArray[i];
-        }
-        const avg = sum / dataArray.length;
-        const level = Math.min(100, Math.round((avg / 128) * 100));
-        setAudioLevel(level);
-        animFrameRef.current = requestAnimationFrame(updateVolume);
-      };
-      updateVolume();
-
-      // 2. Initialize Web Speech Recognition for Real-time Streaming
       const recognition = new SpeechRecognitionAPI();
       recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = "en-US";
+      recognition.lang = navigator.language || "en-US";
       recognitionRef.current = recognition;
 
       recognition.onresult = (event: any) => {
+        hasReceivedSpeechResultsRef.current = true;
         let interim = "";
         let finalChunk = "";
 
@@ -239,42 +264,171 @@ export default function LiveTranscriptPage() {
       };
 
       recognition.onerror = (event: any) => {
-        console.warn("Speech recognition event:", event.error);
-        if (event.error === "no-speech") {
-          return;
-        }
-        if (event.error === "not-allowed") {
-          toastError("Microphone permission denied. Please allow microphone access.");
-          stopRecording();
+        console.warn("Speech recognition notice:", event.error);
+        if (event.error === "network" && recognition.lang !== "en-US") {
+          // If regional language network fails, fallback to en-US
+          recognition.lang = "en-US";
         }
       };
 
-      // Restart automatically if Chrome stops on silence while still recording
       recognition.onend = () => {
         if (isRecordingRef.current) {
-          try {
-            recognition.start();
-          } catch {
-            // Already started or restarting
-          }
+          // Restart after short delay with fresh instance
+          setTimeout(() => {
+            if (isRecordingRef.current) {
+              startWebSpeech();
+            }
+          }, 250);
         }
       };
 
       recognition.start();
+    } catch (err) {
+      console.warn("Speech recognition start skipped:", err);
+    }
+  }, [commitTurn]);
 
+  /**
+   * Start Live Microphone: Dual Engine Real-Time Transcription
+   * Engine 1: Web Speech API for instant (<100ms) live word-by-word streaming
+   * Engine 2: Background ElevenLabs Scribe WAV pipeline every 3.5s for guaranteed transcription
+   */
+  const startRecording = async () => {
+    try {
+      // 1. Request microphone access
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+      mediaStreamRef.current = stream;
+
+      // 2. Setup AudioContext & ScriptProcessor for high-fidelity PCM sample capture
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      const audioCtx = new AudioCtx();
+      audioContextRef.current = audioCtx;
+      if (audioCtx.state === "suspended") {
+        await audioCtx.resume();
+      }
+
+      const source = audioCtx.createMediaStreamSource(stream);
+
+      // Create ScriptProcessorNode (bufferSize=4096, 1 input channel, 1 output channel)
+      const scriptProcessor = audioCtx.createScriptProcessor(4096, 1, 1);
+      scriptProcessorRef.current = scriptProcessor;
+
+      // Zero-gain sink to keep audio flowing through the Web Audio graph in Chrome
+      const zeroGain = audioCtx.createGain();
+      zeroGain.gain.value = 0;
+
+      source.connect(scriptProcessor);
+      scriptProcessor.connect(zeroGain);
+      zeroGain.connect(audioCtx.destination);
+
+      // Reset PCM sample buffers
+      pcmBufferRef.current = [];
+      totalPcmSamplesRef.current = 0;
+      allSessionSamplesRef.current = [];
+      hasReceivedSpeechResultsRef.current = false;
+
+      // Real-time audio processing loop
+      scriptProcessor.onaudioprocess = (e) => {
+        if (!isRecordingRef.current) return;
+        const channelData = e.inputBuffer.getChannelData(0);
+        const copy = new Float32Array(channelData);
+
+        pcmBufferRef.current.push(copy);
+        totalPcmSamplesRef.current += copy.length;
+        allSessionSamplesRef.current.push(copy);
+
+        // Compute Root-Mean-Square (RMS) for responsive volume meter
+        let sumSquares = 0;
+        for (let i = 0; i < copy.length; i++) {
+          sumSquares += copy[i] * copy[i];
+        }
+        const rms = Math.sqrt(sumSquares / copy.length);
+        const level = Math.min(100, Math.round(rms * 450));
+        setAudioLevel(level);
+      };
+
+      // 3. Mark recording as active
       setIsRecording(true);
       isRecordingRef.current = true;
       setRecordingSeconds(0);
       lastTurnEndRef.current = 0;
       setLiveInterimText("");
 
+      // Seconds timer
       recordingTimerRef.current = setInterval(() => {
         setRecordingSeconds((prev) => prev + 1);
       }, 1000);
 
-      info("Live speech recording started. Words will stream live onto the screen!");
+      // 4. Start instant Web Speech API recognition
+      startWebSpeech();
+
+      // 5. Automatic live audio transcription with ElevenLabs Scribe every 3.5 seconds
+      liveChunkTimerRef.current = setInterval(async () => {
+        if (!isRecordingRef.current) return;
+        const currentSampleRate = audioContextRef.current?.sampleRate || 44100;
+
+        // Ensure we have at least 1.5 seconds of audio samples
+        if (totalPcmSamplesRef.current < currentSampleRate * 1.5) return;
+
+        // Drain current slice from buffer
+        const chunks = pcmBufferRef.current;
+        const totalSamples = totalPcmSamplesRef.current;
+        pcmBufferRef.current = [];
+        totalPcmSamplesRef.current = 0;
+
+        // Flatten float samples into single Float32Array
+        const merged = new Float32Array(totalSamples);
+        let offset = 0;
+        for (const chunk of chunks) {
+          merged.set(chunk, offset);
+          offset += chunk.length;
+        }
+
+        // Check if there is actual audio above silence threshold
+        let maxAmp = 0;
+        for (let i = 0; i < merged.length; i++) {
+          const a = Math.abs(merged[i]);
+          if (a > maxAmp) maxAmp = a;
+        }
+        if (maxAmp < 0.02) {
+          // Below audible threshold, skip API call
+          return;
+        }
+
+        try {
+          const wavBlob = encodeWAV(merged, currentSampleRate);
+          const currentKey = apiKey || getElevenLabsApiKey();
+          if (!currentKey) return;
+
+          const res = await transcribeAudio(wavBlob, {
+            apiKey: currentKey,
+            modelId: "scribe_v1",
+            diarize: false,
+            tagAudioEvents: false,
+            languageCode: "eng",
+          });
+
+          // Clean technical audio tags like [tone], [static]
+          const cleanText = (res.text || "")
+            .replace(/\[.*?\]/g, "")
+            .replace(/\s+/g, " ")
+            .trim();
+
+          if (cleanText && cleanText.length > 1) {
+            // Commit words directly to the transcript screen
+            commitTurn(cleanText);
+            setLiveInterimText("");
+          }
+        } catch (sttErr) {
+          console.warn("Background STT slice note:", sttErr);
+        }
+      }, 3500);
+
+      info("Microphone active! Speak now to see your words written live on screen.");
     } catch (err: any) {
-      console.error("Microphone or Speech Recognition error:", err);
+      console.error("Microphone access error:", err);
       toastError(
         err.message || "Failed to access microphone. Please allow microphone permissions."
       );
@@ -282,13 +436,14 @@ export default function LiveTranscriptPage() {
   };
 
   /**
-   * Stop Live Recording
+   * Stop Live Recording & Finalize Transcript
    */
-  const stopRecording = () => {
+  const stopRecording = async () => {
     setIsRecording(false);
     isRecordingRef.current = false;
+    setAudioLevel(0);
 
-    // Commit any remaining interim words
+    // Commit any interim text immediately
     if (liveInterimText.trim()) {
       commitTurn(liveInterimText.trim());
       setLiveInterimText("");
@@ -296,7 +451,7 @@ export default function LiveTranscriptPage() {
 
     if (recognitionRef.current) {
       try {
-        recognitionRef.current.stop();
+        recognitionRef.current.abort();
       } catch {
         // ignore
       }
@@ -305,18 +460,78 @@ export default function LiveTranscriptPage() {
     if (recordingTimerRef.current) {
       clearInterval(recordingTimerRef.current);
     }
-    if (animFrameRef.current) {
-      cancelAnimationFrame(animFrameRef.current);
+    if (liveChunkTimerRef.current) {
+      clearInterval(liveChunkTimerRef.current);
+    }
+
+    if (scriptProcessorRef.current) {
+      try {
+        scriptProcessorRef.current.disconnect();
+      } catch {
+        // ignore
+      }
+    }
+
+    const currentSampleRate = audioContextRef.current?.sampleRate || 44100;
+
+    // Transcribe any remaining trailing audio slice
+    if (totalPcmSamplesRef.current > currentSampleRate * 0.8) {
+      const remainingChunks = pcmBufferRef.current;
+      const remainingTotal = totalPcmSamplesRef.current;
+      pcmBufferRef.current = [];
+      totalPcmSamplesRef.current = 0;
+
+      const merged = new Float32Array(remainingTotal);
+      let offset = 0;
+      for (const chunk of remainingChunks) {
+        merged.set(chunk, offset);
+        offset += chunk.length;
+      }
+
+      try {
+        const currentKey = apiKey || getElevenLabsApiKey();
+        if (currentKey) {
+          const wavBlob = encodeWAV(merged, currentSampleRate);
+          const res = await transcribeAudio(wavBlob, {
+            apiKey: currentKey,
+            modelId: "scribe_v1",
+            diarize: false,
+            tagAudioEvents: false,
+            languageCode: "eng",
+          });
+          const cleanText = (res.text || "").replace(/\[.*?\]/g, "").trim();
+          if (cleanText) {
+            commitTurn(cleanText);
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    // Build complete audio playback URL from all recorded samples
+    if (allSessionSamplesRef.current.length > 0) {
+      let fullLength = 0;
+      for (const c of allSessionSamplesRef.current) fullLength += c.length;
+      const fullBuffer = new Float32Array(fullLength);
+      let off = 0;
+      for (const c of allSessionSamplesRef.current) {
+        fullBuffer.set(c, off);
+        off += c.length;
+      }
+      const fullWav = encodeWAV(fullBuffer, currentSampleRate);
+      const fullUrl = URL.createObjectURL(fullWav);
+      setActiveAudioSrc(fullUrl);
+    }
+
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => { });
     }
     if (mediaStreamRef.current) {
       mediaStreamRef.current.getTracks().forEach((t) => t.stop());
     }
-    if (audioContextRef.current) {
-      audioContextRef.current.close().catch(() => {});
-    }
 
-    setAudioLevel(0);
-    success("Recording stopped. Transcript captured!");
+    success("Speech transcription completed!");
   };
 
   /**
@@ -330,6 +545,7 @@ export default function LiveTranscriptPage() {
     setLiveInterimText("");
     setClinicalSummary(null);
     setTranscriptionResult(null);
+    setActiveAudioSrc(null);
     info("Transcript cleared.");
   };
 
@@ -426,7 +642,7 @@ export default function LiveTranscriptPage() {
   const handleSeekAudio = (timeInSeconds: number) => {
     if (audioPlayerRef.current) {
       audioPlayerRef.current.currentTime = timeInSeconds;
-      audioPlayerRef.current.play().catch(() => {});
+      audioPlayerRef.current.play().catch(() => { });
       setIsPlayingAudio(true);
     }
   };
@@ -565,11 +781,11 @@ export default function LiveTranscriptPage() {
                 <span>Live Speech-to-Text Studio</span>
                 <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>Real-Time Stream</span>
+                  <span>Real-Time Speech</span>
                 </span>
               </h1>
               <p className="text-[11px] text-gray-500 dark:text-gray-400 hidden md:block">
-                Word-by-word real-time dictation &amp; conference audio transcription
+                Direct live conference speech transcription
               </p>
             </div>
           </div>
@@ -583,11 +799,10 @@ export default function LiveTranscriptPage() {
                 setTempApiKey(apiKey);
                 setShowApiKeyModal(true);
               }}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer ${
-                apiKey
-                  ? "text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800"
-                  : "text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800"
-              }`}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer ${apiKey
+                ? "text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800"
+                : "text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800"
+                }`}
             >
               <span className="w-2 h-2 rounded-full bg-current" />
               <span>{apiKey ? "ElevenLabs Connected" : "API Key (.env)"}</span>
@@ -633,33 +848,30 @@ export default function LiveTranscriptPage() {
                     <button
                       type="button"
                       onClick={() => setActiveTab("record")}
-                      className={`px-3 py-1 rounded-md transition-all ${
-                        activeTab === "record"
-                          ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-xs font-semibold"
-                          : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                      }`}
+                      className={`px-3 py-1 rounded-md transition-all ${activeTab === "record"
+                        ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-xs font-semibold"
+                        : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                        }`}
                     >
                       Live Mic
                     </button>
                     <button
                       type="button"
                       onClick={() => setActiveTab("upload")}
-                      className={`px-3 py-1 rounded-md transition-all ${
-                        activeTab === "upload"
-                          ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-xs font-semibold"
-                          : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                      }`}
+                      className={`px-3 py-1 rounded-md transition-all ${activeTab === "upload"
+                        ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-xs font-semibold"
+                        : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                        }`}
                     >
                       File Upload
                     </button>
                     <button
                       type="button"
                       onClick={() => setActiveTab("url")}
-                      className={`px-3 py-1 rounded-md transition-all ${
-                        activeTab === "url"
-                          ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-xs font-semibold"
-                          : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                      }`}
+                      className={`px-3 py-1 rounded-md transition-all ${activeTab === "url"
+                        ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-xs font-semibold"
+                        : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                        }`}
                     >
                       Audio URL
                     </button>
@@ -675,7 +887,9 @@ export default function LiveTranscriptPage() {
                         <div
                           className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${
                             isRecording
-                              ? "bg-rose-500/10 text-rose-600 ring-8 ring-rose-500/20 animate-pulse"
+                              ? audioLevel > 5
+                                ? "bg-emerald-500/15 text-emerald-600 ring-8 ring-emerald-500/25 animate-pulse"
+                                : "bg-rose-500/10 text-rose-600 ring-8 ring-rose-500/20 animate-pulse"
                               : "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400"
                           }`}
                         >
@@ -693,17 +907,19 @@ export default function LiveTranscriptPage() {
                       <div className="text-2xl font-mono font-bold text-gray-900 dark:text-white mb-1">
                         {formatTimestamp(recordingSeconds)}
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs mb-4">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs mb-3">
                         {isRecording
-                          ? "Listening... Speak now and words will stream live on the right screen"
+                          ? "Listening to speech... Spoken words will appear live on the right screen"
                           : "Click below to begin live real-time transcription"}
                       </p>
 
                       {/* Volume Indicator Bar */}
                       {isRecording && (
-                        <div className="w-full max-w-xs bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-4 overflow-hidden">
+                        <div className="w-full max-w-xs bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-4 overflow-hidden shadow-inner">
                           <div
-                            className="bg-rose-500 h-2 rounded-full transition-all duration-75"
+                            className={`h-2.5 rounded-full transition-all duration-75 ${
+                              audioLevel > 5 ? "bg-emerald-500" : "bg-rose-500"
+                            }`}
                             style={{ width: `${Math.max(6, audioLevel)}%` }}
                           />
                         </div>
@@ -751,7 +967,7 @@ export default function LiveTranscriptPage() {
                 {/* TAB 2: AUDIO FILE UPLOAD */}
                 {activeTab === "upload" && (
                   <div className="space-y-4">
-                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center hover:border-indigo-500 transition-colors bg-gray-50/50 dark:bg-gray-700/30">
+                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center hover:border-indigo-500 transition-colors bg-gray-50/50 dark:bg-gray-750">
                       <input
                         type="file"
                         id="audioFileInput"
@@ -789,11 +1005,10 @@ export default function LiveTranscriptPage() {
                       type="button"
                       onClick={handleTranscribeBatch}
                       disabled={isTranscribing || !selectedFile}
-                      className={`w-full py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer ${
-                        isTranscribing || !selectedFile
-                          ? "bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed"
-                          : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-lg"
-                      }`}
+                      className={`w-full py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer ${isTranscribing || !selectedFile
+                        ? "bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed"
+                        : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-lg"
+                        }`}
                     >
                       {isTranscribing ? (
                         <>
@@ -848,11 +1063,10 @@ export default function LiveTranscriptPage() {
                       type="button"
                       onClick={handleTranscribeBatch}
                       disabled={isTranscribing || !audioUrlInput.trim()}
-                      className={`w-full py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer ${
-                        isTranscribing || !audioUrlInput.trim()
-                          ? "bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed"
-                          : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-lg"
-                      }`}
+                      className={`w-full py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer ${isTranscribing || !audioUrlInput.trim()
+                        ? "bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed"
+                        : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-lg"
+                        }`}
                     >
                       {isTranscribing ? (
                         <>
@@ -869,13 +1083,13 @@ export default function LiveTranscriptPage() {
                   </div>
                 )}
 
-                {/* AUDIO PREVIEW PLAYER (For uploaded files / URLs) */}
+                {/* AUDIO PREVIEW PLAYER */}
                 {activeAudioSrc && (
                   <div className="mt-4 p-3 rounded-lg bg-gray-100 dark:bg-gray-750 border border-gray-200 dark:border-gray-700">
                     <div className="flex items-center justify-between mb-1.5 text-xs text-gray-500 dark:text-gray-400">
                       <span className="flex items-center gap-1 font-semibold text-gray-700 dark:text-gray-300">
                         <AudioSpeakerIcon className="w-3.5 h-3.5 text-indigo-500" />
-                        <span>Audio Preview</span>
+                        <span>Audio Playback</span>
                         {isPlayingAudio && (
                           <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 animate-pulse font-medium">
                             Playing
@@ -923,17 +1137,23 @@ export default function LiveTranscriptPage() {
                         <span>LIVE</span>
                       </span>
                     )}
+                    {isTranscribing && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 animate-pulse flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                        <span>Transcribing...</span>
+                      </span>
+                    )}
                   </h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     {isRecording
-                      ? "Streaming spoken words live onto the screen..."
+                      ? "Listening to speech... Spoken words will appear live below"
                       : transcriptionResult
-                      ? `Duration: ${formatTimestamp(
+                        ? `Duration: ${formatTimestamp(
                           transcriptionResult.audio_duration_secs || 0
                         )} • Language: ${transcriptionResult.language_code || "eng"}`
-                      : turns.length > 0
-                      ? `${turns.length} dialogue turns captured`
-                      : "Spoken dialogue will be transcribed directly here"}
+                        : turns.length > 0
+                          ? `${turns.length} dialogue turns captured`
+                          : "Spoken dialogue will be transcribed directly here"}
                   </p>
                 </div>
 
@@ -943,22 +1163,20 @@ export default function LiveTranscriptPage() {
                     <button
                       type="button"
                       onClick={() => setViewTab("formatted")}
-                      className={`px-2.5 py-1 rounded-md transition-all ${
-                        viewTab === "formatted"
-                          ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 font-semibold shadow-xs"
-                          : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                      }`}
+                      className={`px-2.5 py-1 rounded-md transition-all ${viewTab === "formatted"
+                        ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 font-semibold shadow-xs"
+                        : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                        }`}
                     >
                       Formatted
                     </button>
                     <button
                       type="button"
                       onClick={() => setViewTab("plain")}
-                      className={`px-2.5 py-1 rounded-md transition-all ${
-                        viewTab === "plain"
-                          ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 font-semibold shadow-xs"
-                          : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                      }`}
+                      className={`px-2.5 py-1 rounded-md transition-all ${viewTab === "plain"
+                        ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 font-semibold shadow-xs"
+                        : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                        }`}
                     >
                       Plain Text
                     </button>
@@ -995,14 +1213,14 @@ export default function LiveTranscriptPage() {
                         No Transcription Yet
                       </h4>
                       <p className="text-xs text-gray-400 max-w-sm mt-1">
-                        Click &quot;Start Live Speaking&quot; on the left to begin real-time speech-to-text dictation. Words will appear immediately as you speak!
+                        Click &quot;Start Live Speaking&quot; on the left to begin. Your words will appear live on this screen as you speak!
                       </p>
                     </div>
                   </div>
                 )}
 
                 {/* Batch Transcribing Loading State */}
-                {isTranscribing && (
+                {isTranscribing && turns.length === 0 && (
                   <div className="h-full min-h-[350px] flex flex-col items-center justify-center text-center space-y-4">
                     <div className="w-12 h-12 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin" />
                     <div>
@@ -1010,7 +1228,7 @@ export default function LiveTranscriptPage() {
                         Processing Audio with ElevenLabs Scribe
                       </h4>
                       <p className="text-xs text-gray-400 max-w-sm mt-1">
-                        Performing speech-to-text recognition and detecting audio events...
+                        Transcribing speech to text...
                       </p>
                     </div>
                   </div>
@@ -1063,7 +1281,7 @@ export default function LiveTranscriptPage() {
                       );
                     })}
 
-                    {/* LIVE STREAMING TURN BUBBLE (Instant Word-by-Word on Screen) */}
+                    {/* LIVE STREAMING TURN BUBBLE (Words written live as speaker speaks) */}
                     {isRecording && (
                       <div className="p-4 rounded-xl border-2 border-indigo-500/50 bg-indigo-50/60 dark:bg-indigo-950/40 space-y-2 shadow-xs animate-in fade-in duration-100">
                         <div className="flex items-center justify-between gap-2">
@@ -1082,7 +1300,7 @@ export default function LiveTranscriptPage() {
                             <span>{liveInterimText}</span>
                           ) : (
                             <span className="text-gray-400 dark:text-gray-500 italic">
-                              Listening... Speak into microphone to see words live
+                              Listening... Speak into your microphone now to see words live
                             </span>
                           )}
                           <span className="inline-block w-1.5 h-4 ml-1 bg-indigo-600 dark:bg-indigo-400 animate-pulse align-middle" />

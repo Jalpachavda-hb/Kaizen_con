@@ -57,7 +57,7 @@ export default function SendToEmailPage() {
   const [pageSize, setPageSize] = useState<number>(10);
   const [totalCount, setTotalCount] = useState<number>(0);
 
-  // Fetch contacts from dynamic API passing page number into offset field
+  // Fetch contacts from dynamic API passing page number into pag_number field
   const fetchContacts = useCallback(async (page?: number, limit?: number) => {
     const targetPage = typeof page === "number" ? page : currentPage;
     const targetLimit = typeof limit === "number" ? limit : pageSize;
@@ -68,10 +68,12 @@ export default function SendToEmailPage() {
       if (Array.isArray(data)) {
         setContacts(data);
         const serverCount =
-          typeof (data as any).count === "number"
-            ? (data as any).count
+          typeof (data as any).total_email_count === "number"
+            ? (data as any).total_email_count
             : typeof (data as any).total === "number"
             ? (data as any).total
+            : typeof (data as any).count === "number"
+            ? (data as any).count
             : data.length;
         setTotalCount(serverCount);
       } else {
