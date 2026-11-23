@@ -177,7 +177,7 @@ export default function TermsPage() {
               <div className="kz-privacy-block-header">
                 <div className="kz-privacy-block-num">01</div>
                 <div>
-                  <h2 className="kz-privacy-block-title">1. Eligibility</h2>
+                  <h2 className="kz-privacy-block-title">Eligibility</h2>
                 </div>
               </div>
               <div className="kz-privacy-block-body">
@@ -192,7 +192,7 @@ export default function TermsPage() {
               <div className="kz-privacy-block-header">
                 <div className="kz-privacy-block-num">02</div>
                 <div>
-                  <h2 className="kz-privacy-block-title">2. License to Use the App</h2>
+                  <h2 className="kz-privacy-block-title">License to Use the App</h2>
                 </div>
               </div>
               <div className="kz-privacy-block-body">
@@ -206,7 +206,7 @@ export default function TermsPage() {
               <div className="kz-privacy-block-header">
                 <div className="kz-privacy-block-num">03</div>
                 <div>
-                  <h2 className="kz-privacy-block-title">3. User-Generated Content</h2>
+                  <h2 className="kz-privacy-block-title">User-Generated Content</h2>
                 </div>
               </div>
               <div className="kz-privacy-block-body">
@@ -220,7 +220,7 @@ export default function TermsPage() {
               <div className="kz-privacy-block-header">
                 <div className="kz-privacy-block-num">04</div>
                 <div>
-                  <h2 className="kz-privacy-block-title">4. Zero Tolerance Policy</h2>
+                  <h2 className="kz-privacy-block-title">Zero Tolerance Policy</h2>
                 </div>
               </div>
               <div className="kz-privacy-block-body">
@@ -249,7 +249,7 @@ export default function TermsPage() {
               <div className="kz-privacy-block-header">
                 <div className="kz-privacy-block-num">05</div>
                 <div>
-                  <h2 className="kz-privacy-block-title">5. Content Filtering</h2>
+                  <h2 className="kz-privacy-block-title">Content Filtering</h2>
                 </div>
               </div>
               <div className="kz-privacy-block-body">
@@ -263,7 +263,7 @@ export default function TermsPage() {
               <div className="kz-privacy-block-header">
                 <div className="kz-privacy-block-num">06</div>
                 <div>
-                  <h2 className="kz-privacy-block-title">6. Reporting Objectionable Content</h2>
+                  <h2 className="kz-privacy-block-title">Reporting Objectionable Content</h2>
                 </div>
               </div>
               <div className="kz-privacy-block-body">
@@ -282,7 +282,7 @@ export default function TermsPage() {
               <div className="kz-privacy-block-header">
                 <div className="kz-privacy-block-num">07</div>
                 <div>
-                  <h2 className="kz-privacy-block-title">7. Blocking Abusive Users</h2>
+                  <h2 className="kz-privacy-block-title">Blocking Abusive Users</h2>
                 </div>
               </div>
               <div className="kz-privacy-block-body">
@@ -298,7 +298,7 @@ export default function TermsPage() {
               <div className="kz-privacy-block-header">
                 <div className="kz-privacy-block-num">08</div>
                 <div>
-                  <h2 className="kz-privacy-block-title">8. Our Commitment: Action Within 24 Hours</h2>
+                  <h2 className="kz-privacy-block-title">Our Commitment: Action Within 24 Hours</h2>
                 </div>
               </div>
               <div className="kz-privacy-block-body">
@@ -316,7 +316,7 @@ export default function TermsPage() {
               <div className="kz-privacy-block-header">
                 <div className="kz-privacy-block-num">09</div>
                 <div>
-                  <h2 className="kz-privacy-block-title">9. Account Suspension and Termination</h2>
+                  <h2 className="kz-privacy-block-title">Account Suspension and Termination</h2>
                 </div>
               </div>
               <div className="kz-privacy-block-body">
@@ -331,7 +331,7 @@ export default function TermsPage() {
               <div className="kz-privacy-block-header">
                 <div className="kz-privacy-block-num">10</div>
                 <div>
-                  <h2 className="kz-privacy-block-title">10. Privacy</h2>
+                  <h2 className="kz-privacy-block-title">Privacy</h2>
                 </div>
               </div>
               <div className="kz-privacy-block-body">
@@ -346,7 +346,7 @@ export default function TermsPage() {
               <div className="kz-privacy-block-header">
                 <div className="kz-privacy-block-num">11</div>
                 <div>
-                  <h2 className="kz-privacy-block-title">11. Disclaimer</h2>
+                  <h2 className="kz-privacy-block-title">Disclaimer</h2>
                 </div>
               </div>
               <div className="kz-privacy-block-body">
@@ -360,7 +360,7 @@ export default function TermsPage() {
               <div className="kz-privacy-block-header">
                 <div className="kz-privacy-block-num">12</div>
                 <div>
-                  <h2 className="kz-privacy-block-title">12. Limitation of Liability</h2>
+                  <h2 className="kz-privacy-block-title">Limitation of Liability</h2>
                 </div>
               </div>
               <div className="kz-privacy-block-body">
@@ -374,7 +374,7 @@ export default function TermsPage() {
               <div className="kz-privacy-block-header">
                 <div className="kz-privacy-block-num">13</div>
                 <div>
-                  <h2 className="kz-privacy-block-title">13. Apple-Specific Terms</h2>
+                  <h2 className="kz-privacy-block-title">Apple-Specific Terms</h2>
                 </div>
               </div>
               <div className="kz-privacy-block-body">
@@ -392,7 +392,7 @@ export default function TermsPage() {
               <div className="kz-privacy-block-header">
                 <div className="kz-privacy-block-num">14</div>
                 <div>
-                  <h2 className="kz-privacy-block-title">14. Changes to These Terms</h2>
+                  <h2 className="kz-privacy-block-title">Changes to These Terms</h2>
                 </div>
               </div>
               <div className="kz-privacy-block-body">
@@ -406,7 +406,7 @@ export default function TermsPage() {
               <div className="kz-privacy-block-header">
                 <div className="kz-privacy-block-num">15</div>
                 <div>
-                  <h2 className="kz-privacy-block-title">15. Governing Law</h2>
+                  <h2 className="kz-privacy-block-title">Governing Law</h2>
                 </div>
               </div>
               <div className="kz-privacy-block-body">
@@ -420,7 +420,7 @@ export default function TermsPage() {
               <div className="kz-privacy-block-header">
                 <div className="kz-privacy-block-num">16</div>
                 <div>
-                  <h2 className="kz-privacy-block-title">16. Contact Us</h2>
+                  <h2 className="kz-privacy-block-title">Contact Us</h2>
                 </div>
               </div>
               <div className="kz-privacy-block-body">
