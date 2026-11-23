@@ -490,19 +490,22 @@ export const deleteSchedule = deleteSession;
  */
 /**
  * Get Email Agent Contacts API
- * Supports page-number based pagination via pag_number and limit.
+ * Supports page-number based pagination via pag_number. (No limit parameter sent)
  *
- * @param {number} [page=1] - Page number (minimum: 1)
- * @param {number} [limit=10] - Number of items per page (maximum: 500)
+ * @param {number|string} [page=1] - Page number (minimum: 1) or 'all' to fetch all contacts
+ * @param {boolean|any} [fetchAll=false] - Whether to fetch all pages
  * @returns {Promise<any[]>} Array of contacts (with attached .total, .count, and .total_email_count)
  */
-export const getEmailAgentContacts = async (page = 1, limit = 10) => {
+export const getEmailAgentContacts = async (page = 1, fetchAll = false) => {
+  if (fetchAll || page === 'all' || page === 0) {
+    return getAllEmailAgentContacts();
+  }
+
   try {
     const pageNum = Math.max(1, Number(page) || 1);
-    const limitNum = Math.max(1, Math.min(500, Number(limit) || 10));
 
-    // Send pag_number as primary, along with offset for compatibility
-    const url = `${API_ENDPOINTS.EMAIL_AGENT_CONTACTS}?pag_number=${encodeURIComponent(pageNum)}&limit=${encodeURIComponent(limitNum)}&offset=${encodeURIComponent(pageNum)}`;
+    // Send pag_number without limit parameter
+    const url = `${API_ENDPOINTS.EMAIL_AGENT_CONTACTS}?pag_number=${encodeURIComponent(pageNum)}`;
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -563,11 +566,133 @@ export const getEmailAgentContacts = async (page = 1, limit = 10) => {
     items.total = totalCount;
     items.total_email_count = totalCount;
     items.currentPage = pageNum;
-    items.pageSize = limitNum;
 
     return items;
   } catch (error) {
     console.error('Error in getEmailAgentContacts API:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get ALL Email Agent Contacts API
+ * Automatically fetches all pages without limit parameter until all contacts are loaded.
+ *
+ * @returns {Promise<any[]>} Complete array of all contacts
+ */
+export const getAllEmailAgentContacts = async () => {
+  try {
+    // Attempt 1: Fetch all contacts in a single API call via preview endpoint (allows limit up to 5000)
+    try {
+      const previewUrl = `${API_ENDPOINTS.EMAIL_AGENT_CONTACTS}/preview?limit=5000`;
+      const previewRes = await fetch(previewUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (previewRes.ok) {
+        const previewData = await previewRes.json().catch(() => null);
+        let items = [];
+        if (Array.isArray(previewData)) {
+          items = [...previewData];
+        } else if (previewData && Array.isArray(previewData.results)) {
+          items = [...previewData.results];
+        } else if (previewData && Array.isArray(previewData.data)) {
+          items = [...previewData.data];
+        }
+
+        if (items.length > 0) {
+          items.count = items.length;
+          items.total = items.length;
+          items.total_email_count = items.length;
+          return items;
+        }
+      }
+    } catch (previewErr) {
+      console.warn('Single-call preview failed, falling back to paginated fetch:', previewErr);
+    }
+
+    // Attempt 2: Fallback to paginated fetch without limit parameter
+    const firstUrl = `${API_ENDPOINTS.EMAIL_AGENT_CONTACTS}?pag_number=1`;
+    const response = await fetch(firstUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+
+    const firstData = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const errorMsg = firstData?.detail || firstData?.message || `Request failed with status ${response.status}`;
+      throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+    }
+
+    let allItems = [];
+    let totalCount = 0;
+
+    if (Array.isArray(firstData)) {
+      allItems = [...firstData];
+      totalCount = typeof firstData.total_email_count === 'number'
+        ? firstData.total_email_count
+        : firstData.length;
+    } else if (firstData && typeof firstData === 'object') {
+      allItems = Array.isArray(firstData.results)
+        ? [...firstData.results]
+        : Array.isArray(firstData.data)
+        ? [...firstData.data]
+        : [];
+
+      totalCount =
+        typeof firstData.total_email_count === 'number'
+          ? firstData.total_email_count
+          : typeof firstData.total_count === 'number'
+          ? firstData.total_count
+          : typeof firstData.total === 'number'
+          ? firstData.total
+          : typeof firstData.count === 'number'
+          ? firstData.count
+          : allItems.length;
+    }
+
+    // 2. If there are more pages, fetch the remaining pages in parallel
+    const pageSize = allItems.length > 0 ? allItems.length : 100;
+    if (totalCount > pageSize) {
+      const totalPages = Math.ceil(totalCount / pageSize);
+      const pagePromises = [];
+
+      for (let p = 2; p <= totalPages; p++) {
+        pagePromises.push(
+          fetch(`${API_ENDPOINTS.EMAIL_AGENT_CONTACTS}?pag_number=${p}`, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+          })
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data) => {
+              if (Array.isArray(data)) return data;
+              if (data && Array.isArray(data.results)) return data.results;
+              if (data && Array.isArray(data.data)) return data.data;
+              return [];
+            })
+            .catch(() => [])
+        );
+      }
+
+      const otherPages = await Promise.all(pagePromises);
+      otherPages.forEach((pageItems) => {
+        allItems.push(...pageItems);
+      });
+    }
+
+    allItems.count = allItems.length;
+    allItems.total = totalCount || allItems.length;
+    allItems.total_email_count = totalCount || allItems.length;
+
+    return allItems;
+  } catch (error) {
+    console.error('Error in getAllEmailAgentContacts API:', error);
     throw error;
   }
 };
@@ -2533,6 +2658,7 @@ export default {
   saveSchedule,
   deleteSchedule,
   getEmailAgentContacts,
+  getAllEmailAgentContacts,
   stopContact,
   importExcelContacts,
   getCampaigns,

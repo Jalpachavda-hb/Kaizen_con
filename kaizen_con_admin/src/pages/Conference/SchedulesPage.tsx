@@ -694,11 +694,11 @@ export default function SchedulesPage() {
         {/* Stats Row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
           <div className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700/60 shadow-2xs">
-            <div className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Total Sessions</div>
+            <div className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Total Schedule </div>
             <div className="text-xl font-black text-gray-900 dark:text-white mt-1">{stats.total}</div>
           </div>
           <div className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700/60 shadow-2xs">
-            <div className="text-[11px] font-medium text-[#AA2D7B] uppercase tracking-wider">Speaker Sessions</div>
+            <div className="text-[11px] font-medium text-[#AA2D7B] uppercase tracking-wider">Speaker Schedule </div>
             <div className="text-xl font-black text-[#AA2D7B] mt-1">{stats.keynotes}</div>
           </div>
           <div className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700/60 shadow-2xs">
@@ -868,15 +868,19 @@ export default function SchedulesPage() {
 
                       {/* Category */}
                       <td className="py-3.5 px-4 w-36 min-w-[120px] whitespace-nowrap align-top">
-                        <span
-                          className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                            isBreak
-                              ? "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-300"
-                              : "bg-[#faedf5] text-[#55355E] dark:bg-[#55355E]/40 dark:text-[#f5d8e9] border border-[#AA2D7B]/20"
-                          }`}
-                        >
-                          {session.category}
-                        </span>
+                        {session.category && session.category.trim() ? (
+                          <span
+                            className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                              isBreak
+                                ? "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-300"
+                                : "bg-[#faedf5] text-[#55355E] dark:bg-[#55355E]/40 dark:text-[#f5d8e9] border border-[#AA2D7B]/20"
+                            }`}
+                          >
+                            {session.category}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 dark:text-gray-500 font-semibold text-xs">—</span>
+                        )}
                       </td>
 
                       {/* Actions */}
@@ -939,7 +943,7 @@ export default function SchedulesPage() {
         )}
       </AdminPageContainer>
 
-      {/* CREATE / EDIT SESSION SCHEDULE MODAL (POST /api/schedules) */}
+    
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 md:p-8 bg-black/60 backdrop-blur-xs animate-fadeIn overflow-y-auto">
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl w-full sm:max-w-xl md:max-w-3xl lg:max-w-5xl xl:max-w-6xl h-[92vh] sm:h-[88vh] md:h-[86vh] max-h-[920px] min-h-[580px] flex flex-col overflow-hidden animate-scaleIn my-auto transition-all">
@@ -953,9 +957,7 @@ export default function SchedulesPage() {
                 <div>
                   <h3 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     <span>{editingSession ? "Edit Session Schedule" : "Schedule New Session"}</span>
-                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#AA2D7B]/10 text-[#AA2D7B]">
-                      POST /api/schedules
-                    </span>
+                
                   </h3>
                   <p className="text-xs text-gray-500 mt-0.5">
                     Configure session timings, hall assignment, and single or multiple presenters
@@ -1101,8 +1103,8 @@ export default function SchedulesPage() {
               {/* Actions Footer */}
               <div className="flex flex-wrap items-center justify-between gap-3 px-6 sm:px-8 py-4 border-t border-gray-200 dark:border-gray-800 shrink-0 bg-gray-50/90 dark:bg-gray-900/90">
                 <div className="text-xs text-gray-500 hidden sm:flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <span>Payload passes only <code className="px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-800 font-mono text-[11px] text-[#AA2D7B]">speaker_ids: [...]</code></span>
+                
+                
                 </div>
                 <div className="flex items-center gap-3 ml-auto">
                   <button
@@ -1133,9 +1135,7 @@ export default function SchedulesPage() {
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl w-full max-w-xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl h-auto min-h-[460px] md:min-h-[520px] max-h-[92vh] lg:max-h-[88vh] flex flex-col overflow-hidden animate-scaleIn my-auto transition-all">
             <div className="flex items-center justify-between px-6 sm:px-8 py-4 sm:py-5 border-b border-gray-200 dark:border-gray-800 bg-[#55355E] text-white shrink-0">
               <div>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-pink-200">
-                  Session #{selectedSession.id} Details (GET /api/schedules?id={selectedSession.id})
-                </span>
+              
                 <h3 className="text-base sm:text-lg font-bold text-white mt-0.5 line-clamp-1">
                   {selectedSession.title}
                 </h3>
@@ -1183,7 +1183,7 @@ export default function SchedulesPage() {
                 <div className="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700">
                   <span className="text-[10px] text-gray-400 uppercase font-semibold">Category / Specialty</span>
                   <div className="font-bold text-[#AA2D7B] text-sm mt-0.5">
-                    {selectedSession.category}
+                    {selectedSession.category && selectedSession.category.trim() ? selectedSession.category : "—"}
                   </div>
                 </div>
 

@@ -206,17 +206,11 @@ export default function PrivacyPolicyPage() {
             <div className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/40">
               <span className="font-bold text-gray-900 dark:text-white block mb-0.5">Data Protection Officer (DPO)</span>
               <span className="text-gray-500 dark:text-gray-400 block mb-1">Kaizen Con 2027 Secretariat</span>
-              <a href="mailto:privacy@kaizencon.demo" className="text-[#AA2D7B] dark:text-[#f5d8e9] font-medium hover:underline">
-                privacy@kaizencon.demo
+              <a href="mailto:kaizencon2027@gmail.com" className="text-[#AA2D7B] dark:text-[#f5d8e9] font-medium hover:underline">
+                kaizencon2027@gmail.com
               </a>
             </div>
-            <div className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/40">
-              <span className="font-bold text-gray-900 dark:text-white block mb-0.5">Systems &amp; Security Desk</span>
-              <span className="text-gray-500 dark:text-gray-400 block mb-1">Technical Infrastructure Team</span>
-              <a href="mailto:admin-support@kaizencon.demo" className="text-[#AA2D7B] dark:text-[#f5d8e9] font-medium hover:underline">
-                admin-support@kaizencon.demo
-              </a>
-            </div>
+
           </div>
         </div>
       ),
@@ -234,7 +228,7 @@ export default function PrivacyPolicyPage() {
     return matchesTab && matchesSearch;
   });
 
-  return (
+  return  (
     <>
       <PageMeta
         title="Admin Privacy & Compliance Policy | Kaizen Con 2027"
@@ -265,9 +259,9 @@ export default function PrivacyPolicyPage() {
               <span>•</span>
               <span className="text-emerald-300 font-medium">DPDP 2023 &amp; GDPR Compliant</span>
             </div>
-          </div>         
+          </div>
 
-          
+
           <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
           <div className="absolute top-0 right-1/4 w-32 h-32 bg-[#D85A9A]/20 rounded-full blur-xl pointer-events-none" />
         </div>
@@ -281,11 +275,10 @@ export default function PrivacyPolicyPage() {
                 key={cat}
                 type="button"
                 onClick={() => setActiveTab(cat)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                  activeTab === cat
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${activeTab === cat
                     ? "bg-[#55355E] text-white shadow-xs"
                     : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                }`}
+                  }`}
               >
                 {cat === "all" ? "All Sections" : cat}
               </button>

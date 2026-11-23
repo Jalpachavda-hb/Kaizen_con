@@ -42,7 +42,7 @@ export interface Delegate {
 export default function DelegatesPage() {
   const [delegates, setDelegates] = useState<Delegate[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);
   const [_isLiveApi, setIsLiveApi] = useState<boolean>(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -271,68 +271,7 @@ export default function DelegatesPage() {
     );
   };
 
-  const exportToCSV = () => {
-    const headers = [
-      "ID",
-      "Registration ID",
-      "Salutation",
-      "First Name",
-      "Last Name",
-      "Full Name",
-      "Email",
-      "Phone",
-      "City",
-      "State",
-      "Country",
-      "Category",
-      "Total Amount (INR)",
-      "Payment Mode",
-      "Transaction ID",
-      "MCI No",
-      "Registration Date",
-      "Payment Date",
-      "Remarks",
-      "QR Code URL",
-    ];
 
-    const rows = filteredDelegates.map((d) => [
-      d.id,
-      `"${d.registration_id || ""}"`,
-      `"${d.salutation || ""}"`,
-      `"${d.first_name || ""}"`,
-      `"${d.last_name || ""}"`,
-      `"${(d.salutation ? d.salutation + " " : "") + (d.first_name || "") + " " + (d.last_name || "")}".trim()`,
-      `"${d.email || ""}"`,
-      `"${d.phone || ""}"`,
-      `"${d.city || ""}"`,
-      `"${d.state || ""}"`,
-      `"${d.country || ""}"`,
-      `"${d.reg_category || ""}"`,
-      d.total_amount ?? "",
-      `"${d.payment_mode || ""}"`,
-      `"${d.transaction_id || ""}"`,
-      `"${d.mci_no || ""}"`,
-      `"${d.registration_date || ""}"`,
-      `"${d.payment_date || ""}"`,
-      `"${d.remarks || ""}"`,
-      `"${d.qr_code_url ? `${BASE_URL}${d.qr_code_url}` : ""}"`,
-    ]);
-
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute(
-      "download",
-      `kaizencon_delegates_${new Date().toISOString().slice(0, 10)}.csv`
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   return (
     <>
@@ -364,27 +303,7 @@ export default function DelegatesPage() {
               <option value="Uncategorized">Unassigned</option>
             </select>
           
-        
-            <button
-              onClick={exportToCSV}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg shadow-2xs transition-colors cursor-pointer"
-              title="Export delegates data to CSV"
-            >
-              <svg
-                className="w-3.5 h-3.5 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                />
-              </svg>
-              Export CSV
-            </button>
+    
            
             <button
               onClick={fetchDelegatesData}
@@ -405,28 +324,13 @@ export default function DelegatesPage() {
                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                 />
               </svg>
-              {loading ? "Fetching..." : "Refresh API"}
+              {loading ? "Fetching..." : "Refresh "}
             </button>
           </div>
         }
       >
-        {/* API Status Banner */}
-        <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-3.5 py-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-200/80 dark:border-gray-700/80 text-xs">
-          <div className="flex items-center gap-2">
-            
-           
-            {error && (
-              <span className="text-amber-600 dark:text-amber-400 text-[11px] truncate max-w-xs">
-                ({error})
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-3 text-gray-500 dark:text-gray-400 text-[11px]">
-            <span>
-              Displaying <b>{filteredDelegates.length}</b> of <b>{delegates.length}</b> total delegates
-            </span>
-          </div>
-        </div>
+ 
+       
 
         {/* Top Metric Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">

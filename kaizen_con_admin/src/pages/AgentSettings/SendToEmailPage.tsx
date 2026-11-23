@@ -4,7 +4,7 @@ import { AdminPageContainer } from "../../components/common/AdminPageContainer";
 import { TablePagination } from "../../components/common/TablePagination";
 import { useToast } from "../../context/ToastContext";
 import {
-  getEmailAgentContacts,
+  getAllEmailAgentContacts,
   importExcelContacts,
   stopContact,
   deleteContact,
@@ -52,29 +52,27 @@ export default function SendToEmailPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
-  // Contacts Pagination State (Page-wise pagination)
+  // Contacts Pagination State
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [totalCount, setTotalCount] = useState<number>(0);
 
-  // Fetch contacts from dynamic API passing page number into pag_number field
-  const fetchContacts = useCallback(async (page?: number, limit?: number) => {
-    const targetPage = typeof page === "number" ? page : currentPage;
-    const targetLimit = typeof limit === "number" ? limit : pageSize;
+  // Fetch all contacts from dynamic API (1 call) so search and filters work across the entire database
+  const fetchContacts = useCallback(async () => {
     setLoading(true);
     setFetchError(null);
     try {
-      const data = await getEmailAgentContacts(targetPage, targetLimit);
+      const data = await getAllEmailAgentContacts();
       if (Array.isArray(data)) {
         setContacts(data);
         const serverCount =
           typeof (data as any).total_email_count === "number"
             ? (data as any).total_email_count
             : typeof (data as any).total === "number"
-            ? (data as any).total
-            : typeof (data as any).count === "number"
-            ? (data as any).count
-            : data.length;
+              ? (data as any).total
+              : typeof (data as any).count === "number"
+                ? (data as any).count
+                : data.length;
         setTotalCount(serverCount);
       } else {
         setContacts([]);
@@ -86,11 +84,11 @@ export default function SendToEmailPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, pageSize]);
+  }, []);
 
   useEffect(() => {
-    fetchContacts(currentPage, pageSize);
-  }, [currentPage, pageSize]);
+    fetchContacts();
+  }, [fetchContacts]);
 
   // Dynamically extract unique contact types
   const availableTypes = useMemo(() => {
@@ -103,47 +101,51 @@ export default function SendToEmailPage() {
     return Array.from(typesSet).sort();
   }, [contacts]);
 
-  // Filtered contacts based on search, status, and type
-  const filteredContacts = contacts.filter((c) => {
-    const q = search.toLowerCase();
-    const matchesSearch =
-      (c.name && c.name.toLowerCase().includes(q)) ||
-      (c.email && c.email.toLowerCase().includes(q)) ||
-      (c.type && c.type.toLowerCase().includes(q)) ||
-      (c.status && c.status.toLowerCase().includes(q));
+  // Filtered contacts based on search, status, and type (across ALL contacts)
+  const filteredContacts = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return contacts.filter((c) => {
+      const matchesSearch =
+        !q ||
+        (c.name && c.name.toLowerCase().includes(q)) ||
+        (c.email && c.email.toLowerCase().includes(q)) ||
+        (c.type && c.type.toLowerCase().includes(q)) ||
+        (c.status && c.status.toLowerCase().includes(q));
 
-    if (!matchesSearch) return false;
+      if (!matchesSearch) return false;
 
-    // Status filter
-    if (statusFilter === "Eligible") {
-      if (c.status !== "eligible" || c.unsubscribed) return false;
-    } else if (statusFilter === "Unsubscribed") {
-      if (!c.unsubscribed && c.status === "eligible") return false;
-    }
+      // Status filter
+      if (statusFilter === "Eligible") {
+        if (c.status !== "eligible" || c.unsubscribed) return false;
+      } else if (statusFilter === "Unsubscribed") {
+        if (!c.unsubscribed && c.status === "eligible") return false;
+      }
 
-    // Type filter
-    if (typeFilter !== "All") {
-      if (typeFilter === "Unspecified") {
-        if (c.type && c.type.trim()) return false;
-      } else {
-        if (!c.type || c.type.trim().toLowerCase() !== typeFilter.toLowerCase()) {
-          return false;
+      // Type filter
+      if (typeFilter !== "All") {
+        if (typeFilter === "Unspecified") {
+          if (c.type && c.type.trim()) return false;
+        } else {
+          if (!c.type || c.type.trim().toLowerCase() !== typeFilter.toLowerCase()) {
+            return false;
+          }
         }
       }
-    }
 
-    return true;
-  });
+      return true;
+    });
+  }, [contacts, search, statusFilter, typeFilter]);
 
   // Reset page to 1 on search or filter change
   useEffect(() => {
     setCurrentPage(1);
   }, [search, statusFilter, typeFilter]);
 
-  // Data is fetched page-wise from the server
+  // Paginated contacts sliced from the filtered results of whole dataset
   const paginatedContacts = useMemo(() => {
-    return filteredContacts;
-  }, [filteredContacts]);
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredContacts.slice(startIndex, startIndex + pageSize);
+  }, [filteredContacts, currentPage, pageSize]);
 
   // Bulk selection handlers
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -220,11 +222,11 @@ export default function SendToEmailPage() {
         prev.map((c) =>
           c.id === contact.id
             ? {
-                ...c,
-                unsubscribed: true,
-                status: res?.status || "stopped",
-                ...(res?.updated_at ? { updated_at: res.updated_at } : {}),
-              }
+              ...c,
+              unsubscribed: true,
+              status: res?.status || "stopped",
+              ...(res?.updated_at ? { updated_at: res.updated_at } : {}),
+            }
             : c
         )
       );
@@ -550,16 +552,14 @@ export default function SendToEmailPage() {
             <p style="color: #10b981; font-weight: 600; margin-bottom: 6px;">
               ✓ <b>${importedCount}</b> new contacts successfully imported.
             </p>
-            ${
-              duplicateCount > 0
-                ? `<p style="color: #f59e0b; margin-bottom: 4px;">⚠ <b>${duplicateCount}</b> duplicate contact(s) already existed and were skipped.</p>`
-                : ""
-            }
-            ${
-              invalidCount > 0
-                ? `<p style="color: #ef4444; margin-bottom: 4px;">✕ <b>${invalidCount}</b> empty/invalid row(s) skipped.</p>`
-                : ""
-            }
+            ${duplicateCount > 0
+            ? `<p style="color: #f59e0b; margin-bottom: 4px;">⚠ <b>${duplicateCount}</b> duplicate contact(s) already existed and were skipped.</p>`
+            : ""
+          }
+            ${invalidCount > 0
+            ? `<p style="color: #ef4444; margin-bottom: 4px;">✕ <b>${invalidCount}</b> empty/invalid row(s) skipped.</p>`
+            : ""
+          }
           </div>
         `,
         icon: importedCount > 0 ? "success" : "info",
@@ -656,9 +656,8 @@ export default function SendToEmailPage() {
               title="Refresh contacts from API"
             >
               <svg
-                className={`w-3.5 h-3.5 text-gray-500 dark:text-gray-400 ${
-                  loading ? "animate-spin" : ""
-                }`}
+                className={`w-3.5 h-3.5 text-gray-500 dark:text-gray-400 ${loading ? "animate-spin" : ""
+                  }`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -782,18 +781,17 @@ export default function SendToEmailPage() {
                   key={s}
                   type="button"
                   onClick={() => setStatusFilter(s)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${
-                    statusFilter === s
-                      ? "bg-white dark:bg-gray-900 text-[#AA2D7B] dark:text-[#D85A9A] shadow-xs font-semibold"
-                      : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                  }`}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${statusFilter === s
+                    ? "bg-white dark:bg-gray-900 text-[#AA2D7B] dark:text-[#D85A9A] shadow-xs font-semibold"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    }`}
                 >
                   {s}{" "}
                   {s === "All"
                     ? `(${contacts.length})`
                     : s === "Eligible"
-                    ? `(${eligibleCount})`
-                    : `(${unsubscribedCount})`}
+                      ? `(${eligibleCount})`
+                      : `(${unsubscribedCount})`}
                 </button>
               ))}
             </div>
@@ -807,11 +805,10 @@ export default function SendToEmailPage() {
                 <button
                   type="button"
                   onClick={() => setTypeFilter("All")}
-                  className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors cursor-pointer border ${
-                    typeFilter === "All"
-                      ? "bg-[#AA2D7B] text-white border-[#AA2D7B] shadow-2xs"
-                      : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  }`}
+                  className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors cursor-pointer border ${typeFilter === "All"
+                    ? "bg-[#AA2D7B] text-white border-[#AA2D7B] shadow-2xs"
+                    : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    }`}
                 >
                   All ({contacts.length})
                 </button>
@@ -930,9 +927,8 @@ export default function SendToEmailPage() {
                   return (
                     <tr
                       key={contact.id}
-                      className={`hover:bg-gray-50/70 dark:hover:bg-gray-800/40 transition-colors ${
-                        isSelected ? "bg-[#AA2D7B]/5 dark:bg-[#AA2D7B]/10" : ""
-                      }`}
+                      className={`hover:bg-gray-50/70 dark:hover:bg-gray-800/40 transition-colors ${isSelected ? "bg-[#AA2D7B]/5 dark:bg-[#AA2D7B]/10" : ""
+                        }`}
                     >
                       <td className="px-4 py-4 text-center">
                         <input
@@ -979,13 +975,12 @@ export default function SendToEmailPage() {
                       <td className="px-5 py-4 text-center">
                         {contact.type ? (
                           <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${
-                              contact.type.toLowerCase().includes("doctor")
-                                ? "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
-                                : contact.type.toLowerCase().includes("sponser") || contact.type.toLowerCase().includes("sponsor")
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${contact.type.toLowerCase().includes("doctor")
+                              ? "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
+                              : contact.type.toLowerCase().includes("sponser") || contact.type.toLowerCase().includes("sponsor")
                                 ? "bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800"
                                 : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
-                            }`}
+                              }`}
                           >
                             {contact.type}
                           </span>
@@ -996,16 +991,14 @@ export default function SendToEmailPage() {
 
                       <td className="px-5 py-4 text-center">
                         <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${
-                            isEligible
-                              ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
-                              : "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
-                          }`}
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${isEligible
+                            ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                            : "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+                            }`}
                         >
                           <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              isEligible ? "bg-emerald-500" : "bg-amber-500"
-                            }`}
+                            className={`w-1.5 h-1.5 rounded-full ${isEligible ? "bg-emerald-500" : "bg-amber-500"
+                              }`}
                           />
                           {contact.status}
                         </span>
@@ -1093,7 +1086,7 @@ export default function SendToEmailPage() {
           {/* Pagination Controls Bar */}
           <TablePagination
             currentPage={currentPage}
-            totalItems={search.trim() || statusFilter !== "All" || typeFilter !== "All" ? filteredContacts.length : (totalCount || contacts.length)}
+            totalItems={filteredContacts.length}
             pageSize={pageSize}
             onPageChange={(newPage) => {
               setCurrentPage(newPage);
@@ -1173,13 +1166,12 @@ export default function SendToEmailPage() {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
-                  dragActive
-                    ? "border-[#AA2D7B] bg-[#AA2D7B]/5 dark:bg-[#AA2D7B]/10 scale-[1.01]"
-                    : selectedFile
+                className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${dragActive
+                  ? "border-[#AA2D7B] bg-[#AA2D7B]/5 dark:bg-[#AA2D7B]/10 scale-[1.01]"
+                  : selectedFile
                     ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20"
                     : "border-gray-300 dark:border-gray-700 hover:border-[#AA2D7B] dark:hover:border-[#AA2D7B] bg-white dark:bg-gray-800/40"
-                }`}
+                  }`}
               >
                 <input
                   ref={fileInputRef}

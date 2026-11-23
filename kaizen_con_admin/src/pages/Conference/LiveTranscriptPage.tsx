@@ -26,6 +26,14 @@ import {
 
 type InputTab = "record" | "upload" | "url";
 type ViewTab = "formatted" | "plain";
+type LiveTurn = DiarizedTurn & { pending?: boolean };
+
+// Live slicing tuning (audio is cut at natural pauses for ElevenLabs Scribe)
+const SPEECH_RMS_THRESHOLD = 0.012; // RMS above this counts as voice
+const SILENCE_CUT_SECONDS = 0.7; // pause length that ends a phrase
+const MIN_SLICE_SECONDS = 1.2; // don't send tiny fragments
+const MAX_SLICE_SECONDS = 12; // force a cut during long continuous speech
+const PRE_ROLL_SECONDS = 0.3; // audio kept before speech starts
 
 /**
  * Encode raw single-channel 32-bit Float PCM samples into a valid 16-bit PCM WAV Blob
@@ -89,9 +97,11 @@ export default function LiveTranscriptPage() {
   const [recordingSeconds, setRecordingSeconds] = useState<number>(0);
   const [audioLevel, setAudioLevel] = useState<number>(0);
   const [liveInterimText, setLiveInterimText] = useState<string>("");
+  const [liveDraftText, setLiveDraftText] = useState<string>("");
+  const transcriptBodyRef = useRef<HTMLDivElement | null>(null);
 
   // Transcript Turns (Single Speaker)
-  const [turns, setTurns] = useState<DiarizedTurn[]>([]);
+  const [turns, setTurns] = useState<LiveTurn[]>([]);
 
   // ElevenLabs STT State (for File Upload / Audio URL)
   const [isTranscribing, setIsTranscribing] = useState<boolean>(false);
@@ -117,28 +127,38 @@ export default function LiveTranscriptPage() {
   // Audio & Speech Recognition Refs
   const recognitionRef = useRef<any>(null);
   const isRecordingRef = useRef<boolean>(false);
-  const recordingTimerRef = useRef<any>(null);
-  const liveChunkTimerRef = useRef<any>(null);
+  const recordingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
-  const recordingSecondsRef = useRef<number>(0);
-  const lastTurnEndRef = useRef<number>(0);
-  const hasReceivedSpeechResultsRef = useRef<boolean>(false);
+  const sampleRateRef = useRef<number>(44100);
 
-  // PCM Buffers for ElevenLabs Real-Time WAV Streaming
-  const pcmBufferRef = useRef<Float32Array[]>([]);
-  const totalPcmSamplesRef = useRef<number>(0);
+  // Current audio slice (cut at natural pauses, sent to ElevenLabs Scribe)
+  const sliceChunksRef = useRef<Float32Array[]>([]);
+  const sliceSamplesRef = useRef<number>(0);
+  const sliceStartSampleRef = useRef<number>(0);
+  const sliceHasSpeechRef = useRef<boolean>(false);
+  const silenceSamplesRef = useRef<number>(0);
+  const sessionSamplesRef = useRef<number>(0);
   const allSessionSamplesRef = useRef<Float32Array[]>([]);
+
+  // Browser (Web Speech) instant text not yet attached to a Scribe slice
+  const draftFinalRef = useRef<string>("");
+  const interimRef = useRef<string>("");
+  const consumedInterimRef = useRef<string>("");
+  const lastBrowserTurnEndRef = useRef<number>(0);
+  const webSpeechDisabledRef = useRef<boolean>(false);
+  const webSpeechFailuresRef = useRef<number>(0);
+
+  // ElevenLabs Scribe live state
+  const scribeEnabledRef = useRef<boolean>(false);
+  const scribeKeyRef = useRef<string>("");
+  const scribeFailuresRef = useRef<number>(0);
 
   // Keep refs synchronized
   useEffect(() => {
     isRecordingRef.current = isRecording;
   }, [isRecording]);
-
-  useEffect(() => {
-    recordingSecondsRef.current = recordingSeconds;
-  }, [recordingSeconds]);
 
   // Sync API Key from environment on mount
   useEffect(() => {
@@ -148,54 +168,177 @@ export default function LiveTranscriptPage() {
     }
   }, []);
 
-  // Commit a completed phrase/turn into the turns list
-  const commitTurn = useCallback((text: string) => {
+  // Auto-scroll the transcript to the newest words while recording
+  useEffect(() => {
+    const el = transcriptBodyRef.current;
+    if (el && isRecordingRef.current) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, [turns, liveDraftText, liveInterimText]);
+
+  const makeTurnId = () =>
+    `turn_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+  // Commit browser-only text as a final turn (used when Scribe is unavailable)
+  const commitBrowserTurn = useCallback((text: string) => {
     const cleanText = text.trim();
     if (!cleanText) return;
-
-    const currentSecs = recordingSecondsRef.current;
-    const startTime = lastTurnEndRef.current;
-    const endTime = Math.max(startTime + 1, currentSecs);
-    lastTurnEndRef.current = endTime;
-
-    setTurns((prev) => {
-      // Avoid duplicate consecutive turns
-      if (prev.length > 0 && prev[prev.length - 1].text === cleanText) {
-        return prev;
-      }
-      return [
-        ...prev,
-        {
-          id: `turn_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-          speakerId: "speaker_0",
-          speakerName: "Speaker",
-          startTime,
-          endTime,
-          text: cleanText,
-          words: [],
-          audioEvents: [],
-        },
-      ];
-    });
+    const nowSecs = sessionSamplesRef.current / sampleRateRef.current;
+    const startTime = lastBrowserTurnEndRef.current;
+    const endTime = Math.max(startTime + 1, nowSecs);
+    lastBrowserTurnEndRef.current = endTime;
+    setTurns((prev) => [
+      ...prev,
+      {
+        id: makeTurnId(),
+        speakerId: "speaker_0",
+        speakerName: "Speaker",
+        startTime,
+        endTime,
+        text: cleanText,
+        words: [],
+        audioEvents: [],
+      },
+    ]);
   }, []);
+
+  /**
+   * Cut the current audio slice and send it to ElevenLabs Scribe.
+   * The browser's instant text for this slice is shown immediately and then
+   * replaced in place by the more accurate Scribe text (no duplicates).
+   */
+  const flushSlice = useCallback(() => {
+    const chunks = sliceChunksRef.current;
+    const total = sliceSamplesRef.current;
+    const hadSpeech = sliceHasSpeechRef.current;
+    const sr = sampleRateRef.current;
+    const startTime = sliceStartSampleRef.current / sr;
+    const endTime = startTime + total / sr;
+
+    sliceChunksRef.current = [];
+    sliceSamplesRef.current = 0;
+    sliceHasSpeechRef.current = false;
+    silenceSamplesRef.current = 0;
+    sliceStartSampleRef.current = sessionSamplesRef.current;
+
+    // Instant browser text that belongs to this slice (used as a fallback)
+    let fallback = draftFinalRef.current.trim();
+    if (interimRef.current.trim()) {
+      fallback = `${fallback} ${interimRef.current.trim()}`.trim();
+      consumedInterimRef.current = interimRef.current.trim();
+      interimRef.current = "";
+      setLiveInterimText("");
+    }
+    draftFinalRef.current = "";
+    setLiveDraftText("");
+
+    const sendToScribe = scribeEnabledRef.current && hadSpeech && total >= sr * 0.4;
+    if (!sendToScribe && !fallback) return;
+
+    const turnId = makeTurnId();
+    setTurns((prev) => [
+      ...prev,
+      {
+        id: turnId,
+        speakerId: "speaker_0",
+        speakerName: "Speaker",
+        startTime,
+        endTime,
+        text: fallback,
+        words: [],
+        audioEvents: [],
+        pending: sendToScribe,
+      },
+    ]);
+    if (!sendToScribe) return;
+
+    const merged = new Float32Array(total);
+    let offset = 0;
+    for (const chunk of chunks) {
+      merged.set(chunk, offset);
+      offset += chunk.length;
+    }
+
+    const finalize = (scribeText: string) => {
+      setTurns((prev) =>
+        prev.flatMap((t) => {
+          if (t.id !== turnId) return [t];
+          const text = scribeText || t.text;
+          return text ? [{ ...t, text, pending: false }] : [];
+        })
+      );
+    };
+
+    transcribeAudio(encodeWAV(merged, sr), {
+      apiKey: scribeKeyRef.current,
+      modelId: "scribe_v1",
+      diarize: false,
+      tagAudioEvents: false,
+      languageCode: "eng",
+    })
+      .then((res) => {
+        scribeFailuresRef.current = 0;
+        const cleanText = (res.text || "")
+          .replace(/\[.*?\]|\(.*?\)/g, "")
+          .replace(/\s+/g, " ")
+          .trim();
+        finalize(cleanText.length > 1 ? cleanText : "");
+      })
+      .catch((err: any) => {
+        console.warn("ElevenLabs Scribe slice failed:", err);
+        finalize("");
+        scribeFailuresRef.current += 1;
+        if (scribeFailuresRef.current === 1) {
+          toastError(`ElevenLabs Scribe: ${err?.message || "transcription failed"}`);
+        }
+        if (scribeFailuresRef.current >= 3 && scribeEnabledRef.current) {
+          // Stop calling a failing API; keep browser live text instead
+          scribeEnabledRef.current = false;
+          info("ElevenLabs Scribe unavailable — continuing with browser live transcription.");
+        }
+      });
+  }, [info, toastError]);
+
+  // Remove words already attached to a previous slice from new browser text
+  const stripConsumed = (text: string, consumed: string): string => {
+    if (!consumed) return text;
+    const norm = (w: string) => w.toLowerCase().replace(/[^\p{L}\p{N}']/gu, "");
+    const words = text.trim().split(/\s+/);
+    const used = consumed.trim().split(/\s+/);
+    let i = 0;
+    while (i < used.length && i < words.length && norm(words[i]) === norm(used[i])) i++;
+    return i === used.length ? words.slice(i).join(" ") : text.trim();
+  };
+
+  // Handle a finalized phrase from the browser speech engine
+  const addBrowserFinal = useCallback(
+    (text: string) => {
+      const clean = stripConsumed(text, consumedInterimRef.current).trim();
+      consumedInterimRef.current = "";
+      if (!clean) return;
+      if (scribeEnabledRef.current) {
+        draftFinalRef.current = `${draftFinalRef.current} ${clean}`.trim();
+        setLiveDraftText(draftFinalRef.current);
+      } else {
+        commitBrowserTurn(clean);
+      }
+    },
+    [commitBrowserTurn]
+  );
 
   // Clean up AudioContext & Speech Recognition on unmount
   useEffect(() => {
     return () => {
       isRecordingRef.current = false;
       if (recognitionRef.current) {
+        recognitionRef.current.onend = null;
         try {
           recognitionRef.current.abort();
         } catch {
           // ignore
         }
       }
-      if (recordingTimerRef.current) {
-        clearInterval(recordingTimerRef.current);
-      }
-      if (liveChunkTimerRef.current) {
-        clearInterval(liveChunkTimerRef.current);
-      }
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
       if (scriptProcessorRef.current) {
         try {
           scriptProcessorRef.current.disconnect();
@@ -203,82 +346,83 @@ export default function LiveTranscriptPage() {
           // ignore
         }
       }
-      if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach((t) => t.stop());
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close().catch(() => { });
-      }
+      mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
+      audioContextRef.current?.close().catch(() => { });
     };
   }, []);
 
   /**
-   * Helper to start/restart Web Speech API recognition safely
+   * Start/restart Web Speech API recognition (instant on-screen words)
    */
   const startWebSpeech = useCallback(() => {
-    if (!isRecordingRef.current) return;
+    if (!isRecordingRef.current || webSpeechDisabledRef.current) return;
     const SpeechRecognitionAPI =
       (window as any).SpeechRecognition ||
       (window as any).webkitSpeechRecognition;
-
     if (!SpeechRecognitionAPI) return;
 
-    try {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.abort();
-        } catch {
-          // ignore
-        }
+    // Detach and stop any previous instance so it can't trigger a restart loop
+    const old = recognitionRef.current;
+    if (old) {
+      old.onend = null;
+      old.onresult = null;
+      old.onerror = null;
+      try {
+        old.abort();
+      } catch {
+        // ignore
       }
+    }
 
+    try {
       const recognition = new SpeechRecognitionAPI();
       recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = navigator.language || "en-US";
+      const navLang = navigator.language || "en-US";
+      recognition.lang = navLang.toLowerCase().startsWith("en") ? navLang : "en-US";
       recognitionRef.current = recognition;
 
       recognition.onresult = (event: any) => {
-        hasReceivedSpeechResultsRef.current = true;
+        webSpeechFailuresRef.current = 0;
         let interim = "";
-        let finalChunk = "";
-
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           const res = event.results[i];
           const text = res[0]?.transcript || "";
           if (res.isFinal) {
-            finalChunk += (finalChunk ? " " : "") + text.trim();
+            addBrowserFinal(text);
           } else {
-            interim += (interim ? " " : "") + text;
+            interim += text;
           }
         }
-
-        if (interim) {
-          setLiveInterimText(interim);
-        }
-
-        if (finalChunk) {
-          commitTurn(finalChunk);
-          setLiveInterimText("");
-        }
+        interimRef.current = stripConsumed(interim, consumedInterimRef.current);
+        setLiveInterimText(interimRef.current);
       };
 
       recognition.onerror = (event: any) => {
-        console.warn("Speech recognition notice:", event.error);
-        if (event.error === "network" && recognition.lang !== "en-US") {
-          // If regional language network fails, fallback to en-US
-          recognition.lang = "en-US";
+        const err = event?.error;
+        if (err === "no-speech" || err === "aborted") return;
+        console.warn("Speech recognition error:", err);
+        if (err === "not-allowed" || err === "service-not-allowed") {
+          webSpeechDisabledRef.current = true;
+          if (!scribeEnabledRef.current) {
+            toastError("Browser speech recognition was blocked. Allow microphone access or add an ElevenLabs API key.");
+          }
+        } else if (err === "network") {
+          webSpeechFailuresRef.current += 1;
+          if (webSpeechFailuresRef.current >= 3) {
+            webSpeechDisabledRef.current = true;
+            if (scribeEnabledRef.current) {
+              info("Browser instant preview unavailable — words will appear from ElevenLabs Scribe after each pause.");
+            } else {
+              toastError("Browser speech service is unreachable (network). Add an ElevenLabs API key to transcribe.");
+            }
+          }
         }
       };
 
       recognition.onend = () => {
-        if (isRecordingRef.current) {
-          // Restart after short delay with fresh instance
-          setTimeout(() => {
-            if (isRecordingRef.current) {
-              startWebSpeech();
-            }
-          }, 250);
+        if (isRecordingRef.current && !webSpeechDisabledRef.current) {
+          setTimeout(() => startWebSpeech(), 300);
         }
       };
 
@@ -286,185 +430,161 @@ export default function LiveTranscriptPage() {
     } catch (err) {
       console.warn("Speech recognition start skipped:", err);
     }
-  }, [commitTurn]);
+  }, [addBrowserFinal, info, toastError]);
 
   /**
    * Start Live Microphone: Dual Engine Real-Time Transcription
-   * Engine 1: Web Speech API for instant (<100ms) live word-by-word streaming
-   * Engine 2: Background ElevenLabs Scribe WAV pipeline every 3.5s for guaranteed transcription
+   * Engine 1: Web Speech API — instant word-by-word text on screen
+   * Engine 2: ElevenLabs Scribe — each spoken phrase (cut at natural pauses)
+   *           is transcribed and replaces the instant text in place
    */
   const startRecording = async () => {
+    const hasWebSpeech = !!(
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    );
+    const key = (apiKey || getElevenLabsApiKey()).trim();
+    if (!hasWebSpeech && !key) {
+      toastError("This browser has no live speech recognition. Add an ElevenLabs API key or use Chrome/Edge.");
+      return;
+    }
+
     try {
-      // 1. Request microphone access
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
       });
       mediaStreamRef.current = stream;
 
-      // 2. Setup AudioContext & ScriptProcessor for high-fidelity PCM sample capture
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      const audioCtx = new AudioCtx();
+      const audioCtx: AudioContext = new AudioCtx();
       audioContextRef.current = audioCtx;
-      if (audioCtx.state === "suspended") {
-        await audioCtx.resume();
-      }
+      if (audioCtx.state === "suspended") await audioCtx.resume();
+      const sr = audioCtx.sampleRate;
+      sampleRateRef.current = sr;
 
       const source = audioCtx.createMediaStreamSource(stream);
-
-      // Create ScriptProcessorNode (bufferSize=4096, 1 input channel, 1 output channel)
       const scriptProcessor = audioCtx.createScriptProcessor(4096, 1, 1);
       scriptProcessorRef.current = scriptProcessor;
-
-      // Zero-gain sink to keep audio flowing through the Web Audio graph in Chrome
       const zeroGain = audioCtx.createGain();
       zeroGain.gain.value = 0;
-
       source.connect(scriptProcessor);
       scriptProcessor.connect(zeroGain);
       zeroGain.connect(audioCtx.destination);
 
-      // Reset PCM sample buffers
-      pcmBufferRef.current = [];
-      totalPcmSamplesRef.current = 0;
+      // Reset all session state
+      scribeKeyRef.current = key;
+      scribeEnabledRef.current = !!key;
+      scribeFailuresRef.current = 0;
+      webSpeechDisabledRef.current = false;
+      webSpeechFailuresRef.current = 0;
+      sliceChunksRef.current = [];
+      sliceSamplesRef.current = 0;
+      sliceStartSampleRef.current = 0;
+      sliceHasSpeechRef.current = false;
+      silenceSamplesRef.current = 0;
+      sessionSamplesRef.current = 0;
       allSessionSamplesRef.current = [];
-      hasReceivedSpeechResultsRef.current = false;
+      draftFinalRef.current = "";
+      interimRef.current = "";
+      consumedInterimRef.current = "";
+      lastBrowserTurnEndRef.current = 0;
+      setLiveDraftText("");
+      setLiveInterimText("");
+      setTranscriptionResult(null);
 
-      // Real-time audio processing loop
       scriptProcessor.onaudioprocess = (e) => {
         if (!isRecordingRef.current) return;
-        const channelData = e.inputBuffer.getChannelData(0);
-        const copy = new Float32Array(channelData);
-
-        pcmBufferRef.current.push(copy);
-        totalPcmSamplesRef.current += copy.length;
+        const copy = new Float32Array(e.inputBuffer.getChannelData(0));
         allSessionSamplesRef.current.push(copy);
 
-        // Compute Root-Mean-Square (RMS) for responsive volume meter
+        // RMS volume for the meter + speech detection
         let sumSquares = 0;
-        for (let i = 0; i < copy.length; i++) {
-          sumSquares += copy[i] * copy[i];
-        }
+        for (let i = 0; i < copy.length; i++) sumSquares += copy[i] * copy[i];
         const rms = Math.sqrt(sumSquares / copy.length);
-        const level = Math.min(100, Math.round(rms * 450));
-        setAudioLevel(level);
+        setAudioLevel(Math.min(100, Math.round(rms * 450)));
+        const isSpeech = rms > SPEECH_RMS_THRESHOLD;
+
+        // Append to the current slice
+        if (sliceSamplesRef.current === 0) {
+          sliceStartSampleRef.current = sessionSamplesRef.current;
+        }
+        sliceChunksRef.current.push(copy);
+        sliceSamplesRef.current += copy.length;
+        sessionSamplesRef.current += copy.length;
+
+        if (!sliceHasSpeechRef.current) {
+          if (isSpeech) {
+            sliceHasSpeechRef.current = true;
+            silenceSamplesRef.current = 0;
+          } else {
+            // Leading silence: keep only a short pre-roll before speech
+            while (
+              sliceChunksRef.current.length > 1 &&
+              sliceSamplesRef.current - sliceChunksRef.current[0].length >= sr * PRE_ROLL_SECONDS
+            ) {
+              const dropped = sliceChunksRef.current.shift()!;
+              sliceSamplesRef.current -= dropped.length;
+              sliceStartSampleRef.current += dropped.length;
+            }
+            return;
+          }
+        } else if (isSpeech) {
+          silenceSamplesRef.current = 0;
+        } else {
+          silenceSamplesRef.current += copy.length;
+        }
+
+        const sliceSecs = sliceSamplesRef.current / sr;
+        const silenceSecs = silenceSamplesRef.current / sr;
+        if (
+          (silenceSecs >= SILENCE_CUT_SECONDS && sliceSecs >= MIN_SLICE_SECONDS) ||
+          sliceSecs >= MAX_SLICE_SECONDS
+        ) {
+          flushSlice();
+        }
       };
 
-      // 3. Mark recording as active
       setIsRecording(true);
       isRecordingRef.current = true;
       setRecordingSeconds(0);
-      lastTurnEndRef.current = 0;
-      setLiveInterimText("");
-
-      // Seconds timer
       recordingTimerRef.current = setInterval(() => {
         setRecordingSeconds((prev) => prev + 1);
       }, 1000);
 
-      // 4. Start instant Web Speech API recognition
       startWebSpeech();
 
-      // 5. Automatic live audio transcription with ElevenLabs Scribe every 3.5 seconds
-      liveChunkTimerRef.current = setInterval(async () => {
-        if (!isRecordingRef.current) return;
-        const currentSampleRate = audioContextRef.current?.sampleRate || 44100;
-
-        // Ensure we have at least 1.5 seconds of audio samples
-        if (totalPcmSamplesRef.current < currentSampleRate * 1.5) return;
-
-        // Drain current slice from buffer
-        const chunks = pcmBufferRef.current;
-        const totalSamples = totalPcmSamplesRef.current;
-        pcmBufferRef.current = [];
-        totalPcmSamplesRef.current = 0;
-
-        // Flatten float samples into single Float32Array
-        const merged = new Float32Array(totalSamples);
-        let offset = 0;
-        for (const chunk of chunks) {
-          merged.set(chunk, offset);
-          offset += chunk.length;
-        }
-
-        // Check if there is actual audio above silence threshold
-        let maxAmp = 0;
-        for (let i = 0; i < merged.length; i++) {
-          const a = Math.abs(merged[i]);
-          if (a > maxAmp) maxAmp = a;
-        }
-        if (maxAmp < 0.02) {
-          // Below audible threshold, skip API call
-          return;
-        }
-
-        try {
-          const wavBlob = encodeWAV(merged, currentSampleRate);
-          const currentKey = apiKey || getElevenLabsApiKey();
-          if (!currentKey) return;
-
-          const res = await transcribeAudio(wavBlob, {
-            apiKey: currentKey,
-            modelId: "scribe_v1",
-            diarize: false,
-            tagAudioEvents: false,
-            languageCode: "eng",
-          });
-
-          // Clean technical audio tags like [tone], [static]
-          const cleanText = (res.text || "")
-            .replace(/\[.*?\]/g, "")
-            .replace(/\s+/g, " ")
-            .trim();
-
-          if (cleanText && cleanText.length > 1) {
-            // Commit words directly to the transcript screen
-            commitTurn(cleanText);
-            setLiveInterimText("");
-          }
-        } catch (sttErr) {
-          console.warn("Background STT slice note:", sttErr);
-        }
-      }, 3500);
-
-      info("Microphone active! Speak now to see your words written live on screen.");
+      info(
+        key
+          ? "Microphone active! Speak now — words appear live and are refined by ElevenLabs Scribe."
+          : "Microphone active (browser speech only — add an ElevenLabs key for Scribe accuracy)."
+      );
     } catch (err: any) {
       console.error("Microphone access error:", err);
-      toastError(
-        err.message || "Failed to access microphone. Please allow microphone permissions."
-      );
+      toastError(err?.message || "Failed to access microphone. Please allow microphone permissions.");
     }
   };
 
   /**
    * Stop Live Recording & Finalize Transcript
    */
-  const stopRecording = async () => {
+  const stopRecording = () => {
+    if (!isRecordingRef.current) return;
     setIsRecording(false);
     isRecordingRef.current = false;
     setAudioLevel(0);
 
-    // Commit any interim text immediately
-    if (liveInterimText.trim()) {
-      commitTurn(liveInterimText.trim());
-      setLiveInterimText("");
-    }
-
     if (recognitionRef.current) {
+      recognitionRef.current.onend = null;
+      recognitionRef.current.onresult = null;
       try {
         recognitionRef.current.abort();
       } catch {
         // ignore
       }
+      recognitionRef.current = null;
     }
-
-    if (recordingTimerRef.current) {
-      clearInterval(recordingTimerRef.current);
-    }
-    if (liveChunkTimerRef.current) {
-      clearInterval(liveChunkTimerRef.current);
-    }
-
+    if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
     if (scriptProcessorRef.current) {
+      scriptProcessorRef.current.onaudioprocess = null;
       try {
         scriptProcessorRef.current.disconnect();
       } catch {
@@ -472,44 +592,20 @@ export default function LiveTranscriptPage() {
       }
     }
 
-    const currentSampleRate = audioContextRef.current?.sampleRate || 44100;
-
-    // Transcribe any remaining trailing audio slice
-    if (totalPcmSamplesRef.current > currentSampleRate * 0.8) {
-      const remainingChunks = pcmBufferRef.current;
-      const remainingTotal = totalPcmSamplesRef.current;
-      pcmBufferRef.current = [];
-      totalPcmSamplesRef.current = 0;
-
-      const merged = new Float32Array(remainingTotal);
-      let offset = 0;
-      for (const chunk of remainingChunks) {
-        merged.set(chunk, offset);
-        offset += chunk.length;
-      }
-
-      try {
-        const currentKey = apiKey || getElevenLabsApiKey();
-        if (currentKey) {
-          const wavBlob = encodeWAV(merged, currentSampleRate);
-          const res = await transcribeAudio(wavBlob, {
-            apiKey: currentKey,
-            modelId: "scribe_v1",
-            diarize: false,
-            tagAudioEvents: false,
-            languageCode: "eng",
-          });
-          const cleanText = (res.text || "").replace(/\[.*?\]/g, "").trim();
-          if (cleanText) {
-            commitTurn(cleanText);
-          }
-        }
-      } catch {
-        // ignore
-      }
+    // Finalize the trailing audio + any instant text still on screen
+    if (scribeEnabledRef.current) {
+      flushSlice();
+    } else {
+      const remaining = `${draftFinalRef.current} ${interimRef.current}`.trim();
+      draftFinalRef.current = "";
+      interimRef.current = "";
+      setLiveDraftText("");
+      setLiveInterimText("");
+      commitBrowserTurn(remaining);
     }
 
-    // Build complete audio playback URL from all recorded samples
+    // Build full audio playback from all recorded samples
+    const sr = sampleRateRef.current;
     if (allSessionSamplesRef.current.length > 0) {
       let fullLength = 0;
       for (const c of allSessionSamplesRef.current) fullLength += c.length;
@@ -519,19 +615,13 @@ export default function LiveTranscriptPage() {
         fullBuffer.set(c, off);
         off += c.length;
       }
-      const fullWav = encodeWAV(fullBuffer, currentSampleRate);
-      const fullUrl = URL.createObjectURL(fullWav);
-      setActiveAudioSrc(fullUrl);
+      setActiveAudioSrc(URL.createObjectURL(encodeWAV(fullBuffer, sr)));
     }
 
-    if (audioContextRef.current) {
-      audioContextRef.current.close().catch(() => { });
-    }
-    if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach((t) => t.stop());
-    }
+    audioContextRef.current?.close().catch(() => { });
+    mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
 
-    success("Speech transcription completed!");
+    success("Recording stopped. Transcript finalized.");
   };
 
   /**
@@ -543,6 +633,7 @@ export default function LiveTranscriptPage() {
     }
     setTurns([]);
     setLiveInterimText("");
+    setLiveDraftText("");
     setClinicalSummary(null);
     setTranscriptionResult(null);
     setActiveAudioSrc(null);
@@ -650,14 +741,18 @@ export default function LiveTranscriptPage() {
   // Build clean full transcript text string (single speaker)
   const fullTranscriptText = useMemo(() => {
     const parts: string[] = [];
-    if (turns.length > 0) {
-      parts.push(turns.map((t) => t.text).join("\n\n"));
+    const committed = turns.map((t) => t.text.trim()).filter(Boolean);
+    if (committed.length > 0) {
+      parts.push(committed.join("\n\n"));
     }
-    if (liveInterimText.trim()) {
-      parts.push(liveInterimText.trim());
+    const live = `${liveDraftText} ${liveInterimText}`.trim();
+    if (live) {
+      parts.push(live);
     }
     return parts.join("\n\n");
-  }, [turns, liveInterimText]);
+  }, [turns, liveDraftText, liveInterimText]);
+
+  const hasLiveText = !!`${liveDraftText}${liveInterimText}`.trim();
 
   // Copy full transcript to clipboard
   const handleCopyTranscript = () => {
@@ -1201,7 +1296,7 @@ export default function LiveTranscriptPage() {
               )}
 
               {/* TRANSCRIPT BODY */}
-              <div className="flex-1 p-4 sm:p-5 overflow-y-auto max-h-[550px]">
+              <div ref={transcriptBodyRef} className="flex-1 p-4 sm:p-5 overflow-y-auto max-h-[550px] scroll-smooth">
                 {/* Empty State */}
                 {turns.length === 0 && !isRecording && !isTranscribing && (
                   <div className="h-full min-h-[350px] flex flex-col items-center justify-center text-center text-gray-400 space-y-3">
@@ -1275,7 +1370,19 @@ export default function LiveTranscriptPage() {
 
                           {/* Spoken Text */}
                           <p className="text-sm text-gray-800 dark:text-gray-100 leading-relaxed font-normal">
-                            {turn.text}
+                            {turn.text ? (
+                              <span className={turn.pending ? "text-gray-500 dark:text-gray-400" : ""}>
+                                {turn.text}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400 italic">Transcribing phrase...</span>
+                            )}
+                            {turn.pending && (
+                              <span className="ml-2 inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 align-middle">
+                                <span className="w-2.5 h-2.5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                                Scribe
+                              </span>
+                            )}
                           </p>
                         </div>
                       );
@@ -1296,8 +1403,13 @@ export default function LiveTranscriptPage() {
 
                         {/* Word-by-word streaming text */}
                         <p className="text-sm text-gray-900 dark:text-white leading-relaxed font-medium">
-                          {liveInterimText ? (
-                            <span>{liveInterimText}</span>
+                          {hasLiveText ? (
+                            <>
+                              {liveDraftText && <span>{liveDraftText} </span>}
+                              {liveInterimText && (
+                                <span className="text-indigo-700/80 dark:text-indigo-300/80">{liveInterimText}</span>
+                              )}
+                            </>
                           ) : (
                             <span className="text-gray-400 dark:text-gray-500 italic">
                               Listening... Speak into your microphone now to see words live
@@ -1311,7 +1423,7 @@ export default function LiveTranscriptPage() {
                 )}
 
                 {/* VIEW 2: PLAIN TEXT VIEW */}
-                {viewTab === "plain" && (turns.length > 0 || liveInterimText) && (
+                {viewTab === "plain" && (turns.length > 0 || hasLiveText) && (
                   <div className="space-y-4">
                     <textarea
                       readOnly
@@ -1324,7 +1436,7 @@ export default function LiveTranscriptPage() {
               </div>
 
               {/* Output Footer Actions Bar */}
-              {(turns.length > 0 || liveInterimText || clinicalSummary) && (
+              {(turns.length > 0 || hasLiveText || clinicalSummary) && (
                 <div className="p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-750/30 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <button
@@ -1368,7 +1480,7 @@ export default function LiveTranscriptPage() {
                     <button
                       type="button"
                       onClick={handleGenerateClinicalSummary}
-                      disabled={isGeneratingSummary || (!turns.length && !liveInterimText.trim())}
+                      disabled={isGeneratingSummary || isRecording || (!turns.length && !hasLiveText)}
                       className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-purple-600 hover:bg-purple-700 text-white shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       title="Send transcript payload to POST https://api.kaizencon.in/api/clinical/summary"
                     >

@@ -6,7 +6,7 @@
   background-color: #FAFAFC;
   font-family: var(--font-family, 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
   color: #2D1A33;
-  overflow-x: hidden;
+  overflow-x: clip;
   min-height: 100vh;
 }
 
@@ -231,9 +231,12 @@
 
 /* Left Sidebar */
 .kz-privacy-sidebar {
+  position: -webkit-sticky;
   position: sticky;
   top: 96px;
   align-self: start;
+  height: fit-content;
+  z-index: 10;
 }
 
 .kz-privacy-sidebar-inner {
@@ -242,6 +245,27 @@
   border-radius: 18px;
   padding: 24px 20px;
   box-shadow: 0 4px 20px rgba(85, 53, 94, 0.04);
+  max-height: calc(100vh - 116px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(170, 45, 123, 0.25) transparent;
+}
+
+.kz-privacy-sidebar-inner::-webkit-scrollbar {
+  width: 5px;
+}
+
+.kz-privacy-sidebar-inner::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.kz-privacy-sidebar-inner::-webkit-scrollbar-thumb {
+  background: rgba(170, 45, 123, 0.25);
+  border-radius: 4px;
+}
+
+.kz-privacy-sidebar-inner::-webkit-scrollbar-thumb:hover {
+  background: rgba(170, 45, 123, 0.45);
 }
 
 .kz-privacy-sidebar-title {

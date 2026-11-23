@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  FiShield, 
-  FiLock, 
-  FiEye, 
-  FiCpu, 
-  FiDatabase, 
-  FiFileText, 
-  FiUserCheck, 
-  FiMail, 
-  FiCheckCircle, 
+import {
+  FiShield,
+  FiLock,
+  FiEye,
+  FiCpu,
+  FiDatabase,
+  FiFileText,
+  FiUserCheck,
+  FiMail,
+  FiCheckCircle,
   FiPrinter,
   FiArrowUpRight
 } from 'react-icons/fi';
@@ -60,12 +60,12 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
       </section>
-    
+
 
       {/* MAIN CONTENT WITH STICKY SIDEBAR */}
       <section className="kz-privacy-body-section">
         <div className="kz-privacy-container kz-privacy-layout-grid">
-          
+
           {/* LEFT SIDEBAR: Table of Contents */}
           <aside className="kz-privacy-sidebar" aria-label="Table of Contents">
             <div className="kz-privacy-sidebar-inner">
@@ -97,8 +97,8 @@ export default function PrivacyPolicyPage() {
                 <div className="kz-privacy-sidebar-card-badge">NEED ASSISTANCE?</div>
                 <h4>Privacy Questions?</h4>
                 <p>Our Data Protection Officer and compliance team are available to assist you.</p>
-                <a href="mailto:privacy@kaizencon.demo" className="kz-privacy-sidebar-card-link">
-                  privacy@kaizencon.demo
+                <a href="mailto:kaizencon2027@gmail.com" className="kz-privacy-sidebar-card-link">
+                  kaizencon2027@gmail.com
                   <FiArrowUpRight />
                 </a>
               </div>
@@ -107,7 +107,7 @@ export default function PrivacyPolicyPage() {
 
           {/* RIGHT COLUMN: Detailed Policy Sections */}
           <main className="kz-privacy-content-main">
-            
+
             {/* Quick Summary Banner */}
             <div className="kz-privacy-summary-banner">
               <div className="kz-privacy-summary-icon">
@@ -340,7 +340,7 @@ export default function PrivacyPolicyPage() {
                   <li><strong>Withdrawal of Consent:</strong> Withdraw previously given consent for optional services at any time without affecting past lawful processing.</li>
                 </ul>
                 <p>
-                  To exercise any of these rights, simply email our Data Protection Office at <strong>privacy@kaizencon.demo</strong>. We respond to all verified requests within 14 business days.
+                  To exercise any of these rights, simply email our Data Protection Office at <strong>kaizencon2027@gmail.com</strong>. We respond to all verified requests within 14 business days.
                 </p>
               </div>
             </section>
@@ -371,12 +371,9 @@ export default function PrivacyPolicyPage() {
                   <div className="kz-privacy-contact-details">
                     <div className="kz-privacy-contact-row">
                       <span className="kz-privacy-contact-label">Official Email:</span>
-                      <a href="mailto:privacy@kaizencon.demo" className="kz-privacy-contact-val">privacy@kaizencon.demo</a>
+                      <a href="mailto:kaizencon2027@gmail.com" className="kz-privacy-contact-val">kaizencon2027@gmail.com</a>
                     </div>
-                    <div className="kz-privacy-contact-row">
-                      <span className="kz-privacy-contact-label">General Support:</span>
-                      <a href="mailto:hello@kaizencon.demo" className="kz-privacy-contact-val">hello@kaizencon.demo</a>
-                    </div>
+                    
                     <div className="kz-privacy-contact-row">
                       <span className="kz-privacy-contact-label">Venue Location:</span>
                       <span className="kz-privacy-contact-val">International Conference Centre, Ahmedabad, Gujarat, India</span>

@@ -170,6 +170,7 @@ export default function AiExperiencePage() {
   // Section 05 Knowledge Query state
   const [knowledgeQuery, setKnowledgeQuery] = useState('');
   const [knowledgeResult, setKnowledgeResult] = useState(null);
+  const [isKnowledgeSearching, setIsKnowledgeSearching] = useState(false);
   const [showFlowModal, setShowFlowModal] = useState(false);
 
   // Handle Live API query execution for Assistant
@@ -265,15 +266,20 @@ export default function AiExperiencePage() {
   };
 
   // Handle Knowledge Base Query via Live API
-  const handleKnowledgeSearch = async (query) => {
-    setKnowledgeQuery(query);
-    if (!query.trim()) {
+  const handleKnowledgeSearch = async (queryParam) => {
+    const q = typeof queryParam === 'string' ? queryParam : knowledgeQuery;
+    if (typeof queryParam === 'string') {
+      setKnowledgeQuery(queryParam);
+    }
+
+    if (!q || !q.trim()) {
       setKnowledgeResult(null);
       return;
     }
 
+    setIsKnowledgeSearching(true);
     try {
-      const data = await askKnowledgeChat(query);
+      const data = await askKnowledgeChat(q.trim());
       const answer =
         data?.answer ||
         (Array.isArray(data?.results) && (data.results[0]?.answer || data.results[0]?.text)) ||
@@ -284,13 +290,15 @@ export default function AiExperiencePage() {
         : [];
 
       setKnowledgeResult({
-        query,
+        query: q.trim(),
         summary: answer,
         sessions: sessionList.length > 0 ? sessionList : ['Sessions detailed in Programme'],
         updated: 'Just now',
       });
     } catch (err) {
       console.error('Knowledge search failed:', err);
+    } finally {
+      setIsKnowledgeSearching(false);
     }
   };
 
@@ -966,6 +974,7 @@ export default function AiExperiencePage() {
                   type="button"
                   className="kz-query-chip"
                   onClick={() => handleKnowledgeSearch('Anastomotic leak rates in robotic LAR')}
+                  disabled={isKnowledgeSearching}
                 >
                   &ldquo;Anastomotic leak rates in robotic LAR&rdquo;
                 </button>
@@ -973,20 +982,61 @@ export default function AiExperiencePage() {
                   type="button"
                   className="kz-query-chip"
                   onClick={() => handleKnowledgeSearch('Robotic training conversion benchmarks')}
+                  disabled={isKnowledgeSearching}
                 >
                   &ldquo;Robotic training conversion benchmarks&rdquo;
                 </button>
               </div>
 
-              {/* Live search input */}
+              {/* Search input with submit button - API is called on button click or form submit, NOT on change */}
               <div className="kz-knowledge-search-input-box">
-                <input
-                  type="text"
-                  className="kz-knowledge-input"
-                  placeholder="Ask the knowledge base directly..."
-                  value={knowledgeQuery}
-                  onChange={(e) => handleKnowledgeSearch(e.target.value)}
-                />
+                <form
+                  className="kz-knowledge-search-form"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleKnowledgeSearch(knowledgeQuery);
+                  }}
+                >
+                  <input
+                    type="text"
+                    className="kz-knowledge-input"
+                    placeholder="Ask the knowledge base directly..."
+                    value={knowledgeQuery}
+                    onChange={(e) => setKnowledgeQuery(e.target.value)}
+                    disabled={isKnowledgeSearching}
+                  />
+                  <button
+                    type="submit"
+                    className="kz-knowledge-search-btn"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleKnowledgeSearch(knowledgeQuery);
+                    }}
+                    disabled={isKnowledgeSearching || !knowledgeQuery.trim()}
+                    aria-label="Search Knowledge Base"
+                  >
+                    {isKnowledgeSearching ? (
+                      <span className="kz-search-spinner" />
+                    ) : (
+                      <>
+                        <span>Search</span>
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <circle cx="11" cy="11" r="8" />
+                          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                      </>
+                    )}
+                  </button>
+                </form>
               </div>
 
               {/* Search Result Snippet */}

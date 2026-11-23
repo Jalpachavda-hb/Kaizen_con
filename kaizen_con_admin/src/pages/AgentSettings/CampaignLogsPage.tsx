@@ -49,7 +49,6 @@ export default function CampaignLogsPage() {
   // Search & Filters
   const [search, setSearch] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
-  const [viewFormat, setViewFormat] = useState<"table" | "json">("table");
 
   // Pagination
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -133,51 +132,6 @@ export default function CampaignLogsPage() {
   const handleCopyText = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     success(`${label} copied to clipboard`);
-  };
-
-  const handleCopyLogsJson = () => {
-    if (logs.length === 0) return;
-    navigator.clipboard.writeText(JSON.stringify(logs, null, 2));
-    success("All logs copied to clipboard as JSON");
-  };
-
-  // Export to CSV
-  const handleExportCsv = () => {
-    if (filteredLogs.length === 0) return;
-    const headers = ["Recipient Name", "Email Address", "Contact ID", "Status", "Subject", "Template Version", "Direction", "Sent Time", "Error Details"];
-    const rows = filteredLogs.map((log) => {
-      const contactId = (log.contact_id || log.recipient_id || "").trim();
-      const contactName = log.name || log.recipient_name || log.contact_name || (contactId ? `Contact (${contactId.slice(0, 8)}...)` : "Unknown");
-      const contactEmail = log.email || log.recipient || log.contact_email || log.recipient_email || "—";
-      const status = log.message_status || log.status || "—";
-      const subject = log.subject || log.message || "—";
-      const tpl = log.template_version || "—";
-      const dir = log.direction || "outbound";
-      const time = log.created_at || log.timestamp || log.time || "";
-      const err = log.error_details || log.error || "";
-
-      return [
-        `"${contactName.replace(/"/g, '""')}"`,
-        `"${contactEmail.replace(/"/g, '""')}"`,
-        `"${contactId}"`,
-        `"${status}"`,
-        `"${subject.replace(/"/g, '""')}"`,
-        `"${tpl}"`,
-        `"${dir}"`,
-        `"${time}"`,
-        `"${String(err).replace(/"/g, '""')}"`,
-      ].join(",");
-    });
-
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `campaign_${id || "logs"}_export.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    success("Exported logs CSV successfully");
   };
 
   // Filtered Logs
@@ -310,33 +264,6 @@ export default function CampaignLogsPage() {
               </svg>
               <span>Refresh</span>
             </button>
-
-            <button
-              type="button"
-              onClick={handleExportCsv}
-              disabled={filteredLogs.length === 0}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 rounded-lg border border-emerald-200 dark:border-emerald-800 transition-colors cursor-pointer disabled:opacity-50"
-              title="Export filtered logs as CSV"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              <span>Export CSV</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleCopyLogsJson}
-              disabled={logs.length === 0}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700/60 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors cursor-pointer disabled:opacity-50"
-              title="Copy all logs JSON"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-              </svg>
-              <span>Copy JSON</span>
-            </button>
           </div>
         }
       >
@@ -437,7 +364,7 @@ export default function CampaignLogsPage() {
 
           {/* Status Filter Buttons */}
           <div className="flex items-center gap-1.5 flex-wrap">
-            {["All", "Sent", "Pending", "Received", "Failed", "Blocked"].map((st) => {
+            {["All", "Sent", "Received"].map((st) => {
               const active = statusFilter === st;
               return (
                 <button
@@ -454,32 +381,6 @@ export default function CampaignLogsPage() {
                 </button>
               );
             })}
-          </div>
-
-          {/* View Mode: Table vs JSON */}
-          <div className="flex items-center bg-gray-100 dark:bg-gray-700/60 p-0.5 rounded-lg border border-gray-200 dark:border-gray-600 self-start md:self-auto">
-            <button
-              type="button"
-              onClick={() => setViewFormat("table")}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition ${
-                viewFormat === "table"
-                  ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-2xs"
-                  : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-              }`}
-            >
-              Table View
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewFormat("json")}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition ${
-                viewFormat === "json"
-                  ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-2xs"
-                  : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-              }`}
-            >
-              JSON View
-            </button>
           </div>
         </div>
 
@@ -505,11 +406,6 @@ export default function CampaignLogsPage() {
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
             </svg>
             <p className="text-xs text-gray-500">Loading campaign logs from Email Agent API...</p>
-          </div>
-        ) : viewFormat === "json" ? (
-          /* JSON Raw View */
-          <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-950 text-emerald-400 p-4 font-mono text-xs overflow-x-auto max-h-[70vh]">
-            <pre>{JSON.stringify(filteredLogs, null, 2)}</pre>
           </div>
         ) : (
           /* Structured Table View */

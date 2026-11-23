@@ -327,16 +327,16 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="min-h-screen w-full bg-[#fdf5f9] flex items-center justify-center p-4 sm:p-6 lg:p-10 font-outfit">
       {/* Centered Card */}
-      <div className="w-full max-w-[1050px] bg-white rounded-2xl shadow-[0_20px_50px_-15px_rgba(85,53,94,0.15)] border border-gray-100 overflow-hidden flex flex-col lg:flex-row items-stretch min-h-[580px]">
+      <div className="w-full max-w-[1050px] bg-white rounded-2xl shadow-[0_20px_50px_-15px_rgba(85,53,94,0.15)] border border-gray-100 overflow-hidden flex flex-col lg:flex-row items-stretch min-h-[580px] lg:min-h-[640px]">
         {/* Left Side: Brand Visual & Info */}
-        <div className="w-full lg:w-[50%] bg-gradient-to-br from-[#55355E] via-[#AA2D7B] to-[#D85A9A] text-white p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
+        <div className="w-full lg:w-[50%] bg-gradient-to-br from-[#55355E] via-[#AA2D7B] to-[#D85A9A] text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-between relative overflow-hidden">
           {/* Logo */}
           <div className="relative z-10">
-            <div className="inline-block p-2 rounded-lg bg-white/95 backdrop-blur-xs border border-white/20 shadow-xs">
+            <div className="inline-block p-3 sm:p-4 lg:p-4.5 rounded-xl sm:rounded-2xl bg-white shadow-lg shadow-black/15 border border-white/30 backdrop-blur-sm transition-all duration-300">
               <img
                 src={logoUrl}
                 alt="Kaizen Con 2027"
-                className="h-9 w-auto object-contain"
+                className="h-16 sm:h-20 md:h-24 lg:h-28 w-auto max-w-[180px] sm:max-w-[220px] lg:max-w-[260px] object-contain transition-all duration-300"
                 onError={(e) => {
                   const target = e.currentTarget;
                   if (!target.dataset.tried1) {
@@ -361,17 +361,17 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
               />
               <div
                 style={{ display: "none" }}
-                className="items-center gap-1.5 font-black text-sm tracking-tight text-[#AA2D7B] uppercase"
+                className="items-center gap-2 font-black text-lg sm:text-xl tracking-tight text-[#AA2D7B] uppercase"
               >
                 <span>Kaizen</span>
                 <span className="text-[#55355E]">Con</span>
-                <span className="text-[10px] text-gray-500 font-semibold lowercase">2027</span>
+                <span className="text-xs text-gray-500 font-semibold lowercase">2027</span>
               </div>
             </div>
           </div>
 
           {/* Headline & Description */}
-          <div className="relative z-10 space-y-3.5 my-8">
+          <div className="relative z-10 space-y-3 my-5 sm:my-6 lg:my-6">
             <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/20 backdrop-blur-xs text-white">
               Robotics &amp; AI Conference 2027
             </span>

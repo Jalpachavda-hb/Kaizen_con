@@ -307,11 +307,7 @@ export default function SessionsPage() {
     }
   };
 
-  // Unique Categories for filter
-  const uniqueCategories = useMemo(() => {
-    const set = new Set(sessions.map((s) => s.category).filter(Boolean) as string[]);
-    return Array.from(set).sort();
-  }, [sessions]);
+ 
 
   // Filtered Sessions
   const filteredSessions = useMemo(() => {
@@ -366,10 +362,10 @@ export default function SessionsPage() {
 
       <AdminPageContainer
         title="Sessions"
-        subtitle="Manage live interactive sessions, stage join codes, broadcast status, and delegate Q&A."
+        subtitle="Manage live interactive sessions, broadcast status, and delegate Q&A."
         searchValue={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search by title, speaker, join code, or category..."
+        searchPlaceholder="Search by title, speaker, or category..."
         actionButton={
           <div className="flex flex-wrap items-center gap-2">
             {/* Status Filter */}
@@ -384,21 +380,7 @@ export default function SessionsPage() {
               <option value="ended">Ended ({stats.ended})</option>
             </select>
 
-            {/* Category Filter */}
-            {uniqueCategories.length > 0 && (
-              <select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-                className="px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-[#AA2D7B]"
-              >
-                <option value="All">All Categories</option>
-                {uniqueCategories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            )}
+           
 
             {/* Refresh Button */}
             <button
@@ -537,7 +519,6 @@ export default function SessionsPage() {
                   <tr>
                     <th scope="col" className="px-4 py-3">Session Title</th>
                     <th scope="col" className="px-4 py-3">Speaker</th>
-                    <th scope="col" className="px-4 py-3">Join Code</th>
                     <th scope="col" className="px-4 py-3">Status</th>
                     <th scope="col" className="px-4 py-3">Timing / Venue</th>
                     <th scope="col" className="px-4 py-3 text-right">Actions</th>
@@ -583,34 +564,6 @@ export default function SessionsPage() {
                                 {session.speaker_name || "Unassigned"}
                               </div>
                             </div>
-                          </div>
-                        </td>
-
-                        {/* Join Code */}
-                        <td className="px-4 py-3.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                          <div className="inline-flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md border border-gray-200 dark:border-gray-700">
-                            <span className="font-mono font-bold text-xs text-[#AA2D7B] tracking-wider">
-                              {session.join_code || "—"}
-                            </span>
-                            {session.join_code && (
-                              <button
-                                type="button"
-                                onClick={(e) => handleCopyJoinCode(session.join_code, session.id, e)}
-                                className="p-0.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors cursor-pointer"
-                                data-tooltip="Copy Join Code"
-                              >
-                                {copiedId === session.id ? (
-                                  <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-                                  </svg>
-                                ) : (
-                                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" strokeWidth="2" />
-                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" strokeWidth="2" />
-                                  </svg>
-                                )}
-                              </button>
-                            )}
                           </div>
                         </td>
 

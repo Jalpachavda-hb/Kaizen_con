@@ -66,7 +66,7 @@ export default function ContactPage() {
 
     // Dispatch email asynchronously with keepalive so it delivers reliably in the background
     try {
-      fetch('https://formsubmit.co/ajax/kaizencon2027@gmail.com', {
+      fetch('https://formsubmit.co/ajax/ankit.hackberrysoftech@gmail.com', {
         method: 'POST',
         keepalive: true,
         headers: {

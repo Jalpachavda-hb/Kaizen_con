@@ -1726,9 +1726,16 @@
   margin-bottom: 18px;
 }
 
+.kz-knowledge-search-form {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
 .kz-knowledge-input {
   width: 100%;
-  padding: 12px 18px;
+  padding: 13px 120px 13px 18px;
   border-radius: 12px;
   border: 1.5px solid rgba(170, 45, 123, 0.24);
   font-size: 0.94rem;
@@ -1742,6 +1749,59 @@
   background: #FFFFFF;
   border-color: #AA2D7B;
   box-shadow: 0 0 0 3px rgba(170, 45, 123, 0.12);
+}
+
+.kz-knowledge-search-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: linear-gradient(135deg, #AA2D7B 0%, #851e5e 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 9px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(170, 45, 123, 0.25);
+  white-space: nowrap;
+}
+
+.kz-knowledge-search-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #851e5e 0%, #681549 100%);
+  box-shadow: 0 4px 10px rgba(170, 45, 123, 0.35);
+  transform: translateY(calc(-50% - 1px));
+}
+
+.kz-knowledge-search-btn:active:not(:disabled) {
+  transform: translateY(-50%);
+}
+
+.kz-knowledge-search-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: translateY(-50%);
+  box-shadow: none;
+}
+
+.kz-search-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: kzSpin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes kzSpin {
+  to { transform: rotate(360deg); }
 }
 
 .kz-knowledge-result-box {

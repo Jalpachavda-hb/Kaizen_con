@@ -4,7 +4,7 @@ import PageMeta from "../../components/common/PageMeta";
 import { AdminPageContainer } from "../../components/common/AdminPageContainer";
 import {
   createCampaign,
-  getEmailAgentContacts,
+  getAllEmailAgentContacts,
   getTemplates,
 } from "../../api/ApiPath";
 import Swal from "sweetalert2";
@@ -126,7 +126,7 @@ export default function CreateCampaignPage() {
 
       try {
         const [contactsRes, templatesRes] = await Promise.allSettled([
-          getEmailAgentContacts(1, 500),
+          getAllEmailAgentContacts(),
           getTemplates(),
         ]);
 
@@ -614,9 +614,8 @@ export default function CreateCampaignPage() {
                         </button>
                       )}
                       <svg
-                        className={`w-4 h-4 transition-transform duration-200 ${
-                          isTemplateDropdownOpen ? "rotate-180" : ""
-                        }`}
+                        className={`w-4 h-4 transition-transform duration-200 ${isTemplateDropdownOpen ? "rotate-180" : ""
+                          }`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -691,14 +690,13 @@ export default function CreateCampaignPage() {
                               <div
                                 key={tpl.id}
                                 onClick={() => handleToggleTemplate(tpl.id)}
-                                className={`p-2.5 flex items-start gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${
-                                  isSelected ? "bg-[#AA2D7B]/5 dark:bg-[#AA2D7B]/15" : ""
-                                }`}
+                                className={`p-2.5 flex items-start gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${isSelected ? "bg-[#AA2D7B]/5 dark:bg-[#AA2D7B]/15" : ""
+                                  }`}
                               >
                                 <input
                                   type="checkbox"
                                   checked={isSelected}
-                                  onChange={() => {}}
+                                  onChange={() => { }}
                                   className="mt-0.5 w-4 h-4 rounded text-[#AA2D7B] focus:ring-[#AA2D7B] cursor-pointer"
                                 />
                                 <div className="min-w-0 flex-1">
@@ -858,11 +856,10 @@ export default function CreateCampaignPage() {
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`p-6 border-2 border-dashed rounded-xl flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
-                isDragging
-                  ? "border-[#AA2D7B] bg-[#AA2D7B]/5 dark:bg-[#AA2D7B]/10 scale-[1.005]"
-                  : "border-gray-300 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/40 hover:bg-gray-100/60 dark:hover:bg-gray-800/80 hover:border-gray-400"
-              }`}
+              className={`p-6 border-2 border-dashed rounded-xl flex flex-col items-center justify-center text-center cursor-pointer transition-all ${isDragging
+                ? "border-[#AA2D7B] bg-[#AA2D7B]/5 dark:bg-[#AA2D7B]/10 scale-[1.005]"
+                : "border-gray-300 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/40 hover:bg-gray-100/60 dark:hover:bg-gray-800/80 hover:border-gray-400"
+                }`}
             >
               <div className="w-12 h-12 rounded-full bg-pink-100/80 dark:bg-pink-950/60 text-[#AA2D7B] flex items-center justify-center mb-2.5">
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -1037,11 +1034,10 @@ export default function CreateCampaignPage() {
                 </label>
                 <div
                   onClick={() => setFormData((prev) => ({ ...prev, re_mail: !prev.re_mail }))}
-                  className={`flex items-start justify-between p-3 rounded-lg border transition-all cursor-pointer ${
-                    formData.re_mail
-                      ? "border-[#AA2D7B]/40 bg-[#AA2D7B]/5 dark:bg-[#AA2D7B]/10 dark:border-[#AA2D7B]/40"
-                      : "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800"
-                  }`}
+                  className={`flex items-start justify-between p-3 rounded-lg border transition-all cursor-pointer ${formData.re_mail
+                    ? "border-[#AA2D7B]/40 bg-[#AA2D7B]/5 dark:bg-[#AA2D7B]/10 dark:border-[#AA2D7B]/40"
+                    : "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800"
+                    }`}
                 >
                   <div className="pr-2 select-none">
                     <div className="flex items-center gap-1.5">
@@ -1171,15 +1167,14 @@ export default function CreateCampaignPage() {
                     <div
                       key={c.id}
                       onClick={() => handleToggleContact(c.id)}
-                      className={`p-3 flex items-center justify-between gap-3 cursor-pointer hover:bg-gray-50/80 dark:hover:bg-gray-700/40 transition-colors ${
-                        isSelected ? "bg-[#AA2D7B]/5 dark:bg-[#AA2D7B]/10" : ""
-                      }`}
+                      className={`p-3 flex items-center justify-between gap-3 cursor-pointer hover:bg-gray-50/80 dark:hover:bg-gray-700/40 transition-colors ${isSelected ? "bg-[#AA2D7B]/5 dark:bg-[#AA2D7B]/10" : ""
+                        }`}
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <input
                           type="checkbox"
                           checked={isSelected}
-                          onChange={() => {}}
+                          onChange={() => { }}
                           className="w-4 h-4 rounded text-[#AA2D7B] focus:ring-[#AA2D7B] cursor-pointer"
                         />
                         <div className="min-w-0">
@@ -1196,14 +1191,13 @@ export default function CreateCampaignPage() {
                         {/* Type badge */}
                         {c.type ? (
                           <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold capitalize ${
-                              c.type.toLowerCase().includes("doctor")
-                                ? "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
-                                : c.type.toLowerCase().includes("sponser") ||
-                                  c.type.toLowerCase().includes("sponsor")
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold capitalize ${c.type.toLowerCase().includes("doctor")
+                              ? "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
+                              : c.type.toLowerCase().includes("sponser") ||
+                                c.type.toLowerCase().includes("sponsor")
                                 ? "bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800"
                                 : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
-                            }`}
+                              }`}
                           >
                             {c.type}
                           </span>
@@ -1213,11 +1207,10 @@ export default function CreateCampaignPage() {
 
                         {/* Status badge */}
                         <span
-                          className={`shrink-0 text-[10px] font-semibold px-2.5 py-0.5 rounded-full capitalize ${
-                            c.status === "eligible" && !c.unsubscribed
-                              ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60"
-                              : "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60"
-                          }`}
+                          className={`shrink-0 text-[10px] font-semibold px-2.5 py-0.5 rounded-full capitalize ${c.status === "eligible" && !c.unsubscribed
+                            ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60"
+                            : "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60"
+                            }`}
                         >
                           {c.unsubscribed ? "Unsubscribed" : c.status}
                         </span>

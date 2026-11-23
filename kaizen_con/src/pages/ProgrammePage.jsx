@@ -251,6 +251,115 @@ const DEFAULT_TRACKS = [
   { id: 'break', label: 'Breaks & Networking' }
 ];
 
+// Helper to reliably extract speaker names and list from any schedule item
+const getSpeakersFromSchedule = (s, speakerMap = {}) => {
+  let list = [];
+
+  // Case 1: s.speakers is an array of objects or IDs
+  if (Array.isArray(s.speakers) && s.speakers.length > 0) {
+    s.speakers.forEach((sp) => {
+      if (sp && typeof sp === 'object') {
+        const first = sp.first_name || '';
+        const last = sp.last_name || '';
+        let full = `${first} ${last}`.trim();
+        if (full) {
+          if (!full.toLowerCase().startsWith('dr.') && !full.toLowerCase().startsWith('dr ')) {
+            full = `Dr. ${full}`;
+          }
+          list.push({
+            id: sp.id || sp.speaker_id,
+            name: full,
+            designation: sp.designation || '',
+            profile_image_url: sp.profile_image_url || ''
+          });
+        } else if (sp.name) {
+          list.push({
+            id: sp.id || sp.speaker_id,
+            name: sp.name,
+            designation: sp.designation || '',
+            profile_image_url: sp.profile_image_url || ''
+          });
+        } else if (sp.id || sp.speaker_id) {
+          const mapped = speakerMap[sp.id] || speakerMap[sp.speaker_id];
+          list.push({
+            id: sp.id || sp.speaker_id,
+            name: mapped || `Faculty #${sp.id || sp.speaker_id}`
+          });
+        }
+      } else if (typeof sp === 'string' || typeof sp === 'number') {
+        const mapped = speakerMap[sp];
+        if (mapped) {
+          list.push({ id: sp, name: mapped });
+        } else if (typeof sp === 'string' && isNaN(Number(sp)) && sp.trim()) {
+          list.push({ id: sp, name: sp.trim() });
+        } else {
+          list.push({ id: sp, name: `Faculty #${sp}` });
+        }
+      }
+    });
+  } else if (typeof s.speakers === 'string' && s.speakers.trim()) {
+    try {
+      const parsed = JSON.parse(s.speakers);
+      if (Array.isArray(parsed)) {
+        return getSpeakersFromSchedule({ ...s, speakers: parsed }, speakerMap);
+      }
+    } catch {
+      s.speakers.split(',').forEach((nm) => {
+        if (nm.trim()) list.push({ name: nm.trim() });
+      });
+    }
+  }
+
+  // Case 2: s.speaker (single object or string)
+  if (list.length === 0 && s.speaker) {
+    if (typeof s.speaker === 'object') {
+      const first = s.speaker.first_name || '';
+      const last = s.speaker.last_name || '';
+      let full = `${first} ${last}`.trim();
+      if (full) {
+        if (!full.toLowerCase().startsWith('dr.') && !full.toLowerCase().startsWith('dr ')) {
+          full = `Dr. ${full}`;
+        }
+        list.push({ id: s.speaker.id, name: full, designation: s.speaker.designation });
+      } else if (s.speaker.name) {
+        list.push({ id: s.speaker.id, name: s.speaker.name });
+      }
+    } else if (typeof s.speaker === 'string' && s.speaker.trim()) {
+      list.push({ name: s.speaker.trim() });
+    }
+  }
+
+  // Case 3: s.speaker_id
+  if (list.length === 0 && (s.speaker_id || s.speakerId)) {
+    const spkId = s.speaker_id || s.speakerId;
+    const mapped = speakerMap[spkId];
+    list.push({ id: spkId, name: mapped || `Faculty #${spkId}` });
+  }
+
+  // Fallback defaults
+  if (list.length === 0) {
+    if (s.category && s.category.toLowerCase().includes('break')) {
+      return {
+        speakersList: [{ name: 'Hospitality & Refreshments' }],
+        speakerDisplay: 'Hospitality & Refreshments'
+      };
+    }
+    if (s.category && s.category.toLowerCase().includes('registration')) {
+      return {
+        speakersList: [{ name: 'Registration Desk' }],
+        speakerDisplay: 'Registration Desk'
+      };
+    }
+    return {
+      speakersList: [{ name: 'Organizing Committee' }],
+      speakerDisplay: 'Organizing Committee'
+    };
+  }
+
+  const speakerDisplay = list.map((sp) => sp.name).join(', ');
+  return { speakersList: list, speakerDisplay };
+};
+
 // Transform raw API schedule list into day groups for Glance and Grid views
 const transformApiSchedules = (rawList, speakerMap = {}) => {
   if (!Array.isArray(rawList) || rawList.length === 0) {
@@ -290,14 +399,7 @@ const transformApiSchedules = (rawList, speakerMap = {}) => {
       const duration = calculateDuration(timeStart, timeEnd);
       const style = getCategoryStyle(s.category);
 
-      let speakerName;
-      if (s.speaker_id) {
-        speakerName = speakerMap[s.speaker_id] || `Faculty #${s.speaker_id}`;
-      } else if (s.category && s.category.toLowerCase().includes('break')) {
-        speakerName = 'Hospitality & Refreshments';
-      } else {
-        speakerName = 'Organizing Committee';
-      }
+      const { speakersList, speakerDisplay } = getSpeakersFromSchedule(s, speakerMap);
 
       const venueName = s.room && s.venue ? `${s.room} — ${s.venue}` : (s.room || s.venue || 'Main Hall');
 
@@ -320,16 +422,22 @@ const transformApiSchedules = (rawList, speakerMap = {}) => {
         tagColor: style.tagColor,
         tagBorder: style.tagBorder,
         icon: style.icon,
-        speaker: speakerName,
+        speaker: speakerDisplay,
+        speakers: speakersList,
         description: s.description || ''
       };
     });
 
-    const uniqueSpeakers = new Set(
-      sessions
-        .map((s) => s.speaker)
-        .filter((spk) => spk && !spk.includes('Hospitality') && !spk.includes('Committee'))
-    ).size;
+    const uniqueSpeakers = new Set();
+    sessions.forEach((s) => {
+      if (Array.isArray(s.speakers)) {
+        s.speakers.forEach((sp) => {
+          if (sp.name && !sp.name.includes('Hospitality') && !sp.name.includes('Committee') && !sp.name.includes('Desk')) {
+            uniqueSpeakers.add(sp.name);
+          }
+        });
+      }
+    });
 
     const uniqueCategories = new Set(sessions.map((s) => s.rawCategory)).size;
 
@@ -343,7 +451,7 @@ const transformApiSchedules = (rawList, speakerMap = {}) => {
       stats: {
         sessionsCount: String(sessions.length),
         sessionsLabel: 'Sessions',
-        speakersCount: String(uniqueSpeakers || sessions.length),
+        speakersCount: String(uniqueSpeakers.size || sessions.length),
         speakersLabel: 'Faculty',
         tracksCount: String(uniqueCategories || 1),
         tracksLabel: 'Tracks'
@@ -370,14 +478,7 @@ const transformApiSchedules = (rawList, speakerMap = {}) => {
       const duration = calculateDuration(timeStart, timeEnd);
       const style = getCategoryStyle(s.category);
 
-      let speakerName;
-      if (s.speaker_id) {
-        speakerName = speakerMap[s.speaker_id] || `Faculty #${s.speaker_id}`;
-      } else if (s.category && s.category.toLowerCase().includes('break')) {
-        speakerName = 'Hospitality & Refreshments';
-      } else {
-        speakerName = 'Organizing Committee';
-      }
+      const { speakersList, speakerDisplay } = getSpeakersFromSchedule(s, speakerMap);
 
       const venueName = s.room && s.venue ? `${s.room} — ${s.venue}` : (s.room || s.venue || 'Main Hall');
 
@@ -394,7 +495,8 @@ const transformApiSchedules = (rawList, speakerMap = {}) => {
           { label: s.category && s.category.toLowerCase().includes('break') ? 'BREAK' : 'ORAL', type: style.tagType },
           ...(s.category ? [{ label: s.category.toUpperCase(), type: style.tagType }] : [])
         ],
-        speaker: speakerName,
+        speaker: speakerDisplay,
+        speakers: speakersList,
         venue: venueName,
         hall: venueName
       };
@@ -782,7 +884,7 @@ export default function ProgrammePage() {
             
           </div>
 
-          {/* Search Input & Filter Button */}
+          {/* Search Input */}
           <div className="kz-programme-search-filter-group">
             <div className="kz-search-input-wrapper">
               <span className="kz-search-icon" aria-hidden="true">
@@ -807,80 +909,6 @@ export default function ProgrammePage() {
                 </button>
               )}
             </div>
-
-            <div className="kz-filter-wrapper">
-              <button
-                type="button"
-                className={`kz-filter-toggle-btn ${selectedTrack !== 'ALL' || isFilterOpen ? 'is-filtering' : ''}`}
-                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                aria-label="Filter programme options"
-                aria-expanded={isFilterOpen}
-              >
-                <LuFilter size={17} />
-                {selectedTrack !== 'ALL' && <span className="kz-filter-active-dot" />}
-              </button>
-
-              {isFilterOpen && (
-                <div className="kz-filter-dropdown-menu">
-                  <div className="kz-filter-dropdown-header">
-                    <span>Filter by Track</span>
-                    {selectedTrack !== 'ALL' && (
-                      <button
-                        type="button"
-                        className="kz-filter-reset-link"
-                        onClick={() => {
-                          setSelectedTrack('ALL');
-                          setIsFilterOpen(false);
-                        }}
-                      >
-                        Reset
-                      </button>
-                    )}
-                  </div>
-                  <ul className="kz-filter-dropdown-list">
-                    {allTracks.map((tr) => (
-                      <li key={tr.id}>
-                        <button
-                          type="button"
-                          className={`kz-filter-option-btn ${selectedTrack === tr.id ? 'is-selected' : ''}`}
-                          onClick={() => {
-                            setSelectedTrack(tr.id);
-                            setIsFilterOpen(false);
-                          }}
-                        >
-                          <span>{tr.label}</span>
-                          {selectedTrack === tr.id && (
-                            <LuChevronRight size={14} />
-                          )}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* ====================================================
-            3. TOPICS HORIZONTAL FILTER BAR (Matches User's Screenshot 2)
-           ==================================================== */}
-        <section className="kz-topics-horizontal-bar" aria-label="Topic Filter Pills">
-          <span className="kz-topics-bar-label">TOPICS</span>
-          <div className="kz-topics-pills-row">
-            {topicsBarItems.map((topicItem) => {
-              const isActive = selectedTopic === topicItem.id;
-              return (
-                <button
-                  key={topicItem.id}
-                  type="button"
-                  className={`kz-topic-pill-chip ${isActive ? 'is-active' : ''}`}
-                  onClick={() => setSelectedTopic(topicItem.id)}
-                >
-                  {topicItem.label}
-                </button>
-              );
-            })}
           </div>
         </section>
 
@@ -958,9 +986,10 @@ export default function ProgrammePage() {
                           onClick={() => setSelectedSession({
                             title: session.title,
                             time: `${session.timeStart} – ${session.timeEnd}`,
-                            duration: '45-60 min',
+                            duration: session.duration || '45-60 min',
                             venue: session.hall,
                             speaker: session.speaker,
+                            speakers: session.speakers,
                             desc: session.description,
                             tags: session.categoryLabel ? [{ label: session.categoryLabel, type: session.category }] : []
                           })}
@@ -1197,18 +1226,48 @@ export default function ProgrammePage() {
             </div>
 
             <div className="kz-speakers-list-grid">
-              {[
-                { name: 'Dr. James Carter', role: 'Surgical Oncologist & Operating Lead', sessions: 'Opening Keynote, HPB Reconstruction' },
-                { name: 'Dr. Maya Chen', role: 'Robotic GI & Colorectal Surgeon', sessions: 'Robotic Colorectal Surgery, Live Case' },
-                { name: 'Dr. Arjun Mehta', role: 'Director of Advanced Surgical Tech', sessions: 'AI in Surgical Decision Making, Endoscopy' },
-                { name: 'Dr. Sofia Laurent', role: 'Global Surgical Innovation Chair', sessions: 'Global Access, Next-Gen Robotics' },
-                { name: 'Dr. Daniel Okafor', role: 'Laparoscopic & Robotic Specialist', sessions: 'Next Era Panel, Autonomous Suite' },
-                { name: 'Dr. Aisha Rahman', role: 'Surgical VR & AI Simulation Chair', sessions: 'Surgeon Training, Education in AI' },
-                { name: 'Dr. Thomas Weber', role: 'KAIZENCON Scientific Committee President', sessions: 'Humanity in AI, Valedictory Keynote' }
-              ].map((spk, idx) => (
+              {(speakersList && speakersList.length > 0
+                ? speakersList.map((item) => {
+                    const first = item.first_name || '';
+                    const last = item.last_name || '';
+                    let name = `${first} ${last}`.trim();
+                    if (!name.toLowerCase().startsWith('dr.') && !name.toLowerCase().startsWith('dr ')) {
+                      name = `Dr. ${name}`;
+                    }
+                    const initials = name
+                      .replace(/^Dr\.\s*/i, '')
+                      .split(' ')
+                      .map((n) => n[0])
+                      .slice(0, 2)
+                      .join('')
+                      .toUpperCase() || 'FC';
+
+                    // Match schedules for this speaker
+                    const count = apiSchedules.filter((sch) =>
+                      Array.isArray(sch.speakers) &&
+                      sch.speakers.some((s) => s.id === item.id || s.speaker_id === item.speaker_id)
+                    ).length;
+
+                    return {
+                      name,
+                      role: item.designation || 'Faculty Specialist',
+                      initials,
+                      sessions: count > 0 ? `${count} Session${count > 1 ? 's' : ''}` : 'Keynote & Panel'
+                    };
+                  })
+                : [
+                    { name: 'Dr. James Carter', role: 'Surgical Oncologist & Operating Lead', initials: 'JC', sessions: 'Opening Keynote, HPB Reconstruction' },
+                    { name: 'Dr. Maya Chen', role: 'Robotic GI & Colorectal Surgeon', initials: 'MC', sessions: 'Robotic Colorectal Surgery, Live Case' },
+                    { name: 'Dr. Arjun Mehta', role: 'Director of Advanced Surgical Tech', initials: 'AM', sessions: 'AI in Surgical Decision Making, Endoscopy' },
+                    { name: 'Dr. Sofia Laurent', role: 'Global Surgical Innovation Chair', initials: 'SL', sessions: 'Global Access, Next-Gen Robotics' },
+                    { name: 'Dr. Daniel Okafor', role: 'Laparoscopic & Robotic Specialist', initials: 'DO', sessions: 'Next Era Panel, Autonomous Suite' },
+                    { name: 'Dr. Aisha Rahman', role: 'Surgical VR & AI Simulation Chair', initials: 'AR', sessions: 'Surgeon Training, Education in AI' },
+                    { name: 'Dr. Thomas Weber', role: 'KAIZENCON Scientific Committee President', initials: 'TW', sessions: 'Humanity in AI, Valedictory Keynote' }
+                  ]
+              ).map((spk, idx) => (
                 <div key={idx} className="kz-speaker-faculty-card">
                   <div className="kz-speaker-initials-badge">
-                    {spk.name.split(' ').map(n => n[0]).join('').replace('D', '')}
+                    {spk.initials}
                   </div>
                   <div className="kz-speaker-info-col">
                     <h3 className="kz-speaker-card-name">{spk.name}</h3>
@@ -1279,7 +1338,17 @@ export default function ProgrammePage() {
                     <LuUser size={13} style={{ marginRight: 5, verticalAlign: 'text-bottom' }} />
                     Faculty
                   </span>
-                  <span className="kz-modal-meta-val">{selectedSession.speaker}</span>
+                  {Array.isArray(selectedSession.speakers) && selectedSession.speakers.length > 1 ? (
+                    <div className="kz-modal-faculty-tags">
+                      {selectedSession.speakers.map((spk, idx) => (
+                        <span key={idx} className="kz-modal-faculty-badge">
+                          {spk.name}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="kz-modal-meta-val">{selectedSession.speaker}</span>
+                  )}
                 </div>
               </div>
 

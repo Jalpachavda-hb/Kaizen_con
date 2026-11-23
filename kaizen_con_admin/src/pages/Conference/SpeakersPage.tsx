@@ -879,8 +879,8 @@ export default function SpeakersPage() {
                 </h3>
                 <p className="text-[11px] text-gray-500">
                   {editingSpeaker
-                    ? `Updating ID #${editingSpeaker.id} via POST /api/speakers`
-                    : "Creates a new conference speaker record via POST /api/speakers"}
+                    ? `Updating ID #${editingSpeaker.id} `
+                    : "Creates a new conference speaker record "}
                 </p>
               </div>
               <button
