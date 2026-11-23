@@ -11,6 +11,7 @@ import AboutPage from './pages/AboutPage';
 import AiExperiencePage from './pages/AiExperiencePage';
 import ProgrammePage from './pages/ProgrammePage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsPage from './pages/TermsPage';
 import './components/Global.css';
 
 function App() {
@@ -40,6 +41,8 @@ function App() {
           <Route path="/contact-us" element={<ContactPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/terms-of-use" element={<TermsPage />} />
           {/* Fallback route back to home */}
           <Route path="*" element={<HomePage />} />
         </Routes>

@@ -204,6 +204,14 @@ export default function Footer() {
             >
               Privacy Policy
             </a>
+            <span className="kz-footer-legal-sep" aria-hidden="true" />
+            <a
+              href="/terms"
+              onClick={(e) => handleFooterNav(e, '/terms')}
+              className="kz-footer-legal-link"
+            >
+              Terms of Use
+            </a>
           </div>
         </div>
       </div>

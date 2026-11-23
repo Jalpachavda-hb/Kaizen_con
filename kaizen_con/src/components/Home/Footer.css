@@ -338,6 +338,15 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  padding-right: 96px;
+}
+
+.kz-footer-legal-sep {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  flex-shrink: 0;
 }
 
 .kz-footer-legal-link {
@@ -403,5 +412,9 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+  }
+
+  .kz-footer-legal-links {
+    padding-right: 0;
   }
 }

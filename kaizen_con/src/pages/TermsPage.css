@@ -1,0 +1,97 @@
+.kz-terms-page .kz-terms-intro-banner {
+  border-left-color: #AA2D7B;
+  align-items: flex-start;
+}
+
+.kz-terms-page .kz-terms-intro-banner .kz-privacy-summary-icon {
+  background: #FDF2F8;
+  color: #AA2D7B;
+}
+
+.kz-terms-intro-copy {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #334155;
+}
+
+.kz-terms-page .kz-privacy-policy-block {
+  scroll-margin-top: 110px;
+}
+
+.kz-terms-page .kz-privacy-toc-nav {
+  gap: 2px;
+}
+
+.kz-terms-page .kz-privacy-toc-link {
+  padding: 6px 10px;
+}
+
+.kz-terms-page .kz-privacy-sidebar-card {
+  margin-top: 14px;
+  padding: 14px 14px 12px;
+}
+
+.kz-terms-page .kz-terms-safety {
+  border-color: rgba(170, 45, 123, 0.28);
+  box-shadow: 0 8px 24px rgba(170, 45, 123, 0.06);
+}
+
+.kz-terms-page .kz-privacy-bullet-list,
+.kz-terms-ordered-list {
+  display: block;
+  margin: 4px 0 8px;
+  padding-left: 1.35rem;
+}
+
+.kz-terms-page .kz-privacy-bullet-list {
+  list-style: disc outside;
+}
+
+.kz-terms-ordered-list {
+  list-style: decimal outside;
+}
+
+.kz-terms-page .kz-privacy-bullet-list li,
+.kz-terms-ordered-list li {
+  display: list-item;
+  margin: 0 0 10px;
+  padding-left: 6px;
+  font-size: 0.95rem;
+  line-height: 1.62;
+  color: #334155;
+}
+
+.kz-terms-page .kz-privacy-bullet-list li::marker,
+.kz-terms-ordered-list li::marker {
+  color: #AA2D7B;
+  font-weight: 700;
+}
+
+.kz-terms-page .kz-privacy-block-body a {
+  color: #AA2D7B;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.kz-terms-page .kz-privacy-block-body a:hover {
+  color: #7C3369;
+}
+
+@media (max-width: 1024px) {
+  .kz-terms-page .kz-privacy-sidebar {
+    position: static;
+  }
+
+  .kz-terms-page .kz-privacy-sidebar-inner {
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 640px) {
+  .kz-terms-page .kz-privacy-toc-link span {
+    font-size: 0.84rem;
+  }
+}
