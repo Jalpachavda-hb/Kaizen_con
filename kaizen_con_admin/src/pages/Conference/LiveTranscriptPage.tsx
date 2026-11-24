@@ -5,7 +5,6 @@ import { useToast } from "../../context/ToastContext";
 import logoUrl from "../../assets/images/logokaizecon.png";
 import {
   transcribeAudio,
-  fetchAudioFromUrl,
   groupWordsIntoSpeakerTurns,
   formatTimestamp,
   getElevenLabsApiKey,
@@ -21,10 +20,9 @@ import {
   PlayIcon,
   StopIcon,
   CloudUploadIcon,
-  KaiIcon,
 } from "../../icons/conferenceIcons";
 
-type InputTab = "record" | "upload" | "url";
+type InputTab = "record" | "upload";
 type ViewTab = "formatted" | "plain";
 type LiveTurn = DiarizedTurn & { pending?: boolean };
 
@@ -88,9 +86,6 @@ export default function LiveTranscriptPage() {
   // Input Selection Tab
   const [activeTab, setActiveTab] = useState<InputTab>("record");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [audioUrlInput, setAudioUrlInput] = useState<string>(
-    "https://storage.googleapis.com/eleven-public-cdn/audio/marketing/nicole.mp3"
-  );
 
   // Live Microphone & Streaming Recognition State
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -664,15 +659,6 @@ export default function LiveTranscriptPage() {
           return;
         }
         audioBlobToSend = selectedFile;
-      } else if (activeTab === "url") {
-        if (!audioUrlInput.trim()) {
-          toastError("Please enter an audio file URL.");
-          setIsTranscribing(false);
-          return;
-        }
-        info("Downloading audio from URL...");
-        audioBlobToSend = await fetchAudioFromUrl(audioUrlInput.trim());
-        setActiveAudioSrc(audioUrlInput.trim());
       }
 
       if (!audioBlobToSend) {
@@ -887,31 +873,6 @@ export default function LiveTranscriptPage() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2.5">
-            {/* ElevenLabs Connected Badge */}
-            <button
-              type="button"
-              onClick={() => {
-                setTempApiKey(apiKey);
-                setShowApiKeyModal(true);
-              }}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer ${apiKey
-                ? "text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800"
-                : "text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800"
-                }`}
-            >
-              <span className="w-2 h-2 rounded-full bg-current" />
-              <span>{apiKey ? "ElevenLabs Connected" : "API Key (.env)"}</span>
-            </button>
-
-            {/* Back to KAi */}
-            <Link
-              to="/kai"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              <KaiIcon className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-              <span className="hidden sm:inline">Back to KAi</span>
-            </Link>
-
             {/* Close Window / Tab Button */}
             <button
               type="button"
@@ -959,16 +920,6 @@ export default function LiveTranscriptPage() {
                         }`}
                     >
                       File Upload
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab("url")}
-                      className={`px-3 py-1 rounded-md transition-all ${activeTab === "url"
-                        ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-xs font-semibold"
-                        : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                        }`}
-                    >
-                      Audio URL
                     </button>
                   </div>
                 </div>
@@ -1101,64 +1052,6 @@ export default function LiveTranscriptPage() {
                       onClick={handleTranscribeBatch}
                       disabled={isTranscribing || !selectedFile}
                       className={`w-full py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer ${isTranscribing || !selectedFile
-                        ? "bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed"
-                        : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-lg"
-                        }`}
-                    >
-                      {isTranscribing ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          <span>Transcribing with ElevenLabs Scribe...</span>
-                        </>
-                      ) : (
-                        <>
-                          <WaveformIcon className="w-5 h-5" />
-                          <span>Convert Audio to Text</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                )}
-
-                {/* TAB 3: AUDIO URL / SAMPLE */}
-                {activeTab === "url" && (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                        Audio Stream or File URL
-                      </label>
-                      <input
-                        type="url"
-                        value={audioUrlInput}
-                        onChange={(e) => setAudioUrlInput(e.target.value)}
-                        placeholder="https://.../speech.mp3"
-                        className="w-full px-3 py-2 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                      />
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-gray-400">Sample Audio:</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setAudioUrlInput(
-                            "https://storage.googleapis.com/eleven-public-cdn/audio/marketing/nicole.mp3"
-                          );
-                          setActiveAudioSrc(
-                            "https://storage.googleapis.com/eleven-public-cdn/audio/marketing/nicole.mp3"
-                          );
-                        }}
-                        className="text-indigo-600 dark:text-indigo-400 hover:underline font-medium cursor-pointer"
-                      >
-                        Load ElevenLabs Nicole Demo
-                      </button>
-                    </div>
-
-                    {/* Transcribe Batch Button */}
-                    <button
-                      type="button"
-                      onClick={handleTranscribeBatch}
-                      disabled={isTranscribing || !audioUrlInput.trim()}
-                      className={`w-full py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer ${isTranscribing || !audioUrlInput.trim()
                         ? "bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed"
                         : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-lg"
                         }`}

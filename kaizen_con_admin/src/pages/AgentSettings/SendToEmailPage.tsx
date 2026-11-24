@@ -847,10 +847,6 @@ export default function SendToEmailPage() {
               </div>
             )}
           </div>
-
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            Showing <span className="font-semibold text-gray-800 dark:text-gray-200">{filteredContacts.length}</span> of {contacts.length} recipients
-          </div>
         </div>
 
         {/* Error notice if fetch failed */}

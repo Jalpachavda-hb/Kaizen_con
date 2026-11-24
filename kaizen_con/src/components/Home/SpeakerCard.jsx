@@ -46,11 +46,22 @@ export default function SpeakerCard({
     }
   };
 
+  const handleCardKeyDown = (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleCardClick();
+    }
+  };
+
   return (
     <article
       data-speaker-id={id}
       className={`kz-faculty-card ${className}`}
       onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={`View details for ${name}`}
     >
       {/* 1. TOP ROW: AVATAR + VERTICAL DIVIDER + NAME & DESIGNATION */}
       <div className="kz-faculty-header">

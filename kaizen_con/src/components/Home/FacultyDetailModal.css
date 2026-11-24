@@ -1,0 +1,144 @@
+.kz-spk-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(23, 11, 28, 0.65);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10050;
+  padding: 20px;
+  animation: kzFadeIn 0.2s ease-out;
+}
+
+.kz-spk-modal-card {
+  background-color: #FFFFFF;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 620px;
+  padding: 32px 30px;
+  box-sizing: border-box;
+  position: relative;
+  box-shadow: 0 20px 48px rgba(35, 17, 43, 0.28);
+  animation: kzScaleUp 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@keyframes kzFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes kzScaleUp {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.kz-spk-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: #F6F2F8;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6C5C74;
+  transition: all 0.2s ease;
+}
+
+.kz-spk-modal-close:hover {
+  background-color: #B63473;
+  color: #FFFFFF;
+}
+
+.kz-spk-modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 20px;
+  padding-right: 30px;
+}
+
+.kz-spk-modal-title-wrap {
+  flex: 1;
+}
+
+.kz-spk-modal-name {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #2D1A33;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.kz-spk-modal-role {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #4C3955;
+  margin: 0 0 4px 0;
+}
+
+.kz-spk-modal-institute {
+  font-size: 0.86rem;
+  color: #796C81;
+  margin: 0;
+}
+
+.kz-spk-modal-divider {
+  height: 1px;
+  background-color: #F0E8F2;
+  margin: 18px 0;
+}
+
+.kz-spk-modal-section {
+  margin-bottom: 18px;
+}
+
+.kz-spk-modal-topic {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #381942;
+  margin: 4px 0 0 0;
+  line-height: 1.35;
+}
+
+.kz-spk-modal-bio {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: #55445D;
+  margin: 6px 0 0 0;
+}
+
+.kz-spk-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 18px;
+  border-top: 1px solid #F0E8F2;
+  margin-top: 24px;
+}
+
+.kz-spk-modal-cta-btn {
+  background-color: #B63473;
+  color: #FFFFFF;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.kz-spk-modal-cta-btn:hover {
+  background-color: #9D2760;
+  color: #FFFFFF;
+}

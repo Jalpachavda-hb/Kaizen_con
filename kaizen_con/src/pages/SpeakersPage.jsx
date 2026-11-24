@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import SpeakerCard from '../components/Home/SpeakerCard';
+import FacultyDetailModal from '../components/Home/FacultyDetailModal';
 import { getSpeakers, getSchedules, getImageUrl } from '../Apipath';
 import './SpeakersPage.css';
 
@@ -288,125 +289,10 @@ export default function SpeakersPage() {
       {/* ----------------------------------------------------
           6. SPEAKER DETAILS MODAL (Real dynamic faculty data)
           ---------------------------------------------------- */}
-      {activeModalSpeaker && (
-        <div
-          className="kz-spk-modal-backdrop"
-          onClick={() => setActiveModalSpeaker(null)}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="modal-speaker-name"
-        >
-          <div
-            className="kz-spk-modal-card"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Close Button */}
-            <button
-              type="button"
-              className="kz-spk-modal-close"
-              onClick={() => setActiveModalSpeaker(null)}
-              aria-label="Close modal"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-
-            {/* Modal Header */}
-            <div className="kz-spk-modal-header">
-              <div
-                className="kz-faculty-avatar-ring"
-                style={{ width: '70px', height: '70px', minWidth: '70px' }}
-              >
-                {activeModalSpeaker.image ? (
-                  <img
-                    src={activeModalSpeaker.image}
-                    alt={activeModalSpeaker.name}
-                    className="kz-faculty-avatar-img"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                ) : (
-                  <div className="kz-faculty-avatar-fallback" style={{ fontSize: '1.4rem' }}>
-                    {activeModalSpeaker.initials}
-                  </div>
-                )}
-              </div>
-              <div className="kz-spk-modal-title-wrap">
-                <h3 id="modal-speaker-name" className="kz-spk-modal-name">
-                  {activeModalSpeaker.name}
-                </h3>
-                <p className="kz-spk-modal-role">{activeModalSpeaker.role}</p>
-                {activeModalSpeaker.institution && (
-                  <p className="kz-spk-modal-institute">
-                    {activeModalSpeaker.institution}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="kz-spk-modal-divider" />
-
-            {/* Title / Topic */}
-            {activeModalSpeaker.topic && (
-              <div className="kz-spk-modal-section">
-                <span className="kz-faculty-topic-label">SESSION TOPIC</span>
-                <h4 className="kz-spk-modal-topic">{activeModalSpeaker.topic}</h4>
-              </div>
-            )}
-
-            {/* Description / Bio */}
-            {activeModalSpeaker.bio && (
-              <div className="kz-spk-modal-section">
-                <span className="kz-faculty-topic-label">FACULTY PROFILE</span>
-                <p className="kz-spk-modal-bio">
-                  {activeModalSpeaker.bio}
-                </p>
-              </div>
-            )}
-
-            {/* Session Info & Footer */}
-            <div className="kz-spk-modal-footer">
-              <div className="kz-faculty-sessions-row" style={{ margin: 0 }}>
-                <svg
-                  className="kz-faculty-calendar-icon"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-                <span>
-                  {activeModalSpeaker.eventDate ? `${activeModalSpeaker.eventDate} • ` : ''}
-                  {activeModalSpeaker.sessions}
-                  {activeModalSpeaker.room ? ` • ${activeModalSpeaker.room}` : ''}
-                  {activeModalSpeaker.venue ? ` (${activeModalSpeaker.venue})` : ''}
-                </span>
-              </div>
-
-              <div className="kz-spk-modal-actions">
-                <Link
-                  to="/contact"
-                  className="kz-spk-modal-cta-btn"
-                  onClick={() => setActiveModalSpeaker(null)}
-                >
-                  Connect with Faculty Desk
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <FacultyDetailModal
+        speaker={activeModalSpeaker}
+        onClose={() => setActiveModalSpeaker(null)}
+      />
     </div>
   );
 }

@@ -18,6 +18,83 @@ export interface CampaignSummary {
   created_at?: string;
 }
 
+const logStatusText = (log: any): string =>
+  String(log?.message_status || log?.status || "").toLowerCase();
+
+const matchesStatusFilter = (log: any, filter: string): boolean => {
+  if (filter === "All") return true;
+  const status = logStatusText(log);
+  const direction = String(log?.direction || "").toLowerCase();
+
+  if (filter === "Sent") return status.includes("sent");
+  if (filter === "Blocked") return status.includes("block");
+  if (filter === "Failed") return status.includes("fail") || status.includes("err");
+  if (filter === "Pending") return status.includes("pend");
+  if (filter === "Received") {
+    return (
+      status.includes("receive") ||
+      status.includes("reply") ||
+      direction === "inbound" ||
+      direction === "received"
+    );
+  }
+  return true;
+};
+
+const matchesSearch = (log: any, query: string): boolean => {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  const contactId = String(log?.contact_id || log?.recipient_id || "").toLowerCase();
+  const name = String(log?.name || log?.recipient_name || log?.contact_name || "").toLowerCase();
+  const email = String(log?.email || log?.recipient || log?.contact_email || log?.recipient_email || "").toLowerCase();
+  const subject = String(log?.subject || log?.message || "").toLowerCase();
+  const status = logStatusText(log);
+  return (
+    name.includes(q) ||
+    email.includes(q) ||
+    subject.includes(q) ||
+    status.includes(q) ||
+    contactId.includes(q)
+  );
+};
+
+const fetchAllCampaignLogs = async (campaignId: string) => {
+  const pageSize = 500;
+  const first = await getCampaignLogs(campaignId, 0, pageSize);
+  const total = Number(first.count ?? first.total_recipients ?? first.logs?.length ?? 0);
+  const collected: any[] = [];
+  const seen = new Set<string>();
+
+  const addLogs = (batch: any[]) => {
+    let added = 0;
+    batch.forEach((log) => {
+      const key = String(
+        log?.id ||
+        `${log?.contact_id || ""}|${log?.email || log?.recipient || log?.recipient_email || ""}|${log?.created_at || log?.timestamp || ""}|${log?.subject || ""}|${log?.message_status || log?.status || ""}`
+      );
+      if (seen.has(key)) return;
+      seen.add(key);
+      collected.push(log);
+      added += 1;
+    });
+    return added;
+  };
+
+  addLogs(Array.isArray(first.logs) ? first.logs : []);
+  let offset = collected.length;
+
+  while (collected.length < total && offset < 20000) {
+    const next = await getCampaignLogs(campaignId, offset, pageSize);
+    const batch = Array.isArray(next.logs) ? next.logs : [];
+    if (batch.length === 0) break;
+    const added = addLogs(batch);
+    if (added === 0) break;
+    offset += batch.length;
+  }
+
+  return { logs: collected, metrics: first };
+};
+
 const formatDate = (dateString?: string | null): string => {
   if (!dateString) return "—";
   try {
@@ -43,7 +120,10 @@ export default function CampaignLogsPage() {
 
   const [campaign, setCampaign] = useState<CampaignSummary | null>(null);
   const [logs, setLogs] = useState<any[]>([]);
+  const [allLogs, setAllLogs] = useState<any[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadingAll, setLoadingAll] = useState<boolean>(false);
+  const [reloadKey, setReloadKey] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
 
   // Search & Filters
@@ -124,9 +204,51 @@ export default function CampaignLogsPage() {
     }
   }, [id, currentPage, pageSize]);
 
+  const isFiltering = search.trim() !== "" || statusFilter !== "All";
+
   useEffect(() => {
+    setAllLogs(null);
+  }, [id]);
+
+  useEffect(() => {
+    if (!id || isFiltering) return;
     fetchLogsData(currentPage, pageSize);
-  }, [id, currentPage, pageSize, fetchLogsData]);
+  }, [id, currentPage, pageSize, isFiltering, fetchLogsData]);
+
+  useEffect(() => {
+    if (!id || !isFiltering || allLogs) return;
+    let cancelled = false;
+
+    const loadAll = async () => {
+      setLoadingAll(true);
+      setError(null);
+      try {
+        const result = await fetchAllCampaignLogs(id);
+        if (cancelled) return;
+        setAllLogs(result.logs);
+        const data = result.metrics;
+        setMetrics({
+          total_recipients: Number(data.total_recipients ?? 0),
+          sent_count: Number(data.sent_count ?? 0),
+          pending_count: Number(data.pending_count ?? 0),
+          received_count: Number(data.received_count ?? 0),
+          first_sent_at: data.first_sent_at ?? null,
+          last_sent_at: data.last_sent_at ?? null,
+        });
+      } catch (err: any) {
+        if (!cancelled) {
+          setError(err?.message || "Failed to search all campaign logs.");
+        }
+      } finally {
+        if (!cancelled) setLoadingAll(false);
+      }
+    };
+
+    loadAll();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, isFiltering, allLogs, reloadKey]);
 
   // Copy helpers
   const handleCopyText = (text: string, label: string) => {
@@ -134,42 +256,20 @@ export default function CampaignLogsPage() {
     success(`${label} copied to clipboard`);
   };
 
-  // Filtered Logs
   const filteredLogs = useMemo(() => {
-    return logs.filter((log: any) => {
-      const contactId = (log.contact_id || log.recipient_id || "").trim();
-      const name = (log.name || log.recipient_name || log.contact_name || "").toLowerCase();
-      const email = (log.email || log.recipient || log.contact_email || log.recipient_email || "").toLowerCase();
-      const subject = (log.subject || log.message || "").toLowerCase();
-      const status = (log.message_status || log.status || "").toLowerCase();
-      const cid = contactId.toLowerCase();
-      const str = typeof log === "string" ? log.toLowerCase() : JSON.stringify(log).toLowerCase();
+    const source = isFiltering ? (allLogs ?? []) : logs;
+    return source.filter(
+      (log: any) => matchesStatusFilter(log, statusFilter) && matchesSearch(log, search)
+    );
+  }, [allLogs, isFiltering, logs, search, statusFilter]);
 
-      // Status Filter
-      if (statusFilter !== "All") {
-        if (statusFilter === "Sent" && !status.includes("sent")) return false;
-        if (statusFilter === "Blocked" && !status.includes("block")) return false;
-        if (statusFilter === "Failed" && (!status.includes("fail") && !status.includes("err"))) return false;
-        if (statusFilter === "Pending" && !status.includes("pend")) return false;
-        if (statusFilter === "Received" && !status.includes("receive")) return false;
-      }
+  const pagedLogs = useMemo(() => {
+    if (!isFiltering) return filteredLogs;
+    const start = (currentPage - 1) * pageSize;
+    return filteredLogs.slice(start, start + pageSize);
+  }, [currentPage, filteredLogs, isFiltering, pageSize]);
 
-      // Search Query
-      if (search.trim()) {
-        const q = search.trim().toLowerCase();
-        const matches =
-          name.includes(q) ||
-          email.includes(q) ||
-          subject.includes(q) ||
-          status.includes(q) ||
-          cid.includes(q) ||
-          str.includes(q);
-        if (!matches) return false;
-      }
-
-      return true;
-    });
-  }, [logs, search, statusFilter]);
+  const paginationTotal = isFiltering ? filteredLogs.length : totalCount;
 
   // Reset page when search or statusFilter changes
   useEffect(() => {
@@ -248,13 +348,17 @@ export default function CampaignLogsPage() {
 
             <button
               type="button"
-              onClick={() => fetchLogsData(currentPage, pageSize)}
+              onClick={() => {
+                setAllLogs(null);
+                setReloadKey((key) => key + 1);
+                if (!isFiltering) fetchLogsData(currentPage, pageSize);
+              }}
               disabled={loading}
               className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
               title="Refresh logs from API"
             >
               <svg
-                className={`w-3.5 h-3.5 text-gray-600 dark:text-gray-400 ${loading ? "animate-spin" : ""}`}
+                className={`w-3.5 h-3.5 text-gray-600 dark:text-gray-400 ${(loading || loadingAll) ? "animate-spin" : ""}`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -348,7 +452,7 @@ export default function CampaignLogsPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Filter logs by recipient name, email, contact ID, status, or subject..."
+              placeholder="Search all logs by name, email, contact ID, status, or subject..."
               className="w-full pl-10 pr-9 py-2 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#AA2D7B]/20 focus:border-[#AA2D7B] transition"
             />
             {search && (
@@ -390,7 +494,11 @@ export default function CampaignLogsPage() {
             <span>{error}</span>
             <button
               type="button"
-              onClick={() => fetchLogsData(currentPage, pageSize)}
+              onClick={() => {
+                setAllLogs(null);
+                setReloadKey((key) => key + 1);
+                if (!isFiltering) fetchLogsData(currentPage, pageSize);
+              }}
               className="px-3 py-1 rounded-md bg-rose-600 text-white font-medium text-xs hover:bg-rose-700"
             >
               Retry
@@ -399,13 +507,15 @@ export default function CampaignLogsPage() {
         )}
 
         {/* Loading Spinner */}
-        {loading ? (
+        {(isFiltering ? loadingAll && !allLogs : loading) ? (
           <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-gray-800/40 rounded-xl border border-gray-200 dark:border-gray-800">
             <svg className="w-8 h-8 text-[#AA2D7B] animate-spin mb-3" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
             </svg>
-            <p className="text-xs text-gray-500">Loading campaign logs from Email Agent API...</p>
+            <p className="text-xs text-gray-500">
+              {isFiltering ? "Searching all campaign logs..." : "Loading campaign logs from Email Agent API..."}
+            </p>
           </div>
         ) : (
           /* Structured Table View */
@@ -421,14 +531,20 @@ export default function CampaignLogsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800/60">
-                {filteredLogs.length === 0 ? (
+                {pagedLogs.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="py-16 text-center text-xs text-gray-400">
-                      {search ? `No logs match your search "${search}".` : "No logs recorded yet for this campaign."}
+                      {search && statusFilter !== "All"
+                        ? `No ${statusFilter.toLowerCase()} logs match "${search}".`
+                        : search
+                          ? `No logs match your search "${search}".`
+                          : statusFilter !== "All"
+                            ? `No ${statusFilter.toLowerCase()} logs found.`
+                            : "No logs recorded yet for this campaign."}
                     </td>
                   </tr>
                 ) : (
-                  filteredLogs.map((log: any, idx: number) => {
+                  pagedLogs.map((log: any, idx: number) => {
                     const contactId = (log.contact_id || log.recipient_id || "").trim();
                     const contactName = log.name || log.recipient_name || log.contact_name || (contactId ? `Contact (${contactId.slice(0, 8)}...)` : "Unknown Recipient");
                     const contactEmail = log.email || log.recipient || log.contact_email || log.recipient_email || "—";
@@ -533,7 +649,7 @@ export default function CampaignLogsPage() {
             {/* Logs Pagination Bar */}
             <TablePagination
               currentPage={currentPage}
-              totalItems={totalCount}
+              totalItems={paginationTotal}
               pageSize={pageSize}
               onPageChange={(newPage) => {
                 setCurrentPage(newPage);

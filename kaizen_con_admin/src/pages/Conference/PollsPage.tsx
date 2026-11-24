@@ -44,7 +44,6 @@ export default function PollsPage() {
   // Polls State
   const [polls, setPolls] = useState<PollItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   // Filtering & Search
@@ -115,7 +114,6 @@ export default function PollsPage() {
   // Fetch Polls List: calls unified getPolls() WITHOUT passing ID -> GET /polling/api/admin/polls
   const fetchPolls = useCallback(async (showToast = false) => {
     try {
-      if (showToast) setIsRefreshing(true);
       const remotePolls = await getPolls(); // No ID passed -> fetches full polls list
       if (Array.isArray(remotePolls)) {
         const mapped: PollItem[] = remotePolls.map((p: any) => ({
@@ -159,7 +157,6 @@ export default function PollsPage() {
       }
     } finally {
       setIsLoading(false);
-      setIsRefreshing(false);
     }
   }, [success, toastError]);
 
@@ -829,60 +826,6 @@ export default function PollsPage() {
         onSearchChange={setSearch}
         actionButton={
           <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-            {/* WebSocket Connection Status Pill */}
-            {connectionStatus === "connected" && (
-              <div
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs font-semibold text-emerald-700 dark:text-emerald-300 shadow-2xs"
-                title="Connected to WebSocket for instant live voting interactions"
-              >
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                <span className="hidden sm:inline">Live WS Connected</span>
-                <span className="sm:hidden">Live WS</span>
-              </div>
-            )}
-            {connectionStatus === "connecting" && (
-              <div
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs font-semibold text-amber-700 dark:text-amber-300"
-                title="Connecting to WebSocket live stream..."
-              >
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                <span className="hidden sm:inline">Connecting WS...</span>
-                <span className="sm:hidden">Connecting</span>
-              </div>
-            )}
-            {connectionStatus === "disconnected" && (
-              <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-600 dark:text-gray-300">
-                <span className="w-2 h-2 rounded-full bg-gray-400"></span>
-                <span>WS Offline</span>
-                <button
-                  type="button"
-                  onClick={connectWebSocket}
-                  className="ml-1 text-[#AA2D7B] hover:underline font-bold cursor-pointer"
-                >
-                  Reconnect
-                </button>
-              </div>
-            )}
-
-            <button
-              onClick={() => fetchPolls(true)}
-              disabled={isRefreshing}
-              title="Refresh polls list from API"
-              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl shadow-xs transition cursor-pointer disabled:opacity-60"
-            >
-              <svg
-                className={`w-4 h-4 text-gray-500 ${isRefreshing ? "animate-spin text-[#AA2D7B]" : ""}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              <span>{isRefreshing ? "Refreshing..." : "Refresh"}</span>
-            </button>
             <button
               onClick={handleOpenAddModal}
               className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-[#AA2D7B] hover:bg-[#8e2466] active:scale-98 rounded-xl shadow-sm transition-all duration-150 cursor-pointer"
@@ -1029,7 +972,6 @@ export default function PollsPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                {/* Auto-Sync Toggle */}
                 <button
                   type="button"
                   onClick={() => setIsLiveAutoSync((prev) => !prev)}
@@ -1042,20 +984,6 @@ export default function PollsPage() {
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${isLiveAutoSync ? "bg-emerald-500 animate-pulse" : "bg-gray-400"}`}></span>
                   <span>{isLiveAutoSync ? "Live (3s)" : "Paused"}</span>
-                </button>
-
-                {/* Manual Sync Button calling getPolls(currentPoll.id) */}
-                <button
-                  type="button"
-                  onClick={() => syncPollResults(currentPoll.id)}
-                  disabled={isSyncingLive}
-                  title="Sync live results via GET /polling/api/polls/{id}"
-                  className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg shadow-2xs transition cursor-pointer disabled:opacity-50"
-                >
-                  <svg className={`w-3.5 h-3.5 ${isSyncingLive ? "animate-spin text-[#AA2D7B]" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  <span>Sync Now</span>
                 </button>
               </div>
             </div>

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import SpeakerCard from './SpeakerCard';
+import FacultyDetailModal from './FacultyDetailModal';
 import './SpeakersSection.css';
 import { getSpeakers, getSchedules, getImageUrl } from '../../Apipath';
 
 export default function SpeakersSection() {
-  const navigate = useNavigate();
   const [speakers, setSpeakers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeSpeaker, setActiveSpeaker] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -73,15 +74,21 @@ export default function SpeakersSection() {
             ? `${sessionCount} Session${sessionCount > 1 ? 's' : ''}`
             : '1 Session';
 
+          const primarySchedule = speakerSchedules[0] || null;
+
           return {
             id: spk.id || spk.speaker_id || `spk-${idx}`,
             initials,
             image: spk.profile_image_url ? getImageUrl(spk.profile_image_url) : '',
             name: fullName,
             role: spk.designation || 'Faculty Specialist',
+            institution: spk.institution || spk.institute || '',
             topic,
             sessions,
-            bio: spk.bio || '',
+            bio: spk.bio || spk.description || '',
+            eventDate: primarySchedule?.event_date || spk.event_date || '',
+            room: primarySchedule?.room && primarySchedule.room !== 'string' ? primarySchedule.room : '',
+            venue: primarySchedule?.venue && primarySchedule.venue !== 'string' ? primarySchedule.venue : '',
           };
         });
 
@@ -159,7 +166,7 @@ export default function SpeakersSection() {
                 topic={spk.topic}
                 sessions={spk.sessions}
                 bio={spk.bio}
-                onViewDetails={() => navigate('/faculty')}
+                onViewDetails={() => setActiveSpeaker(spk)}
               />
             ))}
           </div>
@@ -169,6 +176,11 @@ export default function SpeakersSection() {
           </div>
         )}
       </div>
+
+      <FacultyDetailModal
+        speaker={activeSpeaker}
+        onClose={() => setActiveSpeaker(null)}
+      />
     </section>
   );
 }
