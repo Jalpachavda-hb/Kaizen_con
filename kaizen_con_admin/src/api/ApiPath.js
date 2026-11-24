@@ -1499,10 +1499,31 @@ export const createTemplate = async (templateData) => {
 
       // Attach file as both docx_file and html_file for dual compatibility
       // (http://192.168.29.201:8000 expects docx_file, while https://api.kaizencon.in expects html_file)
-      const file = templateData.docx_file || templateData.file || templateData.doc_file || templateData.html_file;
-      if (file instanceof File || file instanceof Blob) {
-        body.append('docx_file', file, file.name || 'template.docx');
-        body.append('html_file', file, file.name || 'template.docx');
+      const isUpload = (file) => file instanceof File || file instanceof Blob;
+      const docxCandidate = templateData.docx_file || templateData.file || templateData.doc_file;
+      const htmlCandidate = templateData.html_file;
+
+      if (isUpload(docxCandidate) && isUpload(htmlCandidate) && docxCandidate !== htmlCandidate) {
+        body.append('docx_file', docxCandidate, docxCandidate.name || 'template.docx');
+        body.append('html_file', htmlCandidate, htmlCandidate.name || 'template.html');
+      } else {
+        const file = isUpload(docxCandidate) ? docxCandidate : htmlCandidate;
+        if (isUpload(file)) {
+          const fileName = file.name || 'template.docx';
+          const lowerName = String(fileName).toLowerCase();
+          const isHtml = lowerName.endsWith('.html') || lowerName.endsWith('.htm') || file.type === 'text/html';
+          if (isHtml) {
+            body.append('html_file', file, fileName);
+            body.append('docx_file', file, fileName);
+          } else {
+            body.append('docx_file', file, fileName);
+            body.append('html_file', file, fileName);
+          }
+        }
+      }
+
+      if (typeof templateData.html_body === 'string' && templateData.html_body.trim()) {
+        body.append('html_body', templateData.html_body);
       }
     }
 

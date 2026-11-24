@@ -70,11 +70,10 @@ export default function TemplatesPage() {
       return;
     }
 
-    const fileName = file.name.toLowerCase();
-    if (!fileName.endsWith(".docx") && !fileName.endsWith(".doc")) {
+    if (!isHtmlFile(file) && !isDocxFile(file)) {
       setDocxFile(null);
-      setDocxFileError("Invalid file type: Please upload a Microsoft Word document (.docx).");
-      toastError("Please upload a Microsoft Word document (.docx).");
+      setDocxFileError("Invalid file type: Please upload an HTML template (.html, .htm) or a Word document (.docx).");
+      toastError("Please upload an HTML (.html) or Word (.docx) file.");
       return;
     }
 
@@ -371,15 +370,14 @@ export default function TemplatesPage() {
       return;
     }
     if (!docxFile) {
-      setDocxFileError("Word document (.docx) is required. Please upload a file under 25 MB.");
-      toastError("Please upload a Word document (.docx) for the email body.");
+      setDocxFileError("An HTML template (.html) or Word document (.docx) is required. Please upload a file under 25 MB.");
+      toastError("Please upload an HTML template or a Word document for the email body.");
       return;
     }
 
-    const fileName = docxFile.name.toLowerCase();
-    if (!fileName.endsWith(".docx") && !fileName.endsWith(".doc")) {
-      setDocxFileError("Invalid file format. Only Microsoft Word (.docx) documents are supported.");
-      toastError("Invalid file type. Please upload a Microsoft Word document (.docx).");
+    if (!isHtmlFile(docxFile) && !isDocxFile(docxFile)) {
+      setDocxFileError("Invalid file format. Upload an HTML template (.html, .htm) or a Microsoft Word document (.docx).");
+      toastError("Invalid file type. Please upload an HTML or Word file.");
       return;
     }
 
@@ -397,8 +395,20 @@ export default function TemplatesPage() {
         subject: createFormData.subject.trim(),
         purpose: createFormData.purpose,
         active: createFormData.active,
-        docx_file: docxFile,
       };
+
+      if (isHtmlFile(docxFile)) {
+        const htmlText = await docxFile.text();
+        if (!htmlText.trim()) {
+          setDocxFileError("The HTML file is empty. Please choose a file that contains your email template.");
+          toastError("The HTML file is empty.");
+          return;
+        }
+        payload.html_file = docxFile;
+        payload.html_body = htmlText;
+      } else {
+        payload.docx_file = docxFile;
+      }
 
       const res = await createTemplate(payload);
       const resItem = res?.results?.[0] || (res?.id ? res : null);
@@ -1385,11 +1395,11 @@ export default function TemplatesPage() {
                     <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight">Create Email Template</h2>
                     <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-800">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                      DOCX Parser
+                      HTML / DOCX
                     </span>
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    Configure template metadata and upload a Word document (.docx) to automatically compose the email layout.
+                    Configure template metadata and upload an HTML template (.html) or a Word document (.docx).
                   </p>
                 </div>
               </div>
@@ -1541,11 +1551,11 @@ export default function TemplatesPage() {
                 </div>
               </div>
 
-              {/* Row 4: Word Document (.docx) Upload Area */}
+              {/* Row 4: HTML template or Word document upload */}
               <div className="space-y-2 pt-1">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
-                    Email Body Word Document (.docx) <span className="text-rose-500">*</span>
+                    Email Body Template (.html or .docx) <span className="text-rose-500">*</span>
                   </label>
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400">
@@ -1553,7 +1563,7 @@ export default function TemplatesPage() {
                     </span>
                     <span className="hidden sm:inline-block text-gray-300 dark:text-gray-600">•</span>
                     <span className="hidden sm:inline-block text-[11px] font-semibold text-[#A92E83] dark:text-purple-400">
-                      docx_file
+                      html / docx
                     </span>
                   </div>
                 </div>
@@ -1584,7 +1594,7 @@ export default function TemplatesPage() {
                   <input
                     type="file"
                     id="docx_file_input"
-                    accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.doc"
+                    accept=".html,.htm,.docx,.doc,text/html,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                     onChange={(e) => {
                       if (e.target.files && e.target.files[0]) {
                         handleSelectDocxFile(e.target.files[0]);
@@ -1597,11 +1607,17 @@ export default function TemplatesPage() {
                   {docxFile ? (
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-2">
                       <div className="flex items-center gap-3.5 text-left">
-                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex flex-col items-center justify-center font-bold shadow-md shrink-0">
+                        <div className={`w-12 h-12 rounded-2xl text-white flex flex-col items-center justify-center font-bold shadow-md shrink-0 ${
+                          isHtmlFile(docxFile)
+                            ? "bg-gradient-to-br from-[#A92E83] to-[#7a195b]"
+                            : "bg-gradient-to-br from-blue-600 to-indigo-700"
+                        }`}>
                           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" />
                           </svg>
-                          <span className="text-[8px] -mt-1 tracking-wider uppercase font-mono font-extrabold">DOCX</span>
+                          <span className="text-[8px] -mt-1 tracking-wider uppercase font-mono font-extrabold">
+                            {isHtmlFile(docxFile) ? "HTML" : "DOCX"}
+                          </span>
                         </div>
 
                         <div>
@@ -1617,7 +1633,7 @@ export default function TemplatesPage() {
                             </span>
                           </div>
                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                            {(docxFile.size / 1024).toFixed(1)} KB ({(docxFile.size / (1024 * 1024)).toFixed(2)} MB) • Microsoft Word Document
+                            {(docxFile.size / 1024).toFixed(1)} KB ({(docxFile.size / (1024 * 1024)).toFixed(2)} MB) • {isHtmlFile(docxFile) ? "HTML Email Template" : "Microsoft Word Document"}
                           </p>
                         </div>
                       </div>
@@ -1647,10 +1663,10 @@ export default function TemplatesPage() {
                       </div>
 
                       <p className="text-sm font-bold text-gray-800 dark:text-gray-200">
-                        <span className="text-[#A92E83] dark:text-purple-400 hover:underline">Click to browse</span> or drag and drop your Word document here
+                        <span className="text-[#A92E83] dark:text-purple-400 hover:underline">Click to browse</span> or drag and drop your HTML template or Word document here
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Accepts Microsoft Word <span className="font-semibold text-gray-700 dark:text-gray-300">.docx</span> • Maximum file size <span className="font-bold text-gray-800 dark:text-gray-200">25 MB</span>
+                        Accepts <span className="font-semibold text-gray-700 dark:text-gray-300">.html</span>, <span className="font-semibold text-gray-700 dark:text-gray-300">.htm</span>, or Microsoft Word <span className="font-semibold text-gray-700 dark:text-gray-300">.docx</span> • Maximum file size <span className="font-bold text-gray-800 dark:text-gray-200">25 MB</span>
                       </p>
 
                       <div className="mt-4">
@@ -1658,7 +1674,7 @@ export default function TemplatesPage() {
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                             <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                           </svg>
-                          Select .docx File (Up to 25 MB)
+                          Select .html or .docx (Up to 25 MB)
                         </span>
                       </div>
                     </label>
@@ -1692,7 +1708,7 @@ export default function TemplatesPage() {
                     </svg>
                   </span>
                   <div className="leading-relaxed">
-                    <span className="font-bold">Automated Agent Conversion:</span> The email agent parses typography, headings, tables, bullet points, links, and imagery from your Word document (<code className="px-1 py-0.5 rounded bg-purple-100 dark:bg-purple-900/50 font-mono text-[11px]">.docx</code>), generating a responsive, mobile-tested email template automatically.
+                    <span className="font-bold">HTML or Word:</span> Upload an HTML email template (<code className="px-1 py-0.5 rounded bg-purple-100 dark:bg-purple-900/50 font-mono text-[11px]">.html</code>) and it is used as the email body. A Word document (<code className="px-1 py-0.5 rounded bg-purple-100 dark:bg-purple-900/50 font-mono text-[11px]">.docx</code>) is parsed into a responsive template automatically.
                   </div>
                 </div>
               </div>
