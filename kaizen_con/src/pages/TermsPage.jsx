@@ -182,7 +182,6 @@ export default function TermsPage() {
               </div>
               <div className="kz-privacy-block-body">
                 <ul className="kz-privacy-bullet-list">
-                  <li>You must be at least 18 years old to use the App.</li>
                   <li>You must provide accurate information when registering and keep your login details secure. You are responsible for all activity under your account.</li>
                 </ul>
               </div>
