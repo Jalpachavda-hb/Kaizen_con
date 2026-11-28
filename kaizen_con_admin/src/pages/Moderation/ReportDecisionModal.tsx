@@ -17,9 +17,11 @@ interface Props {
   summary: React.ReactNode;
   onClose: () => void;
   onDone: (result: ModerationActionResult, banUser: boolean | null) => void;
+  /** Called when the API answers 409 "Report already reviewed", so the list can refresh. */
+  onAlreadyReviewed?: () => void;
 }
 
-export const ReportDecisionModal: React.FC<Props> = ({ mode, reportId, summary, onClose, onDone }) => {
+export const ReportDecisionModal: React.FC<Props> = ({ mode, reportId, summary, onClose, onDone, onAlreadyReviewed }) => {
   // No preselection for the ban choice: the API defaults ban_user to true, so the admin
   // must make that call explicitly rather than ban someone by accident.
   const [banUser, setBanUser] = useState<boolean | null>(null);
@@ -45,7 +47,10 @@ export const ReportDecisionModal: React.FC<Props> = ({ mode, reportId, summary, 
       const err = e as ModerationApiError;
       let msg = err?.message || "Request failed.";
       if (err?.status === 404) msg = `Report #${reportId} was not found — it may have been removed. ${msg}`;
-      if (err?.status === 409) msg = `Report #${reportId} has already been processed. ${msg}`;
+      if (err?.status === 409) {
+        msg = `Report #${reportId} has already been reviewed — the list has been refreshed with its current status.`;
+        onAlreadyReviewed?.();
+      }
       setError(msg);
     } finally {
       submittingRef.current = false;
@@ -58,7 +63,7 @@ export const ReportDecisionModal: React.FC<Props> = ({ mode, reportId, summary, 
       title={isApprove ? `Approve report #${reportId}?` : `Reject report #${reportId}?`}
       subtitle={
         isApprove
-          ? "Approving upholds the report against the reported content."
+          ? "Approving removes the reported content (forum posts are deleted, Q&A questions are set to rejected) and also approves every other pending report on the same content."
           : "Rejecting dismisses the report and leaves the content in place."
       }
       onClose={onClose}

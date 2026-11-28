@@ -18,7 +18,6 @@ import {
   WebsiteSettingsIcon,
   NotificationBellIcon,
   ModerationIcon,
-  BlockedUserIcon,
   BlockedContentIcon,
 } from "../icons/conferenceIcons";
 
@@ -138,14 +137,9 @@ const conferenceNavSections: NavSection[] = [
     title: "Moderation",
     items: [
       {
-        name: "Reports",
+        name: "Moderation Reports",
         path: "/moderation/reports",
         icon: <ModerationIcon className="w-5 h-5" />,
-      },
-      {
-        name: "Blocked Users",
-        path: "/moderation/blocked-users",
-        icon: <BlockedUserIcon className="w-5 h-5" />,
       },
       {
         name: "Blocked Content",

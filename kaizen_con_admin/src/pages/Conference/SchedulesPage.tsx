@@ -10,7 +10,22 @@ import {
   createSession,
   deleteSession,
   getSpeakers,
+  BASE_URL,
 } from "../../api/ApiPath";
+
+/** session_pdf limits from POST /api/schedules: PDF only, max 25 MB. */
+const SESSION_PDF_MAX_BYTES = 25 * 1024 * 1024;
+const DEFAULT_CATEGORY = "Other";
+
+const formatFileSize = (bytes: number) =>
+  bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+
+/** API returns a server-relative path (e.g. /uploads/sessions/x.pdf); make it an absolute URL. */
+const sessionPdfUrl = (path?: string | null) => {
+  if (!path) return null;
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+};
 import { useToast } from "../../context/ToastContext";
 import Swal from "sweetalert2";
 import { MultiSelectSpeakers } from "../../components/common/MultiSelectSpeakers";
@@ -42,6 +57,8 @@ export interface SessionItem {
   venue: string;
   room: string;
   speaker_name?: string;
+  /** Server-relative path of the uploaded session PDF, or null. */
+  session_pdf?: string | null;
   [key: string]: any;
 }
 
@@ -136,13 +153,45 @@ export default function SchedulesPage() {
   // Form Fields
   const [title, setTitle] = useState("");
   const [selectedSpeakerIds, setSelectedSpeakerIds] = useState<number[]>([]);
-  const [category, setCategory] = useState("Cardiology");
+  const [category, setCategory] = useState(DEFAULT_CATEGORY);
   const [eventDate, setEventDate] = useState("2027-01-01");
   const [startTime, setStartTime] = useState("09:00:00");
   const [endTime, setEndTime] = useState("10:00:00");
   const [venue, setVenue] = useState("RK Hospital Conference Hall");
   const [room, setRoom] = useState("Hall A");
   const [description, setDescription] = useState("");
+  const [sessionPdf, setSessionPdf] = useState<File | null>(null);
+  const [pdfError, setPdfError] = useState<string | null>(null);
+  const pdfInputRef = React.useRef<HTMLInputElement>(null);
+
+  const resetPdfField = () => {
+    setSessionPdf(null);
+    setPdfError(null);
+    if (pdfInputRef.current) pdfInputRef.current.value = "";
+  };
+
+  const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setPdfError(null);
+    if (!file) {
+      setSessionPdf(null);
+      return;
+    }
+    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+    if (!isPdf) {
+      setPdfError("Only PDF files are allowed.");
+      setSessionPdf(null);
+      e.target.value = "";
+      return;
+    }
+    if (file.size > SESSION_PDF_MAX_BYTES) {
+      setPdfError(`File is ${formatFileSize(file.size)} — the maximum is 25 MB.`);
+      setSessionPdf(null);
+      e.target.value = "";
+      return;
+    }
+    setSessionPdf(file);
+  };
 
   // Session Details (Get by ID) Modal State
   const [selectedSession, setSelectedSession] = useState<SessionItem | null>(null);
@@ -372,13 +421,14 @@ export default function SchedulesPage() {
     setEditingSession(null);
     setTitle("");
     setSelectedSpeakerIds([]);
-    setCategory("Cardiology");
+    setCategory(DEFAULT_CATEGORY);
     setEventDate("2027-01-01");
     setStartTime("09:00:00");
     setEndTime("10:00:00");
     setVenue("Hayatt Regency Ahmedabad");
     setRoom("Hall A");
     setDescription("");
+    resetPdfField();
     setFormError(null);
     setIsModalOpen(true);
   };
@@ -415,13 +465,14 @@ export default function SchedulesPage() {
       });
     }
 
-    setCategory(session.category || "Cardiology");
+    setCategory(session.category || DEFAULT_CATEGORY);
     setEventDate(session.event_date || "2027-01-01");
     setStartTime(session.start_time || "09:00:00");
     setEndTime(session.end_time || "10:00:00");
     setVenue(session.venue || "RK Hospital Conference Hall");
     setRoom(session.room || "Hall A");
     setDescription(session.description || "");
+    resetPdfField();
     setFormError(null);
     setIsModalOpen(true);
   };
@@ -450,6 +501,7 @@ export default function SchedulesPage() {
         end_time: endTime.length === 5 ? `${endTime}:00` : endTime,
         venue,
         room,
+        session_pdf: sessionPdf,
       };
 
       await createSession(payload);
@@ -1110,6 +1162,68 @@ export default function SchedulesPage() {
                     className="w-full px-4 py-3 text-xs sm:text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-[#AA2D7B] focus:ring-2 focus:ring-[#AA2D7B]/20 transition-all shadow-2xs resize-y"
                   />
                 </div>
+
+                {/* Section 6: Session PDF (optional, multipart field `session_pdf`) */}
+                <div>
+                  <label htmlFor="session-pdf" className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                    Session PDF <span className="font-normal text-gray-400">(optional, PDF only, max 25 MB)</span>
+                  </label>
+
+                  {editingSession?.session_pdf && !sessionPdf && (
+                    <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                      <span>Current file:</span>
+                      <a
+                        href={sessionPdfUrl(editingSession.session_pdf) || undefined}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-[#AA2D7B] hover:underline break-all"
+                      >
+                        {editingSession.session_pdf.split("/").pop()}
+                      </a>
+                      <span className="text-gray-400">— choose a new PDF to replace it.</span>
+                    </div>
+                  )}
+
+                  {sessionPdf ? (
+                    <div className="flex items-center justify-between gap-3 px-4 py-2.5 border border-[#AA2D7B]/30 bg-[#faedf5]/50 dark:bg-[#55355E]/20 rounded-xl min-h-[42px]">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#AA2D7B] text-white">PDF</span>
+                        <span className="text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-100 truncate" title={sessionPdf.name}>
+                          {sessionPdf.name}
+                        </span>
+                        <span className="shrink-0 text-[11px] text-gray-500">{formatFileSize(sessionPdf.size)}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={resetPdfField}
+                        disabled={isSubmitting}
+                        className="shrink-0 text-xs font-semibold text-gray-500 hover:text-rose-600 cursor-pointer disabled:opacity-50"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <label
+                      htmlFor="session-pdf"
+                      className="flex items-center gap-3 px-4 py-2.5 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:border-[#AA2D7B] hover:bg-[#faedf5]/30 transition-colors cursor-pointer min-h-[42px]"
+                    >
+                      <span className="shrink-0 px-3 py-1 rounded-lg text-xs font-semibold border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700">
+                        Choose File
+                      </span>
+                      <span className="text-xs sm:text-sm text-gray-400">No file chosen</span>
+                    </label>
+                  )}
+                  <input
+                    id="session-pdf"
+                    ref={pdfInputRef}
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    onChange={handlePdfChange}
+                    disabled={isSubmitting}
+                    className="sr-only"
+                  />
+                  {pdfError && <p className="mt-1.5 text-xs text-rose-600">{pdfError}</p>}
+                </div>
               </div>
 
               {/* Actions Footer */}
@@ -1210,6 +1324,24 @@ export default function SchedulesPage() {
                   <span className="text-[10px] text-gray-400 uppercase font-semibold">Venue & Hall</span>
                   <div className="font-medium text-gray-700 dark:text-gray-300 text-xs mt-0.5">
                     {selectedSession.room} — {selectedSession.venue}
+                  </div>
+                </div>
+
+                <div className="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700">
+                  <span className="text-[10px] text-gray-400 uppercase font-semibold">Session PDF</span>
+                  <div className="text-xs mt-0.5">
+                    {sessionPdfUrl(selectedSession.session_pdf) ? (
+                      <a
+                        href={sessionPdfUrl(selectedSession.session_pdf)!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-[#AA2D7B] hover:underline break-all"
+                      >
+                        View PDF
+                      </a>
+                    ) : (
+                      <span className="text-gray-400">—</span>
+                    )}
                   </div>
                 </div>
               </div>

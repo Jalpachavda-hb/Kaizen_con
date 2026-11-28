@@ -5,6 +5,15 @@ import { clearAuthSession } from "../services/sessionManager";
 // export const BASE_URL = 'http://192.168.29.201:8000';
 export const BASE_URL = 'https://api.kaizencon.in';
 export const API_BASE_URL = `${BASE_URL}/api`;
+
+/**
+ * Same-origin path that forwards to `${API_BASE_URL}` (proxy in vite.config.ts for dev,
+ * rewrite in vercel.json for production). Set VITE_MODERATION_API_BASE to
+ * `https://api.kaizencon.in/api` to call the API directly once the backend allows
+ * CORS preflights on the moderation routes.
+ */
+export const MODERATION_API_BASE =
+  (import.meta.env?.VITE_MODERATION_API_BASE || '/moderation-api').replace(/\/$/, '');
 //
 // Compatibility aliases
 export const Baase_url = `${API_BASE_URL}/`;
@@ -31,10 +40,11 @@ export const API_ENDPOINTS = {
   CLINICAL_SUMMARY: `${API_BASE_URL}/clinical/summary`,
   NOTIFICATIONS: `${API_BASE_URL}/notifications`,
   // Moderation (see src/services/moderationService.ts)
-  MODERATION_BLOCKED_USERS: `${API_BASE_URL}/blocked-users`,
-  MODERATION_ADMIN_REPORTS: `${API_BASE_URL}/admin/reports`,
-  MODERATION_ADMIN_BLOCKS: `${API_BASE_URL}/admin/blocks`,
-  MODERATION_ADMIN_DELEGATES: `${API_BASE_URL}/admin/delegates`,
+  // Routed through a same-origin proxy (MODERATION_API_BASE below) so the browser sends no
+  // CORS preflight; the backend currently rejects OPTIONS preflights on these routes with 401.
+  MODERATION_ADMIN_REPORTS: `${MODERATION_API_BASE}/admin/reports`,
+  MODERATION_ADMIN_BLOCKS: `${MODERATION_API_BASE}/admin/blocks`,
+  MODERATION_ADMIN_DELEGATES: `${MODERATION_API_BASE}/admin/delegates`,
 };
 
 const AUTH_TOKEN_KEY = 'ignito_auth_token';
@@ -657,13 +667,33 @@ export const createSession = async (sessionData) => {
       room: sessionData.room || 'Hall A',
     };
 
+    // Optional PDF (field `session_pdf`, max 25 MB). The API only accepts the file as
+    // multipart/form-data, so switch to FormData when one is attached; otherwise keep JSON.
+    const pdf = sessionData.session_pdf;
+    const hasPdf = typeof File !== 'undefined' && pdf instanceof File;
+
+    let body;
+    const headers = { 'Accept': 'application/json' };
+    if (hasPdf) {
+      body = new FormData();
+      if (payload.id) body.append('id', String(payload.id));
+      // Multipart takes speaker_ids as a comma-separated string. Sent empty on edit so
+      // removing every presenter still clears them; omitted on create.
+      if (speakerIdsList.length > 0 || payload.id) body.append('speaker_ids', speakerIdsList.join(','));
+      ['category', 'title', 'description', 'event_date', 'start_time', 'end_time', 'venue', 'room'].forEach((k) => {
+        body.append(k, payload[k] ?? '');
+      });
+      body.append('session_pdf', pdf, pdf.name);
+      // No Content-Type header: the browser sets multipart/form-data with its boundary.
+    } else {
+      body = JSON.stringify(payload);
+      headers['Content-Type'] = 'application/json';
+    }
+
     const response = await fetch(API_ENDPOINTS.SCHEDULES, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify(payload),
+      headers,
+      body,
     });
 
     const data = await response.json().catch(() => null);

@@ -49,23 +49,74 @@ export const recordStatus = (rec: ModerationRecord, keys: string[], fetchedAs?: 
   return fetchedAs;
 };
 
-// ---- Reports (fields from ReportCreate) -----------------------------------
-export const REPORT_STATUS_KEYS = ["status", "review_status", "moderation_status"];
+// ---- Reports ----------------------------------------------------------------
+// Shape observed from GET /api/admin/reports (2026-11-28):
+//   id, context, content_type, content_id,
+//   reporter_kind ("client" | "delegate"), reporter_ref,
+//   reported_kind ("client" | "delegate"), reported_ref,
+//   reason, details, status, admin_note, reviewed_by, reviewed_at, created_at,
+//   content_snapshot: { text, author_name, author_id, status } | { missing: true },
+//   age_hours, overdue, due_soon
+export const REPORT_STATUS_KEYS = ["status"];
 export const reportId = (rec: ModerationRecord) => recordId(rec, ["report_id"]);
 export const reportReason = (rec: ModerationRecord) => pickString(rec, ["reason"]);
-export const reportDetails = (rec: ModerationRecord) => pickString(rec, ["details", "description"]);
+export const reportDetails = (rec: ModerationRecord) => pickString(rec, ["details"]);
 export const reportContentType = (rec: ModerationRecord) => pickString(rec, ["content_type"]);
 export const reportContentId = (rec: ModerationRecord) => pickString(rec, ["content_id"]);
-export const reportContentText = (rec: ModerationRecord) =>
-  pickString(rec, ["content", "content_text", "content_preview", "content_body", "text"]);
-/** ReportCreate's delegate_id / client_id identify the reporter. */
-export const reporterDelegateId = (rec: ModerationRecord) => pickNumber(rec, ["reporter_delegate_id", "delegate_id"]);
-export const reporterClientId = (rec: ModerationRecord) => pickString(rec, ["reporter_client_id", "client_id"]);
-export const reportedDelegateId = (rec: ModerationRecord) =>
-  pickNumber(rec, ["reported_delegate_id", "target_delegate_id", "author_delegate_id", "content_author_delegate_id"]);
-export const reportedClientId = (rec: ModerationRecord) =>
-  pickString(rec, ["reported_client_id", "target_client_id", "author_client_id", "content_author_client_id"]);
 export const reportAdminNote = (rec: ModerationRecord) => pickString(rec, ["admin_note"]);
+export const reportReviewedBy = (rec: ModerationRecord) => pickString(rec, ["reviewed_by"]);
+export const reportReviewedAt = (rec: ModerationRecord) => pickString(rec, ["reviewed_at"]);
+export const reportOverdue = (rec: ModerationRecord) => rec.overdue === true;
+export const reportDueSoon = (rec: ModerationRecord) => rec.due_soon === true;
+export const reportAgeHours = (rec: ModerationRecord) => pickNumber(rec, ["age_hours"]);
+
+/** content_snapshot as an object, or undefined when absent / not an object. */
+const snapshot = (rec: ModerationRecord): ModerationRecord | undefined => {
+  const s = rec.content_snapshot;
+  return s && typeof s === "object" && !Array.isArray(s) ? (s as ModerationRecord) : undefined;
+};
+/** True when the API reports the content no longer exists (`content_snapshot.missing`). */
+export const reportContentMissing = (rec: ModerationRecord) => snapshot(rec)?.missing === true;
+export const reportContentText = (rec: ModerationRecord) => {
+  const s = snapshot(rec);
+  return s ? pickString(s, ["text"]) : undefined;
+};
+export const reportContentAuthor = (rec: ModerationRecord) => {
+  const s = snapshot(rec);
+  return s ? pickString(s, ["author_name"]) : undefined;
+};
+/** Moderation status of the content itself (e.g. Q&A question status), not the report. */
+export const reportContentStatus = (rec: ModerationRecord) => {
+  const s = snapshot(rec);
+  return s ? pickString(s, ["status"]) : undefined;
+};
+
+/** Resolve a `<prefix>_kind` / `<prefix>_ref` pair to a delegate id or client UUID. */
+const identity = (rec: ModerationRecord, prefix: "reporter" | "reported") => {
+  const kind = pickString(rec, [`${prefix}_kind`])?.toLowerCase();
+  const ref = pickString(rec, [`${prefix}_ref`]);
+  if (!ref) return { delegateId: undefined, clientId: undefined };
+  if (kind === "delegate") {
+    const n = Number(ref);
+    return Number.isFinite(n) ? { delegateId: n, clientId: undefined } : { delegateId: undefined, clientId: ref };
+  }
+  return { delegateId: undefined, clientId: ref };
+};
+export const reporterDelegateId = (rec: ModerationRecord) => identity(rec, "reporter").delegateId;
+export const reporterClientId = (rec: ModerationRecord) => identity(rec, "reporter").clientId;
+export const reportedDelegateId = (rec: ModerationRecord) => identity(rec, "reported").delegateId;
+export const reportedClientId = (rec: ModerationRecord) => identity(rec, "reported").clientId;
+/**
+ * Name of the reported user. Only taken from the content snapshot when its author_id
+ * matches reported_ref, so the name is never attributed to the wrong person.
+ */
+export const reportedName = (rec: ModerationRecord) => {
+  const s = snapshot(rec);
+  if (!s) return undefined;
+  const authorId = pickString(s, ["author_id"]);
+  const ref = pickString(rec, ["reported_ref"]);
+  return authorId && ref && authorId === ref ? pickString(s, ["author_name"]) : undefined;
+};
 
 // ---- Blocks (fields from BlockCreate) -------------------------------------
 export const BLOCK_STATUS_KEYS = ["moderation_status", "status", "review_status"];

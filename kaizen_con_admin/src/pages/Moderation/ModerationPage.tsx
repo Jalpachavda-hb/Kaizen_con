@@ -5,24 +5,21 @@ import { AdminPageContainer } from "../../components/common/AdminPageContainer";
 import { getDelegates } from "../../api/ApiPath";
 import { formatDelegateName } from "../../components/common/DelegateMultiSelect";
 import type { DelegateOption } from "../../components/common/DelegateMultiSelect";
-import { getAdminReports, getBlockedUsers } from "../../services/moderationService";
+import { getAdminReports } from "../../services/moderationService";
 import type { ReviewStatus } from "../../services/moderationService";
 import { useHasModerationAdminKey } from "../../services/moderationAdminKey";
 import { LockKeyButton } from "./ModerationUI";
 import ReportsTab from "./ReportsTab";
-import BlockedUsersTab from "./BlockedUsersTab";
 import BlockedContentTab from "./BlockedContentTab";
 
-type TabKey = "reports" | "blocked-users" | "blocked-content";
+type TabKey = "reports" | "blocked-content";
 
 const TABS: { key: TabKey; label: string; path: string; desc: string }[] = [
   { key: "reports", label: "Reports", path: "/moderation/reports", desc: "Review content reported by delegates and approve or reject each report." },
-  { key: "blocked-users", label: "Blocked Users", path: "/moderation/blocked-users", desc: "Users blocked in the Forum or Q&A." },
   { key: "blocked-content", label: "Blocked Content", path: "/moderation/blocked-content", desc: "Content blocks awaiting or past moderation review." },
 ];
 
 const tabFromPath = (pathname: string): TabKey => {
-  if (pathname.startsWith("/moderation/blocked-users")) return "blocked-users";
   if (pathname.startsWith("/moderation/blocked-content")) return "blocked-content";
   return "reports";
 };
@@ -43,20 +40,11 @@ const StatCard: React.FC<{ label: string; value: Stat; accent: string; hint?: st
 
 const useOverview = (hasKey: boolean, refreshKey: number) => {
   const [reports, setReports] = useState<Record<ReviewStatus, Stat>>({ pending: "loading", approved: "loading", rejected: "loading" });
-  const [blockedUsers, setBlockedUsers] = useState<Stat>("loading");
   const seq = useRef(0);
 
   useEffect(() => {
     const mySeq = ++seq.current;
     const alive = () => mySeq === seq.current;
-
-    // Blocked users: no admin key needed. Count = envelope `count`, else number of records returned.
-    setBlockedUsers("loading");
-    Promise.all([getBlockedUsers({ context: "forum" }), getBlockedUsers({ context: "qa" })])
-      .then(([f, q]) => {
-        if (alive()) setBlockedUsers((f.count ?? f.results.length) + (q.count ?? q.results.length));
-      })
-      .catch(() => alive() && setBlockedUsers(null));
 
     // Report counts: only trustworthy when the API returns `count` (limit=1 keeps payload tiny).
     if (!hasKey) {
@@ -78,7 +66,7 @@ const useOverview = (hasKey: boolean, refreshKey: number) => {
     ? (vals as number[]).reduce((a, b) => a + b, 0)
     : null;
 
-  return { reports, total, blockedUsers };
+  return { reports, total };
 };
 
 export default function ModerationPage() {
@@ -87,7 +75,7 @@ export default function ModerationPage() {
   const hasKey = useHasModerationAdminKey();
   const [refreshKey, setRefreshKey] = useState(0);
   const onChanged = useCallback(() => setRefreshKey((k) => k + 1), []);
-  const { reports, total, blockedUsers } = useOverview(hasKey, refreshKey);
+  const { reports, total } = useOverview(hasKey, refreshKey);
 
   // Delegate names for nicer identity cells (falls back to "Delegate #id" if this fails).
   const [delegates, setDelegates] = useState<DelegateOption[]>([]);
@@ -119,18 +107,20 @@ export default function ModerationPage() {
       <PageMeta title={`${tab.label} | Moderation | Kaizen Con 2027`} description="Moderate reports, blocked users and blocked content." />
 
       <AdminPageContainer
-        title="Moderation"
-        subtitle="Review reported content, blocked users and content blocks across the Forum and Q&A."
+        title={activeTab === "reports" ? "Moderation Reports" : "Moderation"}
+        subtitle={
+          activeTab === "reports"
+            ? "Review, approve, and reject user-submitted reports."
+            : "Review reported content, blocked users and content blocks across the Forum and Q&A."
+        }
         actionButton={<LockKeyButton />}
       >
         {/* Overview */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 mb-6">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
           <StatCard label="Total Reports" value={total} accent="text-gray-900 dark:text-white" hint={keyHint ?? "Sum of pending, approved and rejected counts."} />
           <StatCard label="Pending Reports" value={reports.pending} accent="text-amber-600 dark:text-amber-400" hint={keyHint} />
           <StatCard label="Approved Reports" value={reports.approved} accent="text-emerald-600 dark:text-emerald-400" hint={keyHint} />
-          <StatCard label="Rejected Reports" value={reports.rejected} accent="text-rose-600 dark:text-rose-400" hint={keyHint} />
-          <StatCard label="Blocked Users" value={blockedUsers} accent="text-[#AA2D7B]" hint="Forum + Q&A records from /api/blocked-users." />
-        </div>
+          <StatCard label="Rejected Reports" value={reports.rejected} accent="text-rose-600 dark:text-rose-400" hint={keyHint} />        </div>
 
         {/* Tabs */}
         <div className="border-b border-gray-200 dark:border-gray-800 mb-4 -mx-4 sm:mx-0 px-4 sm:px-0 overflow-x-auto no-scrollbar">
@@ -160,7 +150,6 @@ export default function ModerationPage() {
         <p className="text-[11px] text-gray-500 mb-3">{tab.desc}</p>
 
         {activeTab === "reports" && <ReportsTab delegateName={delegateName} onChanged={onChanged} />}
-        {activeTab === "blocked-users" && <BlockedUsersTab delegateName={delegateName} />}
         {activeTab === "blocked-content" && <BlockedContentTab delegateName={delegateName} onChanged={onChanged} />}
       </AdminPageContainer>
     </>

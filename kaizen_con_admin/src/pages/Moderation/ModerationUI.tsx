@@ -5,7 +5,9 @@ import { ModerationApiError } from "../../services/moderationService";
 import {
   setModerationAdminKey,
   clearModerationAdminKey,
+  isModerationKeyFromEnv,
   useHasModerationAdminKey,
+  useHasManualModerationAdminKey,
 } from "../../services/moderationAdminKey";
 import { CONTEXT_LABEL, formatRawValue, humanize, shortUuid } from "./moderationFields";
 
@@ -44,11 +46,16 @@ export const PersonCell: React.FC<{
   delegateId?: number;
   clientId?: string;
   delegateName?: (id: number) => string | undefined;
-}> = ({ delegateId, clientId, delegateName }) => {
+  /** A display name supplied by the record itself (e.g. content_snapshot.author_name). */
+  name?: string;
+}> = ({ delegateId, clientId, delegateName, name: recordName }) => {
   if (delegateId === undefined && !clientId) return <span className="text-gray-400">—</span>;
   const name = delegateId !== undefined ? delegateName?.(delegateId) : undefined;
   return (
     <div className="min-w-0">
+      {recordName && delegateId === undefined && (
+        <div className="font-semibold text-gray-900 dark:text-gray-100 truncate">{recordName}</div>
+      )}
       {delegateId !== undefined && (
         <div className="font-semibold text-gray-900 dark:text-gray-100 truncate">
           {name || `Delegate #${delegateId}`}
@@ -229,11 +236,15 @@ export const ErrorBanner: React.FC<{ error: unknown; onRetry?: () => void }> = (
   const err = error as ModerationApiError;
   const message = (err && err.message) || "Something went wrong.";
   let hint: string | null = null;
+  const keyIssue = err?.kind === "auth" && /admin (api )?key/i.test(message);
   if (err?.kind === "auth") {
-    hint =
-      err.status === 401
-        ? "The moderation API needs a valid Bearer token. Sign out and back in; if this persists, the admin login is not issuing a token these endpoints accept."
-        : "Check that the admin key is correct, then re-enter it.";
+    hint = keyIssue
+      ? isModerationKeyFromEnv()
+        ? "Check VITE_MODERATION_ADMIN_KEY in the .env file, then restart the dev server (or rebuild)."
+        : "Check that the admin key is correct, then re-enter it."
+      : err.status === 401
+      ? "Your admin session token was missing or expired. Sign out and sign back in."
+      : "Access denied for this admin session.";
   } else if (err?.kind === "validation") {
     hint = "One of the filters was rejected by the API — adjust it and try again.";
   } else if (err?.kind === "server") {
@@ -249,7 +260,7 @@ export const ErrorBanner: React.FC<{ error: unknown; onRetry?: () => void }> = (
         {hint && <span className="block text-[11px] mt-0.5 opacity-80">{hint}</span>}
       </div>
       <div className="flex items-center gap-1.5 shrink-0">
-        {err?.kind === "auth" && err.status === 403 && (
+        {keyIssue && !isModerationKeyFromEnv() && (
           <button
             onClick={clearModerationAdminKey}
             className="px-2 py-1 bg-white/70 dark:bg-amber-900 hover:bg-white rounded font-semibold text-[11px] transition-colors cursor-pointer border border-amber-200 dark:border-amber-800"
@@ -452,7 +463,8 @@ export const AdminKeyGate: React.FC<{ children: React.ReactNode }> = ({ children
 };
 
 export const LockKeyButton: React.FC = () => {
-  const hasKey = useHasModerationAdminKey();
+  // Only a manually entered key can be locked; the .env key is always available.
+  const hasKey = useHasManualModerationAdminKey();
   if (!hasKey) return null;
   return (
     <button

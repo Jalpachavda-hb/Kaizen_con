@@ -131,7 +131,6 @@ export default function App() {
               {/* Moderation */}
               <Route path="/moderation" element={<Navigate to="/moderation/reports" replace />} />
               <Route path="/moderation/reports" element={<ModerationPage />} />
-              <Route path="/moderation/blocked-users" element={<ModerationPage />} />
               <Route path="/moderation/blocked-content" element={<ModerationPage />} />
 
               {/* Legal & Compliance */}

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useToast } from "../../context/ToastContext";
 import { getAdminReports, MODERATION_LIMIT_MAX } from "../../services/moderationService";
-import type { ModerationContext, ModerationRecord, ReviewStatus } from "../../services/moderationService";
+import type { ModerationRecord, ReviewStatus } from "../../services/moderationService";
 import {
   AdminKeyGate,
   ContextBadge,
@@ -27,20 +27,56 @@ import {
   recordCreatedAt,
   recordStatus,
   reportAdminNote,
+  reportAgeHours,
+  reportContentAuthor,
   reportContentId,
+  reportContentMissing,
+  reportContentStatus,
   reportContentText,
   reportContentType,
   reportDetails,
+  reportDueSoon,
   reportId,
+  reportOverdue,
   reportReason,
+  reportReviewedAt,
+  reportReviewedBy,
   reportedClientId,
   reportedDelegateId,
+  reportedName,
   reporterClientId,
   reporterDelegateId,
+  shortUuid,
 } from "./moderationFields";
 
+/** Review-SLA flag sent by the API for pending reports (`overdue` / `due_soon`). */
+const SlaBadge: React.FC<{ rec: ModerationRecord }> = ({ rec }) => {
+  const age = reportAgeHours(rec);
+  const ageText = age !== undefined ? `${Math.floor(age)}h old` : undefined;
+  if (reportOverdue(rec)) {
+    return (
+      <span
+        className="mt-1 block w-fit px-1.5 py-0.5 rounded text-[9.5px] font-bold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800"
+        title={ageText}
+      >
+        Overdue{ageText ? ` · ${ageText}` : ""}
+      </span>
+    );
+  }
+  if (reportDueSoon(rec)) {
+    return (
+      <span
+        className="mt-1 block w-fit px-1.5 py-0.5 rounded text-[9.5px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800"
+        title={ageText}
+      >
+        Due soon{ageText ? ` · ${ageText}` : ""}
+      </span>
+    );
+  }
+  return null;
+};
+
 type StatusFilter = "all" | ReviewStatus;
-type ContextFilter = "all" | ModerationContext;
 
 interface Row {
   rec: ModerationRecord;
@@ -66,7 +102,6 @@ const ReportsTable: React.FC<Props> = ({ delegateName, onChanged }) => {
   const { success: toastSuccess } = useToast();
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("pending");
-  const [contextFilter, setContextFilter] = useState<ContextFilter>("all");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
@@ -87,12 +122,11 @@ const ReportsTable: React.FC<Props> = ({ delegateName, onChanged }) => {
     const seq = ++requestSeq.current;
     setLoading(true);
     setError(null);
-    const context = contextFilter === "all" ? null : contextFilter;
     try {
       if (statusFilter === "all") {
         // No "all" value exists in the API, so fetch each status (max page) and merge.
         const results = await Promise.all(
-          ALL_STATUSES.map((s) => getAdminReports({ status: s, context, offset: 0, limit: MODERATION_LIMIT_MAX }))
+          ALL_STATUSES.map((s) => getAdminReports({ status: s, offset: 0, limit: MODERATION_LIMIT_MAX }))
         );
         if (seq !== requestSeq.current) return;
         const merged: Row[] = results.flatMap((r, i) => r.results.map((rec) => ({ rec, fetchedAs: ALL_STATUSES[i] })));
@@ -105,7 +139,6 @@ const ReportsTable: React.FC<Props> = ({ delegateName, onChanged }) => {
       } else {
         const res = await getAdminReports({
           status: statusFilter,
-          context,
           offset: (page - 1) * pageSize,
           limit: pageSize,
         });
@@ -123,7 +156,7 @@ const ReportsTable: React.FC<Props> = ({ delegateName, onChanged }) => {
     }
     // "all" mode paginates client-side, so page changes there must not refetch
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter, contextFilter, statusFilter === "all" ? 0 : page, pageSize]);
+  }, [statusFilter, statusFilter === "all" ? 0 : page, pageSize]);
 
   useEffect(() => {
     load();
@@ -216,19 +249,6 @@ const ReportsTable: React.FC<Props> = ({ delegateName, onChanged }) => {
               { value: "rejected", label: "Rejected" },
             ]}
           />
-          <FilterPills<ContextFilter>
-            label="Context"
-            value={contextFilter}
-            onChange={(v) => {
-              setContextFilter(v);
-              setPage(1);
-            }}
-            options={[
-              { value: "all", label: "All" },
-              { value: "forum", label: "Forum" },
-              { value: "qa", label: "Q&A" },
-            ]}
-          />
         </div>
         <RefreshButton onClick={load} loading={loading} />
       </div>
@@ -242,11 +262,11 @@ const ReportsTable: React.FC<Props> = ({ delegateName, onChanged }) => {
       {error ? (
         <ErrorBanner error={error} onRetry={load} />
       ) : loading && rows.length === 0 ? (
-        <TableSkeleton columns={8} />
+        <TableSkeleton columns={9} />
       ) : visibleRows.length === 0 ? (
         <EmptyState
           title={statusFilter === "pending" ? "No pending reports" : "No reports found"}
-          hint={contextFilter !== "all" || statusFilter !== "all" ? "Try a different status or context filter." : undefined}
+          hint={statusFilter !== "all" ? "Try a different status filter." : undefined}
         />
       ) : (
         <div className={`overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 ${loading ? "opacity-60" : ""}`}>
@@ -256,7 +276,8 @@ const ReportsTable: React.FC<Props> = ({ delegateName, onChanged }) => {
                 <th className="py-3 px-4 w-16 whitespace-nowrap">ID</th>
                 <th className="py-3 px-4 min-w-[140px]">Reporter</th>
                 <th className="py-3 px-4 min-w-[140px]">Reported User</th>
-                <th className="py-3 px-4 min-w-[240px]">Content / Reason</th>
+                <th className="py-3 px-4 min-w-[200px]">Reported Content</th>
+                <th className="py-3 px-4 min-w-[180px]">Report Reason</th>
                 <th className="py-3 px-4 whitespace-nowrap">Context</th>
                 <th className="py-3 px-4 whitespace-nowrap">Reported</th>
                 <th className="py-3 px-4 whitespace-nowrap">Status</th>
@@ -267,6 +288,14 @@ const ReportsTable: React.FC<Props> = ({ delegateName, onChanged }) => {
               {visibleRows.map((row, idx) => {
                 const id = reportId(row.rec);
                 const text = reportContentText(row.rec);
+                const ctype = reportContentType(row.rec);
+                const cid = reportContentId(row.rec);
+                const reason = reportReason(row.rec);
+                const details = reportDetails(row.rec);
+                const status = effectiveStatus(row);
+                const reviewedAt = reportReviewedAt(row.rec);
+                const reviewedBy = reportReviewedBy(row.rec);
+                const note = reportAdminNote(row.rec);
                 return (
                   <tr key={id ?? `r-${idx}`} className="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors align-top">
                     <td className="py-3 px-4 font-mono text-gray-500">{id !== undefined ? `#${id}` : "—"}</td>
@@ -274,18 +303,58 @@ const ReportsTable: React.FC<Props> = ({ delegateName, onChanged }) => {
                       <PersonCell delegateId={reporterDelegateId(row.rec)} clientId={reporterClientId(row.rec)} delegateName={delegateName} />
                     </td>
                     <td className="py-3 px-4">
-                      <PersonCell delegateId={reportedDelegateId(row.rec)} clientId={reportedClientId(row.rec)} delegateName={delegateName} />
+                      <PersonCell
+                        delegateId={reportedDelegateId(row.rec)}
+                        clientId={reportedClientId(row.rec)}
+                        delegateName={delegateName}
+                        name={reportedName(row.rec)}
+                      />
                     </td>
-                    <td className="py-3 px-4 max-w-[360px] text-gray-800 dark:text-gray-200">
-                      {describe(row)}
-                      {text && <div className="text-[11.5px] text-gray-500 mt-1 line-clamp-2 italic">“{text}”</div>}
+                    <td className="py-3 px-4 max-w-[300px] text-gray-800 dark:text-gray-200">
+                      {ctype ? (
+                        <div className="font-semibold">
+                          {CONTENT_TYPE_LABEL[ctype] || humanize(ctype)}
+                          {cid && (
+                            <span className="font-normal font-mono text-[10.5px] text-gray-500" title={cid}>
+                              {" "}#{shortUuid(cid)}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        !text && <span className="text-gray-400">—</span>
+                      )}
+                      {text ? (
+                        <div className="text-[11.5px] text-gray-500 mt-1 line-clamp-2 italic">“{text}”</div>
+                      ) : (
+                        reportContentMissing(row.rec) && (
+                          <div className="text-[11px] text-gray-400 mt-1 italic">Content no longer available</div>
+                        )
+                      )}
+                    </td>
+                    <td className="py-3 px-4 max-w-[260px] text-gray-800 dark:text-gray-200">
+                      <div className="font-semibold">{reason ? REASON_LABEL[reason] || humanize(reason) : "—"}</div>
+                      {details && <div className="text-[11.5px] text-gray-500 mt-0.5 line-clamp-3 whitespace-pre-line">{details}</div>}
                     </td>
                     <td className="py-3 px-4">
                       <ContextBadge context={recordContext(row.rec)} />
                     </td>
-                    <td className="py-3 px-4 whitespace-nowrap text-gray-600 dark:text-gray-400">{formatDateTime(recordCreatedAt(row.rec))}</td>
+                    <td className="py-3 px-4 whitespace-nowrap text-gray-600 dark:text-gray-400">
+                      {formatDateTime(recordCreatedAt(row.rec))}
+                      {status === "pending" && <SlaBadge rec={row.rec} />}
+                    </td>
                     <td className="py-3 px-4">
-                      <StatusBadge status={effectiveStatus(row)} />
+                      <StatusBadge status={status} />
+                      {status !== "pending" && (reviewedAt || reviewedBy) && (
+                        <div className="text-[10.5px] text-gray-500 mt-1 whitespace-nowrap">
+                          {reviewedBy ? `by ${reviewedBy}` : ""}
+                          {reviewedAt ? `${reviewedBy ? " · " : ""}${formatDateTime(reviewedAt)}` : ""}
+                        </div>
+                      )}
+                      {status !== "pending" && note && (
+                        <div className="text-[10.5px] text-gray-500 mt-0.5 max-w-[180px] line-clamp-2" title={note}>
+                          Note: {note}
+                        </div>
+                      )}
                     </td>
                     <td className="py-3 px-4">{renderActions(row)}</td>
                   </tr>
@@ -325,9 +394,26 @@ const ReportsTable: React.FC<Props> = ({ delegateName, onChanged }) => {
                 ? `${CONTENT_TYPE_LABEL[reportContentType(viewing.rec)!] || reportContentType(viewing.rec)}${reportContentId(viewing.rec) ? ` #${reportContentId(viewing.rec)}` : ""}`
                 : "—",
             ],
+            [
+              "Content text",
+              reportContentText(viewing.rec) || (reportContentMissing(viewing.rec) ? "Content no longer available" : "—"),
+            ],
+            ["Content author", reportContentAuthor(viewing.rec) || "—"],
+            ["Content status", reportContentStatus(viewing.rec) ? humanize(reportContentStatus(viewing.rec)!) : "—"],
             ["Reporter", <PersonCell key="rp" delegateId={reporterDelegateId(viewing.rec)} clientId={reporterClientId(viewing.rec)} delegateName={delegateName} />],
-            ["Reported user", <PersonCell key="ru" delegateId={reportedDelegateId(viewing.rec)} clientId={reportedClientId(viewing.rec)} delegateName={delegateName} />],
+            [
+              "Reported user",
+              <PersonCell
+                key="ru"
+                delegateId={reportedDelegateId(viewing.rec)}
+                clientId={reportedClientId(viewing.rec)}
+                delegateName={delegateName}
+                name={reportedName(viewing.rec)}
+              />,
+            ],
             ["Reported", formatDateTime(recordCreatedAt(viewing.rec))],
+            ["Reviewed by", reportReviewedBy(viewing.rec) || "—"],
+            ["Reviewed at", formatDateTime(reportReviewedAt(viewing.rec))],
             ["Admin note", reportAdminNote(viewing.rec) || "—"],
           ]}
           footer={
@@ -362,6 +448,18 @@ const ReportsTable: React.FC<Props> = ({ delegateName, onChanged }) => {
           summary={
             <div className="space-y-1">
               {describe(deciding.row)}
+              {reportContentText(deciding.row.rec) ? (
+                <div className="text-[11.5px] text-gray-600 dark:text-gray-300 italic line-clamp-3">
+                  “{reportContentText(deciding.row.rec)}”
+                  {reportContentAuthor(deciding.row.rec) && (
+                    <span className="not-italic text-gray-500"> — {reportContentAuthor(deciding.row.rec)}</span>
+                  )}
+                </div>
+              ) : (
+                reportContentMissing(deciding.row.rec) && (
+                  <div className="text-[11px] text-gray-400 italic">Content no longer available</div>
+                )
+              )}
               <div className="text-[11px] text-gray-500 flex items-center gap-2">
                 <ContextBadge context={recordContext(deciding.row.rec)} />
                 {formatDateTime(recordCreatedAt(deciding.row.rec))}
@@ -369,6 +467,11 @@ const ReportsTable: React.FC<Props> = ({ delegateName, onChanged }) => {
             </div>
           }
           onClose={() => setDeciding(null)}
+          onAlreadyReviewed={() => {
+            // 409: someone (or a sibling approval) already reviewed it — show the real status.
+            load();
+            onChanged();
+          }}
           onDone={(res, banUser) => {
             const id = reportId(deciding.row.rec)!;
             const newStatus: ReviewStatus = deciding.mode === "approve" ? "approved" : "rejected";

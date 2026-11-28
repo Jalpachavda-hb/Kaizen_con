@@ -20,5 +20,15 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
+    proxy: {
+      // Moderation API — same-origin in the browser, forwarded server-side (no CORS preflight).
+      // Production equivalent: the /moderation-api rewrite in vercel.json.
+      "/moderation-api": {
+        target: "https://api.kaizencon.in",
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/moderation-api/, "/api"),
+      },
+    },
   },
 });

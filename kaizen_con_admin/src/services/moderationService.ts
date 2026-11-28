@@ -2,7 +2,6 @@
  * MODERATION SERVICE
  * Wraps the Kaizen Con moderation endpoints (tag "Moderation" in /openapi.json).
  *
- *   GET  /api/blocked-users                       Bearer
  *   GET  /api/admin/reports                       Bearer + X-Admin-Key
  *   POST /api/admin/reports/{report_id}/approve   Bearer + X-Admin-Key
  *   POST /api/admin/reports/{report_id}/reject    Bearer + X-Admin-Key
@@ -55,6 +54,8 @@ export class ModerationApiError extends Error {
 export const ADMIN_NOTE_MAX = 2000; // AdminReportDecision / AdminReportReject maxLength
 export const BAN_REASON_MAX = 1000;
 export const MODERATION_LIMIT_MAX = 100;
+/** Reports are always listed for this context (Q&A). */
+export const REPORTS_CONTEXT: ModerationContext = "qa";
 
 // ---------------------------------------------------------------------------
 // Internals
@@ -233,52 +234,22 @@ const assertReportId = (reportId: number | string): number => assertPositiveId(r
 // ---------------------------------------------------------------------------
 
 /**
- * List Blocked Users — GET /api/blocked-users
- * @param params.context    required: "forum" | "qa"
- * @param params.delegateId optional positive integer
- * @param params.clientId   optional UUID
- */
-export const getBlockedUsers = (params: {
-  context: ModerationContext;
-  delegateId?: number | null;
-  clientId?: string | null;
-}): Promise<ModerationListResult> => {
-  if (params.context !== "forum" && params.context !== "qa") {
-    return Promise.reject(new ModerationApiError("Context must be Forum or Q&A.", 0, null, "validation"));
-  }
-  const q = new URLSearchParams({ context: params.context });
-  if (params.delegateId !== undefined && params.delegateId !== null) {
-    if (!Number.isInteger(params.delegateId) || params.delegateId <= 0) {
-      return Promise.reject(new ModerationApiError("Delegate ID must be a positive whole number.", 0, null, "validation"));
-    }
-    q.set("delegate_id", String(params.delegateId));
-  }
-  if (params.clientId) {
-    if (!isValidUuid(params.clientId)) {
-      return Promise.reject(new ModerationApiError("Client ID must be a valid UUID.", 0, null, "validation"));
-    }
-    q.set("client_id", params.clientId.trim());
-  }
-  return dedupedGet(`${API_ENDPOINTS.MODERATION_BLOCKED_USERS}?${q.toString()}`, false);
-};
-
-/**
  * Admin List Reports — GET /api/admin/reports
  * The API has no "all statuses" value (omitting `status` means "pending"), so callers
  * wanting every status must request each one.
  */
 export const getAdminReports = (params: {
   status: ReviewStatus;
-  context?: ModerationContext | null;
   offset?: number;
   limit?: number;
 }): Promise<ModerationListResult> => {
+  // The admin panel moderates Q&A reports only; Forum reports are never requested.
   const q = new URLSearchParams({
     status: params.status,
+    context: REPORTS_CONTEXT,
     offset: String(clampOffset(params.offset)),
     limit: String(clampLimit(params.limit)),
   });
-  if (params.context) q.set("context", params.context);
   return dedupedGet(`${API_ENDPOINTS.MODERATION_ADMIN_REPORTS}?${q.toString()}`, true);
 };
 
@@ -396,7 +367,6 @@ export const unbanDelegate = async (delegateId: number | string): Promise<Modera
 };
 
 export default {
-  getBlockedUsers,
   getAdminReports,
   approveReport,
   rejectReport,

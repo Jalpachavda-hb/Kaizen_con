@@ -18,19 +18,16 @@ import {
   LuStar,
   LuPresentation,
   LuNetwork,
-  LuCalendar,
   LuMapPin,
   LuClock,
   LuChevronRight,
-  LuArrowRight,
   LuSearch,
   LuFilter,
   LuTag,
   LuMic,
   LuCompass,
   LuX,
-  LuLayoutGrid,
-  LuList
+  LuLayoutGrid
 } from 'react-icons/lu';
 import './ProgrammePage.css';
 
@@ -633,7 +630,7 @@ export default function ProgrammePage() {
   }, [speakersList]);
 
   // Formatted datasets for both views
-  const { activeGlanceDays, activeGridDays } = useMemo(() => {
+  const { activeGlanceDays } = useMemo(() => {
     return transformApiSchedules(apiSchedules, speakerMap);
   }, [apiSchedules, speakerMap]);
 
@@ -729,36 +726,6 @@ export default function ProgrammePage() {
     });
   }, [activeGlanceDays, searchQuery, selectedTrack, selectedTopic]);
 
-  // Filtered dataset for Sessions view
-  const filteredSessionsGrid = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-
-    return activeGridDays.map((day) => {
-      const filtered = day.sessions.filter((s) => {
-        if (selectedTopic !== 'ALL') {
-          const inTags = s.tags && s.tags.some(t => t.label.toLowerCase().includes(selectedTopic.toLowerCase()) || (t.type && t.type.toLowerCase().includes(selectedTopic.toLowerCase())));
-          const inTitle = (s.title || '').toLowerCase().includes(selectedTopic.toLowerCase());
-          const inCat = (s.rawCategory || '').toLowerCase().includes(selectedTopic.toLowerCase());
-          if (!inTags && !inTitle && !inCat) return false;
-        }
-
-        if (!query) return true;
-        const inTitle = (s.title || '').toLowerCase().includes(query);
-        const inVenue = (s.venue || '').toLowerCase().includes(query);
-        const inSpeaker = (s.speaker || '').toLowerCase().includes(query);
-        const inDesc = (s.desc || '').toLowerCase().includes(query);
-        const inTags = s.tags && s.tags.some(t => t.label.toLowerCase().includes(query));
-
-        return inTitle || inVenue || inSpeaker || inDesc || inTags;
-      });
-
-      return {
-        ...day,
-        sessions: filtered
-      };
-    });
-  }, [activeGridDays, searchQuery, selectedTopic]);
-
   return (
     <div className="kz-programme-page-wrapper">
       
@@ -852,18 +819,6 @@ export default function ProgrammePage() {
             >
               <LuLayoutGrid size={16} />
               <span>At a Glance</span>
-            </button>
-
-            {/* 2. Sessions Button */}
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'sessions'}
-              className={`kz-view-tab-btn ${activeTab === 'sessions' ? 'is-active' : ''}`}
-              onClick={() => setActiveTab('sessions')}
-            >
-              <LuList size={16} />
-              <span>Sessions</span>
             </button>
 
             {/* 3. Topics Button */}
@@ -1072,110 +1027,6 @@ export default function ProgrammePage() {
         )}
 
         {/* ====================================================
-            5. VIEW 2: "SESSIONS" (4-COLUMN CARD GRID DESIGN)
-               Triggered when clicking the [Sessions] tab!
-           ==================================================== */}
-        {activeTab === 'sessions' && (
-          <main className="kz-programme-days-stack">
-            {filteredSessionsGrid.map((dayData) => (
-              <section key={dayData.dayId} className="kz-day-section-row">
-
-                {/* Left Timeline Rail Column with D1 / D2 / D3 Badge and Dots */}
-                <div className="kz-timeline-date-column" aria-hidden="true">
-                  <div className="kz-date-badge-box">
-                    <div className="kz-date-badge-top">{dayData.dayId}</div>
-                    <div className="kz-date-badge-bottom">
-                      <span className="kz-badge-month">{dayData.badgeMonth}</span>
-                      <span className="kz-badge-date">{dayData.badgeDate}</span>
-                      <span className="kz-badge-year">{dayData.badgeYear}</span>
-                    </div>
-                  </div>
-
-                  <div className="kz-timeline-vertical-line">
-                    <span className="kz-timeline-track-dot dot-1" />
-                    <span className="kz-timeline-track-dot dot-2" />
-                  </div>
-                </div>
-
-                {/* Right Content Column */}
-                <div className="kz-day-content-column">
-                  <div className="kz-day-section-header">
-                    <span className="kz-mobile-day-indicator">{dayData.dayId}</span>
-                    <h2 className="kz-day-section-title">{dayData.title}</h2>
-                    <span className="kz-day-sessions-badge">
-                      <LuCalendar size={14} />
-                      <span>{dayData.sessionsCount}</span>
-                    </span>
-                  </div>
-
-                  <div className="kz-sessions-responsive-grid">
-                    {dayData.sessions.map((session) => (
-                      <article
-                        key={session.id}
-                        className="kz-session-card-block"
-                        onClick={() => setSelectedSession(session)}
-                      >
-                        <div className="kz-card-top-row">
-                          <div className="kz-card-icon-badge" aria-hidden="true">
-                            {renderReactIcon(session.icon, 18)}
-                          </div>
-
-                          <div className="kz-card-time-wrap">
-                            <span className="kz-card-time-text">{session.time}</span>
-                            <span className="kz-card-duration-chip">
-                              <LuClock size={12} />
-                              <span>{session.duration}</span>
-                            </span>
-                          </div>
-                        </div>
-
-                        <h3 className="kz-card-title">{session.title}</h3>
-                        <p className="kz-card-description">{session.desc}</p>
-
-                        <div className="kz-card-tags-row">
-                          {session.tags.map((tagItem, tIdx) => (
-                            <span
-                              key={tIdx}
-                              className={`kz-card-pill kz-pill-${tagItem.type}`}
-                            >
-                              {tagItem.label}
-                            </span>
-                          ))}
-                        </div>
-
-                        <div className="kz-card-bottom-row">
-                          <div className="kz-card-speaker-venue-meta">
-                            {session.speaker && (
-                              <span className="kz-card-speaker-name">{session.speaker}</span>
-                            )}
-                            <div className="kz-card-venue-row">
-                              <LuMapPin size={13} />
-                              <span>{session.venue}</span>
-                            </div>
-                          </div>
-
-                          <button
-                            type="button"
-                            className="kz-card-arrow-btn"
-                            aria-label={`View details for ${session.title}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedSession(session);
-                            }}
-                          >
-                            <LuArrowRight size={16} />
-                          </button>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                </div>
-              </section>
-            ))}
-          </main>
-        )}
-
-        {/* ====================================================
             6. VIEW 3: "TOPICS" TRACKS VIEW
            ==================================================== */}
         {activeTab === 'topics' && (
@@ -1194,7 +1045,7 @@ export default function ProgrammePage() {
                   className="kz-topic-showcase-card"
                   onClick={() => {
                     setSelectedTopic(topicItem.id);
-                    setActiveTab('sessions');
+                    setActiveTab('glance');
                   }}
                 >
                   <div className="kz-topic-showcase-badge">
