@@ -1,3 +1,5 @@
+import { clearAuthSession } from "../services/sessionManager";
+
 // Base API Configuration
 // export const BASE_URL = 'https://34g3qd2p-8000.inc1.devtunnels.ms';
 // export const BASE_URL = 'http://192.168.29.201:8000';
@@ -109,6 +111,21 @@ const appendAccessToken = (url) => {
   } catch {
     const joiner = url.includes('?') ? '&' : '?';
     return `${url}${joiner}token=${encodeURIComponent(token)}`;
+  }
+};
+
+/**
+ * A 401 from a JWT-protected endpoint means the saved access token is missing,
+ * expired or revoked. Clear the session and send the admin back to sign in so a
+ * fresh token is issued by /api/admin_login.
+ */
+const handleUnauthorized = (response) => {
+  if (response?.status !== 401) return;
+  clearAuthSession();
+  if (typeof window === 'undefined') return;
+  const base = (import.meta.env?.BASE_URL || '/').replace(/\/$/, '');
+  if (!window.location.pathname.startsWith(`${base}/signin`)) {
+    window.location.assign(`${base}/signin?expired=true`);
   }
 };
 
@@ -2309,6 +2326,7 @@ export const votePoll = async (pollId, optionId, delegateId = null) => {
     });
 
     if (!response.ok) {
+      handleUnauthorized(response);
       let errorMessage = `Failed to submit vote: ${response.status}`;
       try {
         const errorData = await response.json();
@@ -2362,6 +2380,7 @@ export const getActivePolls = async () => {
     const data = await response.json().catch(() => null);
 
     if (!response.ok) {
+      handleUnauthorized(response);
       let errorMessage = `Failed to fetch active polls: ${response.status}`;
       if (data) {
         if (typeof data.detail === 'string') errorMessage = data.detail;
@@ -2417,6 +2436,7 @@ export const getPollById = async (pollId) => {
     });
 
     if (!response.ok) {
+      handleUnauthorized(response);
       let errorMessage = `Failed to get live poll: ${response.status} ${response.statusText}`;
       try {
         const errorData = await response.json();
@@ -2532,6 +2552,7 @@ export const getSessionQuestions = async (sessionId) => {
   });
   const data = await response.json().catch(() => null);
   if (!response.ok) {
+    handleUnauthorized(response);
     const errorMsg = data?.detail || data?.message || `Failed to load questions: ${response.status}`;
     throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
   }
@@ -2554,6 +2575,7 @@ export const getSessionQuestion = async (sessionId, questionId) => {
   });
   const data = await response.json().catch(() => null);
   if (!response.ok) {
+    handleUnauthorized(response);
     const errorMsg = data?.detail || data?.message || `Failed to load question: ${response.status}`;
     throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
   }
@@ -2577,6 +2599,7 @@ export const deleteSessionQuestion = async (sessionId, questionId) => {
   });
   const data = await response.json().catch(() => null);
   if (!response.ok) {
+    handleUnauthorized(response);
     const errorMsg = data?.detail || data?.message || `Failed to delete question: ${response.status}`;
     throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
   }
@@ -2597,6 +2620,7 @@ export const approveQuestionApi = async (sessionId, questionId) => {
   });
   if (!response.ok) {
     const data = await response.json().catch(() => null);
+    handleUnauthorized(response);
     const errorMsg = data?.detail || data?.message || `Failed to approve question: ${response.status}`;
     throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
   }
@@ -2617,6 +2641,7 @@ export const rejectQuestionApi = async (sessionId, questionId) => {
   });
   if (!response.ok) {
     const data = await response.json().catch(() => null);
+    handleUnauthorized(response);
     const errorMsg = data?.detail || data?.message || `Failed to reject question: ${response.status}`;
     throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
   }

@@ -94,6 +94,29 @@ export function getSessionRemainingTime() {
 }
 
 /**
+ * True when `token` is a JWT (not the legacy `kaizen_auth_<timestamp>` placeholder)
+ * whose `exp` claim, if present, is still in the future.
+ * @param {string|null} token
+ * @returns {boolean}
+ */
+export function isUsableAccessToken(token) {
+  if (typeof token !== 'string') return false;
+  const parts = token.trim().split('.');
+  if (parts.length !== 3 || token.startsWith('kaizen_auth_')) return false;
+  try {
+    const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(b64.padEnd(b64.length + ((4 - (b64.length % 4)) % 4), '=')));
+    if (typeof payload?.exp === 'number') {
+      // 30s margin so a request is not sent with a token that expires in flight.
+      return payload.exp * 1000 > Date.now() + 30000;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Determines whether the current 2-hour session has expired.
  * @returns {boolean}
  */
@@ -105,6 +128,12 @@ export function isSessionExpired() {
     // If there is no active token or user, session isn't expired; it simply doesn't exist
     if (!token && !user) {
       return false;
+    }
+
+    // The Q&A / polling APIs and sockets reject requests without a valid JWT, so a
+    // session holding a placeholder or an expired token is treated as expired.
+    if (!isUsableAccessToken(token)) {
+      return true;
     }
 
     const loginTime = getSessionLoginTime();
