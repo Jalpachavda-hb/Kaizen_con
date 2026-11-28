@@ -111,14 +111,8 @@ export default function TermsPage() {
               <span className="kz-privacy-hero-dark">Terms of Use</span>
               <span className="kz-privacy-hero-magenta">End User License Agreement</span>
             </h1>
-            <div className="kz-privacy-pills-row">
-              <span className="kz-privacy-pill">
-                <span className="kz-privacy-pill-dot" aria-hidden="true" />
-                Kaizencon 2027
-              </span>
-              <span className="kz-privacy-pill kz-privacy-pill-highlight">
-                Last updated: November 23, 2026
-              </span>
+            <div className="kz-privacy-pills-row">          
+             
             </div>
             <p className="kz-privacy-hero-desc">
               The agreement between you and Kaizen Hospital for using the Kaizencon 2027 app.

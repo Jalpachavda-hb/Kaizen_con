@@ -19,6 +19,7 @@ import Home from "./pages/Dashboard/Home";
 import SpeakersPage from "./pages/Conference/SpeakersPage";
 import SchedulesPage from "./pages/Conference/SchedulesPage";
 import SessionsPage from "./pages/Conference/SessionsPage";
+import SessionFeedbackPage from "./pages/Conference/SessionFeedbackPage";
 import TopicsPage from "./pages/Conference/TopicsPage";
 import DelegatesPage from "./pages/Conference/DelegatesPage";
 import UsersPage from "./pages/System/UsersPage";
@@ -35,6 +36,8 @@ import LiveTranscriptPage from "./pages/Conference/LiveTranscriptPage";
 import PrivacyPolicyPage from "./pages/Legal/PrivacyPolicyPage";
 import StandalonePrivacyPolicy from "./pages/Legal/StandalonePrivacyPolicy";
 import WebsiteSettingsPage from "./pages/WebsiteSettings/WebsiteSettingsPage";
+import NotificationsPage from "./pages/WebsiteSettings/NotificationsPage";
+import ModerationPage from "./pages/Moderation/ModerationPage";
 
 export default function App() {
   return (
@@ -58,6 +61,8 @@ export default function App() {
 
               <Route path="/schedules" element={<SchedulesPage />} />
               <Route path="/conference/schedules" element={<SchedulesPage />} />
+              <Route path="/schedules/feedback/:sessionId" element={<SessionFeedbackPage />} />
+              <Route path="/conference/schedules/feedback/:sessionId" element={<SessionFeedbackPage />} />
 
               <Route path="/sessions" element={<SessionsPage />} />
               <Route path="/conference/sessions" element={<SessionsPage />} />
@@ -118,6 +123,16 @@ export default function App() {
               <Route path="/website-settings" element={<WebsiteSettingsPage />} />
               <Route path="/settings/website" element={<WebsiteSettingsPage />} />
               <Route path="/website" element={<WebsiteSettingsPage />} />
+
+              {/* Push Notifications */}
+              <Route path="/notifications" element={<NotificationsPage />} />
+              <Route path="/push-notifications" element={<NotificationsPage />} />
+
+              {/* Moderation */}
+              <Route path="/moderation" element={<Navigate to="/moderation/reports" replace />} />
+              <Route path="/moderation/reports" element={<ModerationPage />} />
+              <Route path="/moderation/blocked-users" element={<ModerationPage />} />
+              <Route path="/moderation/blocked-content" element={<ModerationPage />} />
 
               {/* Legal & Compliance */}
               <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />

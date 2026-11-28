@@ -16,6 +16,10 @@ import {
   MicrophoneIcon,
   ShieldCheckIcon,
   WebsiteSettingsIcon,
+  NotificationBellIcon,
+  ModerationIcon,
+  BlockedUserIcon,
+  BlockedContentIcon,
 } from "../icons/conferenceIcons";
 
 import logoUrl from "../assets/images/logokaizecon.png";
@@ -131,6 +135,26 @@ const conferenceNavSections: NavSection[] = [
     ],
   },
   {
+    title: "Moderation",
+    items: [
+      {
+        name: "Reports",
+        path: "/moderation/reports",
+        icon: <ModerationIcon className="w-5 h-5" />,
+      },
+      {
+        name: "Blocked Users",
+        path: "/moderation/blocked-users",
+        icon: <BlockedUserIcon className="w-5 h-5" />,
+      },
+      {
+        name: "Blocked Content",
+        path: "/moderation/blocked-content",
+        icon: <BlockedContentIcon className="w-5 h-5" />,
+      },
+    ],
+  },
+  {
     title: "Website & Portal",
     items: [
       {
@@ -138,6 +162,12 @@ const conferenceNavSections: NavSection[] = [
         path: "/website-settings",
         aliases: ["/settings/website", "/website"],
         icon: <WebsiteSettingsIcon className="w-5 h-5" />,
+      },
+      {
+        name: "Notifications",
+        path: "/notifications",
+        aliases: ["/push-notifications"],
+        icon: <NotificationBellIcon className="w-5 h-5" />,
       },
     ],
   },

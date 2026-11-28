@@ -7,6 +7,7 @@ import {
   deletePoll,
   votePoll,
   getPolls,
+  getActivePolls,
   getPollQrCodeUrl,
   downloadPollQrCode,
   getPollsWsUrl,
@@ -146,6 +147,15 @@ export default function PollsPage() {
         setFetchError(null);
         if (showToast) {
           success(`Polls list refreshed successfully (${mapped.length} active questions).`);
+        }
+        try {
+          const active = await getActivePolls();
+          if (Array.isArray(active) && active.length > 0 && active[0]?.id != null) {
+            const activeId = String(active[0].id);
+            setCurrentPollId((prev) => (mapped.some((m) => m.id === activeId) ? activeId : prev));
+          }
+        } catch (activeErr) {
+          console.warn("Could not load active polls:", activeErr);
         }
       }
     } catch (err: any) {
@@ -433,22 +443,6 @@ export default function PollsPage() {
     setIsModalOpen(true);
   };
 
-  // Open Edit Modal
-  const handleOpenEditModal = (p: PollItem) => {
-    setEditingPoll(p);
-    setQuestion(p.question);
-    setSessionTitle(p.sessionTitle);
-    setSpeakerName(p.speakerName || "");
-    setPollType(p.type);
-    setPollStatus(p.status);
-    setOptions(p.options.map((o) => o.text));
-    setAllowAnonymous(p.allowAnonymous);
-    setShowLiveResults(p.showLiveResults);
-    setTimerMinutes(p.timerMinutes || 5);
-    setCategory(p.category || "");
-    setIsModalOpen(true);
-  };
-
   // Options input management
   const handleAddOptionField = () => {
     setOptions((prev) => [...prev, ""]);
@@ -583,36 +577,6 @@ export default function PollsPage() {
     }
   };
 
-  // Reset Votes with SweetAlert2
-  const handleResetVotes = async (p: PollItem) => {
-    const result = await Swal.fire({
-      title: "Reset Vote Counts?",
-      text: "All attendee votes for this poll will be reset back to 0.",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#AA2D7B",
-      cancelButtonColor: "#6B7280",
-      confirmButtonText: "Reset to Zero",
-      cancelButtonText: "Cancel",
-    });
-
-    if (result.isConfirmed) {
-      setPolls((prev) =>
-        prev.map((item) => {
-          if (item.id === p.id) {
-            return {
-              ...item,
-              totalVotes: 0,
-              options: item.options.map((o) => ({ ...o, votes: 0 })),
-            };
-          }
-          return item;
-        })
-      );
-      success("Vote counts have been reset.");
-    }
-  };
-
   // Toggle Poll Status (Active / Closed / Draft)
   const handleToggleStatus = (p: PollItem, newStatus: "active" | "closed" | "draft") => {
     setPolls((prev) =>
@@ -695,31 +659,6 @@ export default function PollsPage() {
     } finally {
       setIsVoting(false);
     }
-  };
-
-  // Export Poll Results as CSV
-  const handleExportCSV = (p: PollItem) => {
-    let csv = `Poll Question,"${p.question.replace(/"/g, '""')}"\n`;
-    csv += `Session,"${p.sessionTitle.replace(/"/g, '""')}"\n`;
-    csv += `Speaker,"${(p.speakerName || "N/A").replace(/"/g, '""')}"\n`;
-    csv += `Status,${p.status.toUpperCase()}\n`;
-    csv += `Total Votes,${p.totalVotes}\n\n`;
-    csv += `Option,Votes,Percentage\n`;
-
-    p.options.forEach((opt) => {
-      const pct = p.totalVotes > 0 ? ((opt.votes / p.totalVotes) * 100).toFixed(1) : "0.0";
-      csv += `"${opt.text.replace(/"/g, '""')}",${opt.votes},${pct}%\n`;
-    });
-
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `poll_${p.id}_results.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    success("Poll results downloaded as CSV.");
   };
 
   return (
@@ -1362,62 +1301,6 @@ export default function PollsPage() {
                       </svg>
                       <span>Stage View</span>
                     </button>
-
-                    {/* Test Vote */}
-                    <button
-                      onClick={() => {
-                        setVotingPoll(poll);
-                        setSelectedOptionId(null);
-                      }}
-                      title="Test Vote as Delegate"
-                      className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 dark:hover:bg-purple-900/60 rounded-lg transition cursor-pointer"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span>Test Vote</span>
-                    </button>
-
-                    {/* QR Code Preview / Scan Button */}
-                    {poll.qr_code_url && (
-                      <button
-                        onClick={() => setViewingQrPoll(poll)}
-                        title="View / Scan QR Code"
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 rounded-lg transition cursor-pointer"
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                        </svg>
-                        <span>QR Code</span>
-                      </button>
-                    )}
-
-                    {/* Live Voting Page Link if returned by API */}
-                    {poll.poll_url && (
-                      <a
-                        href={poll.poll_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        title="Open Live Voting Page"
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-lg transition"
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                        <span>Voting Link</span>
-                      </a>
-                    )}
-
-                    {/* Export */}
-                    <button
-                      onClick={() => handleExportCSV(poll)}
-                      title="Download CSV Results"
-                      className="p-1.5 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                    </button>
                   </div>
 
                   {/* Right: State Toggles & Edit/Delete */}
@@ -1438,28 +1321,6 @@ export default function PollsPage() {
                         Make Live
                       </button>
                     )}
-
-                    {/* Edit */}
-                    <button
-                      onClick={() => handleOpenEditModal(poll)}
-                      title="Edit Poll"
-                      className="p-1.5 text-gray-500 hover:text-blue-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 transition cursor-pointer"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                    </button>
-
-                    {/* Reset Votes */}
-                    <button
-                      onClick={() => handleResetVotes(poll)}
-                      title="Reset Votes"
-                      className="p-1.5 text-gray-500 hover:text-amber-600 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/30 transition cursor-pointer"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                    </button>
 
                     {/* Delete */}
                     <button

@@ -20,6 +20,9 @@ export interface Speaker {
   designation: string;
   speciality: string | null;
   institution: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
   bio: string | null;
   role: number | null; // 1 = speaker, 2 = chief guest, 3 = moderator
   profile_image_url: string | null;
@@ -71,6 +74,9 @@ export default function SpeakersPage() {
   const [designation, setDesignation] = useState("");
   const [speciality, setSpeciality] = useState("");
   const [institution, setInstitution] = useState("");
+  const [city, setCity] = useState("");
+  const [stateName, setStateName] = useState("");
+  const [country, setCountry] = useState("");
   const [bio, setBio] = useState("");
   const [role, setRole] = useState<number>(1); // 1 = speaker, 2 = chief guest, 3 = moderator
   const [sessionStatus, setSessionStatus] = useState<
@@ -141,6 +147,9 @@ export default function SpeakersPage() {
         (s.designation && s.designation.toLowerCase().includes(term)) ||
         (s.speciality && s.speciality.toLowerCase().includes(term)) ||
         (s.institution && s.institution.toLowerCase().includes(term)) ||
+        (s.city && s.city.toLowerCase().includes(term)) ||
+        (s.state && s.state.toLowerCase().includes(term)) ||
+        (s.country && s.country.toLowerCase().includes(term)) ||
         (s.bio && s.bio.toLowerCase().includes(term));
 
     
@@ -190,6 +199,9 @@ export default function SpeakersPage() {
     setDesignation("");
     setSpeciality("");
     setInstitution("");
+    setCity("");
+    setStateName("");
+    setCountry("");
     setBio("");
     setRole(1); // Default to Speaker (1)
     setSessionStatus("scheduled");
@@ -220,6 +232,9 @@ export default function SpeakersPage() {
     setDesignation(speaker.designation || "");
     setSpeciality(speaker.speciality || "");
     setInstitution(speaker.institution || "");
+    setCity(speaker.city || "");
+    setStateName(speaker.state || "");
+    setCountry(speaker.country || "");
     setBio(speaker.bio || "");
     setRole(speaker.role ? Number(speaker.role) : 1);
     setSessionStatus((speaker.session_status as any) || "scheduled");
@@ -241,6 +256,9 @@ export default function SpeakersPage() {
         setDesignation(fresh.designation || "");
         setSpeciality(fresh.speciality || "");
         setInstitution(fresh.institution || "");
+        setCity(fresh.city || "");
+        setStateName(fresh.state || "");
+        setCountry(fresh.country || "");
         setBio(fresh.bio || "");
         setRole(fresh.role ? Number(fresh.role) : 1);
         setSessionStatus((fresh.session_status as any) || "scheduled");
@@ -308,6 +326,9 @@ export default function SpeakersPage() {
       if (phone.trim()) formData.append("phone", phone.trim());
       if (speciality.trim()) formData.append("speciality", speciality.trim());
       if (institution.trim()) formData.append("institution", institution.trim());
+      formData.append("city", city.trim());
+      formData.append("state", stateName.trim());
+      formData.append("country", country.trim());
       if (bio.trim()) formData.append("bio", bio.trim());
 
       formData.append("session_status", sessionStatus);
@@ -413,7 +434,7 @@ export default function SpeakersPage() {
         subtitle="Manage conference speakers, chief guests, session moderators, hall assignments, and profiles."
         searchValue={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search by name, role, email, designation, institution, speciality..."
+        searchPlaceholder="Search by name, role, email, city, designation, institution, speciality..."
         actionButton={
           <div className="flex items-center flex-wrap gap-2">
             {/* Role Filter (1 = Speaker, 2 = Chief Guest, 3 = Moderator) */}
@@ -545,6 +566,7 @@ export default function SpeakersPage() {
                   <th className="py-3 px-4">Role</th>
                   <th className="py-3 px-4">Designation & Institution</th>
                   <th className="py-3 px-4">Speciality</th>
+                  <th className="py-3 px-4">City</th>
                   <th className="py-3 px-4">Contact</th>
                   <th className="py-3 px-4">Session Status</th>
                   <th className="py-3 px-4">Active</th>
@@ -623,6 +645,18 @@ export default function SpeakersPage() {
                           </span>
                         ) : (
                           <span className="text-gray-400">—</span>
+                        )}
+                      </td>
+
+                      {/* City */}
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <div className="font-medium text-gray-800 dark:text-gray-200">
+                          {speaker.city || "—"}
+                        </div>
+                        {(speaker.state || speaker.country) && (
+                          <div className="text-[11px] text-gray-500 dark:text-gray-400">
+                            {[speaker.state, speaker.country].filter(Boolean).join(", ")}
+                          </div>
                         )}
                       </td>
 
@@ -829,10 +863,28 @@ export default function SpeakersPage() {
                     {viewingSpeaker.email}
                   </div>
                 </div>
-                <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg col-span-2">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                   <div className="text-gray-400 text-[10px] font-semibold uppercase">Phone</div>
                   <div className="font-semibold text-gray-800 dark:text-gray-200 mt-0.5 font-mono text-[11px]">
                     {viewingSpeaker.phone || "—"}
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                  <div className="text-gray-400 text-[10px] font-semibold uppercase">City</div>
+                  <div className="font-semibold text-gray-800 dark:text-gray-200 mt-0.5">
+                    {viewingSpeaker.city || "—"}
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                  <div className="text-gray-400 text-[10px] font-semibold uppercase">State</div>
+                  <div className="font-semibold text-gray-800 dark:text-gray-200 mt-0.5">
+                    {viewingSpeaker.state || "—"}
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                  <div className="text-gray-400 text-[10px] font-semibold uppercase">Country</div>
+                  <div className="font-semibold text-gray-800 dark:text-gray-200 mt-0.5">
+                    {viewingSpeaker.country || "—"}
                   </div>
                 </div>
               </div>
@@ -1075,6 +1127,46 @@ export default function SpeakersPage() {
                     placeholder="e.g. RK Hospital"
                     className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 focus:outline-none focus:border-[#AA2D7B]"
                   />
+                </div>
+
+                {/* City, State, Country */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                      City
+                    </label>
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="e.g. Ahmedabad"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 focus:outline-none focus:border-[#AA2D7B]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                      State
+                    </label>
+                    <input
+                      type="text"
+                      value={stateName}
+                      onChange={(e) => setStateName(e.target.value)}
+                      placeholder="e.g. Gujarat"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 focus:outline-none focus:border-[#AA2D7B]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                      Country
+                    </label>
+                    <input
+                      type="text"
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      placeholder="e.g. India"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 focus:outline-none focus:border-[#AA2D7B]"
+                    />
+                  </div>
                 </div>
 
                 {/* Bio */}

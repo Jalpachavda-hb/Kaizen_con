@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router";
-import { adminLogin } from "../../api/ApiPath";
+import { adminLogin, extractAccessToken } from "../../api/ApiPath";
 import { saveAuthSession } from "../../services/authService";
 import {
   EyeCloseIcon,
@@ -77,12 +77,10 @@ export function LoginForm() {
           ? response.results[0]
           : response?.results || response?.user || {};
 
-      const token =
-        adminRecord?.token ||
-        adminRecord?.access_token ||
-        response?.token ||
-        response?.access_token ||
-        `kaizen_auth_${Date.now()}`;
+      const token = extractAccessToken(response) || extractAccessToken(adminRecord);
+      if (!token) {
+        throw new Error("Login did not return an access token. Please try again.");
+      }
 
       const adminUser = {
         id: adminRecord?.id || adminRecord?.admin_id || 1,
@@ -97,6 +95,7 @@ export function LoginForm() {
         email: adminRecord?.email || trimmedEmail,
         role: adminRecord?.role || adminRecord?.admin_role || "Super Administrator",
         profileImage: adminRecord?.profile_image || adminRecord?.avatar || "",
+        access_token: token,
       };
 
       // Persist authenticated session with 2-hour timeout timestamp

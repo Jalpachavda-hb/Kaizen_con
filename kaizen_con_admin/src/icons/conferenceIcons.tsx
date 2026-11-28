@@ -324,6 +324,74 @@ export const WebsiteSettingsIcon: React.FC<IconProps> = ({ className = "w-5 h-5"
   </svg>
 );
 
+// Notifications / Bell Ring Icon (Lucide "BellRing")
+export const NotificationBellIcon: React.FC<IconProps> = ({ className = "w-5 h-5" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M10.268 21a2 2 0 0 0 3.464 0" />
+    <path d="M22 8c0-2.3-.8-4.3-2-6" />
+    <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
+    <path d="M4 2C2.8 3.7 2 5.7 2 8" />
+  </svg>
+);
+
+// Moderation / Flag Icon (Lucide "Flag")
+export const ModerationIcon: React.FC<IconProps> = ({ className = "w-5 h-5" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+    <line x1="4" y1="22" x2="4" y2="15" />
+  </svg>
+);
+
+// Blocked User Icon (Lucide "UserX")
+export const BlockedUserIcon: React.FC<IconProps> = ({ className = "w-5 h-5" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <line x1="17" y1="8" x2="22" y2="13" />
+    <line x1="22" y1="8" x2="17" y2="13" />
+  </svg>
+);
+
+// Blocked Content Icon (Lucide "Ban")
+export const BlockedContentIcon: React.FC<IconProps> = ({ className = "w-5 h-5" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+  </svg>
+);
+
 // PDF File Icon
 export const PdfFileIcon: React.FC<IconProps> = ({ className = "w-5 h-5" }) => (
   <svg

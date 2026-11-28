@@ -4,7 +4,7 @@
  * Enforces a 2-hour session expiration rule for admin security.
  */
 
-import { adminLogin as callAdminLoginApi } from '../api/ApiPath';
+import { adminLogin as callAdminLoginApi, extractAccessToken } from '../api/ApiPath';
 import {
   saveAuthSession,
   clearAuthSession,
@@ -57,12 +57,10 @@ export async function validateAdminCredential(emailOrUsername, password) {
         ? data.results[0]
         : (data?.results || data?.user || {});
 
-    const token =
-      adminRecord?.token ||
-      adminRecord?.access_token ||
-      data?.token ||
-      data?.access_token ||
-      `kaizen_auth_${Date.now()}`;
+    const token = extractAccessToken(data) || extractAccessToken(adminRecord);
+    if (!token) {
+      throw new Error('Login did not return an access token. Please try again.');
+    }
 
     const adminUser = {
       id: adminRecord?.id || adminRecord?.admin_id || 1,
@@ -75,6 +73,7 @@ export async function validateAdminCredential(emailOrUsername, password) {
       email: adminRecord?.email || emailOrUsername,
       role: adminRecord?.role || adminRecord?.admin_role || 'Super Administrator',
       profileImage: adminRecord?.profile_image || adminRecord?.avatar || '',
+      access_token: token,
     };
 
     // Save session with 2-hour timestamp

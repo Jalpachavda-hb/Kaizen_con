@@ -27,24 +27,111 @@ export const API_ENDPOINTS = {
   KNOWLEDGE_DOCUMENTS: `${API_BASE_URL}/knowledge/documents`,
   KNOWLEDGE_DOCUMENT_UPLOAD: `${API_BASE_URL}/knowledge/documents/upload`,
   CLINICAL_SUMMARY: `${API_BASE_URL}/clinical/summary`,
+  NOTIFICATIONS: `${API_BASE_URL}/notifications`,
+  // Moderation (see src/services/moderationService.ts)
+  MODERATION_BLOCKED_USERS: `${API_BASE_URL}/blocked-users`,
+  MODERATION_ADMIN_REPORTS: `${API_BASE_URL}/admin/reports`,
+  MODERATION_ADMIN_BLOCKS: `${API_BASE_URL}/admin/blocks`,
+  MODERATION_ADMIN_DELEGATES: `${API_BASE_URL}/admin/delegates`,
+};
+
+const AUTH_TOKEN_KEY = 'ignito_auth_token';
+
+const isRealJwt = (value) => {
+  const token = typeof value === 'string' ? value.trim() : '';
+  return Boolean(token) && !token.startsWith('kaizen_auth_');
+};
+
+/** Pull `access_token` from the admin_login payload, including nested result objects. */
+export const extractAccessToken = (data) => {
+  if (!data || typeof data !== 'object') return '';
+  const preferred = [
+    data.access_token,
+    data.accessToken,
+    data.token,
+    data.jwt,
+    data?.data?.access_token,
+    data?.data?.token,
+  ];
+  for (const candidate of preferred) {
+    if (isRealJwt(candidate)) return String(candidate).trim();
+  }
+  const rows = Array.isArray(data.results)
+    ? data.results
+    : data.results && typeof data.results === 'object'
+      ? [data.results]
+      : [];
+  for (const row of rows) {
+    if (!row || typeof row !== 'object') continue;
+    const nested = row.access_token || row.accessToken || row.token || row.jwt;
+    if (isRealJwt(nested)) return String(nested).trim();
+  }
+  return '';
+};
+
+/** JWT saved from /api/admin_login `access_token`. Synthetic session placeholders are ignored. */
+export const getAccessToken = () => {
+  try {
+    if (typeof localStorage === 'undefined') return '';
+    const token = localStorage.getItem(AUTH_TOKEN_KEY) || '';
+    if (isRealJwt(token)) return token.trim();
+    const rawUser = localStorage.getItem('ignito_auth_user');
+    if (!rawUser) return '';
+    const user = JSON.parse(rawUser);
+    const nested = user?.access_token || user?.accessToken || user?.token || '';
+    return isRealJwt(nested) ? String(nested).trim() : '';
+  } catch {
+    return '';
+  }
+};
+
+/** Merge headers with `Authorization: Bearer <access_token>` when a real JWT is stored. */
+export const bearerHeaders = (extra = {}) => {
+  const headers = { ...extra };
+  const token = getAccessToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  return headers;
+};
+
+/**
+ * Browsers cannot set an Authorization header on a WebSocket handshake.
+ * The same JWT is appended as `token` so the Q&A and polling sockets can authenticate.
+ */
+const appendAccessToken = (url) => {
+  const token = getAccessToken();
+  if (!token || !url) return url;
+  try {
+    const parsed = new URL(url);
+    parsed.searchParams.set('token', token);
+    return parsed.toString();
+  } catch {
+    const joiner = url.includes('?') ? '&' : '?';
+    return `${url}${joiner}token=${encodeURIComponent(token)}`;
+  }
 };
 
 
 /**
  * Admin Login API
- * Endpoint: POST http://192.168.29.201:8000/api/admin_login
+ * Endpoint: POST /api/admin_login
  *
  * Expected Request Body:
  * {
  *   "email": "admin@example.com",
  *   "password": "your_password"
  * }
- *P
+ *
  * Expected Response Structure:
  * {
  *   code: 200,
- *   message: "Login successful",
- *   results: [ ...adminDetails ]
+ *   message: "Admin login successful.",
+ *   results: [{ email, role }],
+ *   isUser: true,
+ *   access_token: "<jwt>",
+ *   token_type: "bearer",
+ *   expires_in: 86400
  * }
  *
  * @param {Object|string} credentials - Credentials object { email, password } or email string
@@ -127,6 +214,144 @@ export const getDelegates = async () => {
     return data;
   } catch (error) {
     console.error('Error in getDelegates API:', error);
+    throw error;
+  }
+};
+
+/**
+ * Create or Update Delegate API
+ * Endpoint: POST /api/delegates
+ *
+ * Send `id` to update an existing delegate. Omit `id` to create a new one.
+ * `password` is only included when a value is provided.
+ *
+ * @param {Object} delegateData
+ * @returns {Promise<any>} API response object { code, message, results, isUser }
+ */
+export const saveDelegate = async (delegateData) => {
+  try {
+    const payload = {
+      registration_id: delegateData.registration_id ?? '',
+      salutation: delegateData.salutation ?? '',
+      first_name: delegateData.first_name ?? '',
+      last_name: delegateData.last_name ?? '',
+      email: delegateData.email ?? '',
+      phone: delegateData.phone ?? '',
+      city: delegateData.city ?? '',
+      state: delegateData.state ?? '',
+      country: delegateData.country ?? '',
+      reg_category: delegateData.reg_category ?? '',
+      total_amount:
+        delegateData.total_amount === '' ||
+        delegateData.total_amount === undefined ||
+        delegateData.total_amount === null
+          ? 0
+          : Number(delegateData.total_amount) || 0,
+      transaction_id: delegateData.transaction_id ?? '',
+      mci_no: delegateData.mci_no ?? '',
+      registration_date: delegateData.registration_date || null,
+      payment_date: delegateData.payment_date || null,
+      payment_mode: delegateData.payment_mode ?? '',
+      remarks: delegateData.remarks ?? '',
+      from_link: delegateData.from_link ?? '',
+    };
+
+    const idNum = Number(delegateData?.id);
+    if (delegateData?.id !== undefined && delegateData?.id !== null && delegateData?.id !== '' && idNum > 0) {
+      payload.id = idNum;
+    }
+
+    if (delegateData?.password) {
+      payload.password = String(delegateData.password);
+    }
+
+    const response = await fetch(API_ENDPOINTS.DELEGATES, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      let errorMessage = 'Failed to save delegate';
+      if (data) {
+        if (typeof data.detail === 'string') {
+          errorMessage = data.detail;
+        } else if (Array.isArray(data.detail)) {
+          errorMessage = data.detail
+            .map((d) => {
+              const loc = Array.isArray(d.loc) ? d.loc.filter((p) => p !== 'body').join('.') : '';
+              return `${loc ? loc + ': ' : ''}${d.msg || JSON.stringify(d)}`;
+            })
+            .join(', ');
+        } else if (data.message) {
+          errorMessage = data.message;
+        }
+      }
+      const error = new Error(errorMessage);
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in saveDelegate API:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete Delegate API
+ * Endpoint: DELETE /api/delegates/{delegate_id}
+ *
+ * @param {number|string} delegateId
+ * @returns {Promise<any>}
+ */
+export const deleteDelegate = async (delegateId) => {
+  try {
+    if (delegateId === undefined || delegateId === null || delegateId === '') {
+      throw new Error('Delegate ID is required to delete a delegate');
+    }
+
+    const response = await fetch(`${API_ENDPOINTS.DELEGATES}/${encodeURIComponent(delegateId)}`, {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      let errorMessage = 'Failed to delete delegate';
+      if (data) {
+        if (typeof data.detail === 'string') {
+          errorMessage = data.detail;
+        } else if (Array.isArray(data.detail)) {
+          errorMessage = data.detail
+            .map((d) => {
+              const loc = Array.isArray(d.loc) ? d.loc.filter((p) => p !== 'body').join('.') : '';
+              return `${loc ? loc + ': ' : ''}${d.msg || JSON.stringify(d)}`;
+            })
+            .join(', ');
+        } else if (data.message) {
+          errorMessage = data.message;
+        }
+      }
+      const error = new Error(errorMessage);
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+
+    return data || { success: true };
+  } catch (error) {
+    console.error('Error in deleteDelegate API:', error);
     throw error;
   }
 };
@@ -470,6 +695,179 @@ export const deleteSession = async (scheduleId) => {
     return data;
   } catch (error) {
     console.error('Error in deleteSession API:', error);
+    throw error;
+  }
+};
+
+/**
+ * Session Feedback Summary API
+ * Endpoint: GET https://api.kaizencon.in/api/sessions/feedback?session_id={id}
+ *
+ * Expected Response Structure:
+ * {
+ *   code: 200,
+ *   message: "Feedback summary retrieved successfully.",
+ *   results: [{
+ *     session_id: 14,
+ *     total_feedback: 2,
+ *     average_rating: 4.0 | null,
+ *     comments: {
+ *       five_star: [{ id, rating, comment, submitted_at }],
+ *       three_or_four_star: [...],
+ *       one_star: [...]
+ *     }
+ *   }],
+ *   isUser: true
+ * }
+ *
+ * Returns 404 { detail: "Session not found" } for unknown sessions.
+ *
+ * @param {number|string} sessionId - The session (schedule) ID
+ * @returns {Promise<any|null>} The feedback summary for that session, or null if none returned
+ */
+export const getSessionFeedback = async (sessionId) => {
+  try {
+    if (sessionId === undefined || sessionId === null || sessionId === '') {
+      throw new Error('Session ID is required to fetch feedback');
+    }
+
+    const response = await fetch(
+      `${API_ENDPOINTS.SESSIONS}/feedback?session_id=${encodeURIComponent(sessionId)}`,
+      {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+      }
+    );
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      let errorMessage = `Request failed with status ${response.status}`;
+      if (data) {
+        if (typeof data.detail === 'string') {
+          errorMessage = data.detail;
+        } else if (Array.isArray(data.detail) && data.detail[0]?.msg) {
+          errorMessage = data.detail[0].msg;
+        } else if (data.message) {
+          errorMessage = data.message;
+        }
+      }
+      const error = new Error(errorMessage);
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+
+    if (data && Array.isArray(data.results)) {
+      return (
+        data.results.find((r) => String(r?.session_id) === String(sessionId)) ||
+        data.results[0] ||
+        null
+      );
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in getSessionFeedback API:', error);
+    throw error;
+  }
+};
+
+/** Extract a readable message from a FastAPI / envelope error body */
+const extractApiError = (data, status) => {
+  if (data) {
+    if (typeof data.detail === 'string') return data.detail;
+    if (Array.isArray(data.detail) && data.detail[0]?.msg) {
+      const loc = Array.isArray(data.detail[0].loc) ? data.detail[0].loc.filter((p) => p !== 'body').join('.') : '';
+      return `${loc ? loc + ': ' : ''}${data.detail[0].msg}`;
+    }
+    if (data.message) return data.message;
+  }
+  return `Request failed with status ${status}`;
+};
+
+/**
+ * Create & Send Push Notification API
+ * Endpoint: POST https://api.kaizencon.in/api/notifications
+ *
+ * Request body (NotificationCreate, additionalProperties: false):
+ * {
+ *   title: string (1-200),
+ *   body: string (1-2000),
+ *   delegate_ids?: number[] (max 5000; [] = broadcast to every registered device),
+ *   data?: { [key: string]: string }
+ * }
+ *
+ * Response (201): { code, message, results: [{ id, title, body, data, delegate_ids,
+ *   target_count, sent_count, failed_count, created_at }], isUser }
+ *
+ * NOTE: 201 only means the notification was saved — inspect target/sent/failed counts
+ * for actual delivery.
+ *
+ * @param {{ title: string, body: string, delegate_ids: number[], data?: Record<string,string> }} payload
+ * @returns {Promise<{ code: number, message: string, notification: any|null }>}
+ */
+export const sendNotification = async (payload) => {
+  try {
+    const response = await fetch(API_ENDPOINTS.NOTIFICATIONS, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const error = new Error(extractApiError(data, response.status));
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+
+    return {
+      code: data?.code ?? response.status,
+      message: data?.message || '',
+      notification: Array.isArray(data?.results) && data.results.length > 0 ? data.results[0] : null,
+    };
+  } catch (error) {
+    console.error('Error in sendNotification API:', error);
+    throw error;
+  }
+};
+
+/**
+ * List Notifications (history) API
+ * Endpoint: GET https://api.kaizencon.in/api/notifications?offset=0&limit=50[&delegate_id=]
+ *
+ * @param {{ offset?: number, limit?: number, delegateId?: number|null }} [params]
+ * @returns {Promise<{ results: any[], count: number }>}
+ */
+export const getNotifications = async ({ offset = 0, limit = 50, delegateId = null } = {}) => {
+  try {
+    const query = new URLSearchParams({ offset: String(offset), limit: String(limit) });
+    if (delegateId) query.set('delegate_id', String(delegateId));
+
+    const response = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}?${query.toString()}`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const error = new Error(extractApiError(data, response.status));
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+
+    const results = Array.isArray(data?.results) ? data.results : [];
+    return { results, count: typeof data?.count === 'number' ? data.count : results.length };
+  } catch (error) {
+    console.error('Error in getNotifications API:', error);
     throw error;
   }
 };
@@ -1903,10 +2301,10 @@ export const votePoll = async (pollId, optionId, delegateId = null) => {
 
     const response = await fetch(`${BASE_URL}/polling/api/polls/${pollId}/vote`, {
       method: 'POST',
-      headers: {
+      headers: bearerHeaders({
         'Content-Type': 'application/json',
         'accept': 'application/json',
-      },
+      }),
       body: JSON.stringify(payload),
     });
 
@@ -1936,12 +2334,52 @@ export const votePoll = async (pollId, optionId, delegateId = null) => {
  * @returns {string}
  */
 export const getPollsWsUrl = (sessionId = QA_DEFAULT_SESSION_ID) => {
+  let url;
   if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_POLL_WS_URL) {
-    return import.meta.env.VITE_POLL_WS_URL;
+    url = import.meta.env.VITE_POLL_WS_URL;
+  } else {
+    const sid = sessionId || QA_DEFAULT_SESSION_ID;
+    const wsBase = (BASE_URL || 'http://192.168.29.201:8000').replace(/^http(s?):/, 'ws$1:');
+    url = `${wsBase}/api/sessions/${sid}/ws?role=moderator`;
   }
-  const sid = sessionId || QA_DEFAULT_SESSION_ID;
-  const wsBase = (BASE_URL || 'http://192.168.29.201:8000').replace(/^http(s?):/, 'ws$1:');
-  return `${wsBase}/api/sessions/${sid}/ws?role=moderator`;
+  return appendAccessToken(url);
+};
+
+/**
+ * Active polls
+ * Endpoint: GET /polling/api/polls/active
+ * Header: Authorization: Bearer <access_token>
+ */
+export const getActivePolls = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/polling/api/polls/active`, {
+      method: 'GET',
+      headers: bearerHeaders({
+        Accept: 'application/json',
+      }),
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      let errorMessage = `Failed to fetch active polls: ${response.status}`;
+      if (data) {
+        if (typeof data.detail === 'string') errorMessage = data.detail;
+        else if (Array.isArray(data.detail)) {
+          errorMessage = data.detail.map((d) => d.msg || JSON.stringify(d)).join(', ');
+        } else if (data.message) errorMessage = data.message;
+      }
+      throw new Error(errorMessage);
+    }
+
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.results)) return data.results;
+    if (data && data.id) return [data];
+    return [];
+  } catch (error) {
+    console.error('Error in getActivePolls API:', error);
+    throw error;
+  }
 };
 
 /**
@@ -1973,9 +2411,9 @@ export const getPollById = async (pollId) => {
 
     const response = await fetch(`${BASE_URL}/polling/api/polls/${id}`, {
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-      },
+      headers: bearerHeaders({
+        Accept: 'application/json',
+      }),
     });
 
     if (!response.ok) {
@@ -2072,34 +2510,115 @@ export const downloadPollQrCode = async (pollId, filename = null) => {
 export const QA_DEFAULT_SESSION_ID = '00000000-0000-0000-0000-000000000001';
 export const QA_WS_URL = `wss://api.kaizencon.in/api/sessions/${QA_DEFAULT_SESSION_ID}/ws?role=moderator`;
 
+const unwrapQuestionList = (data) => {
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.questions)) return data.questions;
+  if (data && Array.isArray(data.results)) return data.results;
+  if (data && data.id) return [data];
+  return [];
+};
+
+/**
+ * List session questions
+ * Endpoint: GET /api/sessions/{session_id}/questions
+ * Header: Authorization: Bearer <access_token>
+ */
+export const getSessionQuestions = async (sessionId) => {
+  const targetSession = sessionId || QA_DEFAULT_SESSION_ID;
+  const url = appendAccessToken(`${API_BASE_URL}/sessions/${targetSession}/questions`);
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: bearerHeaders({ Accept: 'application/json' }),
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    const errorMsg = data?.detail || data?.message || `Failed to load questions: ${response.status}`;
+    throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+  }
+  return unwrapQuestionList(data);
+};
+
+/**
+ * Get one session question
+ * Endpoint: GET /api/sessions/{session_id}/questions/{question_id}
+ * Header: Authorization: Bearer <access_token>
+ */
+export const getSessionQuestion = async (sessionId, questionId) => {
+  const targetSession = sessionId || QA_DEFAULT_SESSION_ID;
+  const url = appendAccessToken(
+    `${API_BASE_URL}/sessions/${targetSession}/questions/${encodeURIComponent(questionId)}`
+  );
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: bearerHeaders({ Accept: 'application/json' }),
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    const errorMsg = data?.detail || data?.message || `Failed to load question: ${response.status}`;
+    throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+  }
+  if (data && Array.isArray(data.results) && data.results.length > 0) return data.results[0];
+  return data;
+};
+
+/**
+ * Delete one session question
+ * Endpoint: DELETE /api/sessions/{session_id}/questions/{question_id}
+ * Header: Authorization: Bearer <access_token>
+ */
+export const deleteSessionQuestion = async (sessionId, questionId) => {
+  const targetSession = sessionId || QA_DEFAULT_SESSION_ID;
+  const url = appendAccessToken(
+    `${API_BASE_URL}/sessions/${targetSession}/questions/${encodeURIComponent(questionId)}`
+  );
+  const response = await fetch(url, {
+    method: 'DELETE',
+    headers: bearerHeaders({ Accept: 'application/json' }),
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    const errorMsg = data?.detail || data?.message || `Failed to delete question: ${response.status}`;
+    throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+  }
+  return data || { success: true };
+};
+
 export const approveQuestionApi = async (sessionId, questionId) => {
   const targetSession = sessionId || QA_DEFAULT_SESSION_ID;
-  const url = `${API_BASE_URL}/sessions/${targetSession}/questions/${questionId}/approve`;
+  const url = appendAccessToken(
+    `${API_BASE_URL}/sessions/${targetSession}/questions/${questionId}/approve`
+  );
   const response = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Accept': 'application/json',
+    headers: bearerHeaders({
+      Accept: 'application/json',
       'Content-Type': 'application/json',
-    },
+    }),
   });
   if (!response.ok) {
-    throw new Error(`Failed to approve question: ${response.status}`);
+    const data = await response.json().catch(() => null);
+    const errorMsg = data?.detail || data?.message || `Failed to approve question: ${response.status}`;
+    throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
   }
   return await response.json();
 };
 
 export const rejectQuestionApi = async (sessionId, questionId) => {
   const targetSession = sessionId || QA_DEFAULT_SESSION_ID;
-  const url = `${API_BASE_URL}/sessions/${targetSession}/questions/${questionId}/reject`;
+  const url = appendAccessToken(
+    `${API_BASE_URL}/sessions/${targetSession}/questions/${questionId}/reject`
+  );
   const response = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Accept': 'application/json',
+    headers: bearerHeaders({
+      Accept: 'application/json',
       'Content-Type': 'application/json',
-    },
+    }),
   });
   if (!response.ok) {
-    throw new Error(`Failed to reject question: ${response.status}`);
+    const data = await response.json().catch(() => null);
+    const errorMsg = data?.detail || data?.message || `Failed to reject question: ${response.status}`;
+    throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
   }
   return await response.json();
 };
@@ -2112,7 +2631,7 @@ export const rejectQuestionApi = async (sessionId, questionId) => {
 export const getQaWsUrl = (sessionId = QA_DEFAULT_SESSION_ID) => {
   const sid = sessionId || QA_DEFAULT_SESSION_ID;
   const wsBase = (BASE_URL || 'https://api.kaizencon.in').replace(/^http(s?):/, 'ws$1:');
-  return `${wsBase}/api/sessions/${sid}/ws?role=moderator`;
+  return appendAccessToken(`${wsBase}/api/sessions/${sid}/ws?role=moderator`);
 };
 
 /**
@@ -2124,9 +2643,7 @@ export const getLiveSessions = async () => {
   try {
     const response = await fetch(API_ENDPOINTS.SESSIONS, {
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-      },
+      headers: bearerHeaders({ Accept: 'application/json' }),
     });
 
     const data = await response.json().catch(() => null);
@@ -2667,6 +3184,8 @@ export default {
   API_ENDPOINTS,
   adminLogin,
   getDelegates,
+  saveDelegate,
+  deleteDelegate,
   getSpeakers,
   saveSpeaker,
   deleteSpeaker,
@@ -2674,6 +3193,9 @@ export default {
   getSessionById,
   createSession,
   deleteSession,
+  getSessionFeedback,
+  sendNotification,
+  getNotifications,
   getSchedules,
   getScheduleById,
   saveSchedule,
@@ -2699,12 +3221,16 @@ export default {
   getAdminPolls,
   deletePoll,
   votePoll,
+  getActivePolls,
   getPollById,
   getLivePoll,
   getPolls,
   getPollQrCodeUrl,
   downloadPollQrCode,
   getPollsWsUrl,
+  getSessionQuestions,
+  getSessionQuestion,
+  deleteSessionQuestion,
   approveQuestionApi,
   rejectQuestionApi,
   getQaWsUrl,

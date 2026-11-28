@@ -8,6 +8,7 @@ import {
   QA_DEFAULT_SESSION_ID,
   approveQuestionApi,
   rejectQuestionApi,
+  getSessionQuestions,
   getLiveSessions,
   getQaWsUrl,
 } from "../../api/ApiPath";
@@ -33,33 +34,64 @@ export interface LiveSessionInfo {
   created_at?: string;
 }
 
+const isRealSessionId = (id?: string | null) =>
+  Boolean(id) && id !== QA_DEFAULT_SESSION_ID;
+
 export default function QAPage() {
   const { success, error: toastError, info } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Selected Session ID from URL or default
-  const paramSessionId = searchParams.get("session_id") || QA_DEFAULT_SESSION_ID;
-  const [activeSessionId, setActiveSessionId] = useState<string>(paramSessionId);
+  // Ignore the placeholder UUID. A real id comes from the URL or from GET /api/sessions.
+  const paramSessionId = searchParams.get("session_id") || "";
+  const [activeSessionId, setActiveSessionId] = useState<string>(
+    isRealSessionId(paramSessionId) ? paramSessionId : ""
+  );
   const [availableSessions, setAvailableSessions] = useState<LiveSessionInfo[]>([]);
 
   // Sync state if URL search param changes
   useEffect(() => {
     const urlSid = searchParams.get("session_id");
-    if (urlSid && urlSid !== activeSessionId) {
-      setActiveSessionId(urlSid);
+    if (isRealSessionId(urlSid) && urlSid !== activeSessionId) {
+      setActiveSessionId(urlSid as string);
     }
-  }, [searchParams]);
+  }, [searchParams, activeSessionId]);
 
-  // Fetch available sessions for dropdown switcher
+  // Fetch available sessions and select a real id (live session first).
   useEffect(() => {
+    let cancelled = false;
     getLiveSessions()
       .then((data: any) => {
-        if (Array.isArray(data)) {
-          setAvailableSessions(data);
+        if (cancelled || !Array.isArray(data)) return;
+        const sessions: LiveSessionInfo[] = data
+          .map((s: any) => ({
+            ...s,
+            id: String(s?.id || s?.session_id || ""),
+            title: s?.title || "Untitled session",
+            status: s?.status,
+            join_code: s?.join_code,
+            speaker_name: s?.speaker_name,
+          }))
+          .filter((s: LiveSessionInfo) => isRealSessionId(s.id));
+        setAvailableSessions(sessions);
+
+        const urlSid = searchParams.get("session_id") || "";
+        const urlIsListed = sessions.some((s) => s.id === urlSid);
+        const keepUrl = isRealSessionId(urlSid) && (urlIsListed || sessions.length === 0);
+        const live = sessions.find((s) => String(s.status || "").toLowerCase() === "live");
+        const nextId = keepUrl ? urlSid : live?.id || sessions[0]?.id || "";
+
+        if (nextId) {
+          setActiveSessionId(nextId);
+          if (nextId !== urlSid) {
+            setSearchParams({ session_id: nextId }, { replace: true });
+          }
         }
       })
       .catch((err: any) => console.warn("Could not load sessions list in QAPage:", err));
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams, setSearchParams]);
 
   // Live WebSocket & State
   const [questions, setQuestions] = useState<LiveQuestionItem[]>([]);
@@ -91,6 +123,11 @@ export default function QAPage() {
         // ignore
       }
       wsRef.current = null;
+    }
+
+    if (!isRealSessionId(activeSessionId)) {
+      setConnectionStatus("disconnected");
+      return;
     }
 
     setConnectionStatus("connecting");
@@ -224,6 +261,33 @@ export default function QAPage() {
     }
   }, [info, activeSessionId]);
 
+  // REST list uses the same JWT as the socket. The socket still pushes live updates.
+  useEffect(() => {
+    if (!isRealSessionId(activeSessionId)) return;
+    let cancelled = false;
+    getSessionQuestions(activeSessionId)
+      .then((list: any) => {
+        if (cancelled || !Array.isArray(list)) return;
+        setQuestions(
+          list.map((q: any) => ({
+            id: String(q.id ?? q.question_id ?? ""),
+            session_id: q.session_id,
+            text: q.text || q.question || q.body || "",
+            author_name: q.author_name ?? q.delegate_name ?? null,
+            status: q.status || "pending",
+            category: q.category ?? null,
+            ai_summary: q.ai_summary ?? null,
+            vote_count: Number(q.vote_count ?? q.votes ?? 0),
+            created_at: q.created_at || new Date().toISOString(),
+          }))
+        );
+      })
+      .catch((err: any) => console.warn("Could not load session questions:", err));
+    return () => {
+      cancelled = true;
+    };
+  }, [activeSessionId]);
+
   // Connect on Mount & Disconnect on Unmount
   useEffect(() => {
     connectWebSocket();
@@ -242,7 +306,8 @@ export default function QAPage() {
   const handleApprove = async (questionId: string) => {
     try {
       setActionLoadingId(questionId);
-      const targetSession = activeSessionId || sessionInfo?.id || QA_DEFAULT_SESSION_ID;
+      const targetSession = activeSessionId || sessionInfo?.id || "";
+      if (!isRealSessionId(targetSession)) return;
       await approveQuestionApi(targetSession, questionId);
 
       // Optimistic update
@@ -262,7 +327,8 @@ export default function QAPage() {
   const handleReject = async (questionId: string) => {
     try {
       setActionLoadingId(questionId);
-      const targetSession = activeSessionId || sessionInfo?.id || QA_DEFAULT_SESSION_ID;
+      const targetSession = activeSessionId || sessionInfo?.id || "";
+      if (!isRealSessionId(targetSession)) return;
       await rejectQuestionApi(targetSession, questionId);
 
       // Optimistic update

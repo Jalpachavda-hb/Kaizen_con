@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { useNavigate } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
+import { FeedbackIcon } from "../../components/common/FeedbackIcon";
 import { AdminPageContainer } from "../../components/common/AdminPageContainer";
 import { TablePagination } from "../../components/common/TablePagination";
 import {
@@ -112,6 +114,7 @@ export const getSessionSpeakerIds = (session: any): number[] => {
 
 export default function SchedulesPage() {
   const { success, error: toastError } = useToast();
+  const navigate = useNavigate();
 
   // Sessions and Speakers state
   const [sessions, setSessions] = useState<SessionItem[]>([]);
@@ -750,7 +753,7 @@ export default function SchedulesPage() {
                   <th className="py-3 px-4 w-60 min-w-[200px] max-w-[250px]">Speaker</th>
                   <th className="py-3 px-4 w-44 min-w-[160px] whitespace-nowrap">Schedule & Venue</th>
                   <th className="py-3 px-4 w-36 min-w-[120px] whitespace-nowrap">Category</th>
-                  <th className="py-3 px-4 w-28 text-center whitespace-nowrap">Actions</th>
+                  <th className="py-3 px-4 w-36 text-center whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800/70">
@@ -884,7 +887,7 @@ export default function SchedulesPage() {
                       </td>
 
                       {/* Actions */}
-                      <td className="py-3.5 px-4 w-28 text-center whitespace-nowrap align-top">
+                      <td className="py-3.5 px-4 w-36 text-center whitespace-nowrap align-top">
                         <div className="inline-flex items-center gap-1.5 justify-center">
                           <button
                             type="button"
@@ -906,6 +909,15 @@ export default function SchedulesPage() {
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                               <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/schedules/feedback/${encodeURIComponent(String(session.id))}`)}
+                            className="p-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg border border-indigo-200 dark:border-indigo-800 transition-colors cursor-pointer inline-flex items-center justify-center"
+                            data-tooltip="View Feedback"
+                            aria-label={`View feedback for session #${session.id}`}
+                          >
+                            <FeedbackIcon className="w-3.5 h-3.5" />
                           </button>
                           <button
                             type="button"

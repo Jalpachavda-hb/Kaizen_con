@@ -1,8 +1,12 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, type FormEvent } from "react";
+import Swal from "sweetalert2";
 import PageMeta from "../../components/common/PageMeta";
 import { AdminPageContainer } from "../../components/common/AdminPageContainer";
 import { TablePagination } from "../../components/common/TablePagination";
-import { getDelegates, BASE_URL } from "../../api/ApiPath";
+import { getDelegates, saveDelegate, deleteDelegate, BASE_URL } from "../../api/ApiPath";
+import { useToast } from "../../context/ToastContext";
+import { DelegateActionModal } from "./DelegateActionModal";
+import type { DelegateActionMode } from "./DelegateActionModal";
 
 export interface Delegate {
   id: number;
@@ -34,12 +38,140 @@ export interface Delegate {
   consent_given?: boolean;
   is_deleted?: boolean;
   is_active?: boolean;
+  is_banned?: boolean;
+  ban_status?: string | null;
   created_at?: string;
   updated_at?: string;
 }
 
+type DelegateAccess = "banned" | "active";
+
+function readDelegateAccess(d: Delegate): DelegateAccess | null {
+  if (typeof d.is_banned === "boolean") return d.is_banned ? "banned" : "active";
+  const raw = (d.ban_status || "").trim().toLowerCase();
+  if (!raw) return null;
+  if (raw === "active" || raw.includes("unban")) return "active";
+  if (raw.includes("ban")) return "banned";
+  return null;
+}
+
+function effectiveDelegateAccess(d: Delegate, overrides: Record<number, DelegateAccess>): DelegateAccess {
+  return overrides[d.id] ?? readDelegateAccess(d) ?? "active";
+}
+
+function delegateFullName(d: Delegate): string {
+  const salutation = d.salutation ? `${d.salutation} ` : "";
+  return `${salutation}${d.first_name || ""} ${d.last_name || ""}`.trim() || `Delegate #${d.id}`;
+}
+
+interface DelegateForm {
+  registration_id: string;
+  salutation: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  password: string;
+  city: string;
+  state: string;
+  country: string;
+  reg_category: string;
+  total_amount: string;
+  transaction_id: string;
+  mci_no: string;
+  registration_date: string;
+  payment_date: string;
+  payment_mode: string;
+  remarks: string;
+  from_link: string;
+}
+
+const EMPTY_DELEGATE_FORM: DelegateForm = {
+  registration_id: "",
+  salutation: "Dr.",
+  first_name: "",
+  last_name: "",
+  email: "",
+  phone: "",
+  password: "",
+  city: "",
+  state: "",
+  country: "India",
+  reg_category: "DELEGATE",
+  total_amount: "",
+  transaction_id: "",
+  mci_no: "",
+  registration_date: "",
+  payment_date: "",
+  payment_mode: "",
+  remarks: "",
+  from_link: "",
+};
+
+const SALUTATIONS = ["Dr.", "Prof.", "Mr.", "Mrs.", "Ms."];
+const PAYMENT_MODES = ["Online", "UPI", "Card", "Net Banking", "Cash", "Cheque", "Complimentary"];
+
+const fieldClass =
+  "w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-[#AA2D7B]";
+const labelClass = "block font-semibold text-gray-700 dark:text-gray-300 mb-1";
+
+function isoToLocalInput(iso?: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function localInputToIso(value: string): string | null {
+  if (!value.trim()) return null;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString();
+}
+
+function formFromDelegate(d: Delegate): DelegateForm {
+  return {
+    registration_id: d.registration_id || "",
+    salutation: d.salutation || "",
+    first_name: d.first_name || "",
+    last_name: d.last_name || "",
+    email: d.email || "",
+    phone: d.phone || "",
+    password: "",
+    city: d.city || "",
+    state: d.state || "",
+    country: d.country || "",
+    reg_category: d.reg_category || "",
+    total_amount: d.total_amount === null || d.total_amount === undefined ? "" : String(d.total_amount),
+    transaction_id: d.transaction_id || "",
+    mci_no: d.mci_no || "",
+    registration_date: isoToLocalInput(d.registration_date),
+    payment_date: isoToLocalInput(d.payment_date),
+    payment_mode: d.payment_mode || "",
+    remarks: d.remarks || "",
+    from_link: d.from_link || "",
+  };
+}
+
+function AccessBadge({ access }: { access: DelegateAccess }) {
+  if (access === "banned") {
+    return (
+      <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border whitespace-nowrap bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800">
+        Banned
+      </span>
+    );
+  }
+  return (
+    <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border whitespace-nowrap bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800">
+      Active
+    </span>
+  );
+}
+
 
 export default function DelegatesPage() {
+  const { success: toastSuccess, error: toastError } = useToast();
   const [delegates, setDelegates] = useState<Delegate[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [_error, setError] = useState<string | null>(null);
@@ -58,33 +190,168 @@ export default function DelegatesPage() {
   // Selected Delegate for View Modal & QR Preview
   const [selectedDelegate, setSelectedDelegate] = useState<Delegate | null>(null);
   const [qrModalDelegate, setQrModalDelegate] = useState<Delegate | null>(null);
+  const [accessOverrides, setAccessOverrides] = useState<Record<number, DelegateAccess>>({});
+  const [moderation, setModeration] = useState<{ delegate: Delegate; mode: DelegateActionMode } | null>(null);
 
-  // Fetch from Live API
-  const fetchDelegatesData = async () => {
-    setLoading(true);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingDelegate, setEditingDelegate] = useState<Delegate | null>(null);
+  const [form, setForm] = useState<DelegateForm>(EMPTY_DELEGATE_FORM);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  // Fetch from Live API. Silent refreshes keep the current table in place.
+  const fetchDelegatesData = async (opts?: { silent?: boolean }): Promise<boolean> => {
+    if (!opts?.silent) setLoading(true);
     setError(null);
     try {
       const data = await getDelegates();
       if (data && Array.isArray(data.results)) {
         setDelegates(data.results);
         setIsLiveApi(true);
-      } else {
-        setDelegates([]);
-        setIsLiveApi(false);
+        return true;
       }
+      setDelegates([]);
+      setIsLiveApi(false);
+      return false;
     } catch (err: any) {
       console.warn("Could not fetch delegates from live API:", err);
       setError(err?.message || "Live API not reachable. Please check connection.");
-      setDelegates([]);
+      if (!opts?.silent) setDelegates([]);
       setIsLiveApi(false);
+      return false;
     } finally {
-      setLoading(false);
+      if (!opts?.silent) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchDelegatesData();
   }, []);
+
+  const setField = (key: keyof DelegateForm, value: string) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const openCreateModal = () => {
+    setEditingDelegate(null);
+    setForm(EMPTY_DELEGATE_FORM);
+    setFormError(null);
+    setFormOpen(true);
+  };
+
+  const openEditModal = (delegate: Delegate) => {
+    setEditingDelegate(delegate);
+    setForm(formFromDelegate(delegate));
+    setFormError(null);
+    setSelectedDelegate(null);
+    setFormOpen(true);
+  };
+
+  const closeFormModal = () => {
+    if (isSubmitting) return;
+    setFormOpen(false);
+    setEditingDelegate(null);
+    setForm(EMPTY_DELEGATE_FORM);
+    setFormError(null);
+  };
+
+  const handleSaveDelegate = async (e: FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+
+    if (!form.first_name.trim() || !form.last_name.trim() || !form.email.trim()) {
+      setFormError("First name, last name, and email are required.");
+      return;
+    }
+    if (!editingDelegate && !form.password.trim()) {
+      setFormError("A password is required when creating a delegate.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setFormError(null);
+    try {
+      const payload: Record<string, unknown> = {
+        registration_id: form.registration_id.trim(),
+        salutation: form.salutation.trim(),
+        first_name: form.first_name.trim(),
+        last_name: form.last_name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        city: form.city.trim(),
+        state: form.state.trim(),
+        country: form.country.trim(),
+        reg_category: form.reg_category.trim(),
+        total_amount: form.total_amount.trim() === "" ? 0 : Number(form.total_amount),
+        transaction_id: form.transaction_id.trim(),
+        mci_no: form.mci_no.trim(),
+        registration_date: localInputToIso(form.registration_date),
+        payment_date: localInputToIso(form.payment_date),
+        payment_mode: form.payment_mode.trim(),
+        remarks: form.remarks.trim(),
+        from_link: form.from_link.trim(),
+      };
+
+      if (editingDelegate?.id) {
+        payload.id = editingDelegate.id;
+      }
+      if (form.password.trim()) {
+        payload.password = form.password;
+      }
+
+      const res = await saveDelegate(payload);
+      const name = `${form.salutation ? form.salutation + " " : ""}${form.first_name} ${form.last_name}`.trim();
+      toastSuccess(
+        editingDelegate
+          ? `${name} has been updated.`
+          : res?.message && !/^(ok|success|string)$/i.test(res.message)
+          ? res.message
+          : `${name} has been registered.`
+      );
+      setFormOpen(false);
+      setEditingDelegate(null);
+      setForm(EMPTY_DELEGATE_FORM);
+      await fetchDelegatesData({ silent: true });
+    } catch (err: any) {
+      const msg = err?.message || "Could not save this delegate.";
+      setFormError(msg);
+      toastError(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteDelegate = async (delegate: Delegate) => {
+    const name = delegateFullName(delegate);
+    const result = await Swal.fire({
+      title: "Delete delegate?",
+      text: `Delete ${name} (${delegate.registration_id || "#" + delegate.id})? This cannot be undone.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#AA2D7B",
+      cancelButtonColor: "#6B7280",
+      confirmButtonText: "Yes, delete",
+      cancelButtonText: "Cancel",
+      reverseButtons: true,
+      focusCancel: true,
+    });
+
+    if (!result.isConfirmed) return;
+
+    setDeletingId(delegate.id);
+    try {
+      await deleteDelegate(delegate.id);
+      setDelegates((prev) => prev.filter((d) => d.id !== delegate.id));
+      setSelectedDelegate((cur) => (cur && cur.id === delegate.id ? null : cur));
+      setQrModalDelegate((cur) => (cur && cur.id === delegate.id ? null : cur));
+      toastSuccess(`${name} has been deleted.`);
+    } catch (err: any) {
+      toastError(err?.message || "Could not delete this delegate.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   // Unique Categories
   const availableCategories = useMemo(() => {
@@ -306,10 +573,23 @@ export default function DelegatesPage() {
     
            
             <button
-              onClick={fetchDelegatesData}
+              type="button"
+              onClick={openCreateModal}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-[#55355E] hover:bg-[#6d4578] rounded-lg shadow-xs transition-colors cursor-pointer"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Add Delegate
+            </button>
+            <button
+              onClick={() => {
+                void fetchDelegatesData();
+              }}
               disabled={loading}
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-[#AA2D7B] hover:bg-[#D85A9A] rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-50"
-              title="Refresh from http://192.168.29.201:8000/api/delegates"
+              title="Refresh delegates"
             >
               <svg
                 className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
@@ -442,6 +722,7 @@ export default function DelegatesPage() {
                   <th className="py-3 px-4">Location</th>
                   <th className="py-3 px-4">MCI No.</th>
                   <th className="py-3 px-4">Reg. Date</th>
+                  <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4 text-center">Actions</th>
                 </tr>
               </thead>
@@ -450,6 +731,7 @@ export default function DelegatesPage() {
                   const salutation = delegate.salutation ? `${delegate.salutation} ` : "";
                   const fullName = `${salutation}${delegate.first_name || ""} ${delegate.last_name || ""}`.trim();
                   const initials = `${(delegate.first_name || "D").charAt(0)}${(delegate.last_name || "C").charAt(0)}`.toUpperCase();
+                  const access = effectiveDelegateAccess(delegate, accessOverrides);
                   const fullQrUrl = delegate.qr_code_url
                     ? `${BASE_URL}${delegate.qr_code_url}`
                     : null;
@@ -589,19 +871,69 @@ export default function DelegatesPage() {
                         {formatDate(delegate.registration_date)}
                       </td>
 
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <AccessBadge access={access} />
+                      </td>
+
                       {/* Actions */}
                       <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedDelegate(delegate)}
-                          className="p-1.5 text-xs font-semibold text-[#AA2D7B] dark:text-[#D85A9A] bg-[#faedf5]/70 hover:bg-[#faedf5] dark:bg-pink-950/40 dark:hover:bg-pink-900/50 rounded-lg border border-[#AA2D7B]/20 dark:border-[#AA2D7B]/40 transition-colors cursor-pointer inline-flex items-center justify-center"
-                          data-tooltip="View Details"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                        </button>
+                        <div className="inline-flex items-center justify-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedDelegate(delegate)}
+                            className="p-1.5 text-xs font-semibold text-[#AA2D7B] dark:text-[#D85A9A] bg-[#faedf5]/70 hover:bg-[#faedf5] dark:bg-pink-950/40 dark:hover:bg-pink-900/50 rounded-lg border border-[#AA2D7B]/20 dark:border-[#AA2D7B]/40 transition-colors cursor-pointer inline-flex items-center justify-center"
+                            data-tooltip="View Details"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                              <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(delegate)}
+                            className="p-1.5 text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg border border-blue-200 dark:border-blue-800 transition-colors cursor-pointer inline-flex items-center justify-center"
+                            data-tooltip="Edit Delegate"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                              <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteDelegate(delegate)}
+                            disabled={deletingId === delegate.id}
+                            className="p-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg border border-rose-200 dark:border-rose-800 transition-colors disabled:opacity-50 cursor-pointer inline-flex items-center justify-center"
+                            data-tooltip="Delete Delegate"
+                          >
+                            {deletingId === delegate.id ? (
+                              <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                                <path d="M12 2a10 10 0 0 1 10 10" />
+                              </svg>
+                            ) : (
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                <line x1="10" y1="11" x2="10" y2="17" />
+                                <line x1="14" y1="11" x2="14" y2="17" />
+                              </svg>
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={moderation !== null}
+                            onClick={() =>
+                              setModeration({ delegate, mode: access === "banned" ? "unban" : "ban" })
+                            }
+                            className={
+                              access === "banned"
+                                ? "px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                                : "px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                            }
+                          >
+                            {access === "banned" ? "Unban" : "Ban"}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -637,12 +969,13 @@ export default function DelegatesPage() {
                   {(selectedDelegate.last_name || "C").charAt(0)}
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="text-base font-bold text-gray-900 dark:text-white">
                       {selectedDelegate.salutation ? `${selectedDelegate.salutation} ` : ""}
                       {selectedDelegate.first_name} {selectedDelegate.last_name}
                     </h3>
                     {getCategoryBadge(selectedDelegate.reg_category)}
+                    <AccessBadge access={effectiveDelegateAccess(selectedDelegate, accessOverrides)} />
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     Registration ID:{" "}
@@ -858,12 +1191,26 @@ export default function DelegatesPage() {
 
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
+                  onClick={() => handleDeleteDelegate(selectedDelegate)}
+                  disabled={deletingId === selectedDelegate.id}
+                  className="px-4 py-2 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 rounded-lg border border-rose-200 dark:border-rose-800 transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {deletingId === selectedDelegate.id ? "Deleting..." : "Delete"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openEditModal(selectedDelegate)}
+                  className="px-4 py-2 text-xs font-semibold text-white bg-[#55355E] hover:bg-[#6d4578] rounded-lg transition-colors cursor-pointer"
+                >
+                  Edit
+                </button>
+                <button
                   onClick={() => setSelectedDelegate(null)}
                   className="px-4 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
                 >
                   Close
                 </button>
-                
               </div>
             </div>
           </div>
@@ -932,6 +1279,309 @@ export default function DelegatesPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {formOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] overflow-hidden flex flex-col my-auto">
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-200 dark:border-gray-800 bg-[#faedf5]/30 shrink-0">
+              <div>
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+                  {editingDelegate
+                    ? `Edit ${form.first_name} ${form.last_name}`.trim()
+                    : "Register a delegate"}
+                </h3>
+                <p className="text-[11px] text-gray-500">
+                  {editingDelegate
+                    ? `Updates delegate #${editingDelegate.id} with POST /api/delegates`
+                    : "Creates a new delegate with POST /api/delegates"}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closeFormModal}
+                disabled={isSubmitting}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-base cursor-pointer disabled:opacity-40"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveDelegate} className="flex flex-col flex-1 min-h-0 overflow-hidden text-xs">
+              <div className="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1">
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                  <div className="sm:col-span-2">
+                    <label className={labelClass}>Salutation</label>
+                    <select
+                      value={form.salutation}
+                      onChange={(e) => setField("salutation", e.target.value)}
+                      className={fieldClass}
+                    >
+                      <option value="">—</option>
+                      {SALUTATIONS.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                      {form.salutation && !SALUTATIONS.includes(form.salutation) && (
+                        <option value={form.salutation}>{form.salutation}</option>
+                      )}
+                    </select>
+                  </div>
+                  <div className="sm:col-span-5">
+                    <label className={labelClass}>
+                      First name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      required
+                      value={form.first_name}
+                      onChange={(e) => setField("first_name", e.target.value)}
+                      className={fieldClass}
+                      placeholder="Aarav"
+                    />
+                  </div>
+                  <div className="sm:col-span-5">
+                    <label className={labelClass}>
+                      Last name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      required
+                      value={form.last_name}
+                      onChange={(e) => setField("last_name", e.target.value)}
+                      className={fieldClass}
+                      placeholder="Sharma"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className={labelClass}>Registration ID</label>
+                    <input
+                      value={form.registration_id}
+                      onChange={(e) => setField("registration_id", e.target.value)}
+                      className={fieldClass}
+                      placeholder="Leave blank if the server assigns one"
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Category</label>
+                    <input
+                      list="delegate-categories"
+                      value={form.reg_category}
+                      onChange={(e) => setField("reg_category", e.target.value)}
+                      className={fieldClass}
+                      placeholder="DELEGATE"
+                    />
+                    <datalist id="delegate-categories">
+                      <option value="DELEGATE" />
+                      <option value="FACULTY" />
+                      <option value="ORGANIZING COMMITTEE" />
+                      {availableCategories.map((cat) => (
+                        <option key={cat} value={cat} />
+                      ))}
+                    </datalist>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className={labelClass}>
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={form.email}
+                      onChange={(e) => setField("email", e.target.value)}
+                      className={fieldClass}
+                      placeholder="user@example.com"
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Phone</label>
+                    <input
+                      value={form.phone}
+                      onChange={(e) => setField("phone", e.target.value)}
+                      className={fieldClass}
+                      placeholder="9814047911"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelClass}>
+                    Password {!editingDelegate && <span className="text-red-500">*</span>}
+                  </label>
+                  <input
+                    type="password"
+                    required={!editingDelegate}
+                    value={form.password}
+                    onChange={(e) => setField("password", e.target.value)}
+                    className={fieldClass}
+                    placeholder={editingDelegate ? "Leave blank to keep the current password" : "Set a login password"}
+                    autoComplete="new-password"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className={labelClass}>City</label>
+                    <input value={form.city} onChange={(e) => setField("city", e.target.value)} className={fieldClass} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>State</label>
+                    <input value={form.state} onChange={(e) => setField("state", e.target.value)} className={fieldClass} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Country</label>
+                    <input value={form.country} onChange={(e) => setField("country", e.target.value)} className={fieldClass} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className={labelClass}>MCI number</label>
+                    <input value={form.mci_no} onChange={(e) => setField("mci_no", e.target.value)} className={fieldClass} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Amount</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={form.total_amount}
+                      onChange={(e) => setField("total_amount", e.target.value)}
+                      className={fieldClass}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className={labelClass}>Payment mode</label>
+                    <select
+                      value={form.payment_mode}
+                      onChange={(e) => setField("payment_mode", e.target.value)}
+                      className={fieldClass}
+                    >
+                      <option value="">—</option>
+                      {PAYMENT_MODES.map((mode) => (
+                        <option key={mode} value={mode}>
+                          {mode}
+                        </option>
+                      ))}
+                      {form.payment_mode && !PAYMENT_MODES.includes(form.payment_mode) && (
+                        <option value={form.payment_mode}>{form.payment_mode}</option>
+                      )}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Transaction ID</label>
+                    <input
+                      value={form.transaction_id}
+                      onChange={(e) => setField("transaction_id", e.target.value)}
+                      className={fieldClass}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className={labelClass}>Registration date</label>
+                    <input
+                      type="datetime-local"
+                      value={form.registration_date}
+                      onChange={(e) => setField("registration_date", e.target.value)}
+                      className={fieldClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Payment date</label>
+                    <input
+                      type="datetime-local"
+                      value={form.payment_date}
+                      onChange={(e) => setField("payment_date", e.target.value)}
+                      className={fieldClass}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Remarks</label>
+                  <textarea
+                    rows={2}
+                    value={form.remarks}
+                    onChange={(e) => setField("remarks", e.target.value)}
+                    className={`${fieldClass} resize-y min-h-[64px]`}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>From link</label>
+                  <input
+                    value={form.from_link}
+                    onChange={(e) => setField("from_link", e.target.value)}
+                    className={fieldClass}
+                    placeholder="https://"
+                  />
+                </div>
+
+                {formError && (
+                  <div className="p-3 rounded-lg bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-300 text-xs" role="alert">
+                    {formError}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-end gap-2 px-5 py-3.5 border-t border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/40 shrink-0">
+                <button
+                  type="button"
+                  onClick={closeFormModal}
+                  disabled={isSubmitting}
+                  className="px-4 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 text-xs font-semibold text-white bg-[#AA2D7B] hover:bg-[#D85A9A] rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmitting ? "Saving..." : editingDelegate ? "Update delegate" : "Create delegate"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {moderation && (
+        <DelegateActionModal
+          mode={moderation.mode}
+          delegateId={moderation.delegate.id}
+          delegateName={delegateFullName(moderation.delegate)}
+          onClose={() => {
+            if (moderation) setModeration(null);
+          }}
+          onDone={async (res) => {
+            const target = moderation.delegate;
+            const next: DelegateAccess = moderation.mode === "ban" ? "banned" : "active";
+            setAccessOverrides((prev) => ({ ...prev, [target.id]: next }));
+            setDelegates((prev) =>
+              prev.map((d) => (d.id === target.id ? { ...d, is_banned: next === "banned", ban_status: next } : d))
+            );
+            setSelectedDelegate((cur) =>
+              cur && cur.id === target.id ? { ...cur, is_banned: next === "banned", ban_status: next } : cur
+            );
+            setModeration(null);
+            const fallback =
+              next === "banned" ? `${delegateFullName(target)} is now banned.` : `${delegateFullName(target)} is active again.`;
+            toastSuccess(res.message && !/^(ok|success)$/i.test(res.message) ? res.message : fallback);
+            const refreshed = await fetchDelegatesData({ silent: true });
+            if (!refreshed) toastError("Status updated, but the delegate list could not be refreshed.");
+          }}
+        />
       )}
     </>
   );
